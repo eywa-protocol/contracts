@@ -17,4 +17,5 @@ deps:
 	go mod download
 
 clean:
-	rm ./wrappers/*.go || rm ./truffle/build/contracts/*.json
+	rm ./wrappers/*.go
+	rm ./truffle/build/contracts/*.json
