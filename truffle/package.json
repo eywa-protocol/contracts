@@ -1,23 +1,31 @@
 {
-  "name": "@digiu/eth-contracts",
-  "version": "0.0.0",
-  "description": "DigiU  bridge ethreum contyracts",
-  "scripts": {
-    "compile": "truffle compile"
+  "name": "upgradability",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
   },
-  "license": "MIT",
+  "scripts": {
+    "deploy:ganache": "./scripts/bash/ganache/deploy_ganache.sh",
+    "deploy:testnet": "./scripts/bash/deploy_testnet.sh",
+    "upgrade:testnet": "./scripts/bash/upgrade_testnet.sh",
+    "integration-test:local": " truffle test ./test/integration/e2e.test.js --typenet devstand --net1 network1 --net2 network2",
+    "integration-test:testnet": " truffle test ./test/integration/e2e.test.js --typenet teststand --net1 rinkeby --net2 bsctestnet",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "@chainlink/contracts": "^0.0.11",
-    "@openzeppelin/contracts": "^3.1.0",
+    "@openzeppelin/contracts": "^4.0.0",
     "@truffle/hdwallet-provider": "^1.2.0",
-    "axios": "^0.21.1",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
-    "@openzeppelin/test-helpers": "^0.5.6",
+    "@openzeppelin/test-helpers": "^0.5.10",
     "chai": "^4.2.0",
-    "depcheck": "^1.3.1",
-    "solhint": "^3.3.2",
     "truffle": "^5.1.57"
   }
 }

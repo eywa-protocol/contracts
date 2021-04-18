@@ -1,7 +1,7 @@
 const axios = require('axios');
 const argv = require('minimist')(process.argv.slice(2), {string: ['typenet','net1', 'net2']});
 const Web3 = require('web3');
-const { checkoutProvider, timeout, adapters, checkBlock, getCostFromScan } = require('../../utils/helper');
+const { checkoutProvider, timeout } = require('../../utils/helper');
 
 const mockPool1    = artifacts.require('MockDexPool');
 const mockPool2    = artifacts.require('MockDexPool');
@@ -10,8 +10,8 @@ const brigdePart2  = artifacts.require('Bridge');
 
 const factoryProvider =  checkoutProvider(argv);
 
-let envNet1 = require('dotenv').config({ path: `./build/addrs_${argv.net1}.env` });
-let envNet2 = require('dotenv').config({ path: `./build/addrs_${argv.net2}.env` });
+let envNet1 = require('dotenv').config({ path: `./env_connect_to_network_1.env` });
+let envNet2 = require('dotenv').config({ path: `./env_connect_to_network_2.env` });
 
 const { expectEvent } = require('@openzeppelin/test-helpers');
 
@@ -28,8 +28,11 @@ contract('Brigde', (deployer, accounts) => {
     brigdePart1.setProvider(factoryProvider.web3Net1);
     brigdePart2.setProvider(factoryProvider.web3Net2);
 
-    this.br1      = await brigdePart1.at(envNet1.parsed.CLIENT_ADDRESS);
-    this.br2      = await brigdePart2.at(envNet2.parsed.CLIENT_ADDRESS);
+let adr1, adr2;
+    if(argv.typenet === 'teststand'){ adr1 = envNet1.parsed.PROXY_RINKEBY; adr2 = envNet2.parsed.PROXY_BSCTESTNET;}
+    if(argv.typenet === 'devstand'){ adr1 = envNet1.parsed.PROXY_NETWORK1; adr2 = envNet2.parsed.PROXY_NETWORK2;}
+    this.br1      = await brigdePart1.at(adr1);
+    this.br2      = await brigdePart2.at(adr2);
 
     /** users */
     this.userNet1 = (await brigdePart1.web3.eth.getAccounts())[0];
@@ -45,7 +48,7 @@ contract('Brigde', (deployer, accounts) => {
 
   describe('simple end-to-end test', async () => {
 
-    it('change state from first to second sides', async () => {
+    it.skip('change state from first to second sides', async () => {
 
       let testData = 10;
       /** send end-to-end request */
@@ -120,21 +123,21 @@ contract('Brigde', (deployer, accounts) => {
 
     });
 
-    it.skip('without callback', async () => {
+    it('without callback', async () => {
 
       let testData = 5;
       /** send end-to-end request */
-      let receipt = await this.mp2.sendRequestTestV2(testData, this.mp1.address, {from: this.userNet2});
-      
+      let receipt = await this.mp1.sendRequestTestV2(testData, this.mp2.address, {from: this.userNet1});
+console.log(receipt)      
       // wait on the second part the excuted tx
-      let reslt = null;
-      while(true){
-       reslt = ~~(await this.mp1.testData({from: this.userNet1})).toString();
-       if(reslt === testData) break;
-       await timeout(500);
-      }
+      // let reslt = null;
+      // while(true){
+      //  reslt = ~~(await this.mp1.testData({from: this.userNet1})).toString();
+      //  if(reslt === testData) break;
+      //  await timeout(500);
+      // }
 
-      assert.equal(reslt.toString(), '5');
+      // assert.equal(reslt.toString(), '5');
 
       //TODO: check out 0x2431bee4 (bytes4(keccak256(bytes('receiveRequestV2(string,bytes,bytes,bytes32,address)'))))
 

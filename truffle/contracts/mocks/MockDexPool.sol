@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.9;
+pragma solidity ^0.8.0;
 
 import "../Bridge.sol";
-import "../interfaces/BridgeClientInterface.sol";
+
 
 /**
  * @notice This is for test purpose.
@@ -10,7 +10,7 @@ import "../interfaces/BridgeClientInterface.sol";
  * @dev Short life cycle
  * @dev POOL_1#sendRequestTest --> {logic bridge} --> POOL_2#setPendingRequestsDone
  */
-contract MockDexPool is BridgeClientInterface {
+contract MockDexPool {
 
 	event RequestSended(bytes32 reqId);
 
@@ -23,8 +23,6 @@ contract MockDexPool is BridgeClientInterface {
 		bridge = _bridge;
 	}
 
-	mapping(bytes32 /** requestId -> tx_from_other_side */ => bytes32) private pendingRequests;
-
 
 
   /**
@@ -35,19 +33,6 @@ contract MockDexPool is BridgeClientInterface {
    * @dev ${this func} ->  bridge#transmitRequest -> node -> adpater#receiveRequest -> mockDexPool_2#receiveRequestTest -> bridge#transmitResponse(reqId) -> node -> adpater#receiveResponse -> mockDexPool_1#setPendingRequestsDone
    *
    */
-	function sendRequestTest(uint256 testData, address secondPartPool) external {
-		require(secondPartPool != address(0), "BAD ADDRESS");
-		// todo some stuff on this part pool
-		// ...
-
-		bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('receiveRequestTest(uint256)'))), testData);
-		bytes32 requestId = Bridge(bridge).transmitRequest(SET_REQUEST_TYPE, out, secondPartPool);
-
-		pendingRequests[requestId] = "0x1";
-
-		emit RequestSended(requestId);
-	}
-
 	function sendRequestTestV2(uint256 testData, address secondPartPool) external {
 		require(secondPartPool != address(0), "BAD ADDRESS");
 		// todo some stuff on this part pool
@@ -56,8 +41,7 @@ contract MockDexPool is BridgeClientInterface {
 		bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('receiveRequestTest(uint256)'))), testData);
 		bytes32 requestId = Bridge(bridge).transmitRequestV2(out, secondPartPool);
 
-		pendingRequests[requestId] = "0x1";
-
+		
 		emit RequestSended(requestId);
 	}
 
@@ -79,30 +63,4 @@ contract MockDexPool is BridgeClientInterface {
      	testData = _testData;
 
 	}
-
-
- /**
-   * @notice receive response after early sended request
-   *
-   * @dev for consistent "transaction" between pool_1 and pool_2 we must got approve that transaction TRUE from pool_2
-   * @dev LIFE CYCLE
-   * @dev ${this pool} -> POOL_2
-   * @dev mockDexPool_1#sendRequestTest -> bridge#transmitRequest -> node -> adpater#receiveRequest -> mockDexPool_2#receiveRequestTest -> bridge#transmitResponse(reqId) -> node -> adpater#receiveResponse -> ${this func}
-   *
-   */
-   function setPendingRequestsDone(bytes32 requestId ,bytes32 tx_fromNet2) public override {
-   		require(pendingRequests[requestId] == "0x1", "NOT FOUND SUCH REQUEST");
-
-	 	pendingRequests[requestId] = tx_fromNet2;
-
-	}
-
-	/**
-	*  @notice only for test
-	*/
-	function getPendingRequests(bytes32 requestId) external view returns (bytes32, bytes32) {
-
-		return (requestId, pendingRequests[requestId]);
-	}
-
 }

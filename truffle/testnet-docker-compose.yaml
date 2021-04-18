@@ -1,0 +1,76 @@
+version: '3.6'
+
+services:
+  gate1:
+    build:
+      context: ./
+      dockerfile: ./adapter/gate/Dockerfile
+    env_file:
+    - ./env_connect_to_network_2.env
+    - ./env_connect_to_network_1.env
+    networks:
+      static-network:
+        ipv4_address: 190.20.128.05
+    environment:
+      - SK=0x441aae36f5d683b44f521b117b1938c004cf0d9326a087985358d811e969a390
+  gate2:
+    build:
+      context: ./
+      dockerfile: ./adapter/gate/Dockerfile
+    env_file:
+    - ./env_connect_to_network_2.env
+    - ./env_connect_to_network_1.env
+    networks:
+      static-network:
+        ipv4_address: 190.20.128.06
+    environment:
+     - SK=0xc5d2504db673679d1aa204fb4be5c5f526416484c98c929c2872abae9672eb1e
+  gate3:
+    build:
+      context: ./
+      dockerfile: ./adapter/gate/Dockerfile
+    env_file:
+    - ./env_connect_to_network_2.env
+    - ./env_connect_to_network_1.env
+    networks:
+      static-network:
+        ipv4_address: 190.20.128.07
+    environment:
+     - SK=0xebc5458a2dbf05d0e368f9f364a9e8ea023d698b5f54a7afaa12bd533a3557dc
+  gate4:
+    build:
+      context: ./
+      dockerfile: ./adapter/gate/Dockerfile
+    env_file:
+    - ./env_connect_to_network_2.env
+    - ./env_connect_to_network_1.env
+    networks:
+      static-network:
+        ipv4_address: 190.20.128.08
+    environment:
+     - SK=0x585f8349e01d07129ceb3c584f1feec8a894ac839c89a5216de6b6d7b0232e63     
+  gate5:
+    build:
+      context: ./
+      dockerfile: ./adapter/gate/Dockerfile
+    env_file:
+    - ./env_connect_to_network_1.env      
+    - ./env_connect_to_network_2.env
+    networks:
+      static-network:
+        ipv4_address: 190.20.128.09
+    environment:
+     - SK=0x93ffa79ed3a39e5fd2e7782997e92b73804ad84550b62b1f8969ffc67a78d68b          
+  crutch_ganache:
+    build: ./network1/ganache
+    networks:
+      static-network:
+        ipv4_address: 190.20.128.11
+    ports:
+     - "7545:7545"          
+networks:
+  static-network:
+    name: dev_net
+    ipam:
+      config:
+        - subnet: 190.20.0.0/16    
