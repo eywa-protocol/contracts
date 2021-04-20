@@ -17,8 +17,8 @@ deps:
 	go mod download
 
 clean:
-	rm ./wrappers/*.go
-	rm ./truffle/build/contracts/*.json
+	rm -f ./wrappers/*.go
+	rm -f ./truffle/build/contracts/*.json
 
 local-deploy: deps npm
 	cd truffle;npm run deploy:ganache;
