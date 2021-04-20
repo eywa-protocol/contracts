@@ -25,13 +25,13 @@ module.exports = {
     },
 
     network1: {
-     host: "127.0.0.1",
+     host: "152.20.128.11",
      port: 7545,
      network_id: "1337",
     },
 
     network2: {
-     host: "127.0.0.1",
+     host: "152.20.128.12",
      port: 8545,
      network_id: "1337",
     },
@@ -39,14 +39,14 @@ module.exports = {
     bsctestnet: {
        provider: () => new HDWalletProvider(process.env.TESTNET_BSC, bscws),
        network_id: 97,
-       timeoutBlocks: 200  
+       timeoutBlocks: 200
     },
     rinkeby: {
        provider: () => new HDWalletProvider(process.env.TESTNET_RINKEBY, rinkebyws),
        network_id: 4,
-       timeoutBlocks: 200  
-    }  
-    
+       timeoutBlocks: 200
+    }
+
   },
 
   // Set default mocha options here, use special reporters etc.
@@ -57,8 +57,8 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-       version: "0.8.0",    
-       docker: true,   
+       version: "0.8.0",
+       docker: true,
        parser: "solcjs",
        settings: {
         optimizer: {
