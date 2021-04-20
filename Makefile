@@ -21,4 +21,4 @@ clean:
 	rm ./truffle/build/contracts/*.json
 
 local-deploy: deps npm
-       	cd truffle;npm run deploy:ganache;
+	cd truffle;npm run deploy:ganache;
