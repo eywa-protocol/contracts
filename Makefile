@@ -9,7 +9,7 @@ npm:
   			cd truffle;npm i;fi
 
 wrappers: deps npm
-	cd truffle;npm run deploy:ganache;
+	cd truffle;npx truffle build;
 	go run wrappers-builder/main.go --json truffle/build/contracts --pkg wrappers --out wrappers
 
 deps:
@@ -19,3 +19,6 @@ deps:
 clean:
 	rm ./wrappers/*.go
 	rm ./truffle/build/contracts/*.json
+
+local-deploy: deps npm
+       	cd truffle;npm run deploy:ganache;
