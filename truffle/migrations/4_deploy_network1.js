@@ -30,7 +30,7 @@ module.exports = async (deployer, network, accounts) => {
               let tupb                = await TransparentUpgradeableProxyBridge.deployed();
 
               
-              let env_file = "env_connect_to_network_1.env";
+              let env_file = "env_connect_to_network1.env";
               exec(`${process.cwd()}/scripts/bash/update_env_adapter.sh 8081 NETWORK1 ${bridge.address} ${tupb.address}  ${proxyAdminBridge.address} ${env_file} ${nodeList.address}`
                   ,{ maxBuffer: 1024 * 100000000 }, (err, stdout, stderr) => {
                 if (err) {
