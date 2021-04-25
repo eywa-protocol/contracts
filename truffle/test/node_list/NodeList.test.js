@@ -50,6 +50,8 @@ contract('NodeList', function (accounts) {
 			  	expect(await web3.utils.toAscii(gt3.p2pAddress)).to.be.equal(await web3.utils.toAscii(this.p2pAddressNode_2));
 			  	expect(gt3.pubKey).to.be.equal(this.pubKeyNode_2);
 			  	expect(gt3.enable).to.be.equal(this.enableNode_2);
+			  const gt4 = await this.nodeList.getNodes();
+			  console.log(gt4);
 			  
 			});
 
