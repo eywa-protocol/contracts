@@ -7,7 +7,7 @@ module.exports = async (deployer, network, accounts) => {
   
   if (network === 'network1' || network === 'network2') {
      try {
-             let env       = require('dotenv').config({ path: `${process.cwd()}/env_connect_to_${network}.env` }); console.log(process.cwd(), env);
+             let env       = require('dotenv').config({ path: `${process.cwd()}/env_connect_to_${network}.env` });
              const [owner] = accounts;
 
                                         await deployer.deploy(MockDexPool, eval(`env.parsed.PROXY_${network.toUpperCase()}`),  { from: owner });
