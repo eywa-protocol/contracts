@@ -10,8 +10,8 @@ const brigdePart2  = artifacts.require('Bridge');
 
 const factoryProvider =  checkoutProvider(argv);
 
-let envNet1 = require('dotenv').config({ path: `./env_connect_to_network_1.env` });
-let envNet2 = require('dotenv').config({ path: `./env_connect_to_network_2.env` });
+let envNet1 = require('dotenv').config({ path: `./env_connect_to_network1.env` });
+let envNet2 = require('dotenv').config({ path: `./env_connect_to_network2.env` });
 
 const { expectEvent } = require('@openzeppelin/test-helpers');
 
@@ -40,8 +40,16 @@ let adr1, adr2;
     /** mock dexpool in one evm based blockchain and in another evm blockchain */
     mockPool1.setProvider(factoryProvider.web3Net1);
     mockPool2.setProvider(factoryProvider.web3Net2);
-    this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1});
-    this.mp2 = await mockPool2.new(this.br2.address, {from: this.userNet2});
+
+    this.mp1 = null;
+    this.mp2 = null;
+    if(argv.typenet === 'devstand' && envNet1.parsed.MOCKDEX_NETWORK1 == undefined && envNet2.parsed.MOCKDEX_NETWORK2 == undefined){
+      this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1});
+      this.mp2 = await mockPool2.new(this.br2.address, {from: this.userNet2});
+    }else{
+      this.mp1 = await mockPool1.at(envNet1.parsed.MOCKDEX_NETWORK1, {from: this.userNet1});
+      this.mp2 = await mockPool2.at(envNet2.parsed.MOCKDEX_NETWORK2, {from: this.userNet2});
+    }
 
   });
 
