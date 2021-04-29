@@ -133,25 +133,20 @@ let adr1, adr2;
 
     it('without callback', async () => {
 
+      let res = (await this.mp2.testData({from: this.userNet2})).toString();
+      console.log(`should be 0: ${res}`);
       let testData = 5;
       /** send end-to-end request */
       let receipt = await this.mp1.sendRequestTestV2(testData, this.mp2.address, {from: this.userNet1});
-console.log(receipt)      
-      // wait on the second part the excuted tx
-      // let reslt = null;
-      // while(true){
-      //  reslt = ~~(await this.mp1.testData({from: this.userNet1})).toString();
-      //  if(reslt === testData) break;
-      //  await timeout(500);
-      // }
+      console.log(receipt);
+      await timeout(5000); // give 5 sec for execute on sencond blockchain
+      res = (await this.mp2.testData({from: this.userNet2})).toString();
 
-      // assert.equal(reslt.toString(), '5');
-
-      //TODO: check out 0x2431bee4 (bytes4(keccak256(bytes('receiveRequestV2(string,bytes,bytes,bytes32,address)'))))
+      assert.equal(res, '5', `Should be ${testData}`);
 
     });
 
-    it('get state', async () => {
+    it.skip('get state', async () => {
 
     });
 
