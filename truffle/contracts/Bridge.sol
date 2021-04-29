@@ -30,22 +30,27 @@ contract Bridge is BridgeCore {
   //==============================================================================================================
 
 
-  function receiveRequestV2(string memory reqId,
-                          bytes memory signature,
-                          bytes memory b,
-                          bytes32 tx,
-                          address receiveSide) external {
+ function receiveRequestV2(string memory reqId,
+                         bytes memory signature,
+                         bytes memory b,
+                         bytes32 tx,
+                         address receiveSide) external {
+    
 
   	//check out nonce == bridge1 nonce, sign || sing bridge1 && schoor consensys
 
   	
-    bytes32 hash     = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(reqId, b, tx, receiveSide)));
-    address res      = ECDSA.recover(hash, signature);
-    require(true == whiteList[res], 'SECURITY EVENT');
+//    bytes32 hash     = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(reqId, b, tx, receiveSide)));
+//    address res      = ECDSA.recover(hash, signature);
+//    require(true == whiteList[res], 'SECURITY EVENT');
 
-    (bool success, bytes memory data) = receiveSide.call(b);
+  (bool success, bytes memory data) = receiveSide.call(b);
 	require(success && (data.length == 0 || abi.decode(data, (bool))), 'FAILED');
 
-	emit ReceiveRequest(reqId, receiveSide, tx);
+	emit ReceiveRequest("0x2", address(0), "0x1");
   }
+
+      function receiveRequestV2() external {
+           emit ReceiveRequest("0x2", address(0), "0x1");
+      }
 }

@@ -10,8 +10,8 @@ const brigdePart2  = artifacts.require('Bridge');
 
 const factoryProvider =  checkoutProvider(argv);
 
-let envNet1 = require('dotenv').config({ path: `./env_connect_to_network_1.env` });
-let envNet2 = require('dotenv').config({ path: `./env_connect_to_network_2.env` });
+let envNet1 = require('dotenv').config({ path: `./env_connect_to_network1.env` });
+let envNet2 = require('dotenv').config({ path: `./env_connect_to_network2.env` });
 
 const { expectEvent } = require('@openzeppelin/test-helpers');
 
@@ -40,8 +40,16 @@ let adr1, adr2;
     /** mock dexpool in one evm based blockchain and in another evm blockchain */
     mockPool1.setProvider(factoryProvider.web3Net1);
     mockPool2.setProvider(factoryProvider.web3Net2);
-    this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1});
-    this.mp2 = await mockPool2.new(this.br2.address, {from: this.userNet2});
+
+    this.mp1 = null;
+    this.mp2 = null;
+    if(argv.typenet === 'devstand' && envNet1.parsed.MOCKDEX_NETWORK1 == undefined && envNet2.parsed.MOCKDEX_NETWORK2 == undefined){
+      this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1});
+      this.mp2 = await mockPool2.new(this.br2.address, {from: this.userNet2});
+    }else{
+      this.mp1 = await mockPool1.at(envNet1.parsed.MOCKDEX_NETWORK1, {from: this.userNet1});
+      this.mp2 = await mockPool2.at(envNet2.parsed.MOCKDEX_NETWORK2, {from: this.userNet2});
+    }
 
   });
 
@@ -125,25 +133,20 @@ let adr1, adr2;
 
     it('without callback', async () => {
 
+      let res = (await this.mp2.testData({from: this.userNet2})).toString();
+      console.log(`should be 0: ${res}`);
       let testData = 5;
       /** send end-to-end request */
       let receipt = await this.mp1.sendRequestTestV2(testData, this.mp2.address, {from: this.userNet1});
-console.log(receipt)      
-      // wait on the second part the excuted tx
-      // let reslt = null;
-      // while(true){
-      //  reslt = ~~(await this.mp1.testData({from: this.userNet1})).toString();
-      //  if(reslt === testData) break;
-      //  await timeout(500);
-      // }
+      console.log(receipt);
+      await timeout(5000); // give 5 sec for execute on sencond blockchain
+      res = (await this.mp2.testData({from: this.userNet2})).toString();
 
-      // assert.equal(reslt.toString(), '5');
-
-      //TODO: check out 0x2431bee4 (bytes4(keccak256(bytes('receiveRequestV2(string,bytes,bytes,bytes32,address)'))))
+      assert.equal(res, '5', `Should be ${testData}`);
 
     });
 
-    it('get state', async () => {
+    it.skip('get state', async () => {
 
     });
 
