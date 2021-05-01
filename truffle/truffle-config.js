@@ -25,13 +25,13 @@ module.exports = {
     },
 
     network1: {
-     host: "152.20.128.11",
+     host: "172.20.128.11",
      port: 7545,
      network_id: "1337",
     },
 
     network2: {
-     host: "152.20.128.12",
+     host: "172.20.128.12",
      port: 8545,
      network_id: "1337",
     },
