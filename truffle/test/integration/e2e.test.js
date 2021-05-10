@@ -131,16 +131,31 @@ let adr1, adr2;
 
     });
 
-    it('without callback', async () => {
+    it('From network1 without callback', async () => {
 
       let res = (await this.mp2.testData({from: this.userNet2})).toString();
       
       let testData = Math.floor((Math.random()*100) + 1);
       /** send end-to-end request */
       let receipt = await this.mp1.sendRequestTestV2(testData, this.mp2.address, {from: this.userNet1});
-      console.log(receipt);
+      // console.log(receipt);
       await timeout(5000); // give 5 sec for execute on sencond blockchain
       res = (await this.mp2.testData({from: this.userNet2})).toString();
+
+      assert.equal(res, testData, `Should be ${testData}`);
+
+    });
+
+    it('From network2 without callback', async () => {
+
+      let res = (await this.mp1.testData({from: this.userNet1})).toString();
+      
+      let testData = Math.floor((Math.random()*100) + 1);
+      /** send end-to-end request */
+      let receipt = await this.mp2.sendRequestTestV2(testData, this.mp1.address, {from: this.userNet2});
+      // console.log(receipt);
+      await timeout(5000); // give 5 sec for execute on sencond blockchain
+      res = (await this.mp1.testData({from: this.userNet1})).toString();
 
       assert.equal(res, testData, `Should be ${testData}`);
 
