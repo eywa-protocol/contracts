@@ -16,6 +16,8 @@ contract NodeList {
    address[] public p2pAddrs;
     Node[] public nodes;
 
+    event AddedNode(bytes _p2pAddress, bytes _blsPubKey);
+
   function addNode(address _nodeWallet, bytes memory _p2pAddress, address _blsPointAddr, bytes memory _blsPubKey, bool _enable) external isNewNode(_blsPointAddr) /*onlyOwner*/ {
       require(_nodeWallet != address(0), "0 address");
       require(_blsPointAddr != address(0), "0 address");
@@ -28,6 +30,7 @@ contract NodeList {
       node.enable       = _enable;
       p2pAddrs.push(_blsPointAddr);
       nodes.push(node);
+      emit AddedNode(node.p2pAddress, node.blsPubKey);
   }
 
     function getNewNodeId() internal returns (uint64){
