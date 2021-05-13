@@ -18,11 +18,11 @@ module.exports = {
 
   networks: {
 
-    development: {
-     host: "127.0.0.1",
-     port: 7545,
-     network_id: "1337",
-    },
+    // development: {
+    //  host: "127.0.0.1",
+    //  port: 7545,
+    //  network_id: "1337",
+    // },
 
     network1: {
      host: "172.20.128.11",
@@ -44,7 +44,8 @@ module.exports = {
     rinkeby: {
        provider: () => new HDWalletProvider(process.env.TESTNET_RINKEBY, rinkebyws),
        network_id: 4,
-       timeoutBlocks: 200
+       timeoutBlocks: 200,
+       skipDryRun: true
     }
 
   },

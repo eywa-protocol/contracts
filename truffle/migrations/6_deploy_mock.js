@@ -3,9 +3,10 @@ const { exec } = require('child_process');
 const MockDexPool = artifacts.require('MockDexPool');
 
 module.exports = async (deployer, network, accounts) => {
-
+  if (network === 'rinkeby')    network = 'network1';
+  if (network === 'bsctestnet') network = 'network2';
   
-  if (network === 'network1' || network === 'network2') {
+  if(network === 'network1' || network === 'network2'){
      try {
              let env       = require('dotenv').config({ path: `${process.cwd()}/env_connect_to_${network}.env` });
              const [owner] = accounts;
@@ -25,6 +26,5 @@ module.exports = async (deployer, network, accounts) => {
             } catch (err) {
               console.error(err)
             }
-  
-    }
+  }
 }

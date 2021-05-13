@@ -28,9 +28,9 @@ contract('Brigde', (deployer, accounts) => {
     brigdePart1.setProvider(factoryProvider.web3Net1);
     brigdePart2.setProvider(factoryProvider.web3Net2);
 
-let adr1, adr2;
-    if(argv.typenet === 'teststand'){ adr1 = envNet1.parsed.PROXY_RINKEBY; adr2 = envNet2.parsed.PROXY_BSCTESTNET;}
-    if(argv.typenet === 'devstand'){ adr1 = envNet1.parsed.PROXY_NETWORK1; adr2 = envNet2.parsed.PROXY_NETWORK2;}
+    
+    let adr1 = envNet1.parsed.PROXY_NETWORK1; 
+    let adr2 = envNet2.parsed.PROXY_NETWORK2;
     this.br1      = await brigdePart1.at(adr1);
     this.br2      = await brigdePart2.at(adr2);
 
@@ -47,8 +47,10 @@ let adr1, adr2;
       this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1});
       this.mp2 = await mockPool2.new(this.br2.address, {from: this.userNet2});
     }else{
-      this.mp1 = await mockPool1.at(envNet1.parsed.MOCKDEX_NETWORK1, {from: this.userNet1});
-      this.mp2 = await mockPool2.at(envNet2.parsed.MOCKDEX_NETWORK2, {from: this.userNet2});
+      // this.mp1 = await mockPool1.at(envNet1.parsed.MOCKDEX_NETWORK1, {from: this.userNet1});
+      // this.mp2 = await mockPool2.at(envNet2.parsed.MOCKDEX_NETWORK2, {from: this.userNet2});
+      this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1});
+      this.mp2 = await mockPool2.new(this.br2.address, {from: this.userNet2});
     }
 
   });
@@ -139,7 +141,7 @@ let adr1, adr2;
       /** send end-to-end request */
       let receipt = await this.mp1.sendRequestTestV2(testData, this.mp2.address, {from: this.userNet1});
       // console.log(receipt);
-      await timeout(5000); // give 5 sec for execute on sencond blockchain
+      await timeout(15000); // give 15 sec for execute on sencond blockchain
       res = (await this.mp2.testData({from: this.userNet2})).toString();
 
       assert.equal(res, testData, `Should be ${testData}`);
@@ -154,7 +156,7 @@ let adr1, adr2;
       /** send end-to-end request */
       let receipt = await this.mp2.sendRequestTestV2(testData, this.mp1.address, {from: this.userNet2});
       // console.log(receipt);
-      await timeout(5000); // give 5 sec for execute on sencond blockchain
+      await timeout(50000); // give 50 sec for execute on sencond blockchain
       res = (await this.mp1.testData({from: this.userNet1})).toString();
 
       assert.equal(res, testData, `Should be ${testData}`);
