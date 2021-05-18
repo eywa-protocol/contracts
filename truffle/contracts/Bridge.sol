@@ -2,14 +2,21 @@
 pragma solidity ^0.8.0;
 
 import "./core/BridgeCore.sol";
+import "./interface/ListNodeInterface.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract Bridge is BridgeCore {
 
-  //TODO: permossion for dex
+  
+  modifier onlyTrustedNode() {
+    require(ListNodeInterface(_listNode).checkPermissionTrustList(msg.sender) == true, "Only trusted node can invoke");
+    _;
+  }
 
 
-
+  constructor(address listNode) public {
+    _listNode = listNode;
+  }
 
 
   function transmitRequestV2(bytes memory  _selector, address receiveSide)
@@ -34,7 +41,7 @@ contract Bridge is BridgeCore {
                          bytes memory signature,
                          bytes memory b,
                          bytes32 tx,
-                         address receiveSide) external {
+                         address receiveSide) onlyTrustedNode external {
     
 
   	//check out nonce == bridge1 nonce, sign || sing bridge1 && schoor consensys

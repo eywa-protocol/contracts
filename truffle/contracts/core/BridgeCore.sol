@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 contract BridgeCore {
 
+  address public    _listNode;
   address private   oppositeBridge;
   uint256 private   requestCount = 1;
   mapping(address => bool) public whiteList;
