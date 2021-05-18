@@ -13,11 +13,13 @@ contract NodeList {
   }
 
    mapping (address => Node) public listNode;
+   mapping (address => mapping(address => bool)) /** node => brigde => permission */  public trustListForDex;
    address[] public p2pAddrs;
     Node[] public nodes;
 
     event AddedNode(bytes _p2pAddress, bytes _blsPubKey);
 
+//TODO: discuss about check: listNode[_blsPointAddr] == address(0)
   function addNode(address _nodeWallet, bytes memory _p2pAddress, address _blsPointAddr, bytes memory _blsPubKey, bool _enable) external isNewNode(_blsPointAddr) /*onlyOwner*/ {
       require(_nodeWallet != address(0), "0 address");
       require(_blsPointAddr != address(0), "0 address");
@@ -30,6 +32,9 @@ contract NodeList {
       node.enable       = _enable;
       p2pAddrs.push(_blsPointAddr);
       nodes.push(node);
+//TODO: discuss about pemission for certain bridge
+      trustListForDex[_nodeWallet][address(0)] = true;
+
       emit AddedNode(node.p2pAddress, node.blsPubKey);
   }
 
@@ -101,4 +106,8 @@ contract NodeList {
     function nodeExists(address _blsPubAddr) public view returns (bool) {
         return listNode[_blsPubAddr].blsPointAddr != address(0);
     }
+
+  function checkPermissionTrustList(address node) external view returns (bool)  {
+    return trustListForDex[node][address(0)];
+  }
 }
