@@ -148,7 +148,7 @@ contract('Brigde', (deployer, accounts) => {
 
     });
 
-    it('From network2 without callback', async () => {
+    it.skip('From network2 without callback', async () => {
 
       let res = (await this.mp1.testData({from: this.userNet1})).toString();
       
@@ -168,5 +168,9 @@ contract('Brigde', (deployer, accounts) => {
     });
 
  });
+
+
+//TODO: 
+// - case when msg.sender (node) have't permission for sending into bridge (absent in trustedList)
 
 })
