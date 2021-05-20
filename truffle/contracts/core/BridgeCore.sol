@@ -3,6 +3,12 @@ pragma solidity ^0.8.0;
 
 contract BridgeCore {
 
+//TODO: initializer
+  function initialize(address listNode) public /*initializer*/ {
+      _listNode = listNode;
+      
+  }
+
   address public    _listNode;
   address private   oppositeBridge;
   uint256 private   requestCount = 1;

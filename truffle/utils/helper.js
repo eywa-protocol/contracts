@@ -35,13 +35,27 @@ const timeout = async (ms) => {
         return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const encodeWithSignature = (address) => {
+
+  return web3.eth.abi.encodeFunctionCall({
+      name: 'initialize',
+      type: 'function',
+      inputs: [{
+          type: 'address',
+          name: '_listNode'
+      }]
+  }, [address]);
+
+}
+
 
 module.exports = {
 
     toWei,
     fromWei,
     checkoutProvider,
-    timeout
+    timeout,
+    encodeWithSignature
 
     
 };
