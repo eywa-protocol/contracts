@@ -18,7 +18,7 @@ module.exports = async (deployer, network, accounts) => {
               let nodeList            = await NodeList.deployed();              
 
 
-                                        await deployer.deploy(Bridge, nodeList.address { from: proxyAdminOwner });
+                                        await deployer.deploy(Bridge, nodeList.address, { from: proxyAdminOwner });
               let bridge              = await Bridge.deployed();
 
                                         await deployer.deploy(ProxyAdminBridge, { from: proxyAdminOwner });
