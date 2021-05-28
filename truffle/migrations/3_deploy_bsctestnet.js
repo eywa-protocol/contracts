@@ -1,4 +1,5 @@
 const { exec } = require('child_process');
+const { encodeWithSignature } = require('../utils/helper');
 
 
 const NodeList                          = artifacts.require('NodeList');
@@ -11,17 +12,17 @@ module.exports = async (deployer, network, accounts) => {
   
   if (network === 'bsctestnet') {
      try {
-              const initializeData = Buffer.from('');
               const [proxyAdminOwner, newAdmin, anotherAccount] = accounts;
 
                                         await deployer.deploy(NodeList, { from: proxyAdminOwner });
               let nodeList            = await NodeList.deployed();              
 
 
-                                        await deployer.deploy(Bridge, { from: proxyAdminOwner });
+                                        await deployer.deploy(Bridge, nodeList.address { from: proxyAdminOwner });
               let bridge              = await Bridge.deployed();
 
                                         await deployer.deploy(ProxyAdminBridge, { from: proxyAdminOwner });
+              const initializeData    = encodeWithSignature(nodeList.address);                                        
               let proxyAdminBridge    = await ProxyAdminBridge.deployed();    
                                         await deployer.deploy(TransparentUpgradeableProxyBridge,
                                                               bridge.address,
