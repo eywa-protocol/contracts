@@ -148,7 +148,7 @@ contract('Brigde', (deployer, accounts) => {
 
     });
 
-    it.skip('From network2 without callback', async () => {
+    it('From network2 without callback', async () => {
 
       let res = (await this.mp1.testData({from: this.userNet1})).toString();
       
