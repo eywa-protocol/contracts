@@ -22,3 +22,6 @@ clean:
 
 local-deploy: deps npm
 	cd truffle;npm run deploy:ganache;
+	
+local-test: deps npm
+	cd truffle;npm run integration-test:local;
