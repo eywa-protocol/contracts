@@ -6,7 +6,7 @@ npm:
 	@if [ -d truffle/node_modules ]; then \
   			echo "installed"; \
   			else \
-  			cd truffle;npm i;fi
+  			cd truffle;npm ci;fi
 
 wrappers: deps npm
 	cd truffle;npx truffle build;
