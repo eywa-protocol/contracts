@@ -1,3 +1,0 @@
-[submodule "wrappers"]
-	path = wrappers
-	url = git@github.com:DigiU-Lab/eth-contracts-go-wrappers.git
