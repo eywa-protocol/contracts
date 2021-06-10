@@ -14,7 +14,7 @@ contract BridgeCore {
   mapping(uint => address) public externalBridgesByChainId;
 
 
-  function addBridge(address bridge, uint chainId) public /*onlyOwner, bridgeDoesNotExist*/ {
+  function addBridge(address bridge, uint chainId) public /*onlyOwner,*/ notRegisterdBridgeForChain {
     externalBridgesByChainId[chainId] = bridge;
   }
 
@@ -49,5 +49,10 @@ contract BridgeCore {
   );
 
   event ReceiveRequest(string reqId, address receiveSide, bytes32 tx);
+
+  modifier notRegisterdBridgeForChain(uint chainID) {
+    require ( getBridgeByChainId(chainId) == address(0), "bridge allready registered");
+    _;
+  }
 
 }
