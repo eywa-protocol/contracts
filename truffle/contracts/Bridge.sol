@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract Bridge is BridgeCore {
 
-  
+
   modifier onlyTrustedNode() {
     require(ListNodeInterface(_listNode).checkPermissionTrustList(msg.sender) == true, "Only trusted node can invoke");
     _;
@@ -19,16 +19,15 @@ contract Bridge is BridgeCore {
   }
 
 
-  function transmitRequestV2(bytes memory  _selector, address receiveSide)
+  function transmitRequestV2(bytes memory  _selector, address receiveSide,  address oppositeBridge, uint chainId)
     public
     /*onlyOwner*/
     returns (bytes32)
   {
 	require(address(0) != receiveSide, 'BAD RECEIVE SIDE');
     //require(msg.sender == myContract, "ONLY PERMISSIONED ADDRESS");
-
-	(bytes32 requestId, address oppositeBridge) = prepareRqId(_selector, receiveSide);
-  	emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge);
+	bytes32 requestId = prepareRqId(_selector, receiveSide, oppositeBridge, chainId);
+  	emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
 
   	return requestId;
   }
@@ -42,11 +41,11 @@ contract Bridge is BridgeCore {
                          bytes memory b,
                          bytes32 tx,
                          address receiveSide) onlyTrustedNode external {
-    
+
 
   	//check out nonce == bridge1 nonce, sign || sing bridge1 && schoor consensys
 
-  	
+
 //    bytes32 hash     = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(reqId, b, tx, receiveSide)));
 //    address res      = ECDSA.recover(hash, signature);
 //    require(true == whiteList[res], 'SECURITY EVENT');

@@ -1,4 +1,3 @@
-const axios = require('axios');
 const argv = require('minimist')(process.argv.slice(2), {string: ['typenet','net1', 'net2']});
 const Web3 = require('web3');
 const { checkoutProvider, timeout } = require('../../utils/helper');
@@ -28,8 +27,8 @@ contract('Brigde', (deployer, accounts) => {
     brigdePart1.setProvider(factoryProvider.web3Net1);
     brigdePart2.setProvider(factoryProvider.web3Net2);
 
-    
-    let adr1 = envNet1.parsed.PROXY_NETWORK1; 
+
+    let adr1 = envNet1.parsed.PROXY_NETWORK1;
     let adr2 = envNet2.parsed.PROXY_NETWORK2;
     this.br1      = await brigdePart1.at(adr1);
     this.br2      = await brigdePart2.at(adr2);
@@ -63,10 +62,10 @@ contract('Brigde', (deployer, accounts) => {
       let testData = 10;
       /** send end-to-end request */
       let receipt = await this.mp1.sendRequestTest(testData, this.mp2.address, {from: this.userNet1});
-      let t = await expectEvent(receipt, 'RequestSended'); 
+      let t = await expectEvent(receipt, 'RequestSended');
       let result = await this.mp1.getPendingRequests(t.args[0], {from: this.userNet1});
       assert.equal(result[1], '0x3078310000000000000000000000000000000000000000000000000000000000', 'tx in pending on other side');
-      
+
             // if(argv.typenet === 'teststand') await getCostFromScan('rinkeby', receipt.tx);
 
       // wait on the second part the excuted tx
@@ -78,13 +77,13 @@ contract('Brigde', (deployer, accounts) => {
 
             // let tx1 = await checkBlock(brigdePart2.web3, adapters().adapter1_net1_1);
             // if(argv.typenet === 'teststand' && tx1 != null) await getCostFromScan('binance', tx1);
-      
+
             // let tx2 = await checkBlock(brigdePart2.web3, adapters().adapter2_net1_1);
             // if(argv.typenet === 'teststand' && tx2 != null) await getCostFromScan('binance', tx2);
-      
+
 
       while(true){
-        let result = await this.mp1.getPendingRequests(t.args[0], {from: this.userNet1});  
+        let result = await this.mp1.getPendingRequests(t.args[0], {from: this.userNet1});
         if(result[1] !== '0x3078310000000000000000000000000000000000000000000000000000000000') break;
         await timeout(500);
       }
@@ -95,11 +94,11 @@ contract('Brigde', (deployer, accounts) => {
 
             // let tx3 = await checkBlock(brigdePart1.web3, adapters().adapter1_net2_1);
             // if(argv.typenet === 'teststand') await getCostFromScan('rinkeby', tx3);
-      
+
             // let tx4 = await checkBlock(brigdePart1.web3, adapters().adapter2_net2_1);
             // if(argv.typenet === 'teststand') await getCostFromScan('rinkeby', tx4);
-      
-      /*Fee = Gas_Used * Gas_Price 
+
+      /*Fee = Gas_Used * Gas_Price
         = 35531 (unit) * 0.000000008 (eth)
         = 0.000284248 (eth)
        */
@@ -122,7 +121,7 @@ contract('Brigde', (deployer, accounts) => {
       }
 
       while(true){
-        let result = await this.mp2.getPendingRequests(t.args[0], {from: this.userNet2});  
+        let result = await this.mp2.getPendingRequests(t.args[0], {from: this.userNet2});
         if(result[1] !== '0x3078310000000000000000000000000000000000000000000000000000000000') break;
         await timeout(500);
       }
@@ -136,10 +135,10 @@ contract('Brigde', (deployer, accounts) => {
     it('From network1 without callback', async () => {
 
       let res = (await this.mp2.testData({from: this.userNet2})).toString();
-      
+
       let testData = Math.floor((Math.random()*100) + 1);
       /** send end-to-end request */
-      let receipt = await this.mp1.sendRequestTestV2(testData, this.mp2.address, {from: this.userNet1});
+      let receipt = await this.mp1.sendRequestTestV2(testData, this.mp2.address, this.br2.address, 1112, {from: this.userNet1});
       // console.log(receipt);
       await timeout(15000); // give 15 sec for execute on sencond blockchain
       res = (await this.mp2.testData({from: this.userNet2})).toString();
@@ -151,10 +150,10 @@ contract('Brigde', (deployer, accounts) => {
     it('From network2 without callback', async () => {
 
       let res = (await this.mp1.testData({from: this.userNet1})).toString();
-      
+
       let testData = Math.floor((Math.random()*100) + 1);
       /** send end-to-end request */
-      let receipt = await this.mp2.sendRequestTestV2(testData, this.mp1.address, {from: this.userNet2});
+      let receipt = await this.mp2.sendRequestTestV2(testData, this.mp1.address, this.br1.address, 1111, {from: this.userNet2});
       // console.log(receipt);
       await timeout(50000); // give 50 sec for execute on sencond blockchain
       res = (await this.mp1.testData({from: this.userNet1})).toString();
@@ -170,7 +169,7 @@ contract('Brigde', (deployer, accounts) => {
  });
 
 
-//TODO: 
+//TODO:
 // - case when msg.sender (node) have't permission for sending into bridge (absent in trustedList)
 
 })
