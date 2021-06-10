@@ -1,4 +1,4 @@
-module github.com/digiu=ai/wrappers
+module github.com/digiu-ai/wrappers
 
 go 1.16
 
