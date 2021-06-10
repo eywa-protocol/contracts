@@ -1,7 +1,6 @@
 "use strict";
 const Web3 = require('web3');
 const web3 = new Web3();
-const axios = require('axios');
 
 const fs = require('fs');
 const path = require('path');
@@ -57,5 +56,5 @@ module.exports = {
     timeout,
     encodeWithSignature
 
-    
+
 };
