@@ -2,6 +2,8 @@
 
 .PHONY: wrappers
 
+all: wrappers
+
 npm:
 	@if [ -d truffle/node_modules ]; then \
   			echo "installed"; \
