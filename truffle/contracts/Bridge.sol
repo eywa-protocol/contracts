@@ -27,7 +27,7 @@ contract Bridge is BridgeCore {
 	require(address(0) != receiveSide, 'BAD RECEIVE SIDE');
     //require(msg.sender == myContract, "ONLY PERMISSIONED ADDRESS");
       address oppBridge = getBridgeByChainId(chainId);
-	(bytes32 requestId, address oppositeBridge) = prepareRqId(_selector, receiveSide);
+	(bytes32 requestId, address oppositeBridge) = prepareRqId(_selector, receiveSide, chainId);
   	emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppBridge, chainId);
 
   	return requestId;

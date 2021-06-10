@@ -9,10 +9,8 @@ contract BridgeCore {
   }
 
   address public    _listNode;
-  address private   oppositeBridge;
   uint256 private   requestCount = 1;
   mapping(address => bool) public whiteList;
-  mapping(address => uint) public bridgeList;
   mapping(uint => address) public externalBridgesByChainId;
 
 
@@ -27,8 +25,9 @@ contract BridgeCore {
   }
 
 
-  function prepareRqId(bytes memory  _selector, address receiveSide) internal returns (bytes32, address){
-	bytes32 requestId = keccak256(abi.encodePacked(this, requestCount, _selector, receiveSide, oppositeBridge));
+  function prepareRqId(bytes memory  _selector, address receiveSide, uint chainId) internal returns (bytes32, address){
+    address oppositeBridge = getBridgeByChainId(chainId);
+    bytes32 requestId = keccak256(abi.encodePacked(this, requestCount, _selector, receiveSide, oppositeBridge));
     requestCount += 1;
 	return (requestId, oppositeBridge);
   }
@@ -36,10 +35,7 @@ contract BridgeCore {
   function setControl(address a) public /*onlyOwner*/ {
     whiteList[a] = true;
   }
-  // set lock - only once
-  function setOppsite(address a) public /*onlyOwner*/ {
-    oppositeBridge = a;
-  }
+
 
 
   event OracleRequest(
