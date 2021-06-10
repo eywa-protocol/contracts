@@ -19,16 +19,15 @@ contract Bridge is BridgeCore {
   }
 
 
-  function transmitRequestV2(bytes memory  _selector, address receiveSide, uint chainId)
+  function transmitRequestV2(bytes memory  _selector, address receiveSide,  address oppositeBridge, uint chainId)
     public
     /*onlyOwner*/
     returns (bytes32)
   {
 	require(address(0) != receiveSide, 'BAD RECEIVE SIDE');
     //require(msg.sender == myContract, "ONLY PERMISSIONED ADDRESS");
-      address oppBridge = getBridgeByChainId(chainId);
-	(bytes32 requestId, address oppositeBridge) = prepareRqId(_selector, receiveSide, chainId);
-  	emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppBridge, chainId);
+	bytes32 requestId = prepareRqId(_selector, receiveSide, oppositeBridge, chainId);
+  	emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
 
   	return requestId;
   }
