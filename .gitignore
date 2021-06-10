@@ -1,3 +1,5 @@
 wrappers/
 truffle/node_modules
 truffle/build/contracts
+!wrappers/go.mod
+!wrappers/go.sum
