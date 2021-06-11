@@ -2,7 +2,7 @@ FROM node:alpine
 WORKDIR /app
 RUN npm install -g ganache-cli
 EXPOSE 7545
-CMD ganache-cli -h 0.0.0.0 -p 7545 -i 1111 \
+CMD ganache-cli -h 0.0.0.0 -p 7545 -i 1111 --chainId 1111 \
   --account="0x60cc6f7a3b09e5080dc86cc0fd80e29545683ad4336012b221998b448d2d57bb,1000000000000000000000000"  \
   --account="0x187994e6d93bb29e386fe7ab50232a6a2bea5d6f61046b803b9e9b8306b7d268,1000000000000000000000000"  \
   --account="0xf5e350eb75d845a8cd538e06331ee6eeb159c54710c6c84c725cd77e2e0dde59,1000000000000000000000000"  \

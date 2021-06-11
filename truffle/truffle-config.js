@@ -35,8 +35,9 @@ module.exports = {
      port: 8545,
      network_id: "1112",
     },
+
       network3: {
-          host: "172.20.128.12",
+          host: "172.20.128.13",
           port: 9545,
           network_id: "1113",
       },
