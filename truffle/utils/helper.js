@@ -1,13 +1,11 @@
 "use strict";
 const Web3 = require('web3');
 const web3 = new Web3();
-
-const fs = require('fs');
-const path = require('path');
 const { networks }         = require('../truffle-config');
 
 function toWei(n) { return web3.utils.toWei(n, 'ether');}
 function fromWei(n) { return web3.utils.fromWei(n, 'ether');}
+
 
 
 
@@ -49,12 +47,9 @@ const encodeWithSignature = (address) => {
 
 
 module.exports = {
-
     toWei,
     fromWei,
     checkoutProvider,
     timeout,
     encodeWithSignature
-
-
 };

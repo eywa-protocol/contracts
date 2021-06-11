@@ -29,4 +29,4 @@ local-test: deps npm
 	cd truffle;npm run integration-test:local;
 
 eth-local-migrate:
-	cd truffle;npx truffle migrate --reset --network network1 && npx truffle migrate --reset --network network2
+	cd truffle;npx truffle migrate --reset --network network1 && npx truffle migrate --reset --network network2 && npx truffle migrate --reset --network network3

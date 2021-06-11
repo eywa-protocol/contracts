@@ -11,6 +11,7 @@ const factoryProvider =  checkoutProvider(argv);
 
 let envNet1 = require('dotenv').config({ path: `./env_connect_to_network1.env` });
 let envNet2 = require('dotenv').config({ path: `./env_connect_to_network2.env` });
+let envNet3 = require('dotenv').config({ path: `./env_connect_to_network3.env` });
 
 const { expectEvent } = require('@openzeppelin/test-helpers');
 
@@ -28,8 +29,8 @@ contract('Brigde', (deployer, accounts) => {
     brigdePart2.setProvider(factoryProvider.web3Net2);
 
 
-    let adr1 = envNet1.parsed.PROXY_NETWORK1;
-    let adr2 = envNet2.parsed.PROXY_NETWORK2;
+    let adr1 = envNet1.parsed.BRIDGE_NETWORK1;
+    let adr2 = envNet2.parsed.BRIDGE_NETWORK2;
     this.br1      = await brigdePart1.at(adr1);
     this.br2      = await brigdePart2.at(adr2);
 
@@ -46,10 +47,8 @@ contract('Brigde', (deployer, accounts) => {
       this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1});
       this.mp2 = await mockPool2.new(this.br2.address, {from: this.userNet2});
     }else{
-      // this.mp1 = await mockPool1.at(envNet1.parsed.MOCKDEX_NETWORK1, {from: this.userNet1});
-      // this.mp2 = await mockPool2.at(envNet2.parsed.MOCKDEX_NETWORK2, {from: this.userNet2});
-      this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1});
-      this.mp2 = await mockPool2.new(this.br2.address, {from: this.userNet2});
+      this.mp1 = await mockPool1.at(envNet1.parsed.MOCKDEX_NETWORK1, {from: this.userNet1});
+      this.mp2 = await mockPool2.at(envNet2.parsed.MOCKDEX_NETWORK2, {from: this.userNet2});
     }
 
   });
