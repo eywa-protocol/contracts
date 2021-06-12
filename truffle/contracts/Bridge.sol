@@ -5,6 +5,9 @@ import "./core/BridgeCore.sol";
 import "./interface/ListNodeInterface.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
+
+//TODO: onlyTrustedNode has worse filled data. I.e. In func NodeList#addNode the golang node registers himself
+// and this means every node who wants to start up can add himself in onlyTrustedNode list.
 contract Bridge is BridgeCore {
 
 
