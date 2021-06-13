@@ -9,7 +9,6 @@
   "scripts": {
     "deploy:ganache": "./scripts/bash/ganache/deploy_ganache.sh",
     "deploy:testnet": "./scripts/bash/deploy_testnet.sh",
-    "upgrade:testnet": "./scripts/bash/upgrade_testnet.sh",
     "integration-test:local": " truffle test ./test/integration/e2e.test.js --typenet devstand --net1 network1 --net2 network2 --net3 network3",
     "integration-test:testnet": " truffle test ./test/integration/e2e.test.js --typenet teststand --net1 rinkeby --net2 bsctestnet",
     "test": "echo \"Error: no test specified\" && exit 1"

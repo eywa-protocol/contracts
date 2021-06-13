@@ -8,11 +8,6 @@ contract BridgeCore {
       _;
   }
 
-//TODO: initializer
-  function initialize(address listNode) public /*initializer*/ {
-      _listNode = listNode;
-  }
-
   address public   _owner;
   address public   _listNode;
   uint256 public   requestCount = 1;
