@@ -15,22 +15,26 @@ contract Bridge is BridgeCore {
     require(ListNodeInterface(_listNode).checkPermissionTrustList(msg.sender) == true, "Only trusted node can invoke");
     _;
   }
+  modifier onlyTrustedDex() {
+    require(dexBind[msg.sender] == true, "UNTRUSTED DEX");
+    _;
+  }
 
 
   constructor(address listNode) public {
     _listNode = listNode;
+    _owner    = msg.sender;
   }
 
 
   function transmitRequestV2(bytes memory  _selector, address receiveSide,  address oppositeBridge, uint chainId)
     public
-    /*onlyOwner*/
+    onlyTrustedDex
     returns (bytes32)
   {
-	require(address(0) != receiveSide, 'BAD RECEIVE SIDE');
-    //require(msg.sender == myContract, "ONLY PERMISSIONED ADDRESS");
-	bytes32 requestId = prepareRqId(_selector, receiveSide, oppositeBridge, chainId);
-  	emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
+	
+  bytes32 requestId = prepareRqId(_selector, receiveSide, oppositeBridge, chainId);
+  emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
 
   	return requestId;
   }
@@ -39,27 +43,20 @@ contract Bridge is BridgeCore {
   //==============================================================================================================
 
 
- function receiveRequestV2(string memory reqId,
-                         bytes memory signature,
-                         bytes memory b,
-                         bytes32 tx,
-                         address receiveSide) onlyTrustedNode external {
+ function receiveRequestV2(bytes32 reqId,
+                           bytes memory b,
+                           address receiveSide,
+                           address brigeFrom) onlyTrustedNode external {
 
-
-  	//check out nonce == bridge1 nonce, sign || sing bridge1 && schoor consensys
-
-
-//    bytes32 hash     = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(reqId, b, tx, receiveSide)));
-//    address res      = ECDSA.recover(hash, signature);
-//    require(true == whiteList[res], 'SECURITY EVENT');
+    bytes32 recreateReqId = keccak256(abi.encodePacked(brigeFrom, nonce[brigeFrom], b, receiveSide, this, block.chainid));
+    // require(reqId == recreateReqId, 'CONSISTENCY FAILED');
+    require(dexBind[receiveSide] == true,   'UNTRUSTED DEX');
 
   (bool success, bytes memory data) = receiveSide.call(b);
 	require(success && (data.length == 0 || abi.decode(data, (bool))), 'FAILED');
 
-	emit ReceiveRequest("0x2", address(0), "0x1");
-  }
+  nonce[brigeFrom] = nonce[brigeFrom] + 1;
 
-      function receiveRequestV2() external {
-           emit ReceiveRequest("0x2", address(0), "0x1");
-      }
+	emit ReceiveRequest(reqId, receiveSide, recreateReqId);
+  }
 }
