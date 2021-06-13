@@ -1,6 +1,7 @@
 const argv = require('minimist')(process.argv.slice(3), {string: ['typenet','net1', 'net2', 'net3']});
 const Web3 = require('web3');
 const { checkoutProvider, timeout } = require('../../utils/helper');
+const { expectRevert } = require('@openzeppelin/test-helpers');
 
 const mockPool1    = artifacts.require('MockDexPool');
 const mockPool2    = artifacts.require('MockDexPool');
@@ -53,14 +54,18 @@ contract('Brigde', (deployer, accounts) => {
     this.mp1 = null;
     this.mp2 = null;
     this.mp3 = null;
-    if (argv.typenet === 'devstand' && envNet1.parsed.MOCKDEX_NETWORK1 == undefined && envNet2.parsed.MOCKDEX_NETWORK2 == undefined) {
+    if (argv.typenet === 'devstand' 
+      && envNet1.parsed.DEXPOOL_NETWORK1 == undefined 
+      && envNet2.parsed.DEXPOOL_NETWORK2 == undefined 
+      && envNet3.parsed.DEXPOOL_NETWORK3 == undefined) {
+
       this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1});
       this.mp2 = await mockPool2.new(this.br2.address, {from: this.userNet2});
       this.mp3 = await mockPool3.new(this.br3.address, {from: this.userNet3});
     } else {
-      this.mp1 = await mockPool1.at(envNet1.parsed.MOCKDEX_NETWORK1, {from: this.userNet1});
-      this.mp2 = await mockPool2.at(envNet2.parsed.MOCKDEX_NETWORK2, {from: this.userNet2});
-      this.mp3 = await mockPool3.at(envNet3.parsed.MOCKDEX_NETWORK3, {from: this.userNet3});
+      this.mp1 = await mockPool1.at(envNet1.parsed.DEXPOOL_NETWORK1, {from: this.userNet1});
+      this.mp2 = await mockPool2.at(envNet2.parsed.DEXPOOL_NETWORK2, {from: this.userNet2});
+      this.mp3 = await mockPool3.at(envNet3.parsed.DEXPOOL_NETWORK3, {from: this.userNet3});
     }
 
   });
@@ -76,6 +81,7 @@ contract('Brigde', (deployer, accounts) => {
       let testData = Math.floor((Math.random() * 100) + 1);
       /** send end-to-end request */
       let receipt = await this.mp1.sendRequestTestV2(testData, this.mp2.address, this.br2.address, 1112, {from: this.userNet1});
+      console.log(receipt);
       // console.log(receipt);
       await timeout(15000); // give 15 sec for execute on sencond blockchain
       res = (await this.mp2.testData({from: this.userNet2})).toString();
@@ -99,9 +105,9 @@ contract('Brigde', (deployer, accounts) => {
 
     });
 
-    it('From network 3 to 1 without callback', async () => {
+    it('From network 3 to 2 without callback', async () => {
 
-      let res = (await this.mp1.testData({from: this.userNet1})).toString();
+      let res = (await this.mp2.testData({from: this.userNet2})).toString();
 
       let testData = Math.floor((Math.random() * 100) + 1);
       /** send end-to-end request */
@@ -111,6 +117,20 @@ contract('Brigde', (deployer, accounts) => {
       res = (await this.mp2.testData({from: this.userNet2})).toString();
 
       assert.equal(res, testData, `Should be ${testData}`);
+
+    });
+
+    it('Negative test: From network 1 to 2. Untrusted dex on bridge1', async () => {
+
+      this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1});
+      let res = (await this.mp2.testData({from: this.userNet2})).toString();
+
+      let testData = Math.floor((Math.random() * 100) + 1);
+      /** send end-to-end request */
+      await expectRevert(
+        this.mp1.sendRequestTestV2(testData, this.mp2.address, this.br2.address, 1112, {from: this.userNet1}),
+        'UNTRUSTED DEX'
+      );
 
     });
 
