@@ -20,8 +20,10 @@ async function migrateLocalnetwork(deployer, network, accounts) {
     console.log("bridge.address ", bridge.address)
 
     await deployer.deploy(MockDexPool, bridge.address,  { from: proxyAdminOwner });
-    let dexpool = await Bridge.deployed();
+    let dexpool = await MockDexPool.deployed();
     console.log("MockDexPool.address ", dexpool.address)
+
+    await bridge.updateDexBind(dexpool.address, true);
 
     let env_file = "env_connect_to_" + network + ".env";
     console.log("env_file ",env_file)
