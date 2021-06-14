@@ -62,6 +62,11 @@ contract('Brigde', (deployer, accounts) => {
       this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1});
       this.mp2 = await mockPool2.new(this.br2.address, {from: this.userNet2});
       this.mp3 = await mockPool3.new(this.br3.address, {from: this.userNet3});
+
+      await this.br1.updateDexBind(this.mp1.address, true, {from: this.userNet1});
+      await this.br2.updateDexBind(this.mp2.address, true, {from: this.userNet2});
+      await this.br3.updateDexBind(this.mp3.address, true, {from: this.userNet3});
+      
     } else {
       this.mp1 = await mockPool1.at(envNet1.parsed.DEXPOOL_NETWORK1, {from: this.userNet1});
       this.mp2 = await mockPool2.at(envNet2.parsed.DEXPOOL_NETWORK2, {from: this.userNet2});
