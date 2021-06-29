@@ -2,8 +2,12 @@ require('dotenv').config();
 const HDWalletProvider = require('@truffle/hdwallet-provider')
 
 const bscws     = 'https://data-seed-prebsc-1-s1.binance.org:8545/';
-// const rinkebyws = 'wss://rinkeby.infura.io/ws/v3/0f4453c71dd145c6b819bbbf60a96e9d';
+
 const rinkebyws = 'wss://rinkeby.infura.io/ws/v3/ab95bf9f6dd743e6a8526579b76fe358';
+
+// const mumbaiws = 'wss://rpc-mumbai.maticvigil.com/ws'
+
+const mumbaiws = 'https://polygon-mumbai.infura.io/v3/79a941babd7947e58490a5e35a074c34'
 
 module.exports = {
   /**
@@ -53,6 +57,11 @@ module.exports = {
        network_id: 4,
        timeoutBlocks: 200,
        skipDryRun: true
+    },
+    mumbai: {
+         provider: () => new HDWalletProvider(process.env.TESTNET_MUMBAI, mumbaiws),
+         network_id: 80001,
+         timeoutBlocks: 200
     }
 
   },
