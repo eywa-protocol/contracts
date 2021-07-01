@@ -46,6 +46,24 @@ module.exports = {
           network_id: "1113",
       },
 
+      netci1: {
+          host: "0.0.0.0",
+          port: 7545,
+          network_id: "1111",
+      },
+
+      netci2: {
+          host: "0.0.0.0",
+          port: 8545,
+          network_id: "1112",
+      },
+
+      netci3: {
+          host: "0.0.0.0",
+          port: 9545,
+          network_id: "1113",
+      },
+
 
     bsctestnet: {
        provider: () => new HDWalletProvider(process.env.TESTNET_BSC, bscws),
