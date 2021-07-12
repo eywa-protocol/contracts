@@ -1,4 +1,4 @@
-module gitlab.digiu.ai/blockchainlaboratory/eywa-contractseth-contracts
+module gitlab.digiu.ai/blockchainlaboratory/eywa-contracts
 
 go 1.16
 
