@@ -1,4 +1,4 @@
-module github.com/digiu-ai/eth-contracts
+module gitlab.digiu.ai/blockchainlaboratory/eywa-contractseth-contracts
 
 go 1.16
 
