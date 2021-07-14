@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity >=0.7.6 <=0.8.0;
 
 import "./core/BridgeCore.sol";
 import "./interface/ListNodeInterface.sol";
@@ -32,7 +32,7 @@ contract Bridge is BridgeCore {
     onlyTrustedDex
     returns (bytes32)
   {
-
+	
   bytes32 requestId = prepareRqId(_selector, receiveSide, oppositeBridge, chainId);
   emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
 

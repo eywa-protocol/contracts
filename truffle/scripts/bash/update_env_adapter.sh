@@ -1,14 +1,26 @@
 #! /bin/bash
 
+MODE=${1}
+FILENAME=${2}
+if [[ "$MODE" =~ ^(create)$ ]]
+then
+ rm ${FILENAME} 2> /dev/null
+fi
 
-echo "
-RPC_URL=${1:-\"null\"}
-NETWORK_ID=${2:-\"null\"}
-BRIDGE_ADDRESS=${3:-\"null\"}
-NODELIST_ADDRESS=${4:-\"null\"}
-DEXPOOL_ADDRESS=${5:-\"null\"}"  > $6
+i=0
+for pass in "${@:3}"
+do
+    # update or create
+    if [[ "$MODE" =~ ^(create)$ ]]
+    then
+cat << EOF >> ${FILENAME}
+${pass}
+EOF
+     else
+cat << EOF >> ${FILENAME}
+${pass}
+EOF
+    fi
 
-echo "
-BRIDGE_${7:-\"null\"}=${3:-\"null\"}
-NODELIST_${7:-\"null\"}=${4:-\"null\"}
-DEXPOOL_${7:-\"null\"}=${5:-\"null\"}"  > $8
+    i=$((i+1))
+done
