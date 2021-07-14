@@ -37,7 +37,7 @@ module.exports = {
     network2: {
      host: "172.20.128.12",
      port: 8545,
-     network_id: "1112",
+     network_id: "1337",
     },
 
       network3: {
@@ -55,7 +55,7 @@ module.exports = {
       netci2: {
           host: "127.0.0.1",
           port: 8545,
-          network_id: "1112",
+          network_id: "1337",
       },
 
       netci3: {
@@ -102,5 +102,6 @@ module.exports = {
         }
       }
     }
-  }
+  },
+    contracts_directory: "./contracts/v0.8"
 };

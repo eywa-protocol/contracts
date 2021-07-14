@@ -3,15 +3,24 @@
 const { exec } = require('child_process');
 const { networks }         = require('../truffle-config');
 
-async function migrateLocalnetwork(deployer, network, accounts) {
 
+async function migrateLocalnetwork(deployer, network, accounts) {
+    const [proxyAdminOwner, newAdmin, anotherAccount] = accounts;
     console.log(process.cwd())
     const NodeList = artifacts.require('NodeList');
     const Bridge = artifacts.require('Bridge');
     const MockDexPool = artifacts.require('MockDexPool');
+    const WhitelistPaymaster = artifacts.require('WhitelistPaymaster');
+    await deployer.deploy(WhitelistPaymaster)
+    let whitelistPaymaster = await WhitelistPaymaster.deployed();
 
 
-    const [proxyAdminOwner, newAdmin, anotherAccount] = accounts;
+    console.log("whitelistPaymaster", whitelistPaymaster.address)
+
+
+    const RelayHub = artifacts.require('RelayHub')
+
+
     await deployer.deploy(NodeList, {from: proxyAdminOwner});
     let nodeList = await NodeList.deployed();
     console.log(nodeList.address)
@@ -37,10 +46,48 @@ async function migrateLocalnetwork(deployer, network, accounts) {
         , {maxBuffer: 1024 * 100000000}, (err, stdout, stderr) => {
         });
 
-
-
 }
 
+
+async function migratGSN(deployer, network, accounts) {
+    const [proxyAdminOwner, newAdmin, anotherAccount] = accounts;
+    const RelayHub = artifacts.require('RelayHub');
+    const relayHubAddress = require('../build/gsn/RelayHub.json').address;
+    const relayHub = await RelayHub.at(relayHubAddress);
+
+
+
+    const WhitelistPaymaster = artifacts.require('WhitelistPaymaster');
+
+    const forwarder = await require( '../build/gsn/Forwarder.json' ).address
+
+    await deployer.deploy(WhitelistPaymaster)
+
+    const paymaster = await WhitelistPaymaster.deployed()
+    await paymaster.setRelayHub(relayHubAddress)
+    await paymaster.setTrustedForwarder(forwarder)
+    // This is the first ganache address, when started with "ganache-cli -d"
+    await paymaster.whitelistSender('0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1')
+    console.log(`RelayHub(${relayHubAddress}) set on Paymaster(${WhitelistPaymaster.address})`)
+    // to add more addresses to the whitelist, open truffle console and run:
+    // const pm = await WhitelistPaymaster.deployed()
+    // pm.whitelistSender('0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1')
+
+
+
+    await relayHub.depositFor(paymaster.address, {value: 1e18.toString()})
+    console.log(`1 ETH deposited to Paymaster(${WhitelistPaymaster.address})`)
+
+    const NodeListWithGSN = artifacts.require('NodeListWithGSN');
+    await deployer.deploy(NodeListWithGSN, forwarder, {from: proxyAdminOwner});
+    let nodeListWithGSN = await NodeListWithGSN.deployed();
+    console.log("nodeListWithGSN", nodeListWithGSN.address)
+}
+
+
+
 module.exports = {
-    migrateLocalnetwork
+    migrateLocalnetwork,
+    migratGSN
 };
+

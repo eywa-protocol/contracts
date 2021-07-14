@@ -10,8 +10,8 @@ npm:
   			else \
   			cd truffle;npm ci;fi
 
-wrappers: deps npm
-	cd truffle;npx truffle build;
+wrappers: clean deps npm
+	cd truffle;yarn compile7;yarn compile8;
 	go run wrappers-builder/main.go --json truffle/build/contracts --pkg wrappers --out wrappers
 
 deps:
@@ -21,6 +21,7 @@ deps:
 clean:
 	rm -f ./wrappers/*.go
 	rm -f ./truffle/build/contracts/*.json
+	rm -f ./truffle/build/gsn/*.json
 
 local-deploy: deps npm
 	cd truffle;npm run deploy:ganache;
@@ -28,5 +29,11 @@ local-deploy: deps npm
 local-test: deps npm
 	cd truffle;npm run integration-test:local;
 
-eth-local-migrate:
+eth-local-migrate: gsn wrappers
 	cd truffle;npx truffle migrate --reset --network network1 && npx truffle migrate --reset --network network2 && npx truffle migrate --reset --network network3
+gsn:
+	cd truffle;yarn gsn &
+
+migrate: gsn
+	cd truffle;npx truffle deploy --network network2;
+
