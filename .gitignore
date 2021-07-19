@@ -1,5 +1,12 @@
 wrappers/
-truffle/node_modules
+**/node_modules
 truffle/build/contracts
 !wrappers/go.mod
 !wrappers/go.sum
+
+#Hardhat files
+**/cache
+**/artifacts
+**/factories
+
+**/.env
