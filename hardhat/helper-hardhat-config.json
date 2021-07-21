@@ -1,34 +1,60 @@
 {
   "rinkeby": {
+    "n": "NETWORK1",
+    "env_file": "env_connect_to_network1.env",
     "chainId": 4,
     "relayHub": "0x6650d69225CA31049DB7Bd210aE4671c0B1ca132",
     "forwarder": "0x83A54884bE4657706785D7309cf46B58FE5f6e8a",
     "amm_pool": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",
     "token": [
-      "0xe5FF136a8cf502eCF8130ab514F980e1ca2304E0",
-      "0x10E3794C0D610214B727567a5deafdc07fD16F8b"
+      {
+        "address": "0xe5FF136a8cf502eCF8130ab514F980e1ca2304E0",
+        "name": "Toruk Makto",
+        "symbol": "TM"
+      },
+      {
+        "address": "0x10E3794C0D610214B727567a5deafdc07fD16F8b",
+        "name": "Naa'vi",
+        "symbol": "NV"
+      }
     ],
-    "paymaster": "0xe61F1965b3F852244c358Cc4026711D518C03Ed0",
-    "nodeList": "0xcBce25c0C709a720E606c115D84A0c5b2Cd9bC55",
-    "bridge": "0xD70c6745aBf1c26391D5Dd2025774f2f2EADFd87",
-    "mockDexPool": "0x80A15125478523B403212Ad003041e0ff2B8C161",
-    "portal": "0x1053fB29eC4809BCa0F2B840E94Ed17596211552",
-    "synthesis": "0x3B1D6a9174df5CE2F5065775BcCA1Ea083dAc485"
+    "sourceForRepresentation": [
+      "bsctestnet"
+    ],
+    "paymaster": "0x59C5C2101F86976f2fDB309F82f684d66f768290",
+    "nodeList": "0x208956Df2079DDa2971a4d0A4347298347Ca8046",
+    "bridge": "0x7480aD405a15D1ec2A7ABC3a837590a347B1DbdA",
+    "mockDexPool": "0x77D68D5Dd8a8721C3f95297d0e8de922E29E55dc",
+    "portal": "0xBAf47b805F77aE664e56403BfeAD06796869CF56",
+    "synthesis": "0x4Ca0AD2b449066EEB41766F76e729094c15118A4"
   },
   "bsctestnet": {
+    "n": "NETWORK2",
+    "env_file": "env_connect_to_network2.env",
     "chainId": 97,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
     "forwarder": "0xeB230bF62267E94e657b5cbE74bdcea78EB3a5AB",
     "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
     "token": [
-      "0x1bBB6FC8e87A3622Fbd5300f13bf21A3e66cdB7d",
-      "0x74142B3bE036AF872deF48A00482c5BeC90386bF"
+      {
+        "address": "0x1bBB6FC8e87A3622Fbd5300f13bf21A3e66cdB7d",
+        "name": "Pandora",
+        "symbol": "PAR"
+      },
+      {
+        "address": "0x74142B3bE036AF872deF48A00482c5BeC90386bF",
+        "name": "Tsakheila",
+        "symbol": "TSL"
+      }
     ],
-    "paymaster": "0x137c907D7ff1EFDB926Da040A69Fc7f045740e0d",
-    "nodeList": "0x94996FB3F8d4dE4C35dF3c58a7C971f209C9cad2",
-    "bridge": "0xbBE2DdF8631c84F4207480A63c1e0dfB50900685",
-    "mockDexPool": "0xaF3eC8c8e944E3c15674068D512FeBF961c0A9FD",
-    "portal": "0x7E761B41f72c79B212A8f07E5d174d4E6d1dc78E",
-    "synthesis": "0x94F0A8AB639C78eaca7Cc707C155B074fa7506C4"
+    "sourceForRepresentation": [
+      "rinkeby"
+    ],
+    "paymaster": "0xd12E5056287d20843b607d3Ab609b7Ed0191230c",
+    "nodeList": "0xbD1F277D436bc1b943563a6350D56Eab940F692c",
+    "bridge": "0xDDBe81b7a2A97f0860a6B17a44bc4a590a269BA6",
+    "mockDexPool": "0xA93259ac5B18A19aD02E7BD7d165fEd917BEe73b",
+    "portal": "0x27Da6B4CaEA622b6CA7919CA53409204745b53bc",
+    "synthesis": "0xa988Ff263d03e471de3aCCC6C0550502fAb06E9e"
   }
 }

@@ -25,7 +25,7 @@ async function main() {
     this.tx = await paymaster.setTrustedForwarder(this.forwarderRinkeby);
     console.log("ForwarderRinkeby set:", this.tx);
     for(let t of this.token) {
-        this.tx = await paymaster.addToken(t, this.ammPool);
+        this.tx = await paymaster.addToken(t.address, this.ammPool);
         console.log("Added token set:", this.tx);
     }
 
