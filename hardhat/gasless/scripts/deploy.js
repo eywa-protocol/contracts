@@ -1,11 +1,10 @@
-const argv = require('minimist')(process.argv.slice(2), {string: [ 'paymastergsn' ]});
 const fs = require("fs");
 let networkConfig = require('../../helper-hardhat-config.json')
 const hre = require("hardhat");
 
 async function main() {
 
-    if(argv.paymastergsn === void 0){
+    if(networkConfig[network.name].paymaster === ''){
 
     this.relayHubRinkeby  = networkConfig[network.name].relayHub;
     this.forwarderRinkeby = networkConfig[network.name].forwarder;

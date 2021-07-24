@@ -1,11 +1,14 @@
-const argv = require('minimist')(process.argv.slice(2), {string: ['bridge', 'nodelist', 'mockdexpool' ]});
 const fs = require("fs");
 let networkConfig = require('../../helper-hardhat-config.json')
 const hre = require("hardhat");
 
 async function main() {
 
-   if(argv.bridge === void 0){
+   if( networkConfig[network.name].bridge === void 0 ||
+       networkConfig[network.name].bridge === '' ||
+       networkConfig[network.name].bridge === null ||
+       networkConfig[network.name].nodeList === void 0 ||
+       networkConfig[network.name].nodeList === ''){
 
 
     const [deployer] = await ethers.getSigners();

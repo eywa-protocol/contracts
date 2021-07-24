@@ -4,6 +4,8 @@ const hre = require("hardhat");
 
 async function main() {
 
+   if(networkConfig[network.name].portal === void 0 || networkConfig[network.name].portal === "" || networkConfig[network.name].synthesis === void 0 || networkConfig[network.name].synthesis === ''){
+
     const [deployer] = await ethers.getSigners();
     console.log("Owner:", deployer.address);
 
@@ -26,6 +28,7 @@ async function main() {
     //     constructorArguments: [
     //     ],
     // })
+   }
 
 }
 

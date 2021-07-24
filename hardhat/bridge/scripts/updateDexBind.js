@@ -12,10 +12,14 @@ async function main() {
 
     const Bridge = await ethers.getContractFactory("Bridge");
     const bridge = Bridge.attach(this.bridgeAdr);
-    this.tx = await bridge.updateDexBind(this.s, true);
-    console.log(`updateDexBind for synthesis on ${network.name}: ${this.tx.hash}`);
-    this.tx = await bridge.updateDexBind(this.p, true);
-    console.log(`updateDexBind for portal on ${network.name}: ${this.tx.hash}`);
+    if(await bridge.dexBind(this.s) === false){
+       this.tx = await bridge.updateDexBind(this.s, true);
+       console.log(`updateDexBind for synthesis on ${network.name}: ${this.tx.hash}`);
+    }
+    if(await bridge.dexBind(this.p) === false){
+        this.tx = await bridge.updateDexBind(this.p, true);
+        console.log(`updateDexBind for portal on ${network.name}: ${this.tx.hash}`);
+    }
 
 }
 

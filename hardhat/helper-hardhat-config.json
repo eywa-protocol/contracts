@@ -21,12 +21,12 @@
     "sourceForRepresentation": [
       "bsctestnet"
     ],
-    "paymaster": "0x59C5C2101F86976f2fDB309F82f684d66f768290",
-    "nodeList": "0x208956Df2079DDa2971a4d0A4347298347Ca8046",
-    "bridge": "0x7480aD405a15D1ec2A7ABC3a837590a347B1DbdA",
-    "mockDexPool": "0x77D68D5Dd8a8721C3f95297d0e8de922E29E55dc",
-    "portal": "0xBAf47b805F77aE664e56403BfeAD06796869CF56",
-    "synthesis": "0x4Ca0AD2b449066EEB41766F76e729094c15118A4"
+    "paymaster": "0xeFAC0dE7B0588335010B69abb24eB01309265EA2",
+    "nodeList": "",
+    "bridge": "",
+    "mockDexPool": "",
+    "portal": "",
+    "synthesis": ""
   },
   "bsctestnet": {
     "n": "NETWORK2",
@@ -50,11 +50,11 @@
     "sourceForRepresentation": [
       "rinkeby"
     ],
-    "paymaster": "0xd12E5056287d20843b607d3Ab609b7Ed0191230c",
-    "nodeList": "0xbD1F277D436bc1b943563a6350D56Eab940F692c",
-    "bridge": "0xDDBe81b7a2A97f0860a6B17a44bc4a590a269BA6",
-    "mockDexPool": "0xA93259ac5B18A19aD02E7BD7d165fEd917BEe73b",
-    "portal": "0x27Da6B4CaEA622b6CA7919CA53409204745b53bc",
-    "synthesis": "0xa988Ff263d03e471de3aCCC6C0550502fAb06E9e"
+    "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
+    "nodeList": "",
+    "bridge": "",
+    "mockDexPool": "",
+    "portal": "",
+    "synthesis": ""
   }
 }
