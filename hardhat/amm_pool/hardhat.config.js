@@ -10,6 +10,7 @@ const RINKEBY             = env.parsed.RINKEBY     || "";
 const BSCTESNET           = env.parsed.BSCTESNET   || "";
 const ETHERSCAN_API_KEY   = env.parsed.ETHERSCAN_API_KEY    || "";
 const BINANCESCAN_API_KEY = env.parsed.BINANCESCAN_API_KEY  || "";
+const MUMBAI              = env.parsed.MUMBAI     || "";
 
 module.exports = {
     defaultNetwork: "hardhat",
@@ -29,6 +30,10 @@ module.exports = {
         bsctestnet: {
             url: BSCTESNET,
             accounts: [BSC_PRIVATE_KEY]
+        },
+        mumbai:{
+            url: MUMBAI,
+            accounts: [MUMBAI_PRIVATE_KEY]
         }
         // ,
         // ganache: {

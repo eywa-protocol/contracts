@@ -10,6 +10,7 @@ const RINKEBY             = env.parsed.RINKEBY     || "";
 const BSCTESNET           = env.parsed.BSCTESNET   || "";
 const ETHERSCAN_API_KEY   = env.parsed.ETHERSCAN_API_KEY    || "";
 const BINANCESCAN_API_KEY = env.parsed.BINANCESCAN_API_KEY  || "";
+const MUMBAI              = env.parsed.MUMBAI     || "";
 
 
 //TODO: Need to resolve dynamic initialization for apiKey. Now it is wrong working.
@@ -37,6 +38,10 @@ module.exports = {
         bsctestnet: {
             url: BSCTESNET,
             accounts: [BSC_PRIVATE_KEY]
+        },
+        mumbai:{
+           url: MUMBAI,
+           accounts: [MUMBAI_PRIVATE_KEY]
         }
         // ,
         // ganache: {
