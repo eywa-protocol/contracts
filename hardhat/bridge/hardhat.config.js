@@ -6,6 +6,7 @@ const env = require('dotenv').config({ path: '../.env' })
 const RINKEBY_PRIVATE_KEY = env.parsed.PRIVATE_KEY_RINKEBY || "";
 const BSC_PRIVATE_KEY     = env.parsed.PRIVATE_KEY_BSC     || "";
 const MUMBAI_PRIVATE_KEY  = env.parsed.PRIVATE_KEY_MUMBAI  || "";
+const GANACHE_PRIVATE_KEY = env.parsed.PRIVATE_KEY_GANACHE || "";
 const RINKEBY             = env.parsed.RINKEBY     || "";
 const BSCTESNET           = env.parsed.BSCTESNET   || "";
 const ETHERSCAN_API_KEY   = env.parsed.ETHERSCAN_API_KEY    || "";
@@ -34,6 +35,10 @@ module.exports = {
         mumbai:{
             url: MUMBAI,
             accounts: [MUMBAI_PRIVATE_KEY]
+        },
+        ganache: {
+            url: 'http://127.0.0.1:8545',
+            accounts: [GANACHE_PRIVATE_KEY]
         }
         // ,
         // ganache: {

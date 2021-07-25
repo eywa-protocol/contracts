@@ -22,11 +22,11 @@
       "bsctestnet"
     ],
     "paymaster": "0xeFAC0dE7B0588335010B69abb24eB01309265EA2",
-    "nodeList": "",
-    "bridge": "",
-    "mockDexPool": "",
-    "portal": "",
-    "synthesis": ""
+    "nodeList": "0x6b2305F84DD719045dcbe0509962B34F8B4B609b",
+    "bridge": "0x2eC933470C09988569AB4FE0eb01b11268AE0d40",
+    "mockDexPool": "0xb8c239D2613c2DAe2e19F228DAf810b8084a7959",
+    "portal": "0x5404De5965DF8058813aCC7C06F10d17A0D3e63F",
+    "synthesis": "0xAE382E0Cf02CeE59bcbB8752AB5e919B644702Bf"
   },
   "bsctestnet": {
     "n": "NETWORK2",
@@ -51,10 +51,39 @@
       "rinkeby"
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeList": "",
-    "bridge": "",
-    "mockDexPool": "",
-    "portal": "",
-    "synthesis": ""
+    "nodeList": "0x62C127Ef630702108c454fE07540B2e42Bd68C9e",
+    "bridge": "0xFd79ff7a8797f673FBc226bEbE4B3d01fF96cB8f",
+    "mockDexPool": "0xfB92979803bDb789c70a0742B4272A2A2f481C05",
+    "portal": "0x2f0c662f33D7fB617aceFd74c58705Ae6084Ef93",
+    "synthesis": "0x93Ef61B459C49E896130431F214f09e5BA2E374C"
+  },
+  "ganache": {
+    "n": "GANACHE",
+    "env_file": "env_connect_to_ganache.env",
+    "chainId": 0,
+    "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
+    "forwarder": "0xeB230bF62267E94e657b5cbE74bdcea78EB3a5AB",
+    "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
+    "token": [
+      {
+        "address": "0x1bBB6FC8e87A3622Fbd5300f13bf21A3e66cdB7d",
+        "name": "Pandora",
+        "symbol": "PAR"
+      },
+      {
+        "address": "0x74142B3bE036AF872deF48A00482c5BeC90386bF",
+        "name": "Tsakheila",
+        "symbol": "TSL"
+      }
+    ],
+    "sourceForRepresentation": [
+      "rinkeby"
+    ],
+    "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
+    "nodeList": "0x4c5c441Ea5d34c186C18ff70BF6e06f083BECb55",
+    "bridge": "0x205C740e8572ffb364EcE8a9D0CC01bcA27cdD0C",
+    "mockDexPool": "0xF8A748b4B8430FD76E7f9ED8A5f9a5cf400Df7fc",
+    "portal": "0x6FeACfFF44afAfA65ce2395E8E8612Eb9c7b73E1",
+    "synthesis": "0x33C6B21459070B242EC918238CC29c98AC09a031"
   }
 }
