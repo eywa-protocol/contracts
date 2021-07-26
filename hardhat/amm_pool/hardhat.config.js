@@ -8,12 +8,8 @@ const RINKEBY_PRIVATE_KEY = env.parsed.PRIVATE_KEY_RINKEBY || "";
 const BSC_PRIVATE_KEY     = env.parsed.PRIVATE_KEY_BSC     || "";
 const MUMBAI_PRIVATE_KEY  = env.parsed.PRIVATE_KEY_MUMBAI  || "";
 const GANACHE_PRIVATE_KEY = env.parsed.PRIVATE_KEY_GANACHE || "";
-const RINKEBY             = env.parsed.RINKEBY     || "";
-const BSCTESNET           = env.parsed.BSCTESNET   || "";
 const ETHERSCAN_API_KEY   = env.parsed.ETHERSCAN_API_KEY    || "";
 const BINANCESCAN_API_KEY = env.parsed.BINANCESCAN_API_KEY  || "";
-const MUMBAI              = env.parsed.MUMBAI     || "";
-const GANACHE             = networkConfig.ganache.rpcUrl || "";
 
 module.exports = {
     defaultNetwork: "hardhat",
@@ -27,15 +23,15 @@ module.exports = {
         localhost: {
         },
         rinkeby: {
-            url: RINKEBY,
+            url:  networkConfig.rinkeby.rpcUrl,
             accounts: [RINKEBY_PRIVATE_KEY]
         },
         bsctestnet: {
-            url: BSCTESNET,
+            url:  networkConfig.bsctestnet.rpcUrl,
             accounts: [BSC_PRIVATE_KEY]
         },
         mumbai:{
-            url: MUMBAI,
+            url:  networkConfig.mumbai.rpcUrl,
             accounts: [MUMBAI_PRIVATE_KEY]
         },
         network1: {
@@ -52,7 +48,7 @@ module.exports = {
              accounts:[env.parsed.PRIVATE_KEY_NETWORK3]
         },
         ganache: {
-            url: GANACHE,
+            url:  networkConfig.ganache.rpcUrl,
             accounts: [GANACHE_PRIVATE_KEY]
         }
         // ,

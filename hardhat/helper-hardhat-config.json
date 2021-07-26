@@ -1,8 +1,45 @@
 {
+  "mumbai": {
+    "rpcUrl": "https://polygon-mumbai.infura.io/v3/79a941babd7947e58490a5e35a074c34",
+    "n": "MUMBAI",
+    "env_file": [
+      "networks_env/env_connect_to_mumbai.env",
+      "networks_env/env_test_for_mumbai.env"
+    ],
+    "chainId": 80001,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [
+      {
+        "address": "0x0000000000000000000000000000000000000000",
+        "name": "Toruk Makto",
+        "symbol": "TM"
+      },
+      {
+        "address": "0x0000000000000000000000000000000000000000",
+        "name": "Naa'vi",
+        "symbol": "NV"
+      }
+    ],
+    "sourceForRepresentation": [
+      "rinkeby",
+      "bsctestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeList": "",
+    "bridge": "",
+    "mockDexPool": "",
+    "portal": "",
+    "synthesis": ""
+  },
   "rinkeby": {
-    "rpcUrl":"https://rinkeby.infura.io/v3/ab95bf9f6dd743e6a8526579b76fe358",
+    "rpcUrl": "https://rinkeby.infura.io/v3/ab95bf9f6dd743e6a8526579b76fe358",
     "n": "RINKEBY",
-    "env_file": [ "networks_env/env_connect_to_rinkeby.env", "networks_env/env_test_for_rinkeby.env" ],
+    "env_file": [
+      "networks_env/env_connect_to_rinkeby.env",
+      "networks_env/env_test_for_rinkeby.env"
+    ],
     "chainId": 4,
     "relayHub": "0x6650d69225CA31049DB7Bd210aE4671c0B1ca132",
     "forwarder": "0x83A54884bE4657706785D7309cf46B58FE5f6e8a",
@@ -20,19 +57,23 @@
       }
     ],
     "sourceForRepresentation": [
-      "bsctestnet"
+      "bsctestnet",
+      "mumbai"
     ],
     "paymaster": "0xeFAC0dE7B0588335010B69abb24eB01309265EA2",
-    "nodeList": "0x6b2305F84DD719045dcbe0509962B34F8B4B609b",
-    "bridge": "0x2eC933470C09988569AB4FE0eb01b11268AE0d40",
-    "mockDexPool": "0xb8c239D2613c2DAe2e19F228DAf810b8084a7959",
-    "portal": "0x5404De5965DF8058813aCC7C06F10d17A0D3e63F",
-    "synthesis": "0xAE382E0Cf02CeE59bcbB8752AB5e919B644702Bf"
+    "nodeList": "0x7b951F6e3f41714bb682B3BEe78a8fDD4258788d",
+    "bridge": "0xc606118D050821DdADFcf7c397682A8D17FD1953",
+    "mockDexPool": "0x1F9782FbC8a58Ed9D2c61027A10b91A81985a72e",
+    "portal": "0x969fcb1BD54b7b8736816775373cf3A693C6b6e2",
+    "synthesis": "0xeCd64cc0B0e6BB42685981107B177fC6c8B64456"
   },
   "bsctestnet": {
-    "rpcUrl":"https://data-seed-prebsc-1-s1.binance.org:8545",
+    "rpcUrl": "https://data-seed-prebsc-1-s1.binance.org:8545",
     "n": "BSCTESTNET",
-    "env_file": ["networks_env/env_connect_to_bsctestnet.env",  "networks_env/env_test_for_bsctestnet.env"],
+    "env_file": [
+      "networks_env/env_connect_to_bsctestnet.env",
+      "networks_env/env_test_for_bsctestnet.env"
+    ],
     "chainId": 97,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
     "forwarder": "0xeB230bF62267E94e657b5cbE74bdcea78EB3a5AB",
@@ -50,7 +91,8 @@
       }
     ],
     "sourceForRepresentation": [
-      "rinkeby"
+      "rinkeby",
+      "mumbai"
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
     "nodeList": "0x62C127Ef630702108c454fE07540B2e42Bd68C9e",
@@ -60,9 +102,12 @@
     "synthesis": "0x93Ef61B459C49E896130431F214f09e5BA2E374C"
   },
   "ganache": {
-    "rpcUrl":"http://127.0.0.1:8545",
+    "rpcUrl": "http://127.0.0.1:8545",
     "n": "GANACHE",
-    "env_file": [ "networks_env/env_connect_to_ganache.env",  "networks_env/env_test_for_ganache.env" ],
+    "env_file": [
+      "networks_env/env_connect_to_ganache.env",
+      "networks_env/env_test_for_ganache.env"
+    ],
     "chainId": 0,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
     "forwarder": "0xeB230bF62267E94e657b5cbE74bdcea78EB3a5AB",
@@ -88,5 +133,107 @@
     "mockDexPool": "0xF8A748b4B8430FD76E7f9ED8A5f9a5cf400Df7fc",
     "portal": "0x6FeACfFF44afAfA65ce2395E8E8612Eb9c7b73E1",
     "synthesis": "0x33C6B21459070B242EC918238CC29c98AC09a031"
+  },
+  "network1": {
+    "rpcUrl": "http://172.20.128.11:7545",
+    "n": "NETWORK1",
+    "env_file": [
+      "networks_env/env_connect_to_network1.env",
+      "networks_env/env_test_for_network1.env"
+    ],
+    "chainId": 1111,
+    "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
+    "forwarder": "0xeB230bF62267E94e657b5cbE74bdcea78EB3a5AB",
+    "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
+    "token": [
+      {
+        "address": "0x1bBB6FC8e87A3622Fbd5300f13bf21A3e66cdB7d",
+        "name": "Pandora",
+        "symbol": "PAR"
+      },
+      {
+        "address": "0x74142B3bE036AF872deF48A00482c5BeC90386bF",
+        "name": "Tsakheila",
+        "symbol": "TSL"
+      }
+    ],
+    "sourceForRepresentation": [
+      "network2",
+      "network3"
+    ],
+    "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
+    "nodeList": "",
+    "bridge": "",
+    "mockDexPool": "",
+    "portal": "",
+    "synthesis": ""
+  },
+  "network2": {
+    "rpcUrl": "http://172.20.128.12:8545",
+    "n": "NETWORK2",
+    "env_file": [
+      "networks_env/env_connect_to_network2.env",
+      "networks_env/env_test_for_network2.env"
+    ],
+    "chainId": 1112,
+    "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
+    "forwarder": "0xeB230bF62267E94e657b5cbE74bdcea78EB3a5AB",
+    "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
+    "token": [
+      {
+        "address": "0x1bBB6FC8e87A3622Fbd5300f13bf21A3e66cdB7d",
+        "name": "Pandora",
+        "symbol": "PAR"
+      },
+      {
+        "address": "0x74142B3bE036AF872deF48A00482c5BeC90386bF",
+        "name": "Tsakheila",
+        "symbol": "TSL"
+      }
+    ],
+    "sourceForRepresentation": [
+      "network1",
+      "network3"
+    ],
+    "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
+    "nodeList": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "network3": {
+    "rpcUrl": "http://172.20.128.13:9545",
+    "n": "NETWORK3",
+    "env_file": [
+      "networks_env/env_connect_to_network3.env",
+      "networks_env/env_test_for_network3.env"
+    ],
+    "chainId": 1113,
+    "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
+    "forwarder": "0xeB230bF62267E94e657b5cbE74bdcea78EB3a5AB",
+    "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
+    "token": [
+      {
+        "address": "0x1bBB6FC8e87A3622Fbd5300f13bf21A3e66cdB7d",
+        "name": "Pandora",
+        "symbol": "PAR"
+      },
+      {
+        "address": "0x74142B3bE036AF872deF48A00482c5BeC90386bF",
+        "name": "Tsakheila",
+        "symbol": "TSL"
+      }
+    ],
+    "sourceForRepresentation": [
+      "network1",
+      "network2"
+    ],
+    "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
+    "nodeList": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000000000000000000000000000"
   }
 }

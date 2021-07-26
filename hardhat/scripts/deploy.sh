@@ -8,10 +8,16 @@ getField(){
 ## NOTE: "NEEDS" it is when address in config is epmty (=== '')
 node ./_deploy.js --networks ${1} --parentpid $$
 
-nets=$(jq 'keys[]' ../helper-hardhat-config.json)
-for net in ${nets//\"/ }
-do
+nets=${1}
+if [[ ${1} =~ ^('')$ ]]
+ then
+  nets=$(jq 'keys[]' ../helper-hardhat-config.json)
+  nets=${nets//\"/ }
+ fi
 
+for net in ${nets//\,/ }
+do
+echo 'bash script for network:' ${net}
 cd ../gasless
 npx hardhat run ./scripts/deploy.js --network ${net}
 cd ../bridge
