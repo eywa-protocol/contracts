@@ -1,18 +1,16 @@
 {
-  "name": "smart-contracts",
-  "version": "0.0.1",
+  "name": "upgradability",
+  "version": "1.0.0",
   "description": "",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "deploy:ganache": "truffle compile --config=truffle-config.v07.js && truffle compile && truffle migrate --reset --network network1 && npx truffle migrate --reset --network network2 && npx truffle migrate --reset --network network3",
-    "deploy:testnet": "truffle compile --config=truffle-config.v07.js && truffle compile && ./scripts/bash/deploy.sh",
+    "deploy:ganache": "./scripts/bash/ganache/deploy_ganache.sh",
+    "deploy:testnet": "./scripts/bash/deploy_testnet.sh",
     "integration-test:local": " truffle test ./test/integration/e2e.test.js --typenet devstand --net1 network1 --net2 network2 --net3 network3",
-    "integration-test:testnet": " truffle test ./test/integration/e2e.bridge.test.js --typenet teststand --net1 rinkeby --net2 bsctestnet",
-    "e2e-synthesis:testnet": "truffle test ./test/integration/e2e.synthesis.gasless.test.js --typenet teststand --net1 rinkeby --net2 bsctestnet",
-    "e2e-synthesis:testnetV2": "truffle test ./test/integration/e2e.synthesis.gasless.testV2.js --typenet teststand --net1 rinkeby --net2 bsctestnet",
+    "integration-test:testnet": " truffle test ./test/integration/e2e.test.js --typenet teststand --net1 rinkeby --net2 bsctestnet --net3 mumbai",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -20,18 +18,13 @@
   "license": "ISC",
   "dependencies": {
     "@chainlink/contracts": "^0.0.11",
-    "@opengsn/contracts": "^2.2.2",
-    "@openzeppelin/contracts": "3.4.1",
-    "@openzeppelin/contracts-newone": "npm:@openzeppelin/contracts@4.1.0",
+    "@openzeppelin/contracts": "^4.0.0",
     "@truffle/hdwallet-provider": "^1.2.0",
-    "@uniswap/lib": "^4.0.1-alpha",
-    "dotenv": "^8.2.0",
-    "@opengsn/provider": "^2.2.2"
+    "dotenv": "^8.2.0"
   },
   "devDependencies": {
     "@openzeppelin/test-helpers": "^0.5.10",
     "chai": "^4.2.0",
-    "ganache-cli": "^6.12.2",
     "truffle": "^5.1.57"
   }
 }

@@ -1,43 +1,37 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.7.6 <=0.8.0;
+pragma solidity ^0.8.0;
 
 
 //WARN: Before release should be baned trustListForDex into addNode
 contract NodeList {
 
   struct Node {
-  	bool    enable;
     address nodeWallet;
-    bytes   p2pAddress;
-    address blsPointAddr;
+    address nodeIdAddress;
     bytes   blsPubKey;
     uint64 nodeId;
   }
 
    mapping (address => Node) public listNode;
    mapping (address => mapping(address => bool)) /** node => brigde => permission */  public trustListForDex;
-   address[] public p2pAddrs;
     Node[] public nodes;
 
-    event AddedNode(bytes _p2pAddress, bytes _blsPubKey);
+    event AddedNode(address nodeIdAddress);
 
 //TODO: discuss about check: listNode[_blsPointAddr] == address(0)
-  function addNode(address _nodeWallet, bytes memory _p2pAddress, address _blsPointAddr, bytes memory _blsPubKey, bool _enable) external isNewNode(_blsPointAddr) /*onlyOwner*/ {
+  function addNode(address _nodeWallet, address _nodeIdAddress, bytes memory _blsPubKey) external isNewNode(_nodeIdAddress) /*onlyOwner*/ {
       require(_nodeWallet != address(0), "0 address");
-      require(_blsPointAddr != address(0), "0 address");
-      Node storage node = listNode[_blsPointAddr];
+      require(_nodeIdAddress != address(0), "0 address");
+      Node storage node = listNode[_nodeIdAddress];
       node.nodeId  = getNewNodeId();
       node.nodeWallet   = _nodeWallet;
-      node.p2pAddress   = _p2pAddress;
-      node.blsPointAddr = _blsPointAddr;
+      node.nodeIdAddress = _nodeIdAddress;
       node.blsPubKey    = _blsPubKey;
-      node.enable       = _enable;
-      p2pAddrs.push(_blsPointAddr);
       nodes.push(node);
 //TODO: discuss about pemission for certain bridge
       trustListForDex[_nodeWallet][address(0)] = true;
 
-      emit AddedNode(node.p2pAddress, node.blsPubKey);
+      emit AddedNode(node.nodeIdAddress);
   }
 
     function getNewNodeId() internal returns (uint64){
@@ -48,44 +42,29 @@ contract NodeList {
   	return listNode[_blsPubAddr];
   }
 
-  function getAllNodesAddrs() external view returns (address[] memory) {
-  	return p2pAddrs;
-  }
+
 
   function getNodes() external view returns (Node[] memory){
-      Node[] memory nodes = new Node[](p2pAddrs.length);
-      for (uint i = 0; i < p2pAddrs.length; i++) {
-          Node storage node = listNode[p2pAddrs[i]];
-          nodes[i] = node;
-      }
       return nodes;
   }
 
     function getBLSPubKeys() external view returns (bytes[] memory){
-        bytes[] memory pubKeys = new bytes[](p2pAddrs.length);
-        for (uint i = 0; i < p2pAddrs.length; i++) {
-            Node storage node = listNode[p2pAddrs[i]];
+        bytes[] memory pubKeys = new bytes[](nodes.length);
+        for (uint i = 0; i < nodes.length; i++) {
+            Node storage node = listNode[nodes[i].nodeIdAddress];
             pubKeys[i] = node.blsPubKey;
         }
         return pubKeys;
     }
 
-    function getNodeBLSAddrs() external view returns (address[] memory){
-        address[] memory blsAddrs= new address[](p2pAddrs.length);
-        for (uint i = 0; i < p2pAddrs.length; i++) {
-            Node storage node = listNode[p2pAddrs[i]];
-            blsAddrs[i] = node.blsPointAddr;
-        }
-        return blsAddrs;
-    }
 
-    modifier isNewNode(address _nodeBLSAddr) {
-        require(listNode[_nodeBLSAddr].blsPointAddr == address(0),string(abi.encodePacked("node ", toString(_nodeBLSAddr), " allready exists")));
+    modifier isNewNode(address _nodeIdAddr) {
+        require(listNode[_nodeIdAddr].nodeWallet == address(0),string(abi.encodePacked("node ", toString(_nodeIdAddr), " allready exists")));
         _;
     }
 
-    modifier existingNode(address addr) {
-        require(listNode[addr].blsPointAddr != address(0), string(abi.encodePacked("node ", toString(addr), " does not exist")));
+    modifier existingNode(address _nodeIdAddr) {
+        require(listNode[_nodeIdAddr].nodeWallet != address(0), string(abi.encodePacked("node ", toString(_nodeIdAddr), " does not exist")));
         _;
     }
 
@@ -105,8 +84,8 @@ contract NodeList {
         return string(result);
     }
 
-    function nodeExists(address _blsPubAddr) public view returns (bool) {
-        return listNode[_blsPubAddr].blsPointAddr != address(0);
+    function nodeExists(address _nodeIdAddr) public view returns (bool) {
+        return listNode[_nodeIdAddr].nodeWallet != address(0);
     }
 
   function checkPermissionTrustList(address node) external view returns (bool)  {

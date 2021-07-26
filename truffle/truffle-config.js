@@ -2,8 +2,12 @@ require('dotenv').config();
 const HDWalletProvider = require('@truffle/hdwallet-provider')
 
 const bscws     = 'https://data-seed-prebsc-1-s1.binance.org:8545/';
-// const rinkebyws = 'wss://rinkeby.infura.io/ws/v3/0f4453c71dd145c6b819bbbf60a96e9d';
+
 const rinkebyws = 'wss://rinkeby.infura.io/ws/v3/ab95bf9f6dd743e6a8526579b76fe358';
+
+// const mumbaiws = 'wss://rpc-mumbai.maticvigil.com/ws'
+
+const mumbaiws = 'https://polygon-mumbai.infura.io/v3/79a941babd7947e58490a5e35a074c34'
 
 module.exports = {
   /**
@@ -18,6 +22,12 @@ module.exports = {
 
   networks: {
 
+    // development: {
+    //  host: "127.0.0.1",
+    //  port: 7545,
+    //  network_id: "1337",
+    // },
+
     network1: {
      host: "172.20.128.11",
      port: 7545,
@@ -30,11 +40,30 @@ module.exports = {
      network_id: "1112",
     },
 
-    network3: {
+      network3: {
           host: "172.20.128.13",
           port: 9545,
           network_id: "1113",
-    },
+      },
+
+      netci1: {
+          host: "127.0.0.1",
+          port: 7545,
+          network_id: "1111",
+      },
+
+      netci2: {
+          host: "127.0.0.1",
+          port: 8545,
+          network_id: "1112",
+      },
+
+      netci3: {
+          host: "127.0.0.1",
+          port: 9545,
+          network_id: "1113",
+      },
+
 
     bsctestnet: {
        provider: () => new HDWalletProvider(process.env.TESTNET_BSC, bscws),
@@ -64,7 +93,7 @@ module.exports = {
   compilers: {
     solc: {
        version: "0.8.0",
-       docker: false,
+       docker: true,
        parser: "solcjs",
        settings: {
         optimizer: {
@@ -73,7 +102,5 @@ module.exports = {
         }
       }
     }
-  },
-
-  contracts_directory: "./contracts/v0.8"
+  }
 };
