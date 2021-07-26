@@ -1,5 +1,6 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
+const NETWORK1            = networkConfig.network1.rpcUrl || "";
 require("hardhat-gas-reporter");
 const env = require('dotenv').config({ path: '../.env' });
 const networkConfig = require('../helper-hardhat-config.json');
@@ -47,7 +48,17 @@ module.exports = {
            accounts: [MUMBAI_PRIVATE_KEY]
         },
         network1: {
-             url: "http://172.20.128.11:7545"
+             url: networkConfig.network1.rpcUrl,
+             accounts:[env.parsed.PRIVATE_KEY_NETWORK1]
+
+        },
+        network2: {
+	     url: networkConfig.network2.rpcUrl,
+             accounts:[env.parsed.PRIVATE_KEY_NETWORK2]
+        },
+        network3: {
+             url: networkConfig.network3.rpcUrl,
+             accounts:[env.parsed.PRIVATE_KEY_NETWORK3]
         },
         ganache: {
              url: GANACHE,
