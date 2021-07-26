@@ -38,6 +38,19 @@ module.exports = {
             url: MUMBAI,
             accounts: [MUMBAI_PRIVATE_KEY]
         },
+        network1: {
+             url: networkConfig.network1.rpcUrl,
+             accounts:[env.parsed.PRIVATE_KEY_NETWORK1]
+
+        },
+        network2: {
+	     url: networkConfig.network2.rpcUrl,
+             accounts:[env.parsed.PRIVATE_KEY_NETWORK2]
+        },
+        network3: {
+             url: networkConfig.network3.rpcUrl,
+             accounts:[env.parsed.PRIVATE_KEY_NETWORK3]
+        },
         ganache: {
             url: GANACHE,
             accounts: [GANACHE_PRIVATE_KEY]
