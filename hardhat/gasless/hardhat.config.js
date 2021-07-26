@@ -1,7 +1,8 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
 require("hardhat-gas-reporter");
-const env = require('dotenv').config({ path: '../.env' })
+const env = require('dotenv').config({ path: '../.env' });
+const networkConfig = require('../helper-hardhat-config.json');
 
 const RINKEBY_PRIVATE_KEY = env.parsed.PRIVATE_KEY_RINKEBY || "";
 const BSC_PRIVATE_KEY     = env.parsed.PRIVATE_KEY_BSC     || "";
@@ -12,6 +13,7 @@ const BSCTESNET           = env.parsed.BSCTESNET   || "";
 const ETHERSCAN_API_KEY   = env.parsed.ETHERSCAN_API_KEY    || "";
 const BINANCESCAN_API_KEY = env.parsed.BINANCESCAN_API_KEY  || "";
 const MUMBAI              = env.parsed.MUMBAI     || "";
+const GANACHE             = networkConfig.ganache.rpcUrl || "";
 
 
 //TODO: Need to resolve dynamic initialization for apiKey. Now it is wrong working.
@@ -48,7 +50,7 @@ module.exports = {
              url: "http://172.20.128.11:7545"
         },
         ganache: {
-             url: 'http://127.0.0.1:8545',
+             url: GANACHE,
              accounts: [GANACHE_PRIVATE_KEY]
         }
     },

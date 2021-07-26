@@ -1,7 +1,8 @@
 {
   "rinkeby": {
-    "n": "NETWORK1",
-    "env_file": "env_connect_to_network1.env",
+    "rpcUrl":"https://rinkeby.infura.io/v3/ab95bf9f6dd743e6a8526579b76fe358",
+    "n": "RINKEBY",
+    "env_file": [ "networks_env/env_connect_to_rinkeby.env", "networks_env/env_test_for_rinkeby.env" ],
     "chainId": 4,
     "relayHub": "0x6650d69225CA31049DB7Bd210aE4671c0B1ca132",
     "forwarder": "0x83A54884bE4657706785D7309cf46B58FE5f6e8a",
@@ -29,8 +30,9 @@
     "synthesis": "0xAE382E0Cf02CeE59bcbB8752AB5e919B644702Bf"
   },
   "bsctestnet": {
-    "n": "NETWORK2",
-    "env_file": "env_connect_to_network2.env",
+    "rpcUrl":"https://data-seed-prebsc-1-s1.binance.org:8545",
+    "n": "BSCTESTNET",
+    "env_file": ["networks_env/env_connect_to_bsctestnet.env",  "networks_env/env_test_for_bsctestnet.env"],
     "chainId": 97,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
     "forwarder": "0xeB230bF62267E94e657b5cbE74bdcea78EB3a5AB",
@@ -58,8 +60,9 @@
     "synthesis": "0x93Ef61B459C49E896130431F214f09e5BA2E374C"
   },
   "ganache": {
+    "rpcUrl":"http://127.0.0.1:8545",
     "n": "GANACHE",
-    "env_file": "env_connect_to_ganache.env",
+    "env_file": [ "networks_env/env_connect_to_ganache.env",  "networks_env/env_test_for_ganache.env" ],
     "chainId": 0,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
     "forwarder": "0xeB230bF62267E94e657b5cbE74bdcea78EB3a5AB",
