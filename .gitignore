@@ -3,10 +3,9 @@ wrappers/
 truffle/build/contracts
 !wrappers/go.mod
 !wrappers/go.sum
-
 #Hardhat files
 **/cache
 **/artifacts
 **/factories
 
-**/.env
+**/.env     
