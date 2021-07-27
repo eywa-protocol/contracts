@@ -135,7 +135,7 @@
     "synthesis": "0x33C6B21459070B242EC918238CC29c98AC09a031"
   },
   "network1": {
-    "rpcUrl": "http://172.20.128.11:7545",
+    "rpcUrl": "ws://172.20.128.11:7545",
     "n": "NETWORK1",
     "env_file": [
       "networks_env/env_connect_to_network1.env",
@@ -169,7 +169,7 @@
     "synthesis": ""
   },
   "network2": {
-    "rpcUrl": "http://172.20.128.12:8545",
+    "rpcUrl": "ws://172.20.128.12:8545",
     "n": "NETWORK2",
     "env_file": [
       "networks_env/env_connect_to_network2.env",
@@ -203,7 +203,7 @@
     "synthesis": "0x0000000000000000000000000000000000000000000000000000000000000000"
   },
   "network3": {
-    "rpcUrl": "http://172.20.128.13:9545",
+    "rpcUrl": "ws://172.20.128.13:9545",
     "n": "NETWORK3",
     "env_file": [
       "networks_env/env_connect_to_network3.env",
