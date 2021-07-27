@@ -5,14 +5,17 @@
 all: wrappers
 
 npm:
-	@if [ -d truffle/node_modules ]; then \
+	@if [ -d hardhat/node_modules ]; then \
   			echo "installed"; \
   			else \
-  			cd truffle;npm ci;fi
+  			cd hardhat;npm ci; \
+                        cd gasless;npm ci; \
+                        cd ../amm_pool;npm ci; \
+                        cd ../bridge;npm ci;fi;
 
 wrappers: deps npm
-	cd truffle;npx truffle build;
-	go run wrappers-builder/main.go --json truffle/build/contracts --pkg wrappers --out wrappers
+	cd hardhat/bridge;npx hardhat compile;
+	go run wrappers-builder/main.go --json hardhat/bridge/artifacts/contracts --pkg wrappers --out wrappers
 
 deps:
 	go mod tidy
@@ -20,13 +23,13 @@ deps:
 
 clean:
 	rm -f ./wrappers/*.go
-	rm -f ./truffle/build/contracts/*.json
+	cd hardhat/bridge;npx hardhat clean;
 
-local-deploy: deps npm
-	cd truffle;npm run deploy:ganache;
+#local-deploy: deps npm
+#	cd truffle;npm run deploy:ganache;
 
-local-test: deps npm
-	cd truffle;npm run integration-test:local;
+#local-test: deps npm
+#	cd truffle;npm run integration-test:local;
 
 eth-local-migrate:
-	cd truffle;npx truffle migrate --reset --network network1 && npx truffle migrate --reset --network network2 && npx truffle migrate --reset --network network3
+	cd hardhat/scripts;./deploy.sh network1,network2,network3

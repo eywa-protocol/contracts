@@ -35,16 +35,16 @@ module.exports = {
             accounts: [MUMBAI_PRIVATE_KEY]
         },
         network1: {
-             url: networkConfig.network1.rpcUrl,
+             url: networkConfig.network1.rpcUrl.replace('ws','http'),
              accounts:[env.parsed.PRIVATE_KEY_NETWORK1]
 
         },
         network2: {
-	     url: networkConfig.network2.rpcUrl,
+	     url: networkConfig.network2.rpcUrl.replace('ws','http'),
              accounts:[env.parsed.PRIVATE_KEY_NETWORK2]
         },
         network3: {
-             url: networkConfig.network3.rpcUrl,
+             url: networkConfig.network3.rpcUrl.replace('ws','http'),
              accounts:[env.parsed.PRIVATE_KEY_NETWORK3]
         },
         ganache: {
