@@ -83,7 +83,7 @@ func findAllSourceFiles(root, extension string) ([]string, error) {
 		if info.IsDir() {
 			return nil
 		}
-		if filepath.Ext(path) == extension {
+		if filepath.Ext(path) == extension && !strings.Contains(path, ".dbg.json") {
 			sourceFiles = append(sourceFiles, path)
 		}
 		return nil
