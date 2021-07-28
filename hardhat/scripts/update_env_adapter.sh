@@ -1,5 +1,6 @@
 #! /bin/bash
 
+mkdir -p ../networks_env
 MODE=${1}
 FILENAME=${2}
 if [[ "$MODE" =~ ^(create)$ ]]
