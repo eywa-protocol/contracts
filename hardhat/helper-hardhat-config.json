@@ -102,7 +102,7 @@
     "synthesis": "0x93Ef61B459C49E896130431F214f09e5BA2E374C"
   },
   "ganache": {
-    "rpcUrl": "http://127.0.0.1:8545",
+    "rpcUrl": "http://127.0.0.1:9999",
     "n": "GANACHE",
     "env_file": [
       "networks_env/env_connect_to_ganache.env",
