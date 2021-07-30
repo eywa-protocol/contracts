@@ -9,3 +9,4 @@ truffle/build/contracts
 **/factories
 
 **/.env     
+networks_env

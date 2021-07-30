@@ -9,13 +9,13 @@ npm:
   			echo "installed"; \
   			else \
   			cd hardhat;npm ci; \
-                        cd gasless;npm ci; \
+                        cd packages/gasless;npm ci; \
                         cd ../amm_pool;npm ci; \
                         cd ../bridge;npm ci;fi;
 
 wrappers: deps npm
-	cd hardhat/bridge;npx hardhat compile;
-	go run wrappers-builder/main.go --json hardhat/bridge/artifacts/contracts --pkg wrappers --out wrappers
+	cd hardhat/packages/bridge;npx hardhat compile;
+	go run wrappers-builder/main.go --json hardhat/packages/bridge/artifacts/contracts --pkg wrappers --out wrappers
 
 deps:
 	go mod tidy
@@ -23,13 +23,13 @@ deps:
 
 clean:
 	rm -f ./wrappers/*.go
-	cd hardhat/bridge;npx hardhat clean;
+	cd hardhat/packages/bridge;npx hardhat clean;
 
 #local-deploy: deps npm
 #	cd truffle;npm run deploy:ganache;
 
 local-test: deps npm
-	cd hardhat/bridge;npm run integration-test:local;
+	cd hardhat/packages/bridge;npm run integration-test:local;
 
 eth-local-migrate:
 	cd hardhat/scripts;./deploy.sh network1,network2,network3
