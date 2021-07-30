@@ -28,8 +28,8 @@ clean:
 #local-deploy: deps npm
 #	cd truffle;npm run deploy:ganache;
 
-#local-test: deps npm
-#	cd truffle;npm run integration-test:local;
+local-test: deps npm
+	cd hardhat/bridge;npm run integration-test:local;
 
 eth-local-migrate:
 	cd hardhat/scripts;./deploy.sh network1,network2,network3
