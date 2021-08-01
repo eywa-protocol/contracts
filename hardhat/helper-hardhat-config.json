@@ -1,6 +1,41 @@
 {
+  "hecotestnet": {
+    "rpcUrl": "wss://ws-testnet.hecochain.com",
+    "n": "HECOTESTNET",
+    "env_file": [
+      "networks_env/env_connect_to_hecotestnet.env",
+      "networks_env/env_test_for_hecotestnet.env"
+    ],
+    "chainId": 256,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [
+      {
+        "address": "0x0000000000000000000000000000000000000000",
+        "name": "Toruk Makto",
+        "symbol": "TM"
+      },
+      {
+        "address": "0x0000000000000000000000000000000000000000",
+        "name": "Naa'vi",
+        "symbol": "NV"
+      }
+    ],
+    "sourceForRepresentation": [
+      "rinkeby",
+      "bsctestnet",
+      "mumbai"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeList": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000"
+  },
   "mumbai": {
-    "rpcUrl": "https://polygon-mumbai.infura.io/v3/79a941babd7947e58490a5e35a074c34",
+    "rpcUrl": "wss://polygon-mumbai.infura.io/ws/v3/79a941babd7947e58490a5e35a074c34",
     "n": "MUMBAI",
     "env_file": [
       "networks_env/env_connect_to_mumbai.env",
@@ -24,7 +59,8 @@
     ],
     "sourceForRepresentation": [
       "rinkeby",
-      "bsctestnet"
+      "bsctestnet",
+      "hecotestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeList": "",
@@ -34,7 +70,7 @@
     "synthesis": ""
   },
   "rinkeby": {
-    "rpcUrl": "https://rinkeby.infura.io/v3/ab95bf9f6dd743e6a8526579b76fe358",
+    "rpcUrl": "wss://rinkeby.infura.io/ws/v3/ab95bf9f6dd743e6a8526579b76fe358",
     "n": "RINKEBY",
     "env_file": [
       "networks_env/env_connect_to_rinkeby.env",
@@ -58,17 +94,18 @@
     ],
     "sourceForRepresentation": [
       "bsctestnet",
-      "mumbai"
+      "mumbai",
+      "hecotestnet"
     ],
     "paymaster": "0xeFAC0dE7B0588335010B69abb24eB01309265EA2",
-    "nodeList": "0x7b951F6e3f41714bb682B3BEe78a8fDD4258788d",
-    "bridge": "0xc606118D050821DdADFcf7c397682A8D17FD1953",
-    "mockDexPool": "0x1F9782FbC8a58Ed9D2c61027A10b91A81985a72e",
-    "portal": "0x969fcb1BD54b7b8736816775373cf3A693C6b6e2",
-    "synthesis": "0xeCd64cc0B0e6BB42685981107B177fC6c8B64456"
+    "nodeList": "0xD915fF927E380c7d865E2Ba62B7Ba3BA6a7032d5",
+    "bridge": "0x40E4248Bac40bEA657e5860004d79C08740C52DC",
+    "mockDexPool": "0xE82Bda3f0DEa5F07CECe5fa9fb8Fb18394D31095",
+    "portal": "0x21fC4360AB07F0E191F35148454ea0761892CF3e",
+    "synthesis": "0x02207ADb7Ccc7AFb6031501Cb5e0e5c727FD32dA"
   },
   "bsctestnet": {
-    "rpcUrl": "https://data-seed-prebsc-1-s1.binance.org:8545",
+    "rpcUrl": "ws://95.217.104.54:8576",
     "n": "BSCTESTNET",
     "env_file": [
       "networks_env/env_connect_to_bsctestnet.env",
@@ -92,14 +129,15 @@
     ],
     "sourceForRepresentation": [
       "rinkeby",
-      "mumbai"
+      "mumbai",
+      "hecotestnet"
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeList": "0x62C127Ef630702108c454fE07540B2e42Bd68C9e",
-    "bridge": "0xFd79ff7a8797f673FBc226bEbE4B3d01fF96cB8f",
-    "mockDexPool": "0xfB92979803bDb789c70a0742B4272A2A2f481C05",
-    "portal": "0x2f0c662f33D7fB617aceFd74c58705Ae6084Ef93",
-    "synthesis": "0x93Ef61B459C49E896130431F214f09e5BA2E374C"
+    "nodeList": "",
+    "bridge": "",
+    "mockDexPool": "",
+    "portal": "",
+    "synthesis": ""
   },
   "ganache": {
     "rpcUrl": "http://127.0.0.1:9999",
@@ -162,11 +200,11 @@
       "network3"
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeList": "",
-    "bridge": "",
-    "mockDexPool": "",
-    "portal": "",
-    "synthesis": ""
+    "nodeList": "0x48a031c6ad7F74923Dd4450d4b70d9D21c52215b",
+    "bridge": "0x4bb819FA7AfC1b3F65fc47198bF3e9A4c959CbEc",
+    "mockDexPool": "0xDDF1108f02C97B6594455e556aE0174381C217Bc",
+    "portal": "0xD846DE1386bac441fdA49D05563bFD874F52CAb4",
+    "synthesis": "0x204F815995eb66B8a13b2308d56CB98d7566F48a"
   },
   "network2": {
     "rpcUrl": "ws://172.20.128.12:8545",
@@ -196,11 +234,11 @@
       "network3"
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeList": "0x0000000000000000000000000000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    "nodeList": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
+    "bridge": "0x756b147e4Fac1E185B07bFdBb95c42eF5eCEAa4c",
+    "mockDexPool": "0x59da540FeACf4DAa3c9D00DEd796EBb53Fd5342e",
+    "portal": "0x329DCb6edc4D6b9110d366BCc4f52624F619176A",
+    "synthesis": "0xBE8a929Ac944333f054D2936ba7CdcD9A457323f"
   },
   "network3": {
     "rpcUrl": "ws://172.20.128.13:9545",
@@ -230,10 +268,10 @@
       "network2"
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeList": "0x0000000000000000000000000000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    "nodeList": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
+    "bridge": "0x756b147e4Fac1E185B07bFdBb95c42eF5eCEAa4c",
+    "mockDexPool": "0x59da540FeACf4DAa3c9D00DEd796EBb53Fd5342e",
+    "portal": "0x329DCb6edc4D6b9110d366BCc4f52624F619176A",
+    "synthesis": "0xBE8a929Ac944333f054D2936ba7CdcD9A457323f"
   }
 }

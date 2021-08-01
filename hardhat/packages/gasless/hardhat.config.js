@@ -10,6 +10,7 @@ const MUMBAI_PRIVATE_KEY  = env.parsed.PRIVATE_KEY_MUMBAI  || "";
 const GANACHE_PRIVATE_KEY = env.parsed.PRIVATE_KEY_GANACHE || "";
 const ETHERSCAN_API_KEY   = env.parsed.ETHERSCAN_API_KEY    || "";
 const BINANCESCAN_API_KEY = env.parsed.BINANCESCAN_API_KEY  || "";
+const HECO_PRIVATE_KEY    = env.parsed.PRIVATE_KEY_HECO     || "";
 
 
 //TODO: Need to resolve dynamic initialization for apiKey. Now it is wrong working.
@@ -31,15 +32,15 @@ module.exports = {
         localhost: {
         },
         rinkeby: {
-            url:  networkConfig.rinkeby.rpcUrl,
+            url:  networkConfig.rinkeby.rpcUrl.replace('ws','http').replace('ws/',''),
             accounts: [RINKEBY_PRIVATE_KEY]
         },
         bsctestnet: {
-            url:  networkConfig.bsctestnet.rpcUrl,
+            url:  'https://data-seed-prebsc-1-s1.binance.org:8545/',
             accounts: [BSC_PRIVATE_KEY]
         },
         mumbai:{
-           url:  networkConfig.mumbai.rpcUrl,
+           url:  networkConfig.mumbai.rpcUrl.replace('ws','http').replace('ws/',''),
            accounts: [MUMBAI_PRIVATE_KEY]
         },
         network1: {
@@ -58,6 +59,10 @@ module.exports = {
         ganache: {
              url:  networkConfig.ganache.rpcUrl,
              accounts: [GANACHE_PRIVATE_KEY]
+        },
+        hecotestnet:{
+            url: networkConfig.hecotestnet.rpcUrl.split('ws').join('http'),
+            accounts: [HECO_PRIVATE_KEY]
         }
     },
     etherscan: {

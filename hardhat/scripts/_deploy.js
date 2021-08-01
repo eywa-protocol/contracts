@@ -4,7 +4,7 @@ let networkConfig = require('../helper-hardhat-config.json');
 
     this.networksFromConfig  = argv.networks?.split(',') || Object.keys(networkConfig);
     for(let net of this.networksFromConfig){ if( !Object.keys(networkConfig).includes(net) && net !== ''){ console.log(`Unresolved network: ${net}`); process.kill(argv.parentpid, 'SIGTERM'); process.exit(1); }}
-    console.log("Trying to deploy into: ", this.networksFromConfig[0] === '' ?  Object.keys(networkConfig) : this.networksFromConfig);
+    console.log("Networks in process: ", this.networksFromConfig[0] === '' ?  Object.keys(networkConfig) : this.networksFromConfig);
      for(let net of this.networksFromConfig){
       if(net !== ''){
         networkConfig[net].nodeList = '';
