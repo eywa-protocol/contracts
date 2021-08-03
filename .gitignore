@@ -10,3 +10,5 @@ truffle/build/contracts
 
 **/.env     
 networks_env
+
+.idea
