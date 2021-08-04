@@ -12,3 +12,4 @@ truffle/build/contracts
 networks_env
 
 .idea
+hardhat/helper-hardhat-config.json
