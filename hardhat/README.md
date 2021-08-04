@@ -24,7 +24,7 @@ cd hardhat/scripts
 ## TEST
 1. Copy /hardhat/helper-hardhat-config.json.example to /hardhat/helper-hardhat-config.json
 2. Copy .env.example to .env and update its
-3. If you update contracts in test networks(rinkeby, mumbai and etc) (not local networks) you should update "helper-hardhat-config.json.example" file.
+3. If you update contracts for all users in test networks (not local networks!!! for rinkeby, mumbai, bsctestnet and etc) you should update "helper-hardhat-config.json.example" file.
 
 todo
 move e2e from truffle
