@@ -3,7 +3,7 @@ require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
 require("hardhat-gas-reporter");
 const env = require('dotenv').config({ path: '../../.env' })
-const networkConfig = require('../../helper-hardhat-config.json');
+const networkConfig = require('./helper-hardhat-config.json');
 
 const RINKEBY_PRIVATE_KEY = env.parsed.PRIVATE_KEY_RINKEBY || "";
 const BSC_PRIVATE_KEY     = env.parsed.PRIVATE_KEY_BSC     || "";
@@ -12,6 +12,13 @@ const GANACHE_PRIVATE_KEY = env.parsed.PRIVATE_KEY_GANACHE || "";
 const ETHERSCAN_API_KEY   = env.parsed.ETHERSCAN_API_KEY    || "";
 const BINANCESCAN_API_KEY = env.parsed.BINANCESCAN_API_KEY  || "";
 const HECO_PRIVATE_KEY    = env.parsed.PRIVATE_KEY_HECO     || "";
+
+//TODO: Need to resolve dynamic initialization for apiKey. Now it is wrong working.
+async function getKey(network) {
+  if(network === 'rinkeby')    {console.log(ETHERSCAN_API_KEY); return ETHERSCAN_API_KEY;}
+  if(network === 'bsctestnet') {console.log(BINANCESCAN_API_KEY); return BINANCESCAN_API_KEY;}
+}
+
 
 module.exports = {
     defaultNetwork: "hardhat",
@@ -59,7 +66,7 @@ module.exports = {
         }
     },
     etherscan: {
-      apiKey: ''
+      apiKey: getKey(process.argv[5] || process.env.HARDHAT_NETWORK)
     },
     gasReporter: {
       currency: "USD",
