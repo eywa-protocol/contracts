@@ -3,7 +3,7 @@ pragma solidity >=0.7.6 <=0.8.0;
 
 import "./core/BridgeCore.sol";
 import "./interface/ListNodeInterface.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/cryptography/ECDSA.sol";
 
 //TODO: onlyTrustedNode has worse filled data. I.e. In func NodeList#addNode the golang node registers himself
 // and this means every node who wants to start up can add himself in onlyTrustedNode list.
@@ -44,17 +44,17 @@ contract Bridge is BridgeCore {
         bytes32 reqId,
         bytes memory b,
         address receiveSide,
-        address brigeFrom
-    ) onlyTrustedNode external {
+        address bridgeFrom
+    ) external onlyTrustedNode {
 
-        bytes32 recreateReqId = keccak256(abi.encodePacked(brigeFrom, nonce[brigeFrom], b, receiveSide, this, block.chainid));
+        bytes32 recreateReqId = keccak256(abi.encodePacked(bridgeFrom, nonce[bridgeFrom], b, receiveSide, this, block.chainId));
         // require(reqId == recreateReqId, 'CONSISTENCY FAILED');
         require(dexBind[receiveSide] == true,   'UNTRUSTED DEX');
 
         (bool success, bytes memory data) = receiveSide.call(b);
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'FAILED');
 
-        nonce[brigeFrom] = nonce[brigeFrom] + 1;
+        nonce[bridgeFrom] = nonce[bridgeFrom] + 1;
 
         emit ReceiveRequest(reqId, receiveSide, recreateReqId);
     }
