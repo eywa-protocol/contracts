@@ -8,7 +8,7 @@ contract NodeList {
   struct Node {
     address nodeWallet;
     address nodeIdAddress;
-    bytes   blsPubKey;
+    string  blsPubKey;
     uint64 nodeId;
   }
 
@@ -19,7 +19,7 @@ contract NodeList {
     event AddedNode(address nodeIdAddress);
 
 //TODO: discuss about check: listNode[_blsPointAddr] == address(0)
-  function addNode(address _nodeWallet, address _nodeIdAddress, bytes memory _blsPubKey) external isNewNode(_nodeIdAddress) /*onlyOwner*/ {
+  function addNode(address _nodeWallet, address _nodeIdAddress, string memory _blsPubKey) external isNewNode(_nodeIdAddress) /*onlyOwner*/ {
       require(_nodeWallet != address(0), "0 address");
       require(_nodeIdAddress != address(0), "0 address");
       Node storage node = listNode[_nodeIdAddress];
@@ -48,8 +48,8 @@ contract NodeList {
       return nodes;
   }
 
-    function getBLSPubKeys() external view returns (bytes[] memory){
-        bytes[] memory pubKeys = new bytes[](nodes.length);
+    function getBLSPubKeys() external view returns (string[] memory){
+        string[] memory pubKeys = new string[](nodes.length);
         for (uint i = 0; i < nodes.length; i++) {
             Node storage node = listNode[nodes[i].nodeIdAddress];
             pubKeys[i] = node.blsPubKey;
