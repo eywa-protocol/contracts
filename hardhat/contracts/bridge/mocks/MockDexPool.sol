@@ -18,7 +18,7 @@ contract MockDexPool {
 
     event RequestSended(bytes32 reqId);
 
-    constructor(address _bridge) public {
+    constructor(address _bridge) {
 		bridge = _bridge;
 	}
 

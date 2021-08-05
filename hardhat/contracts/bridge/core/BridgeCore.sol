@@ -6,7 +6,9 @@ contract BridgeCore {
     address public _owner;
     address public _listNode;
     uint256 public requestCount = 1;
-    mapping(address => uint /* bridge => nonce */) public nonce;
+
+    /* bridge => nonce */
+    mapping(address => uint) public nonce;
     mapping(address => bool) public dexBind;
 
     event OracleRequest(

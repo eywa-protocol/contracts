@@ -35,6 +35,7 @@ contract Bridge is BridgeCore {
         returns (bytes32)
     {
         bytes32 requestId = prepareRqId(_selector, receiveSide, oppositeBridge, chainId);
+
         emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
 
         return requestId;
@@ -47,15 +48,17 @@ contract Bridge is BridgeCore {
         address bridgeFrom
     ) external onlyTrustedNode {
 
-        bytes32 recreateReqId = keccak256(abi.encodePacked(bridgeFrom, nonce[bridgeFrom], b, receiveSide, this, block.chainId));
+        // TODO check and repair this function
+        // bytes32 recreateReqId = keccak256(abi.encodePacked(bridgeFrom, nonce[bridgeFrom], b, receiveSide, this, block.chainId));
         // require(reqId == recreateReqId, 'CONSISTENCY FAILED');
-        require(dexBind[receiveSide] == true,   'UNTRUSTED DEX');
+        require(dexBind[receiveSide] == true, 'UNTRUSTED DEX');
 
         (bool success, bytes memory data) = receiveSide.call(b);
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'FAILED');
 
         nonce[bridgeFrom] = nonce[bridgeFrom] + 1;
 
-        emit ReceiveRequest(reqId, receiveSide, recreateReqId);
+//        emit ReceiveRequest(reqId, receiveSide, recreateReqId);
+        emit ReceiveRequest(reqId, receiveSide, reqId);
     }
 }

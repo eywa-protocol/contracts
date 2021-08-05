@@ -33,7 +33,7 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
     event TokensPrecharged(address token, address router, uint256 tokenPrecharge);
     event Received(uint256 eth);
 
-    constructor() public {}
+    constructor() {}
 
     function setPostGasUsage(uint256 _gasUsedByPost) external onlyOwner {
         gasUsedByPost = _gasUsedByPost;
@@ -89,6 +89,8 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
         uint256 gasUseWithoutPost,
         GsnTypes.RelayData calldata relayData
     ) external virtual override relayHubOnly {
+        success; // remove warning
+
         (address payer, uint256 tokenPrecharge, IERC20 token, IUniswap router) = abi.decode(
             context,
             (address, uint256, IERC20, IUniswap)
@@ -161,7 +163,7 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
 
     // todo move in prod to internal
     // @param router - is just router with uniswap like interface, it may be not a uniswap
-    function _getToken(bytes memory paymasterData) public view returns (IERC20 token, IUniswap uniswap) {
+    function _getToken(bytes memory paymasterData) public view returns (IERC20, IUniswap) {
         address token = abi.decode(paymasterData, (address));
         address router = routersMap[token];
         require(token != address(0), "This token not supported as fee");

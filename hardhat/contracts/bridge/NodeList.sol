@@ -46,7 +46,7 @@ contract NodeList {
         emit AddedNode(node.nodeIdAddress);
     }
 
-    function getNewNodeId() internal returns (uint64) {
+    function getNewNodeId() internal view returns (uint64) {
         return uint64(nodes.length);
     }
 

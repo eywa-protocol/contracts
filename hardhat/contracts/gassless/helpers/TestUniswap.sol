@@ -86,6 +86,10 @@ contract TestUniswap is IUniswap {
         address to,
         uint256 deadline
     ) external override {
+        amountIn; // remove warning
+        to; // remove warning
+        deadline; // remove warning
+
         uint256 tokensToSell = getTokenToEthOutputPrice(amountOutMin);
         require(address(this).balance > amountOutMin, "not enough liquidity");
 
@@ -100,6 +104,8 @@ contract TestUniswap is IUniswap {
         override
         returns (uint256[] memory amounts)
     {
+        path; // remove warning
+
         uint256[] memory amount = new uint256[](2);
         amount[0] = (amountOut * rateMult) / rateDiv;
         amount[1] = 0;
