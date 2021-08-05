@@ -1,7 +1,7 @@
 "use strict";
 const Web3 = require('web3');
 const web3 = new Web3();
-const { networks }         = require('../hardhat.config');
+const { networks }         = require('../packages/bridge/hardhat.config');
 
 function toWei(n) { return web3.utils.toWei(n, 'ether');}
 function fromWei(n) { return web3.utils.fromWei(n, 'ether');}
