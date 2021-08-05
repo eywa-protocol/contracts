@@ -18,7 +18,7 @@ contract TestUniswap is IUniswap {
         uint256 _rateMult,
         uint256 _rateDiv,
         address _WETH
-    ) public payable {
+    ) payable {
         rateMult = _rateMult;
         rateDiv = _rateDiv;
         require(msg.value > 0, "must specify liquidity");
@@ -49,6 +49,7 @@ contract TestUniswap is IUniswap {
 
         _token.transferFrom(msg.sender, address(this), tokensToSell);
         msg.sender.transfer(ethBought);
+
         return tokensToSell;
     }
 
@@ -70,6 +71,7 @@ contract TestUniswap is IUniswap {
 
         _token.transferFrom(msg.sender, address(this), tokensToSell);
         recipient.transfer(ethBought);
+
         return tokensToSell;
     }
 

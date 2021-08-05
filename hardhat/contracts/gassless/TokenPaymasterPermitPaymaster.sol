@@ -1,6 +1,6 @@
 // SPDX-License-Identifier:MIT
 pragma solidity >=0.7.6;
-pragma experimental ABIEncoderV2;
+pragma abicoder v2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -20,13 +20,18 @@ import "./interfaces/IUniswap.sol";
 contract TokenPaymasterPermitPaymaster is BasePaymaster {
     using SafeMath for uint256;
 
-    function versionPaymaster() external view virtual override returns (string memory) {
-        return "2.2.0";
-    }
-
     mapping(address => address) public routersMap;
 
     uint256 public gasUsedByPost;
+
+    event TokensCharged(
+        uint256 gasUseWithoutPost,
+        uint256 gasUsedByPost,
+        uint256 ethActualCharge,
+        uint256 tokenActualCharge
+    );
+    event TokensPrecharged(address token, address router, uint256 tokenPrecharge);
+    event Received(uint256 eth);
 
     constructor() public {}
 
@@ -37,10 +42,6 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
     function getPayer(GsnTypes.RelayRequest calldata relayRequest) public view virtual returns (address) {
         (this);
         return relayRequest.request.from;
-    }
-
-    receive() external payable override {
-        emit Received(msg.value);
     }
 
     function calculatePreCharge(
@@ -76,7 +77,9 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
         }
 
         token.transferFrom(payer, address(this), tokenPrecharge);
+
         emit TokensPrecharged(address(token), address(router), tokenPrecharge);
+
         return (abi.encode(payer, tokenPrecharge, token, router), false);
     }
 
@@ -104,6 +107,7 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
     ) external onlyOwner() {
         uint256 tokenBalance = token.balanceOf(address(this));
         require(amount <= tokenBalance, "TokenPaymaster/Balance to low.");
+
         token.transfer(account, amount);
     }
 
@@ -121,6 +125,7 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
         uint256 tokenRefund = tokenPrecharge.sub(tokenActualCharge);
         _refundPayer(payer, token, tokenRefund);
         _depositProceedsToHub(ethActualCharge, tokenActualCharge, token, router);
+
         emit TokensCharged(gasUseWithoutPost, gasUsedByPost, ethActualCharge, tokenActualCharge);
     }
 
@@ -161,6 +166,7 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
         address router = routersMap[token];
         require(token != address(0), "This token not supported as fee");
         require(router != address(0), "Does't supported pool");
+
         return (IERC20(token), IUniswap(router));
     }
 
@@ -194,13 +200,11 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
         return amountOuts[0];
     }
 
-    // Events
-    event TokensCharged(
-        uint256 gasUseWithoutPost,
-        uint256 gasUsedByPost,
-        uint256 ethActualCharge,
-        uint256 tokenActualCharge
-    );
-    event TokensPrecharged(address token, address router, uint256 tokenPrecharge);
-    event Received(uint256 eth);
+    function versionPaymaster() external view virtual override returns (string memory) {
+        return "2.2.0";
+    }
+
+    receive() external payable override {
+        emit Received(msg.value);
+    }
 }

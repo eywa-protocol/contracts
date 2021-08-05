@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "@openzeppelin/contracts-newone/access/Ownable.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol";
 
 // Synthesis must be owner of this contract
 contract SyntERC20 is  Ownable, ERC20Permit {
