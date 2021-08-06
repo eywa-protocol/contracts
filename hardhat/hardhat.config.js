@@ -3,16 +3,16 @@ require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
 require("hardhat-gas-reporter");
 
-const env = require('dotenv').config({ path: '.env' })
+const env = require('dotenv').config({ path: '../../.env' })
 const networkConfig = require('./helper-hardhat-config.json');
 
-const RINKEBY_PRIVATE_KEY = env.parsed.PRIVATE_KEY_RINKEBY || "";
-const BSC_PRIVATE_KEY     = env.parsed.PRIVATE_KEY_BSC     || "";
-const MUMBAI_PRIVATE_KEY  = env.parsed.PRIVATE_KEY_MUMBAI  || "";
-const GANACHE_PRIVATE_KEY = env.parsed.PRIVATE_KEY_GANACHE || "";
+const PRIVATE_KEY_RINKEBY = env.parsed.PRIVATE_KEY_RINKEBY || "";
+const PRIVATE_KEY_BSC     = env.parsed.PRIVATE_KEY_BSC     || "";
+const PRIVATE_KEY_MUMBAI  = env.parsed.PRIVATE_KEY_MUMBAI  || "";
+const PRIVATE_KEY_GANACHE = env.parsed.PRIVATE_KEY_GANACHE || "";
 const ETHERSCAN_API_KEY   = env.parsed.ETHERSCAN_API_KEY    || "";
 const BINANCESCAN_API_KEY = env.parsed.BINANCESCAN_API_KEY  || "";
-const HECO_PRIVATE_KEY    = env.parsed.PRIVATE_KEY_HECO     || "";
+const PRIVATE_KEY_HECO    = env.parsed.PRIVATE_KEY_HECO     || "";
 
 //TODO: Need to resolve dynamic initialization for apiKey. Now it is wrong working.
 async function getKey(network) {
@@ -35,15 +35,15 @@ module.exports = {
     },
     rinkeby: {
       url: networkConfig.rinkeby.rpcUrl.replace('ws','http').replace('ws/',''),
-      accounts: [RINKEBY_PRIVATE_KEY]
+      accounts: [PRIVATE_KEY_RINKEBY]
     },
     bsctestnet: {
       url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
-      accounts: [BSC_PRIVATE_KEY]
+      accounts: [PRIVATE_KEY_BSC]
     },
     mumbai:{
         url: networkConfig.mumbai.rpcUrl.replace('ws','http').replace('ws/',''),
-        accounts: [MUMBAI_PRIVATE_KEY]
+        accounts: [PRIVATE_KEY_MUMBAI]
     },
     network1: {
        url: networkConfig.network1.rpcUrl.replace('ws','http'),
@@ -59,11 +59,11 @@ module.exports = {
     },
     ganache: {
       url: networkConfig.ganache.rpcUrl,
-      accounts: [GANACHE_PRIVATE_KEY]
+      accounts: [PRIVATE_KEY_GANACHE]
     },
     hecotestnet:{
       url: networkConfig.hecotestnet.rpcUrl.split('ws').join('http'),
-      accounts: [HECO_PRIVATE_KEY]
+      accounts: [PRIVATE_KEY_HECO]
     }
   },
   etherscan: {
@@ -95,5 +95,11 @@ module.exports = {
   },
   mocha: {
     timeout: 100000
-  }
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts"
+  },
 };
