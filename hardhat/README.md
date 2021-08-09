@@ -20,7 +20,7 @@ All adjustments for deploy on LOW LEVEL, should set in ./helper-hardhat-config.j
 
 ## DEPLOY
 
-### test net deploy
+### testnet's deploy
 ```bash
 cd hardhat/scripts
 # if you invoke command without networks, for ex. ./deploy.sh at this time, under hood the script will looking empty addresses (see 'FOR DEVELOPERS') and deploy this contratcs
