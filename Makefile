@@ -13,7 +13,7 @@ npm: copy_configs
   			cd hardhat;npm i; \
                         fi;
 
-wrappers:
+wrappers: copy_configs
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/Bridge.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/Forwarder.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/NodeList.sol --pkg wrappers --out wrappers
