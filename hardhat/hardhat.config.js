@@ -3,7 +3,7 @@ require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
 require("hardhat-gas-reporter");
 
-const env = require('dotenv').config({ path: '../../.env' })
+const env = require('dotenv').config()
 const networkConfig = require('./helper-hardhat-config.json');
 
 const PRIVATE_KEY_RINKEBY = process.env.PRIVATE_KEY_RINKEBY || "";
