@@ -6,7 +6,7 @@ ARTIFACTS="hardhat/artifacts/contracts/bridge"
 
 all: wrappers
 
-npm: copy_configs:q
+npm: copy_configs
 	@if [ -d hardhat/node_modules ]; then \
   			echo "installed"; \
   			else \
