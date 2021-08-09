@@ -7,7 +7,7 @@ truffle/build/contracts
 **/cache
 **/artifacts
 **/factories
-
+/hardhat/yarn.lock
 **/.env     
 networks_env
 
