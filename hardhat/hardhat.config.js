@@ -6,13 +6,13 @@ require("hardhat-gas-reporter");
 const env = require('dotenv').config({ path: '../../.env' })
 const networkConfig = require('./helper-hardhat-config.json');
 
-const PRIVATE_KEY_RINKEBY = process.env.PRIVATE_KEY_RINKEBY || "";
-const PRIVATE_KEY_BSC     = process.env.PRIVATE_KEY_BSC     || "";
-const PRIVATE_KEY_MUMBAI  = process.env.PRIVATE_KEY_MUMBAI  || "";
-const PRIVATE_KEY_GANACHE = process.env.PRIVATE_KEY_GANACHE || "";
-const ETHERSCAN_API_KEY   = process.env.ETHERSCAN_API_KEY    || "";
-const BINANCESCAN_API_KEY = process.env.BINANCESCAN_API_KEY  || "";
-const PRIVATE_KEY_HECO    = process.env.PRIVATE_KEY_HECO     || "";
+const PRIVATE_KEY_RINKEBY = env.parsed.PRIVATE_KEY_RINKEBY || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_BSC     = env.parsed.PRIVATE_KEY_BSC     || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_MUMBAI  = env.parsed.PRIVATE_KEY_MUMBAI  || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_GANACHE = env.parsed.PRIVATE_KEY_GANACHE || "0x0000000000000000000000000000000000000000";
+const ETHERSCAN_API_KEY   = env.parsed.ETHERSCAN_API_KEY    || "0x0000000000000000000000000000000000000000";
+const BINANCESCAN_API_KEY = env.parsed.BINANCESCAN_API_KEY  || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_HECO    = env.parsed.PRIVATE_KEY_HECO     || "0x0000000000000000000000000000000000000000";
 
 //TODO: Need to resolve dynamic initialization for apiKey. Now it is wrong working.
 async function getKey(network) {
