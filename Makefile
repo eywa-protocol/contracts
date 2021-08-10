@@ -35,6 +35,9 @@ local-test: deps npm
 eth-local-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh network1,network2,network3
 
+eth-testnet-migrate: deps npm wrappers
+	cd hardhat;./scripts/deploy.sh rinkeby,bsctestnet
+
 copy_configs:
 	cp ./hardhat/helper-hardhat-config.json.example ./hardhat/helper-hardhat-config.json;cp ./hardhat/.env.example ./hardhat/.env;
 
