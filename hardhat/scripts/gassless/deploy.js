@@ -4,7 +4,6 @@ const hre = require("hardhat");
 
 async function main() {
 
-    if(networkConfig[network.name].paymaster === ''){
 
     this.relayHubRinkeby  = networkConfig[network.name].relayHub;
     this.forwarderRinkeby = networkConfig[network.name].forwarder;
@@ -43,7 +42,6 @@ async function main() {
     //     constructorArguments: [
     //     ],
     // })
-    }
 
 }
 

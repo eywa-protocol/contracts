@@ -4,13 +4,6 @@ const hre = require("hardhat");
 
 async function main() {
 
-   if( networkConfig[network.name].bridge === void 0 ||
-       networkConfig[network.name].bridge === '' ||
-       networkConfig[network.name].bridge === null ||
-       networkConfig[network.name].nodeList === void 0 ||
-       networkConfig[network.name].nodeList === ''){
-
-
     const [deployer] = await ethers.getSigners();
     console.log("Owner:", deployer.address);
 
@@ -42,7 +35,6 @@ async function main() {
     //     constructorArguments: [
     //     ],
     // })
-    }
 
 }
 
