@@ -4,8 +4,6 @@
   "description": "Eywa smart-contracts",
   "main": "index.js",
   "scripts": {
-    "compile": "npx hardhat compile",
-    "deploy": "npx hardhat run ./scripts/deploy.js --network rinkeby",
     "integration-test:local": "npx hardhat  test ./test/integration/e2e.test.js",
     "prettier": "prettier --write 'contracts/**/*.sol'",
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -16,9 +16,9 @@ const brigdePart3 = artifacts.require('Bridge');
 
 const factoryProvider = checkoutProvider(argv);
 
-let envNet1 = require('dotenv').config({path: `../../networks_env/env_test_for_network1.env`});
-let envNet2 = require('dotenv').config({path: `../../networks_env/env_test_for_network2.env`});
-let envNet3 = require('dotenv').config({path: `../../networks_env/env_test_for_network3.env`});
+let envNet1 = require('dotenv').config({path: `./networks_env/env_test_for_network1.env`});
+let envNet2 = require('dotenv').config({path: `./networks_env/env_test_for_network2.env`});
+let envNet3 = require('dotenv').config({path: `./networks_env/env_test_for_network3.env`});
 
 // todo gas consumtion
 contract('Brigde', (deployer, accounts) => {
