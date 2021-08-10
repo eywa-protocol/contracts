@@ -1,6 +1,6 @@
 #! /bin/bash
 
-mkdir -p ../networks_env
+mkdir -p ./networks_env
 MODE=${1}
 FILENAME=${2}
 if [[ "$MODE" =~ ^(create)$ ]]
@@ -14,11 +14,11 @@ do
     # update or create
     if [[ "$MODE" =~ ^(create)$ ]]
     then
-cat << EOF >> ../${FILENAME}
+cat << EOF >> ./${FILENAME}
 ${pass}
 EOF
      else
-cat << EOF >> ../${FILENAME}
+cat << EOF >> ./${FILENAME}
 ${pass}
 EOF
     fi

@@ -13,7 +13,7 @@ npm: copy_configs
   			cd hardhat;npm i; \
                         fi;
 
-wrappers: copy_configs
+wrappers: npm compile copy_configs
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/Bridge.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/Forwarder.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/NodeList.sol --pkg wrappers --out wrappers
@@ -33,7 +33,7 @@ local-test: deps npm
 	cd hardhat/contracts/bridge;npm run integration-test:local;
 
 eth-local-migrate: deps npm wrappers
-	cd hardhat/scripts;./deploy.sh network1,network2,network3
+	cd hardhat;./scripts/deploy.sh network1,network2,network3
 
 copy_configs:
 	cp ./hardhat/helper-hardhat-config.json.example ./hardhat/helper-hardhat-config.json;cp ./hardhat/.env.example ./hardhat/.env;

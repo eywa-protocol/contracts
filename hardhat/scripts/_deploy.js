@@ -11,7 +11,7 @@ let networkConfig = require('../helper-hardhat-config.json');
         networkConfig[net].bridge = '';
         networkConfig[net].portal = '';
         networkConfig[net].synthesis = '';
-        fs.writeFileSync("../helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
+        fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
       }
      }
      process.exit(0);

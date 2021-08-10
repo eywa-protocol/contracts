@@ -36,7 +36,7 @@ async function main() {
 
 
     networkConfig[network.name].paymaster = paymaster.address;
-    fs.writeFileSync("../../helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
+    fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
 
     // await hre.run("verify:verify", {
     //     address: paymaster.address,
