@@ -31,6 +31,8 @@ clean:
 
 local-test:
 	cd hardhat;npm run e2e:local;
+testnet-test:
+	cd hardhat;npm run e2e:testnet;
 
 eth-local-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh network1,network2,network3

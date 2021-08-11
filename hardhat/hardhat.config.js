@@ -46,7 +46,7 @@ module.exports = {
       accounts: [PRIVATE_KEY_BSC]
     },
     mumbai:{
-        url: networkConfig.mumbai.rpcUrl.replace('ws','http').replace('ws/',''),
+        url: networkConfig.mumbai.rpcUrl.replace('ws','http').replace('-ws','-rpc'),
         accounts: [PRIVATE_KEY_MUMBAI]
     },
     network1: {

@@ -35,7 +35,7 @@
     "synthesis": "0x0000000000000000000000000000000000000000"
   },
   "mumbai": {
-    "rpcUrl": "wss://polygon-mumbai.infura.io/ws/v3/79a941babd7947e58490a5e35a074c34",
+    "rpcUrl": "wss://matic-testnet-archive-ws.bwarelabs.com",
     "n": "MUMBAI",
     "env_file": [
       "networks_env/env_connect_to_mumbai.env",
