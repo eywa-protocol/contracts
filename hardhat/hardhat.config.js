@@ -42,7 +42,7 @@ module.exports = {
       accounts: [PRIVATE_KEY_RINKEBY]
     },
     bsctestnet: {
-      url: networkConfig.bsctestnet.rpcUrl.replace('ws','http'),
+      url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
       accounts: [PRIVATE_KEY_BSC]
     },
     mumbai:{
