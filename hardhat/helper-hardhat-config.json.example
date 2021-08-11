@@ -42,8 +42,8 @@
       "networks_env/env_test_for_mumbai.env"
     ],
     "chainId": 80001,
-    "relayHub": "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
+    "relayHub": "0x6C28AfC105e65782D9Ea6F2cA68df84C9e7d750d",
+    "forwarder": "0xdA78a11FD57aF7be2eDD804840eA7f4c2A38801d",
     "amm_pool": "0x0000000000000000000000000000000000000000",
     "token": [
       {

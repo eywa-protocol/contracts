@@ -23,21 +23,16 @@ All adjustments for deploy on LOW LEVEL, should set in ./helper-hardhat-config.j
 ### testnet's deploy
 ```bash
 cd hardhat
-# if you invoke command without networks, for ex. ./deploy.sh at this time, under hood the script will looking empty addresses (see 'FOR DEVELOPERS') and deploy this contratcs
 ./scripts/deploy.sh rinkeby,bsctestnet,mumbai
-```
+
 
 ### local deploy
-1. start ganaches (3 endpoint), addresses see in helper config
-2. do next commands
 ```bash
 cd hardhat
-# if you invoke command without networks, for ex. ./deploy.sh at this time, under hood the script will looking empty addresses (see 'FOR DEVELOPERS') and deploy this contratcs
 ./scripts/deploy.sh network1,network2,network3
 ```
 
-## TEST
+### Tests
 
-todo
-move e2e from truffle
+- Local deploy and test should be triggered form https://gitlab.digiu.ai/blockchainlaboratory/eywa-p2p-bridge.
 

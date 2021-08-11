@@ -29,14 +29,14 @@ clean:
 	cd hardhat;npx hardhat clean;
 
 
-local-test: deps npm
-	cd hardhat/contracts/bridge;npm run integration-test:local;
+local-test:
+	cd hardhat;npm run e2e:local;
 
 eth-local-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh network1,network2,network3
 
 eth-testnet-migrate: deps npm wrappers
-	cd hardhat;./scripts/deploy.sh rinkeby,bsctestnet
+	cd hardhat;./scripts/deploy.sh rinkeby,bsctestnet,mumbai
 
 copy_configs:
 	cp ./hardhat/helper-hardhat-config.json.example ./hardhat/helper-hardhat-config.json;cp ./hardhat/.env.example ./hardhat/.env;
