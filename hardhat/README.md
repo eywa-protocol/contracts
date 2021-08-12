@@ -3,20 +3,9 @@ node >= 14
 hardhat
 
 `FOR DEVELOPERS:`
-1. Copy /hardhat/helper-hardhat-config.json.example to /hardhat/helper-hardhat-config.json
-2. Copy .env.example to .env and update its
-3. If you update contracts for all users in test networks (not local networks!!! for rinkeby, mumbai, bsctestnet and etc) you should update "helper-hardhat-config.json.example" file.
 
-All adjustments for deploy on LOW LEVEL, should set in ./helper-hardhat-config.json. The main idea if address of field in json does not present that means contract will be depoyed again.
-- if you want deploy gasless (where owner of gsn node is opengsn) you must clear address of field paymaster.
-- if you want deploy bridge contract (+ mockdexpool and nodeList) you must clear address of one of them.
-- if you want deploy portal/bridge contract you must clear address one of them.
-
-
-## Details of init process (after deploy)
-
-- every bridge contract should know who can invoke it ()
-- every synthesis contaract should createRepresantation
+- We suppose that before execute './scripts/deploy.sh *' in helper-hardhat-config.json was set actual addresses: RelayHub, Forwarder, amm_pool, tokens and sourceForRepresentation. Current deploy flow is skipped the gns deploy file.
+- If you want to deploy your own gns contracts (RelayHub etc) you have to uncomment the line in ./scripts/deploy.sh (look the 'NOTE' mark)
 
 ## DEPLOY
 
@@ -35,4 +24,14 @@ cd hardhat
 ### Tests
 
 - Local deploy and test should be triggered form https://gitlab.digiu.ai/blockchainlaboratory/eywa-p2p-bridge.
+
+## Code Style
+
+### Prettier
+
+- For code slyle on .sol use 'npm run prettier'
+
+### Git
+
+- For pretty commit are suggested to use 'npm run commit' after git add
 
