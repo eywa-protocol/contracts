@@ -10,7 +10,7 @@ npm: copy_configs
 	@if [ -d hardhat/node_modules ]; then \
   			echo "installed"; \
   			else \
-  			cd hardhat;npm i; \
+  			cd hardhat;npm ci; \
                         fi;
 
 wrappers: npm compile copy_configs

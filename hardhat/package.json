@@ -4,6 +4,7 @@
   "description": "Eywa smart-contracts",
   "main": "index.js",
   "scripts": {
+    "postinstall":"node ./utils/check-version.js",
     "e2e:local": "export TYPE_TEST=local && npx hardhat  test ./test/integration/e2e.test.js",
     "e2e:testnet": "export TYPE_TEST=testnet && npx hardhat  test ./test/integration/e2e.test.js",
     "prettier": "prettier --write 'contracts/**/*.sol'",
@@ -38,9 +39,10 @@
     "@opengsn/contracts": "^2.2.2",
     "@openzeppelin/contracts": "3.4.1",
     "@openzeppelin/contracts-newone": "npm:@openzeppelin/contracts@4.1.0",
+    "semver": "^7.3.5",
     "truffle-flattener": "^1.5.0"
   },
   "engines": {
-    "node": ">=0.14.0"
+    "node": ">=14.0.0"
   }
 }
