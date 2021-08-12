@@ -4,10 +4,6 @@ getField(){
  node -pe 'JSON.parse(process.argv[1]).'$1 "$(cat ./helper-hardhat-config.json)"
 }
 
-## only this networks will deploy otherwise script will processing and check NEEDS for deploy by all networks in config
-## NOTE: "NEEDS" it is when address in config is epmty (=== '')
-node ./scripts/_deploy.js --networks ${1} --parentpid $$
-
 nets=${1}
 if [[ ${1} =~ ^('')$ ]]
  then
@@ -27,8 +23,9 @@ if [[ ${1} =~ ^('')$ ]]
 for net in ${nets//\,/ }
 do
 echo 'bash script for network:' ${net}
-pwd
-## NOTE: gsn-node where owner is opengsn. Uncomment for our ralyer gsn.
+echo '==========================================='
+echo ''
+## NOTE !!!!! : gsn-node where owner is opengsn. Uncomment for our ralyer gsn.
 #npx hardhat run ./scripts/gassless/deploy.js --network ${net}
 npx hardhat run ./scripts/bridge/deploy.js   --network ${net}
 npx hardhat run ./scripts/amm_pool/deploy.js --network ${net}
