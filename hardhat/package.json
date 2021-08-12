@@ -4,7 +4,8 @@
   "description": "Eywa smart-contracts",
   "main": "index.js",
   "scripts": {
-    "postinstall":"node ./utils/check-version.js",
+    "commit": "./node_modules/cz-customizable/standalone.js",
+    "postinstall": "node ./utils/check-version.js",
     "e2e:local": "export TYPE_TEST=local && npx hardhat  test ./test/integration/e2e.test.js",
     "e2e:testnet": "export TYPE_TEST=testnet && npx hardhat  test ./test/integration/e2e.test.js",
     "prettier": "prettier --write 'contracts/**/*.sol'",
@@ -23,6 +24,8 @@
     "@truffle/hdwallet-provider": "^1.4.3",
     "@uniswap/lib": "^4.0.1-alpha",
     "chai": "^4.3.4",
+    "commit-message-validator": "^1.0.0",
+    "commitizen": "^4.2.4",
     "dotenv": "^10.0.0",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.4.1",
@@ -39,7 +42,8 @@
     "@opengsn/contracts": "^2.2.2",
     "@openzeppelin/contracts": "3.4.1",
     "@openzeppelin/contracts-newone": "npm:@openzeppelin/contracts@4.1.0",
-    "semver": "^7.3.5"
+    "semver": "^7.3.5",
+    "cz-customizable": "^6.3.0"
   },
   "engines": {
     "node": ">=14.0.0"
