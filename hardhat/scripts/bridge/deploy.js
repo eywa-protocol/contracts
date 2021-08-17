@@ -17,6 +17,16 @@ async function main() {
     await bridge.deployed();
     console.log("Bridge address:", bridge.address);
 
+    const _MyCoin = await ethers.getContractFactory("MyCoin");
+    const myCoin  = await _MyCoin.deploy();
+    await myCoin.deployed();
+    console.log("MyCoin address:", myCoin.address);
+
+    const _MyRewards = await ethers.getContractFactory("MyRewards");
+    const myRewards  = await _MyRewards.deploy(myCoin.address);
+    await myRewards.deployed();
+    console.log("MyRewards address:", myRewards.address);
+
     const _MockDexPool = await ethers.getContractFactory("MockDexPool");
     const mockDexPool  = await _MockDexPool.deploy(bridge.address);
     await mockDexPool.deployed();
@@ -27,6 +37,8 @@ async function main() {
 
     networkConfig[network.name].nodeList   = nodeList.address;
     networkConfig[network.name].bridge     = bridge.address;
+    networkConfig[network.name].myCoin     = myCoin.address;
+    networkConfig[network.name].myRewards  = myRewards.address;
     networkConfig[network.name].mockDexPool= mockDexPool.address;
     fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
 

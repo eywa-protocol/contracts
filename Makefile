@@ -15,6 +15,8 @@ npm: copy_configs
 
 wrappers: npm compile copy_configs
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/Bridge.sol --pkg wrappers --out wrappers
+	go run wrappers-builder/main.go --json ${ARTIFACTS}/MyCoin.sol --pkg wrappers --out wrappers
+	go run wrappers-builder/main.go --json ${ARTIFACTS}/MyRewards.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/Forwarder.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/NodeList.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/mocks/MockDexPool.sol --pkg wrappers --out wrappers
