@@ -40,10 +40,11 @@
   },
   "dependencies": {
     "@opengsn/contracts": "^2.2.2",
+    "@opengsn/provider": "^2.2.2",
     "@openzeppelin/contracts": "3.4.1",
     "@openzeppelin/contracts-newone": "npm:@openzeppelin/contracts@4.1.0",
-    "semver": "^7.3.5",
-    "cz-customizable": "^6.3.0"
+    "cz-customizable": "^6.3.0",
+    "semver": "^7.3.5"
   },
   "engines": {
     "node": ">=14.0.0"
