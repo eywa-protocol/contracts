@@ -138,7 +138,7 @@ contract NodeRegistry is BaseRelayRecipient {
         IERC20Permit(EYWA).permit(_msgSender(), address(this), MIN_COLLATERAL, _deadline, _v, _r, _s);
         IERC20(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), MIN_COLLATERAL);
         addNode(_node);
-        this.setRelayerStatus(RelayerPool.RelayerStatus.Online, _node.nodeIdAddress);
+        listNode[_node.nodeIdAddress].status = RelayerPool.RelayerStatus.Online;
     }
     
     string public override versionRecipient = "2.2.3";
