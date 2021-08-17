@@ -42,9 +42,10 @@ contract NodeRegistry is BaseRelayRecipient {
 
     event AddedNode(address nodeIdAddress);
     
-    constructor(address _EYWA, address _consensus){
+    constructor(address _EYWA, address _consensus, address _forwarder){
         EYWA = _EYWA;
         consensus = _consensus;
+        trustedForwarder = _forwarder;
     }
     
     modifier isNewNode(address _nodeIdAddr) {
