@@ -1,6 +1,6 @@
-pragma solidity 0.8.4;
+pragma solidity 0.8.0;
 
-import '@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol';
+import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol";
 import '@opengsn/contracts/src/BaseRelayRecipient.sol';
 import './RelayerPool.sol';
 
@@ -64,16 +64,16 @@ contract NodeRegistry is BaseRelayRecipient {
     }
 
     //TODO: discuss about check: listNode[_blsPointAddr] == address(0)
-    function addNode(Node memory _node) internal isNewNode(_node.nodeIdAddress) /*onlyOwner*/ {
-      require(_node.nodeWallet != address(0), "0 address");
-      require(_node.nodeIdAddress != address(0), "0 address");
-      _node.nodeId = getNewNodeId();
-      listNode[_node.nodeIdAddress] = _node;
-      nodes.push(_node);
+    function addNode(Node memory node) internal isNewNode(node.nodeIdAddress){
+      require(node.nodeWallet != address(0), "0 address");
+      require(node.nodeIdAddress != address(0), "0 address");
+      node.nodeId = getNewNodeId();
+      listNode[node.nodeIdAddress] = node;
+      nodes.push(node);
       //TODO: discuss about pemission for certain bridge
-      trustListForDex[_node.nodeWallet][address(0)] = true;
+      trustListForDex[node.nodeWallet][address(0)] = true;
       
-      emit AddedNode(_node.nodeIdAddress);
+      emit AddedNode(node.nodeIdAddress);
     }
 
     function getNewNodeId() internal returns (uint64){
@@ -115,8 +115,8 @@ contract NodeRegistry is BaseRelayRecipient {
         return listNode[_nodeIdAddr].nodeWallet != address(0);
     }
 
-    function checkPermissionTrustList(address node) external view returns (bool)  {
-        return trustListForDex[node][address(0)];
+    function checkPermissionTrustList(address _node) external view returns (bool)  {
+        return trustListForDex[_node][address(0)];
     }
     
     

@@ -1,13 +1,13 @@
 //SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.4;
+pragma solidity 0.8.0;
 
 // https://confluence.digiu.ai/pages/viewpage.action?pageId=19202711
 
-import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
-import {EnumerableSet} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import {ReentrancyGuard} from '@openzeppelin/contracts/security/ReentrancyGuard.sol';
+import {Ownable} from '@openzeppelin/contracts-newone/access/Ownable.sol';
+import {EnumerableSet} from '@openzeppelin/contracts-newone/utils/structs/EnumerableSet.sol';
+import {IERC20} from '@openzeppelin/contracts-newone/token/ERC20/IERC20.sol';
+import {SafeERC20} from '@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol';
+import {ReentrancyGuard} from '@openzeppelin/contracts-newone/security/ReentrancyGuard.sol';
 
 //todo discuss заморозка через оптимизацию array or enumerableSet with depositId
 //todo если решение через depositId - OK то добавляем view методы
@@ -28,7 +28,7 @@ contract Vault is Ownable {
     using SafeERC20 for IERC20;
 }
 
-contract RelayerPool is Ownable, ReentrancyGuard {
+contract RelayerPool is ReentrancyGuard {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.UintSet;
     address internal payableToken;
@@ -76,6 +76,8 @@ contract RelayerPool is Ownable, ReentrancyGuard {
         emissionRate = _emissionRate;
         require(_rewardToken != address(0), Errors.ZERO_ADDRESS);
         payableToken = _rewardToken;
+        require(_poolOwner != address(0), Errors.ZERO_ADDRESS);
+        poolOwner = _poolOwner;
 
     }
     
@@ -132,9 +134,9 @@ contract RelayerPool is Ownable, ReentrancyGuard {
         }
         userTotalDeposit[msg.sender] -= _amount;  // todo total deposit event
         totalDeposit -= _amount;
-        if (msg.sender == owner()) {
-            require(totalDeposit <= userTotalDeposit[owner()] * 6, "small owner stake (ownerStaker*6 >= totalStake)");  //todo err msg
-            require(userTotalDeposit[owner()] >= minOwnerCollateral, "small owner stake (ownerStake >= _min_owner_collateral)");
+        if (msg.sender == poolOwner) {
+            require(totalDeposit <= userTotalDeposit[poolOwner] * 6, "small owner stake (ownerStaker*6 >= totalStake)");  //todo err msg
+            require(userTotalDeposit[poolOwner] >= minOwnerCollateral, "small owner stake (ownerStake >= _min_owner_collateral)");
         }
         IERC20(payableToken).safeTransfer(msg.sender, _amount);
     }
@@ -145,7 +147,7 @@ contract RelayerPool is Ownable, ReentrancyGuard {
     function deposit(uint256 _amount) external {
         uint256 depositId = nextDepositId++;
         uint256 lockTill;
-        if (msg.sender == owner()) {
+        if (msg.sender == poolOwner) {
             lockTill = block.timestamp + MIN_RELAYER_STAKING_TIME;
         } else {
             lockTill = block.timestamp + MIN_STAKING_TIME;
@@ -158,13 +160,13 @@ contract RelayerPool is Ownable, ReentrancyGuard {
         userTotalDeposit[msg.sender] += _amount;
         totalDeposit += _amount;
         IERC20(payableToken).safeTransferFrom(msg.sender, address(this), _amount);
-        if (msg.sender != owner()) {
-            require(totalDeposit <= userTotalDeposit[owner()]*6, "small owner stake (ownerStaker*6 >= totalStake)");
+        if (msg.sender != poolOwner) {
+            require(totalDeposit <= userTotalDeposit[poolOwner]*6, "small owner stake (ownerStaker*6 >= totalStake)");
         }
         userClaimed[msg.sender] += _amount * rewardPerTokenNumerator / REWARD_PER_TOKEN_DENOMINATOR;
     }
 
-    /// @dev метод для сбора вознаграждений из смартконтракте Reward, доступен с адреса, который разместил средства,
+    ///  метод для сбора вознаграждений из смартконтракте Reward, доступен с адреса, который разместил средства,
     ///  на замороженные средства также действует период заморозки
     function harvest() public {
         uint256 reward = (rewardPerTokenNumerator * userTotalDeposit[msg.sender] / REWARD_PER_TOKEN_DENOMINATOR
@@ -183,12 +185,12 @@ contract RelayerPool is Ownable, ReentrancyGuard {
         // emit RewardShared(msg.sender, reward);
     }
     
-    /// @notice Базой для расчёта начислений нужно считать, что мы закладываем фиксированный годовой процент
-    ///   эмиссии токена для релееров, обозначим его как Emission rate
-    ///   Обозначим суммарный стейк релеера в его пуле Relayer pool как Pool Stake=SUM Stakei i=0,..,n,
-    ///   где n - количество записей в контракте Relayer pool.
-    ///   Тогда дневная прибыль валидатора day profit составляет Day profit=Pool Stake*Emission rate/100/365
-    ///   Период начисления наград - один раз сутки.
+    //   Базой для расчёта начислений нужно считать, что мы закладываем фиксированный годовой процент
+    //   эмиссии токена для релееров, обозначим его как Emission rate
+    //   Обозначим суммарный стейк релеера в его пуле Relayer pool как Pool Stake=SUM Stakei i=0,..,n,
+    //   где n - количество записей в контракте Relayer pool.
+    //   Тогда дневная прибыль валидатора day profit составляет Day profit=Pool Stake*Emission rate/100/365
+    //   Период начисления наград - один раз сутки.
     uint256 internal lastHarvestRewardTimestamp;
 
     function getLastHarvestRewardTimestamp() external view returns(uint256) {
