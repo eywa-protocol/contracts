@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.7.6 <=0.8.0;
+pragma solidity 0.8.0;
 
 contract BridgeCore {
 
     address public _owner;
     address public _listNode;
-    uint256 public requestCount = 1;
 
     /* bridge => nonce */
-    mapping(address => uint) public nonce;
-    mapping(address => bool) public dexBind;
+    mapping(address => mapping(address => uint256)) internal nonce;
+    mapping(address => mapping(address => address)) internal contractBind;
 
     event OracleRequest(
         string  requestType,
@@ -21,21 +20,29 @@ contract BridgeCore {
         uint chainid
     );
 
-    event ReceiveRequest(bytes32 reqId, address receiveSide, bytes32 tx);
+    event ReceiveRequest(bytes32 reqId, address receiveSide, address bridgeFrom, address senderSide);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, "Ownable: caller is not the owner");
         _;
     }
 
-    function updateDexBind(address a, bool f) public onlyOwner {
-        dexBind[a] = f;
+    /**
+       Mandatory for participants who wants to use a own contracts
+       1. Contract A (chain A) should be bind with Contract B (chain B) only once! It's not allowed to  switch Contract A (chain A) to Contract C (chain B). This mandatory
+       for prevent malicious behaviour.
+       2. Contract A (chain A) could be bind with several contracts where every contract from another chain. For ex: Contract A (chain A) --> Contract B (chain B) + Contract A (chain A) --> Contract B' (chain B') ... etc
+    */
+    function addContractBind(address from, address oppositeBridge, address to) external {
+        // for prevent malicious behaviour like switching between older and newer contracts
+        require(contractBind[from][oppositeBridge] == address(0), "UPDATE DOES NOT ALLOWED");
+        // TODO to - should be once inicialized
+        contractBind[from][oppositeBridge] = to;
+
     }
 
-    function prepareRqId(bytes memory  _selector, address receiveSide, address oppositeBridge, uint chainId) internal returns (bytes32) {
-        bytes32 requestId = keccak256(abi.encodePacked(this, nonce[oppositeBridge], _selector, receiveSide, oppositeBridge, chainId));
-        nonce[oppositeBridge] = nonce[oppositeBridge] + 1;
-
-        return (requestId);
+    function prepareRqId(bytes memory  _selector, address oppositeBridge, uint256 chainId, address receiveSide) internal view returns (bytes32) {
+        bytes32 requestId = keccak256(abi.encodePacked(nonce[oppositeBridge][receiveSide], _selector, chainId));
+        return requestId;
     }
 }
