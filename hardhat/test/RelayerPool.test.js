@@ -1,4 +1,4 @@
-import { ethers, waffle } from 'hardhat';
+const ethers = require('hardhat');
 const { constants, expectEvent, expectRevert, BN } = require('@openzeppelin/test-helpers');
 const { ZERO_ADDRESS } = constants;
 
@@ -22,34 +22,36 @@ async function timeTravelAt(timestamp) {
 
 contract('RelayerPool', function (accounts) {
   const [owner, other] = accounts;
-  const DECIMALS = BN(10).pow(BN(18));
-  const INITIAL_ERC20_ACCOUNT_BALANCE = BN(100).mul(DECIMALS);
+  const DECIMALS =  new web3.utils.BN(10).pow(new web3.utils.BN(18));
+  const INITIAL_ERC20_ACCOUNT_BALANCE = new web3.utils.BN(100).mul(DECIMALS);
 
   beforeEach(async function () {
     this.depositToken = await ERC20Mock.new("DepositToken", "DepositToken", {from: owner});
     this.rewardToken = await ERC20Mock.new("RewardToken", "RewardToken", {from: owner});
 
     for (const account of accounts) {
-      await this.depositToken.mintTo(account, INITIAL_ERC20_ACCOUNT_BALANCE, {from: owner});
-      await this.rewardToken.mintTo(account, INITIAL_ERC20_ACCOUNT_BALANCE, {from: owner});
+      await this.depositToken.mint(account, INITIAL_ERC20_ACCOUNT_BALANCE, {from: owner});
+      await this.rewardToken.mint(account, INITIAL_ERC20_ACCOUNT_BALANCE, {from: owner});
     }
 
     this.relayerFeeNumerator = 100;  // 1%
     this.emissionRateNumerator = 100;
     this.relayerPool = await RelayerPool.new(
+        owner,
+        this.rewardToken.address,
+        this.depositToken.address,
         this.relayerFeeNumerator,
         this.emissionRateNumerator,
-        this.depositToken.address,
-        this.rewardToken.address,
         {from: owner});
   });
 
   it('reverts on depositToken zero address', async function () {
     await expectRevert(RelayerPool.new(
-        this.relayerFeeNumerator,
-        this.emissionRateNumerator,
-        ZERO_ADDRESS,
-        this.rewardToken.address,
+      owner,
+      this.rewardToken.address,
+      ZERO_ADDRESS,
+      this.relayerFeeNumerator,
+      this.emissionRateNumerator,
         {from: owner}),
         "ZERO_ADDRESS"
     );

@@ -51,7 +51,7 @@ contract RelayerPool is Ownable, ReentrancyGuard {
     uint256 constant REWARD_PER_TOKEN_DENOMINATOR = 10*18;
     uint256 internal minOwnerCollateral;
 
-    uint256 constant RELAYER_FEE_MIN_NUMERATOR = 200;
+    uint256 constant RELAYER_FEE_MIN_NUMERATOR = 100;
     uint256 constant RELAYER_FEE_DENOMINATOR = 10000;
     uint256 public relayerFeeNumerator;
     uint256 public emissionRateNumerator;
@@ -86,7 +86,6 @@ contract RelayerPool is Ownable, ReentrancyGuard {
 
     constructor(
         address _poolOwner,
-        address _registry,
         address _rewardToken,
         address _depositToken,
         uint256 _relayerFeeNumerator,
@@ -104,6 +103,7 @@ contract RelayerPool is Ownable, ReentrancyGuard {
         payableToken = _depositToken;
         require(_poolOwner != address(0), Errors.ZERO_ADDRESS);
         poolOwner = _poolOwner;
+        registry = msg.sender;
         lastShareRewardTimestamp = block.timestamp;
     }
     

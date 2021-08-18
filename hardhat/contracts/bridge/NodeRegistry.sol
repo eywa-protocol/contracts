@@ -134,7 +134,7 @@ contract NodeRegistry is BaseRelayRecipient {
     }
     
     function createRelayer(Node memory _node, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) external {
-        RelayerPool relayerPool = new RelayerPool(_node.owner, address(this), address(EYWA), address(EYWA), _node.relayerFeeNumerator, _node.emissionRateNumerator);
+        RelayerPool relayerPool = new RelayerPool(_node.owner, address(EYWA), address(EYWA), _node.relayerFeeNumerator, _node.emissionRateNumerator);
         IERC20Permit(EYWA).permit(_msgSender(), address(this), MIN_COLLATERAL, _deadline, _v, _r, _s);
         IERC20(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), MIN_COLLATERAL);
         addNode(_node);
