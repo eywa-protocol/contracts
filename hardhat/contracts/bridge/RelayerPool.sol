@@ -72,7 +72,7 @@ contract RelayerPool is Ownable, ReentrancyGuard {
 
     event DepositPut (
         address indexed user,
-        uint40 lockTill,
+        uint256 lockTill,
         uint256 indexed id,
         uint256 amount
     );
@@ -90,7 +90,7 @@ contract RelayerPool is Ownable, ReentrancyGuard {
         address _rewardToken,
         address _depositToken,
         uint256 _relayerFeeNumerator,
-        uint256 _emissionRateNumerator,
+        uint256 _emissionRateNumerator
    
     ) {
         require(relayerFeeNumerator >= RELAYER_FEE_MIN_NUMERATOR, Errors.FEE_IS_TOO_LOW);
@@ -191,12 +191,12 @@ contract RelayerPool is Ownable, ReentrancyGuard {
         // emit RewardHarvest(msg.sender, reward);
     }
 
-    /// @notice Базой для расчёта начислений нужно считать, что мы закладываем фиксированный годовой процент
-    ///   эмиссии токена для релееров, обозначим его как Emission rate
-    ///   Обозначим суммарный стейк релеера в его пуле Relayer pool как Pool Stake=SUM Stakei i=0,..,n,
-    ///   где n - количество записей в контракте Relayer pool.
-    ///   Тогда дневная прибыль валидатора day profit составляет Day profit=Pool Stake*Emission rate/100/365
-    ///   Период начисления наград - один раз сутки.
+    //   Базой для расчёта начислений нужно считать, что мы закладываем фиксированный годовой процент
+    //   эмиссии токена для релееров, обозначим его как Emission rate
+    //   Обозначим суммарный стейк релеера в его пуле Relayer pool как Pool Stake=SUM Stakei i=0,..,n,
+    //   где n - количество записей в контракте Relayer pool.
+    //   Тогда дневная прибыль валидатора day profit составляет Day profit=Pool Stake*Emission rate/100/365
+    //   Период начисления наград - один раз сутки.
     uint256 internal lastHarvestRewardTimestamp;
 
     function getLastHarvestRewardTimestamp() external view returns(uint256) {
@@ -209,7 +209,7 @@ contract RelayerPool is Ownable, ReentrancyGuard {
 
         // Тогда дневная прибыль валидатора day profit составляет Day profit=Pool Stake*Emission rate/100/365
         uint256 harvestForPeriod = block.timestamp - lastHarvestRewardTimestamp;
-        uint256 profit = this.getTotalDeposit() * harvestForPeriod * emissionRate;
+        uint256 profit = this.getTotalDeposit() * harvestForPeriod * emissionRateNumerator;
         lastHarvestRewardTimestamp = block.timestamp;
 
         // fee goes to the owner
@@ -219,15 +219,15 @@ contract RelayerPool is Ownable, ReentrancyGuard {
         rewardPerTokenNumerator += rewardForPool * REWARD_PER_TOKEN_DENOMINATOR / totalDeposit;
         IERC20(rewardToken).safeTransferFrom(address(vault), address(this), profit);
         IERC20(rewardToken).safeTransferFrom(msg.sender, poolOwner, fee);
-        emit Harvest(
-            block.timestamp,
-            harvestForPeriod,
-            profit,
-            feeReceiver,
-            fee,
-            rewardForPool,
-            rewardPerTokenNumerator
-        );
+        // emit Harvest(
+        //     block.timestamp,
+        //     harvestForPeriod,
+        //     profit,
+        //     feeReceiver,
+        //     fee,
+        //     rewardForPool,
+        //     rewardPerTokenNumerator
+        // );
     }
     
     function setRelayerStatus(RelayerStatus _status) external onlyRegistry {
