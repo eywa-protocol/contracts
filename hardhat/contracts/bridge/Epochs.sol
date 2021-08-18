@@ -5,21 +5,25 @@ contract Epochs {
     Epoch[] public epochs;
 
     struct Epoch {
-        bytes ePubKey;
+        string ePubKey;
         uint256 time;
     }
 
-    constructor(bytes memory _ownerPKey) GenesisEpoch() {
+    constructor(string memory _ownerPKey) GenesisEpoch() {
         StartNewEpochInternal(_ownerPKey);
     }
 
-    function StartNewEpoch(bytes memory _pKey) NotGenesisEpoch()  external  {
+    function StartNewEpoch(string memory _pKey) NotGenesisEpoch()  external  {
         StartNewEpochInternal(_pKey);
     }
 
-    function StartNewEpochInternal(bytes memory _pKey) internal {
+    function StartNewEpochInternal(string memory _pKey) internal {
         Epoch memory e = Epoch(_pKey, block.timestamp);
         epochs.push(e);
+    }
+
+    function getLastEpoch() external view returns (Epoch memory) {
+        return epochs[epochs.length - 1];
     }
 
     modifier GenesisEpoch() {
@@ -30,6 +34,8 @@ contract Epochs {
         require (epochs.length > 0, "no epoch");
         _;
     }
+
+
 
 
 }
