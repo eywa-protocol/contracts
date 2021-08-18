@@ -7,4 +7,8 @@ contract MyCoin is ERC20Permit {
     string constant private _name = "MyEYWA";
 
     constructor() ERC20Permit(_name) ERC20(_name, _name) {}
+
+    function sep() public view returns (bytes32) {
+        return _domainSeparatorV4();
+    }
 }

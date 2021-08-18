@@ -17,6 +17,7 @@ contract MyRewards {
     }
 
     IERC20Permit public token;
+    bool public exists = false;
 
     constructor(IERC20Permit _token) public {
         token = _token;
@@ -24,5 +25,10 @@ contract MyRewards {
 
     function createRelayer(Node memory _node, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) public {
         token.permit(_node.owner, address(this), 100 ether, _deadline, _v, _r, _s);
+        exists = true;
+    }
+
+    function NodeExists(address id) public view returns(bool) {
+        return exists;
     }
 }
