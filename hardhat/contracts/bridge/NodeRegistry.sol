@@ -27,15 +27,13 @@ contract NodeRegistry is BaseRelayRecipient {
         uint256 emissionRateNumerator;
         RelayerPool.RelayerStatus status;
         RelayerType nodeType;
-    }
-    
-    enum RelayerType { Validator, Fisher }
+    }  
         
     address EYWA;
     address consensus;
     uint256 constant MIN_COLLATERAL = 1 ether;
-
-        
+    enum RelayerType { Validator, Fisher }
+    
     mapping (address => Node) public listNode;
     mapping (address => mapping(address => bool)) public trustListForDex;
     Node[] public nodes;
@@ -117,8 +115,7 @@ contract NodeRegistry is BaseRelayRecipient {
 
     function checkPermissionTrustList(address _node) external view returns (bool)  {
         return trustListForDex[_node][address(0)];
-    }
-    
+    }   
     
     function setRelayerFee(uint256 _fee, address _nodeIdAddress ) external {
         require(_msgSender() == listNode[_nodeIdAddress].owner, "only node owner");

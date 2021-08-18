@@ -36,7 +36,7 @@ contract RelayerPool is Ownable, ReentrancyGuard {
     enum RelayerStatus { Online, Offline, Inactive, BlackListed }
     RelayerStatus internal relayerStatus;
     
-    uint256 constant MIN_RELAYER_STAKING_TIME = 4 weeks;
+    uint256 constant public MIN_RELAYER_STAKING_TIME = 4 weeks;
     uint256 constant MIN_STAKING_TIME = 2 weeks;
     uint256 constant MIN_RELAYER_COLLATERAL = 10**18;
 
@@ -92,8 +92,8 @@ contract RelayerPool is Ownable, ReentrancyGuard {
         uint256 _emissionRateNumerator
    
     ) {
-        require(relayerFeeNumerator >= RELAYER_FEE_MIN_NUMERATOR, Errors.FEE_IS_TOO_LOW);
-        require(relayerFeeNumerator <= RELAYER_FEE_DENOMINATOR, Errors.FEE_IS_TOO_HIGH);
+        require(_relayerFeeNumerator >= RELAYER_FEE_MIN_NUMERATOR, Errors.FEE_IS_TOO_LOW);
+        require(_relayerFeeNumerator <= RELAYER_FEE_DENOMINATOR, Errors.FEE_IS_TOO_HIGH);
         relayerFeeNumerator = _relayerFeeNumerator;
         // todo discuss limits on emissionRate
         emissionRateNumerator = _emissionRateNumerator;

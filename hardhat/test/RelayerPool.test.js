@@ -59,10 +59,11 @@ contract('RelayerPool', function (accounts) {
 
   it('reverts on rewardToken zero address', async function () {
     await expectRevert(RelayerPool.new(
-        this.relayerFeeNumerator,
-        this.emissionRateNumerator,
-        this.depositToken.address,
-        ZERO_ADDRESS,
+      owner,
+      ZERO_ADDRESS,
+      this.depositToken.address,
+      this.relayerFeeNumerator,
+      this.emissionRateNumerator,
         {from: owner}),
         "ZERO_ADDRESS"
     );
@@ -74,9 +75,10 @@ contract('RelayerPool', function (accounts) {
 
   it('deposit owner', async function () {
     const user = owner;
-    const depositAmount = BN(10).mul(DECIMALS);
+    const depositAmount = new web3.utils.BN(10).mul(DECIMALS);
+    const tx1 = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: user})
     const tx = await this.relayerPool.deposit(depositAmount, {from: user});
-    expectEvent.inLogs(
+    expectEvent(
         tx,
         'DepositPut',
         {
@@ -90,9 +92,9 @@ contract('RelayerPool', function (accounts) {
 
   it('deposit other user', async function () {
     const user = other[0];
-    const depositAmount = BN(10).mul(DECIMALS);
+    const depositAmount = new web3.utils.BN(10).mul(DECIMALS);
     const tx = await this.relayerPool.deposit(depositAmount, {from: user});
-    expectEvent.inLogs(
+    expectEvent(
         tx,
         'DepositPut',
         {
@@ -107,11 +109,11 @@ contract('RelayerPool', function (accounts) {
   it('full withdraw by owner', async function () {
     let tx;
     const user = owner;
-    const depositAmount = BN(10).mul(DECIMALS);
+    const depositAmount = new web3.utils.BN(10).mul(DECIMALS);
     tx = await this.relayerPool.deposit(depositAmount, {from: user});
     const expectedLockTill = tx.timestamp + (await this.relayerPool.MIN_STAKING_TIME());
     const expectedDepositId = 0;
-    expectEvent.inLogs(
+    expectEvent(
         tx,
         'DepositPut',
         {
@@ -125,7 +127,7 @@ contract('RelayerPool', function (accounts) {
     await timeTravelAt(expectedLockTill);
 
     tx = await this.relayerPool.withdraw(expectedDepositId, depositAmount, {from: user});
-    expectEvent.inLogs(
+    expectEvent(
         tx,
         'DepositWithdrawn',
         {
@@ -143,11 +145,11 @@ contract('RelayerPool', function (accounts) {
   it('partial withdraw', async function () {
     let tx;
     const user = owner;
-    const depositAmount = BN(10).mul(DECIMALS);
+    const depositAmount = new web3.utils.BN(10).mul(DECIMALS);
     tx = await this.relayerPool.deposit(depositAmount, {from: user});
     const expectedLockTill = tx.timestamp + (await this.relayerPool.MIN_STAKING_TIME());
     const expectedDepositId = 0;
-    expectEvent.inLogs(
+    expectEvent(
         tx,
         'DepositPut',
         {
@@ -160,16 +162,16 @@ contract('RelayerPool', function (accounts) {
 
     await timeTravelAt(expectedLockTill);
 
-    tx = await this.relayerPool.withdraw(expectedDepositId, BN(2).mul(DECIMALS), {from: user});
-    expectEvent.inLogs(
+    tx = await this.relayerPool.withdraw(expectedDepositId, new web3.utils.BN(2).mul(DECIMALS), {from: user});
+    expectEvent(
         tx,
         'DepositWithdrawn',
         {
           'user': user,
-          'amount': BN(2).mul(DECIMALS),
+          'amount': new web3.utils.BN(2).mul(DECIMALS),
           'depositId': 0,
           'lockTill': lockTill,
-          'rest': BN(8).mul(DECIMALS),
+          'rest': new web3.utils.BN(8).mul(DECIMALS),
         }
     );
   });
@@ -177,11 +179,11 @@ contract('RelayerPool', function (accounts) {
   it('withdraw before unlock reverts', async function () {
         let tx;
     const user = owner;
-    const depositAmount = BN(10).mul(DECIMALS);
+    const depositAmount = new web3.utils.BN(10).mul(DECIMALS);
     tx = await this.relayerPool.deposit(depositAmount, {from: user});
     const expectedLockTill = tx.timestamp + (await this.relayerPool.MIN_STAKING_TIME());
     const expectedDepositId = 0;
-    expectEvent.inLogs(
+    expectEvent(
         tx,
         'DepositPut',
         {
@@ -221,11 +223,11 @@ contract('RelayerPool', function (accounts) {
   it('harvestReward', async function () {
     let tx;
     const user = owner;
-    const depositAmount = BN(10).mul(DECIMALS);
+    const depositAmount = new web3.utils.BN(10).mul(DECIMALS);
     tx = await this.relayerPool.deposit(depositAmount, {from: user});
     const expectedLockTill = tx.timestamp + (await this.relayerPool.MIN_STAKING_TIME());
     const expectedDepositId = 0;
-    expectEvent.inLogs(
+    expectEvent(
         tx,
         'DepositPut',
         {
@@ -240,7 +242,7 @@ contract('RelayerPool', function (accounts) {
     timeTravelFor(period);
 
     tx = await this.relayerPool.harvest({from: owner});
-    expectEvent.inLogs(
+    expectEvent(
         tx,
         'Harvest',
         {
