@@ -12,8 +12,7 @@ import (
 	"sort"
 	"strings"
 	"text/template"
-
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"eywa-accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/compiler"
 	"github.com/sirupsen/logrus"
 	cli "gopkg.in/urfave/cli.v1"
