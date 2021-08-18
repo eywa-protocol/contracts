@@ -28,17 +28,17 @@ contract Vault is Ownable {
     using SafeERC20 for IERC20;
 }
 
-contract RelayerPool is ReentrancyGuard {
+contract RelayerPool is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.UintSet;
-    address internal payableToken;
-    
+
     uint256 version;
     enum RelayerStatus { Online, Offline, Inactive, BlackListed }
     RelayerStatus internal relayerStatus;
     
     uint256 constant MIN_RELAYER_STAKING_TIME = 4 weeks;
     uint256 constant MIN_STAKING_TIME = 2 weeks;
+    uint256 constant MIN_RELAYER_COLLATERAL = 10**18;
 
     uint256 internal nextDepositId;
     mapping (uint256 => Deposit) public deposits;  // id -> deposit
@@ -53,42 +53,16 @@ contract RelayerPool is ReentrancyGuard {
 
     uint256 constant RELAYER_FEE_MIN_NUMERATOR = 200;
     uint256 constant RELAYER_FEE_DENOMINATOR = 10000;
-    uint256  relayerFeeNumerator;
-    uint256  emissionRate;
-    address  poolOwner;
-    address  registry;
-    
+    uint256 public relayerFeeNumerator;
+    uint256 public emissionRateNumerator;
+    uint256 constant internal EMISSION_RATE_DENOMINATOR = 10000;
+    address public poolOwner;
+    address public registry;
+
+    address public payableToken;
+    address public rewardToken;
+
     Vault internal vault;
-    
-    
-    constructor(
-        //lastShareRewardTimestamp = block.timestamp;  
-        address _poolOwner,
-        address _registry,
-        uint256 _relayerFeeNumerator,
-        uint256 _emissionRate,
-        address _rewardToken
-    ) {
-        require(relayerFeeNumerator >= RELAYER_FEE_MIN_NUMERATOR, Errors.FEE_IS_TOO_LOW);
-        require(relayerFeeNumerator <= RELAYER_FEE_DENOMINATOR, Errors.FEE_IS_TOO_HIGH);
-        relayerFeeNumerator = _relayerFeeNumerator;
-        // todo discuss limits
-        emissionRate = _emissionRate;
-        require(_rewardToken != address(0), Errors.ZERO_ADDRESS);
-        payableToken = _rewardToken;
-        require(_poolOwner != address(0), Errors.ZERO_ADDRESS);
-        poolOwner = _poolOwner;
-
-    }
-    
-    modifier onlyRegistry() {
-        require(msg.sender == registry, "only registry");
-        _;
-    }
-
-    function getTotalDeposit() external view returns(uint256){
-        return totalDeposit;
-    }
 
     struct Deposit {
         address user;  // todo optimization it's possible to exclude
@@ -98,7 +72,7 @@ contract RelayerPool is ReentrancyGuard {
 
     event DepositPut (
         address indexed user,
-        uint40 lockFor,
+        uint40 lockTill,
         uint256 indexed id,
         uint256 amount
     );
@@ -109,6 +83,38 @@ contract RelayerPool is ReentrancyGuard {
         uint256 amount,
         uint256 rest
     );
+
+    constructor(
+        address _poolOwner,
+        address _registry,
+        address _rewardToken,
+        address _depositToken,
+        uint256 _relayerFeeNumerator,
+        uint256 _emissionRateNumerator,
+   
+    ) {
+        require(relayerFeeNumerator >= RELAYER_FEE_MIN_NUMERATOR, Errors.FEE_IS_TOO_LOW);
+        require(relayerFeeNumerator <= RELAYER_FEE_DENOMINATOR, Errors.FEE_IS_TOO_HIGH);
+        relayerFeeNumerator = _relayerFeeNumerator;
+        // todo discuss limits on emissionRate
+        emissionRateNumerator = _emissionRateNumerator;
+        require(_rewardToken != address(0), Errors.ZERO_ADDRESS);
+        rewardToken = _rewardToken;
+        require(_depositToken != address(0), Errors.ZERO_ADDRESS);
+        payableToken = _depositToken;
+        require(_poolOwner != address(0), Errors.ZERO_ADDRESS);
+        poolOwner = _poolOwner;
+        lastShareRewardTimestamp = block.timestamp;
+    }
+    
+    modifier onlyRegistry() {
+        require(msg.sender == registry, "only registry");
+        _;
+    }
+
+    function getTotalDeposit() external view returns(uint256){
+        return totalDeposit;
+    }
 
     /// @dev метод для вывода средств из пула, позволяет выводить вызывающему только те средства,
     ///   которые были размещены с его адреса, учитывает сроки заморозки токенов при депозите,
@@ -159,11 +165,17 @@ contract RelayerPool is ReentrancyGuard {
         });
         userTotalDeposit[msg.sender] += _amount;
         totalDeposit += _amount;
-        IERC20(payableToken).safeTransferFrom(msg.sender, address(this), _amount);
+        userClaimed[msg.sender] += _amount * rewardPerTokenNumerator / REWARD_PER_TOKEN_DENOMINATOR;
         if (msg.sender != poolOwner) {
             require(totalDeposit <= userTotalDeposit[poolOwner]*6, "small owner stake (ownerStaker*6 >= totalStake)");
         }
-        userClaimed[msg.sender] += _amount * rewardPerTokenNumerator / REWARD_PER_TOKEN_DENOMINATOR;
+        IERC20(payableToken).safeTransferFrom(msg.sender, address(this), _amount);
+        emit DepositPut (
+            msg.sender,
+            lockTill,
+            depositId,
+            _amount
+        );
     }
 
     ///  метод для сбора вознаграждений из смартконтракте Reward, доступен с адреса, который разместил средства,
@@ -179,18 +191,12 @@ contract RelayerPool is ReentrancyGuard {
         // emit RewardHarvest(msg.sender, reward);
     }
 
-    function onRewardReceived(uint256 _reward) external {
-        IERC20(payableToken).safeTransferFrom(msg.sender, address(this), _reward);
-        rewardPerTokenNumerator += _reward * REWARD_PER_TOKEN_DENOMINATOR / totalDeposit;
-        // emit RewardShared(msg.sender, reward);
-    }
-    
-    //   Базой для расчёта начислений нужно считать, что мы закладываем фиксированный годовой процент
-    //   эмиссии токена для релееров, обозначим его как Emission rate
-    //   Обозначим суммарный стейк релеера в его пуле Relayer pool как Pool Stake=SUM Stakei i=0,..,n,
-    //   где n - количество записей в контракте Relayer pool.
-    //   Тогда дневная прибыль валидатора day profit составляет Day profit=Pool Stake*Emission rate/100/365
-    //   Период начисления наград - один раз сутки.
+    /// @notice Базой для расчёта начислений нужно считать, что мы закладываем фиксированный годовой процент
+    ///   эмиссии токена для релееров, обозначим его как Emission rate
+    ///   Обозначим суммарный стейк релеера в его пуле Relayer pool как Pool Stake=SUM Stakei i=0,..,n,
+    ///   где n - количество записей в контракте Relayer pool.
+    ///   Тогда дневная прибыль валидатора day profit составляет Day profit=Pool Stake*Emission rate/100/365
+    ///   Период начисления наград - один раз сутки.
     uint256 internal lastHarvestRewardTimestamp;
 
     function getLastHarvestRewardTimestamp() external view returns(uint256) {
@@ -206,15 +212,22 @@ contract RelayerPool is ReentrancyGuard {
         uint256 profit = this.getTotalDeposit() * harvestForPeriod * emissionRate;
         lastHarvestRewardTimestamp = block.timestamp;
 
-        IERC20(payableToken).safeTransferFrom(address(vault), address(this), profit);
-
-        // fee
+        // fee goes to the owner
         uint256 fee = profit * relayerFeeNumerator / RELAYER_FEE_DENOMINATOR;
         uint256 rewardForPool = profit - fee;
 
-        this.onRewardReceived(rewardForPool);
-
-        // todo emit
+        rewardPerTokenNumerator += rewardForPool * REWARD_PER_TOKEN_DENOMINATOR / totalDeposit;
+        IERC20(rewardToken).safeTransferFrom(address(vault), address(this), profit);
+        IERC20(rewardToken).safeTransferFrom(msg.sender, poolOwner, fee);
+        emit Harvest(
+            block.timestamp,
+            harvestForPeriod,
+            profit,
+            feeReceiver,
+            fee,
+            rewardForPool,
+            rewardPerTokenNumerator
+        );
     }
     
     function setRelayerStatus(RelayerStatus _status) external onlyRegistry {
