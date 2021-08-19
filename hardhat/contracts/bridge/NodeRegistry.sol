@@ -30,9 +30,9 @@ contract NodeRegistry is BaseRelayRecipient {
         RelayerType nodeType;
     }
 
-    address EYWA;
-    address consensus;
-    uint256 constant MIN_COLLATERAL = 1 ether;
+    address public EYWA;
+    address public consensus;
+    uint256 constant public MIN_COLLATERAL = 1 ether;
     enum RelayerType { Validator, Fisher }
 
     mapping (address => Node) public listNode;
