@@ -3,7 +3,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-IERC20Permit.sol";
-import "@openzeppelin/contracts-newone/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-newone/utils/Counters.sol";
@@ -18,7 +18,7 @@ import "@openzeppelin/contracts-newone/utils/Counters.sol";
  *
  * _Available since v3.4._
  */
-contract TestERC20Permit is ERC20, IERC20Permit, EIP712 {
+contract TestERC20Permit is ERC20PresetMinterPauser, IERC20Permit, EIP712 {
     using Counters for Counters.Counter;
 
     mapping(address => Counters.Counter) private _nonces;
@@ -32,7 +32,7 @@ contract TestERC20Permit is ERC20, IERC20Permit, EIP712 {
      *
      * It's a good idea to use the same `name` that is defined as the ERC20 token name.
      */
-    constructor(string memory name_, string memory symbol_) EIP712(name_, "1") ERC20(name_, symbol_) {}
+    constructor(string memory name_, string memory symbol_) EIP712(name_, "1") ERC20PresetMinterPauser(name_, symbol_) {}
 
     /**
      * @dev See {IERC20Permit-permit}.
