@@ -9,6 +9,7 @@ contract BridgeCore {
     /* bridge => nonce */
     mapping(address => mapping(address => uint256)) internal nonce;
     mapping(address => mapping(address => address)) internal contractBind;
+    mapping(address => bool) private is_in;
 
     event OracleRequest(
         string  requestType,
@@ -34,10 +35,13 @@ contract BridgeCore {
        2. Contract A (chain A) could be bind with several contracts where every contract from another chain. For ex: Contract A (chain A) --> Contract B (chain B) + Contract A (chain A) --> Contract B' (chain B') ... etc
     */
     function addContractBind(address from, address oppositeBridge, address to) external {
+        require(to   != address(0), "NULL ADDRESS TO");
+        require(from != address(0), "NULL ADDRESS FROM");
+        require(is_in[to] == false, "TO ALREADY EXIST");
         // for prevent malicious behaviour like switching between older and newer contracts
         require(contractBind[from][oppositeBridge] == address(0), "UPDATE DOES NOT ALLOWED");
-        // TODO to - should be once inicialized
         contractBind[from][oppositeBridge] = to;
+        is_in[to] = true;
 
     }
 
