@@ -8,15 +8,16 @@ all: wrappers
 
 npm: copy_configs
 	@if [ -d hardhat/node_modules ]; then \
-  			echo "installed"; \
-  			else \
-  			cd hardhat;npm ci; \
-                        fi;
+			echo "installed"; \
+			else \
+			cd hardhat;npm ci; \
+			fi;
 
 wrappers: npm compile copy_configs
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/Bridge.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/Forwarder.sol --pkg wrappers --out wrappers
-	go run wrappers-builder/main.go --json ${ARTIFACTS}/NodeList.sol --pkg wrappers --out wrappers
+	go run wrappers-builder/main.go --json ${ARTIFACTS}/NodeRegistry.sol --pkg wrappers --out wrappers
+	go run wrappers-builder/main.go --json ${ARTIFACTS}/RelayerPool.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/mocks/MockDexPool.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/test/TestTarget.sol --pkg wrappers --out wrappers
 

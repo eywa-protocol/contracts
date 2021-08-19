@@ -33,9 +33,10 @@ async function main() {
     this.tx = await bridge.updateDexBind(mockDexPool.address, true);
     console.log("mockDexPool updateDexBind:", tx);
 
-    networkConfig[network.name].nodeRegistry   = nodeRegistry.address;
-    networkConfig[network.name].bridge     = bridge.address;
-    networkConfig[network.name].mockDexPool= mockDexPool.address;
+    networkConfig[network.name].eywa         = EYWA.address;
+    networkConfig[network.name].nodeRegistry = nodeRegistry.address;
+    networkConfig[network.name].bridge       = bridge.address;
+    networkConfig[network.name].mockDexPool  = mockDexPool.address;
     fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
 
     // await hre.run("verify:verify", {
