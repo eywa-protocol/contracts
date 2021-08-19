@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.0;
 
 // https://confluence.digiu.ai/pages/viewpage.action?pageId=19202711
@@ -35,7 +35,7 @@ contract RelayerPool is Ownable, ReentrancyGuard {
     uint256 version;
     enum RelayerStatus { Online, Offline, Inactive, BlackListed }
     RelayerStatus internal relayerStatus;
-    
+
     uint256 constant public MIN_RELAYER_STAKING_TIME = 4 weeks;
     uint256 constant MIN_STAKING_TIME = 2 weeks;
     uint256 constant MIN_RELAYER_COLLATERAL = 10**18;
@@ -90,7 +90,7 @@ contract RelayerPool is Ownable, ReentrancyGuard {
         address _depositToken,
         uint256 _relayerFeeNumerator,
         uint256 _emissionRateNumerator
-   
+
     ) {
         require(_relayerFeeNumerator >= RELAYER_FEE_MIN_NUMERATOR, Errors.FEE_IS_TOO_LOW);
         require(_relayerFeeNumerator <= RELAYER_FEE_DENOMINATOR, Errors.FEE_IS_TOO_HIGH);
@@ -106,7 +106,7 @@ contract RelayerPool is Ownable, ReentrancyGuard {
         registry = msg.sender;
         lastShareRewardTimestamp = block.timestamp;
     }
-    
+
     modifier onlyRegistry() {
         require(msg.sender == registry, "only registry");
         _;
@@ -229,20 +229,20 @@ contract RelayerPool is Ownable, ReentrancyGuard {
         //     rewardPerTokenNumerator
         // );
     }
-    
+
     function setRelayerStatus(RelayerStatus _status) external onlyRegistry {
         require(relayerStatus != _status, Errors.SAME_VALUE);
         relayerStatus = _status;
         // emit RelayerStatusSet(_status);
     }
-    
+
     function setRelayerFeeNumerator(uint256 _value) external onlyRegistry {
         require(_value >= RELAYER_FEE_MIN_NUMERATOR, Errors.FEE_IS_TOO_LOW);
         require(_value <= RELAYER_FEE_DENOMINATOR, Errors.FEE_IS_TOO_HIGH);
         relayerFeeNumerator = _value;
         //  emit RelayerFeeSet(_value);
     }
-    
+
 }
 
 

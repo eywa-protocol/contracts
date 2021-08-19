@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-IERC20Permit.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-newone/utils/cryptography/draft-EIP712.sol";
+import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts-newone/utils/Counters.sol";
 
 /**
  * @dev Implementation of the ERC20 Permit extension allowing approvals to be made via signatures, as defined in
@@ -32,7 +32,7 @@ contract TestERC20Permit is ERC20, IERC20Permit, EIP712 {
      *
      * It's a good idea to use the same `name` that is defined as the ERC20 token name.
      */
-    constructor(string memory name_,string memory symbol_) EIP712(name_, "1") ERC20(name_, symbol_) public{}
+    constructor(string memory name_, string memory symbol_) EIP712(name_, "1") ERC20(name_, symbol_) {}
 
     /**
      * @dev See {IERC20Permit-permit}.

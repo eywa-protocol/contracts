@@ -1,7 +1,8 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.0;
 
 import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol";
-import '@opengsn/contracts/src/BaseRelayRecipient.sol';
+import '../utils/@opengsn/contracts/src/BaseRelayRecipient.sol';
 import './RelayerPool.sol';
 
 //  Создать новую ноду-релеер, требует наличия определенного залога COLLATERAL и
@@ -23,29 +24,29 @@ contract NodeRegistry is BaseRelayRecipient {
         string  blsPubKey;
         uint64  nodeId;
         uint256 version;
-        uint256 relayerFeeNumerator; 
+        uint256 relayerFeeNumerator;
         uint256 emissionRateNumerator;
         RelayerPool.RelayerStatus status;
         RelayerType nodeType;
-    }  
-        
+    }
+
     address EYWA;
     address consensus;
     uint256 constant MIN_COLLATERAL = 1 ether;
     enum RelayerType { Validator, Fisher }
-    
+
     mapping (address => Node) public listNode;
     mapping (address => mapping(address => bool)) public trustListForDex;
     Node[] public nodes;
 
     event AddedNode(address nodeIdAddress);
-    
+
     constructor(address _EYWA, address _consensus, address _forwarder){
         EYWA = _EYWA;
         consensus = _consensus;
         trustedForwarder = _forwarder;
     }
-    
+
     modifier isNewNode(address _nodeIdAddr) {
         require(listNode[_nodeIdAddr].nodeWallet == address(0),string(abi.encodePacked("node ", convertToString(_nodeIdAddr), " allready exists")));
         _;
@@ -55,7 +56,7 @@ contract NodeRegistry is BaseRelayRecipient {
         require(listNode[_nodeIdAddr].nodeWallet != address(0), string(abi.encodePacked("node ", convertToString(_nodeIdAddr), " does not exist")));
         _;
     }
-    
+
     modifier onlyConsensus() {
         require(_msgSender() == consensus, "only consensus");
         _;
@@ -70,16 +71,16 @@ contract NodeRegistry is BaseRelayRecipient {
       nodes.push(node);
       //TODO: discuss about pemission for certain bridge
       trustListForDex[node.nodeWallet][address(0)] = true;
-      
+
       emit AddedNode(node.nodeIdAddress);
     }
 
-    function getNewNodeId() internal returns (uint64){
+    function getNewNodeId() internal view returns (uint64){
         return uint64(nodes.length);
     }
 
     function getNode(address _nodeIdAddress) external view returns (Node memory)  {
-  	   return listNode[_nodeIdAddress];
+           return listNode[_nodeIdAddress];
     }
 
     function getNodes() external view returns (Node[] memory){
@@ -94,7 +95,7 @@ contract NodeRegistry is BaseRelayRecipient {
         }
         return pubKeys;
     }
-    
+
     /// @notice Преобразовать адрес в строку для require()
     function convertToString(address account) public pure returns (string memory s) {
         bytes memory alphabet = "0123456789abcdef";
@@ -115,21 +116,21 @@ contract NodeRegistry is BaseRelayRecipient {
 
     function checkPermissionTrustList(address _node) external view returns (bool)  {
         return trustListForDex[_node][address(0)];
-    }   
-    
+    }
+
     function setRelayerFee(uint256 _fee, address _nodeIdAddress ) external {
         require(_msgSender() == listNode[_nodeIdAddress].owner, "only node owner");
         RelayerPool(listNode[_nodeIdAddress].pool).setRelayerFeeNumerator(_fee);
         //emit RelayerFeeSet(value);
     }
-    
+
     function setRelayerStatus(RelayerPool.RelayerStatus _status, address _nodeIdAddress) external onlyConsensus {
         require(listNode[_nodeIdAddress].status != _status, Errors.SAME_VALUE);
         listNode[_nodeIdAddress].status = _status;
         RelayerPool(listNode[_nodeIdAddress].pool).setRelayerStatus(_status);
         // emit RelayerStatusSet(_status);
     }
-    
+
     function createRelayer(Node memory _node, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) external {
         RelayerPool relayerPool = new RelayerPool(_node.owner, address(EYWA), address(EYWA), _node.relayerFeeNumerator, _node.emissionRateNumerator);
         IERC20Permit(EYWA).permit(_msgSender(), address(this), MIN_COLLATERAL, _deadline, _v, _r, _s);
@@ -138,6 +139,6 @@ contract NodeRegistry is BaseRelayRecipient {
         listNode[_node.nodeIdAddress].status = RelayerPool.RelayerStatus.Online;
         RelayerPool(listNode[_node.nodeIdAddress].pool).setRelayerStatus(RelayerPool.RelayerStatus.Online);
     }
-    
+
     string public override versionRecipient = "2.2.3";
 }
