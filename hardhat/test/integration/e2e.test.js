@@ -110,7 +110,7 @@ contract('Brigde', (deployer, accounts) => {
 
         it('Negative test: From network 1 to 2. Untrusted dex on bridge1', async () => {
 
-            this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1, gasPrice: 20000000000, gas: 300_000});
+            this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1, gasPrice: 20000000000, gas: 500_000});
             let res = (await this.mp2.testData({from: this.userNet2})).toString();
 
             let testData = Math.floor((Math.random() * 100) + 1);
@@ -119,7 +119,7 @@ contract('Brigde', (deployer, accounts) => {
                 let tx = await this.mp1.sendRequestTestV2(testData, this.mp2.address, this.br2.address, chainId(argv.net2), {from: this.userNet1, gasPrice: 20000000000, gas: 300_000 })
             }catch(e){
                 // unusual process for reason: hardhat + HDWalletProvider
-                console.log(e.tx);
+                //console.log(e.tx);
                 assert.equal(e.receipt?.status === false ? undefined : e.receipt?.status, undefined, `Should be false by UNTRASTED DEX`);
                 
             }
