@@ -13,6 +13,7 @@ contract Synthesis is RelayRecipient {
 
     mapping (address => address) public representationReal;
     mapping (address => address) public representationSynt;
+    address[] private keys;
     uint256 requestCount = 1;
     mapping (bytes32 => TxState) public requests;
     mapping (bytes32 => SynthesizeState) public synthesizeStates;
@@ -153,5 +154,15 @@ contract Synthesis is RelayRecipient {
     function setRepresentation (address _rtoken, address _stoken) internal {
         representationSynt[_rtoken] = _stoken;
         representationReal[_stoken] = _rtoken;
+        keys.push(_rtoken);
+    }
+
+    function getListRepresentation() external view returns(address[] memory, address[] memory) {
+       uint256 len = keys.length;
+       address[] memory sToken = new address[](len);
+       for (uint256 i = 0; i < len; i++) {
+          sToken[i] = representationSynt[keys[i]];
+       }
+       return (keys, sToken);
     }
 }
