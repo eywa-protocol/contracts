@@ -70,7 +70,7 @@ contract('Brigde', (deployer, accounts) => {
             let testData = Math.floor((Math.random() * 100) + 1);
             /** send end-to-end request */
             let receipt = await this.mp1.sendRequestTestV2(testData, this.mp2.address, this.br2.address, chainId(argv.net2), {from: this.userNet1, gasPrice: 20000000000, gas: 300_000 });
-            // console.log(receipt);
+	        //console.log(receipt);
             await timeout(25000); // give some time
             res = (await this.mp2.testData({from: this.userNet2})).toString();
 
@@ -100,7 +100,7 @@ contract('Brigde', (deployer, accounts) => {
             let testData = Math.floor((Math.random() * 100) + 1);
             /** send end-to-end request */
             let receipt = await this.mp3.sendRequestTestV2(testData, this.mp2.address, this.br2.address, chainId(argv.net2), {from: this.userNet3, gasPrice: 20000000000, gas: 300_000 });
-            // console.log(receipt);
+            //console.log(receipt);
             await timeout(25000); // give some time
             res = (await this.mp2.testData({from: this.userNet2})).toString();
 
@@ -108,25 +108,36 @@ contract('Brigde', (deployer, accounts) => {
 
         });
 
-        it('Negative test: From network 1 to 2. Untrusted dex on bridge1', async () => {
-
-            this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1, gasPrice: 20000000000, gas: 300_000});
-            let res = (await this.mp2.testData({from: this.userNet2})).toString();
-
-            let testData = Math.floor((Math.random() * 100) + 1);
-            /** send end-to-end request */
-            try{
-                let tx = await this.mp1.sendRequestTestV2(testData, this.mp2.address, this.br2.address, chainId(argv.net2), {from: this.userNet1, gasPrice: 20000000000, gas: 300_000 })
+        it('Negative test: From network 3 to 1. \'TO\' ALREADY EXIST', async () => {
+            let from           = await mockPool3.new(this.br3.address, {from: this.userNet3, gasPrice: 20000000000, gas: 500_000});
+            let oppositeBridge = this.br1.address;
+            let to             = this.mp1.address;
+         try{
+             let tx =  await this.br3.addContractBind(from.address, oppositeBridge, to, {from: this.userNet3, gasPrice: 20000000000, gas: 200_000 });
             }catch(e){
                 // unusual process for reason: hardhat + HDWalletProvider
-                //console.log(e.tx);
+                //console.log(e.message);
+                assert.equal(e.receipt?.status === false ? undefined : e.receipt?.status, undefined, `Should be false by TO ALREADY EXIST`);
+                
+            }
+        });
+
+        it('Negative test: From network 1 to 2. Untrusted dex on bridge1', async () => {
+
+            this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1, gasPrice: 20000000000, gas: 500_000});
+            let res = (await this.mp2.testData({from: this.userNet2})).toString();
+           
+            let testData = Math.floor((Math.random() * 100) + 1);
+           try{
+             let tx = await this.mp1.sendRequestTestV2(testData, this.mp2.address, this.br2.address, chainId(argv.net2), {from: this.userNet1, gasPrice: 20000000000, gas: 300_000 });
+           }catch(e){
+                // unusual process for reason: hardhat + HDWalletProvider
+                //console.log(e.message);
                 assert.equal(e.receipt?.status === false ? undefined : e.receipt?.status, undefined, `Should be false by UNTRASTED DEX`);
                 
             }
-            
-
-
         });
+
 
     });
 })

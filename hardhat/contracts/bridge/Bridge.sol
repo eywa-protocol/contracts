@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.7.6 <=0.8.0;
+pragma solidity 0.8.0;
 
 import "./core/BridgeCore.sol";
 import "./interface/ListNodeInterface.sol";
-import "@openzeppelin/contracts/cryptography/ECDSA.sol";
 
 //TODO: onlyTrustedNode has worse filled data. I.e. In func NodeList#addNode the golang node registers himself
 // and this means every node who wants to start up can add himself in onlyTrustedNode list.
@@ -19,8 +18,8 @@ contract Bridge is BridgeCore {
         _;
     }
 
-    modifier onlyTrustedDex() {
-        require(dexBind[msg.sender] == true, "UNTRUSTED DEX");
+    modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
+        require(contractBind[msg.sender][oppositeBridge] == receiveSide, "UNTRUSTED CONTRACT");
         _;
     }
 
@@ -28,16 +27,15 @@ contract Bridge is BridgeCore {
         bytes memory _selector,
         address receiveSide,
         address oppositeBridge,
-        uint chainId
+        uint256 chainId
     )
-        public
-        onlyTrustedDex
-        returns (bytes32)
-    {
-        bytes32 requestId = prepareRqId(_selector, receiveSide, oppositeBridge, chainId);
+        external
+        onlyTrustedContract(receiveSide, oppositeBridge)
+        returns (bytes32){
 
+        bytes32 requestId = prepareRqId(_selector, oppositeBridge, chainId, receiveSide);
+        nonce[oppositeBridge][receiveSide] = nonce[oppositeBridge][receiveSide] + 1;
         emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
-
         return requestId;
     }
 
@@ -48,17 +46,13 @@ contract Bridge is BridgeCore {
         address bridgeFrom
     ) external onlyTrustedNode {
 
-        // TODO check and repair this function
-        // bytes32 recreateReqId = keccak256(abi.encodePacked(bridgeFrom, nonce[bridgeFrom], b, receiveSide, this, block.chainId));
-        // require(reqId == recreateReqId, 'CONSISTENCY FAILED');
-        require(dexBind[receiveSide] == true, 'UNTRUSTED DEX');
-
+        address senderSide = contractBind[receiveSide][bridgeFrom];
+        bytes32 recreateReqId = keccak256(abi.encodePacked(nonce[bridgeFrom][senderSide], b, block.chainid));
+        require(reqId == recreateReqId, 'CONSISTENCY FAILED');
         (bool success, bytes memory data) = receiveSide.call(b);
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'FAILED');
+        nonce[bridgeFrom][senderSide] = nonce[bridgeFrom][senderSide] + 1;
 
-        nonce[bridgeFrom] = nonce[bridgeFrom] + 1;
-
-//        emit ReceiveRequest(reqId, receiveSide, recreateReqId);
-        emit ReceiveRequest(reqId, receiveSide, reqId);
+        emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
     }
 }
