@@ -8,7 +8,7 @@ async function main() {
     console.log("Owner:", deployer.address);
 
     //Test token with permit
-    const _ERC20Permit = await ethers.getContractFactory("TestERC20Permit");
+    const _ERC20Permit = await ethers.getContractFactory("TestTokenPermit");
     const EYWA  = await _ERC20Permit.deploy("EYWA", "EYWA");
     await EYWA.deployed();
     console.log("EYWA ERC20 address:", EYWA.address);
