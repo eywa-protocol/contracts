@@ -22,9 +22,6 @@ async function main() {
     await mockDexPool.deployed();
     console.log(`MockDexPool address: ${mockDexPool.address}`);
 
-    this.tx = await bridge.updateDexBind(mockDexPool.address, true);
-    console.log("mockDexPool updateDexBind:", tx);
-
     networkConfig[network.name].nodeList   = nodeList.address;
     networkConfig[network.name].bridge     = bridge.address;
     networkConfig[network.name].mockDexPool= mockDexPool.address;
