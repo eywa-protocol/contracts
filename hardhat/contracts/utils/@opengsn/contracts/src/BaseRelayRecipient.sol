@@ -4,7 +4,7 @@
 // solhint-disable no-inline-assembly
 pragma solidity >=0.7.6;
 
-import "@opengsn/contracts/src/interfaces/IRelayRecipient.sol";
+import "./IRelayRecipient.sol";
 
 /**
  * A base contract to be inherited by any contract that want to receive relayed transactions

@@ -12,4 +12,5 @@ truffle/build/contracts
 networks_env
 
 .idea
+.vscode
 hardhat/helper-hardhat-config.json
