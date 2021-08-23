@@ -1,6 +1,8 @@
+let argv = null;
+if(process.env.TYPE_TEST === 'local') argv = {'typenet': 'devstand', 'net1': 'network1','net2': 'network2'};
+if(process.env.TYPE_TEST === 'testnet') argv = {'typenet': 'teststand', 'net1': 'rinkeby','net2': 'bsctestnet'};
 
 require('dotenv').config();
-const argv = require('minimist')(process.argv.slice(3), {string: ['typenet','net1', 'net2']});
 const Web3 = require('web3');
 const {checkoutProvider, makeGsnProvider, timeout, specialQuikHackProvider} = require('../../utils/helper');
 const { expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
