@@ -5,6 +5,7 @@ const { ZERO_ADDRESS } = constants;
 const { expect } = require('chai');
 
 const RelayerPool = artifacts.require('RelayerPool');
+const VaultMock = artifacts.require('VaultMock');
 const ERC20Mock = artifacts.require('ERC20Mock');
 
 const chai = require('chai');
@@ -64,6 +65,9 @@ contract('RelayerPool', function (accounts) {
       await this.rewardToken.mint(account, INITIAL_ERC20_ACCOUNT_BALANCE, {from: owner});
     }
 
+    this.vault = await VaultMock.new({from: owner});
+    await this.rewardToken.mint(this.vault.address, INITIAL_ERC20_ACCOUNT_BALANCE, {from: owner});
+
     this.relayerFeeNumerator = 100;  // 1%
     this.emissionAnnualRateNumerator = Math.floor((24 * 3600 * 365)/10);  // 10%
     this.relayerPool = await RelayerPool.new(
@@ -72,8 +76,10 @@ contract('RelayerPool', function (accounts) {
         this.depositToken.address,
         this.relayerFeeNumerator,
         this.emissionAnnualRateNumerator,
+        this.vault.address,
         {from: owner}
     );
+    await this.vault.approveInfinity(this.rewardToken.address, this.relayerPool.address);
 
     this.MIN_RELAYER_STAKING_TIME = await this.relayerPool.MIN_RELAYER_STAKING_TIME();
     this.MIN_STAKING_TIME = await this.relayerPool.MIN_STAKING_TIME();
@@ -86,7 +92,8 @@ contract('RelayerPool', function (accounts) {
       ZERO_ADDRESS,
       this.relayerFeeNumerator,
       this.emissionAnnualRateNumerator,
-        {from: owner}),
+      this.vault.address,
+      {from: owner}),
         "ZERO_ADDRESS"
     );
   });
@@ -98,7 +105,22 @@ contract('RelayerPool', function (accounts) {
       this.depositToken.address,
       this.relayerFeeNumerator,
       this.emissionAnnualRateNumerator,
-        {from: owner}),
+      this.vault.address,
+      {from: owner}),
+        "ZERO_ADDRESS"
+    );
+  });
+
+
+  it('reverts on vault zero address', async function () {
+    await expectRevert(RelayerPool.new(
+      owner,
+      this.rewardToken.address,
+      this.depositToken.address,
+      this.relayerFeeNumerator,
+      this.emissionAnnualRateNumerator,
+      ZERO_ADDRESS,
+      {from: owner}),
         "ZERO_ADDRESS"
     );
   });
@@ -517,14 +539,14 @@ contract('RelayerPool', function (accounts) {
 
   it('setRelayerFeeNumerator works', async function () {
       const user = owner;
-      const value = 100;  // 1%
+      const value = toBN(100);  // 1%
       const tx = await this.relayerPool.setRelayerFeeNumerator(value, {from: user});
       expectEvent(
         tx,
         'RelayerFeeNumeratorSet',
         {
           'sender': user,
-          'value': user,
+          'value': value,
         }
     );
   });
@@ -577,8 +599,6 @@ contract('RelayerPool', function (accounts) {
           'lockTill': toBN(await getTxTimestamp(tx)).add(this.MIN_STAKING_TIME),
         }
     );
-
-
-  })
+  });
 
 });
