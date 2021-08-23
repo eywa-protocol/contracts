@@ -158,7 +158,7 @@ contract NodeRegistry is BaseRelayRecipient {
             address(EYWA),  /* _rewardToken todo discuss with vadim */
             _node.relayerFeeNumerator,
             _node.emissionRateNumerator,
-            address(0)  // vault
+            _msgSender()  // vault
         );
         uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
         require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");
