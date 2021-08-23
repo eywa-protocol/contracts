@@ -14,7 +14,7 @@ npm: copy_configs
 			fi;
 
 wrappers: npm compile copy_configs
-	go run wrappers-builder/main.go --json hardhat/artifacts/@openzeppelin/contracts-newone/token/ERC20/extensions/draft-IERC20Permit.sol --pkg wrappers --out wrappers
+	go run wrappers-builder/main.go --json hardhat/artifacts/@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/Bridge.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/Forwarder.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/NodeRegistry.sol --pkg wrappers --out wrappers
