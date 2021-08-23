@@ -26,7 +26,7 @@ contract Forwarder is IForwarder {
         return nonces[from];
     }
 
-    constructor() public {
+    constructor() {
         string memory requestType = string(abi.encodePacked("ForwardRequest(", GENERIC_PARAMS, ")"));
         registerRequestTypeInternal(requestType);
     }

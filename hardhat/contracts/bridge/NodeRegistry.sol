@@ -153,6 +153,7 @@ contract NodeRegistry is BaseRelayRecipient {
         RelayerPool relayerPool = new RelayerPool(
             _node.owner,
             address(EYWA),  /* _depositToken*/
+            address(EYWA),  /* _rewardToken todo discuss with vadim */
             _node.relayerFeeNumerator,
             _node.emissionRateNumerator
         );

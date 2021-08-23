@@ -1,4 +1,4 @@
-const ethers = require('hardhat');
+const { ethers } = require('hardhat');
 const { constants, expectEvent, expectRevert, BN } = require('@openzeppelin/test-helpers');
 const { ZERO_ADDRESS } = constants;
 
@@ -7,10 +7,34 @@ const { expect } = require('chai');
 const RelayerPool = artifacts.require('RelayerPool');
 const ERC20Mock = artifacts.require('ERC20Mock');
 
+const chai = require('chai');
+chai.use(require('chai-bn')(BN));
 
 async function timeTravelFor(secs) {
     await ethers.provider.send("evm_increaseTime", [secs]);
     await ethers.provider.send("evm_mine");
+}
+
+function Enum (...options) {
+  return Object.fromEntries(options.map((key, i) => [ key, new BN(i) ]));
+}
+
+const RelayerStatus = Enum(
+    'Inactive',
+    'Online',
+    'Offline',
+    'BlackListed'
+);
+
+
+async function getTxTimestamp(tx) {
+    return await getBlockTimestamp(tx.receipt.blockNumber);
+}
+
+
+async function getBlockTimestamp(blockNumber) {
+    const block = await ethers.provider.getBlock(blockNumber);
+    return block.timestamp;
 }
 
 
@@ -20,9 +44,15 @@ async function timeTravelAt(timestamp) {
 }
 
 
+function toBN(val) {
+    return new BN(val);
+}
+
+
 contract('RelayerPool', function (accounts) {
-  const [owner, other] = accounts;
-  const DECIMALS =  new web3.utils.BN(10).pow(new web3.utils.BN(18));
+  const owner = accounts[0];
+  const others = accounts.slice(1);
+  const DECIMALS =  toBN(10).pow(toBN(18));
   const INITIAL_ERC20_ACCOUNT_BALANCE = new web3.utils.BN(100).mul(DECIMALS);
 
   beforeEach(async function () {
@@ -35,14 +65,18 @@ contract('RelayerPool', function (accounts) {
     }
 
     this.relayerFeeNumerator = 100;  // 1%
-    this.emissionRateNumerator = 100;
+    this.emissionAnnualRateNumerator = Math.floor((24 * 3600 * 365)/10);  // 10%
     this.relayerPool = await RelayerPool.new(
         owner,
         this.rewardToken.address,
         this.depositToken.address,
         this.relayerFeeNumerator,
-        this.emissionRateNumerator,
-        {from: owner});
+        this.emissionAnnualRateNumerator,
+        {from: owner}
+    );
+
+    this.MIN_RELAYER_STAKING_TIME = await this.relayerPool.MIN_RELAYER_STAKING_TIME();
+    this.MIN_STAKING_TIME = await this.relayerPool.MIN_STAKING_TIME();
   });
 
   it('reverts on depositToken zero address', async function () {
@@ -51,7 +85,7 @@ contract('RelayerPool', function (accounts) {
       this.rewardToken.address,
       ZERO_ADDRESS,
       this.relayerFeeNumerator,
-      this.emissionRateNumerator,
+      this.emissionAnnualRateNumerator,
         {from: owner}),
         "ZERO_ADDRESS"
     );
@@ -63,7 +97,7 @@ contract('RelayerPool', function (accounts) {
       ZERO_ADDRESS,
       this.depositToken.address,
       this.relayerFeeNumerator,
-      this.emissionRateNumerator,
+      this.emissionAnnualRateNumerator,
         {from: owner}),
         "ZERO_ADDRESS"
     );
@@ -73,10 +107,18 @@ contract('RelayerPool', function (accounts) {
     expect(await this.relayerPool.owner()).to.equal(owner);
   });
 
-  it('deposit owner', async function () {
+  it('min staking time', async function () {
+    expect(await this.relayerPool.MIN_STAKING_TIME()).to.be.bignumber.equal(toBN(2 * 7 * 24 * 3600));
+  });
+
+  it('min relayer staking time', async function () {
+    expect(await this.relayerPool.MIN_RELAYER_STAKING_TIME()).to.be.bignumber.equal(toBN(4 * 7 * 24 * 3600));
+  });
+
+  it('deposit by the owner', async function () {
     const user = owner;
-    const depositAmount = new web3.utils.BN(10).mul(DECIMALS);
-    const tx1 = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: user})
+    const depositAmount = toBN(10).mul(DECIMALS);
+    const txApprove = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: user});
     const tx = await this.relayerPool.deposit(depositAmount, {from: user});
     expectEvent(
         tx,
@@ -84,15 +126,40 @@ contract('RelayerPool', function (accounts) {
         {
           'user': user,
           'amount': depositAmount,
-          'depositId': 0,
-          'lockTill': tx.timestamp + (await this.relayerPool.MIN_RELAYER_STAKING_TIME())
+          'id': toBN(0),
+          'lockTill': toBN(await getTxTimestamp(tx)).add(this.MIN_RELAYER_STAKING_TIME),
         }
     );
   });
 
-  it('deposit other user', async function () {
-    const user = other[0];
-    const depositAmount = new web3.utils.BN(10).mul(DECIMALS);
+  it('deposit other user with no owner stake', async function () {
+    const user = others[0];
+    const depositAmount = toBN(10).mul(DECIMALS);
+    const txApprove = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: user});
+    await expectRevert(
+        this.relayerPool.deposit(depositAmount, {from: user}),
+        'small owner stake (ownerStaker*6 >= totalStake)',
+    );
+  });
+
+  it('deposit other user with the owner stake', async function () {
+    const depositAmount = toBN(10).mul(DECIMALS);
+
+    const txApproveOwner = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: owner});
+    const txOwner = await this.relayerPool.deposit(depositAmount, {from: owner});
+    expectEvent(
+        txOwner,
+        'DepositPut',
+        {
+          'user': owner,
+          'amount': depositAmount,
+          'id': toBN(0),
+          'lockTill': toBN(await getTxTimestamp(txOwner)).add(this.MIN_RELAYER_STAKING_TIME),
+        }
+    );
+
+    const user = others[0];
+    const txApprove = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: user});
     const tx = await this.relayerPool.deposit(depositAmount, {from: user});
     expectEvent(
         tx,
@@ -100,8 +167,8 @@ contract('RelayerPool', function (accounts) {
         {
           'user': user,
           'amount': depositAmount,
-          'depositId': 0,
-          'lockTill': tx.timestamp + (await this.relayerPool.MIN_STAKING_TIME()),
+          'id': toBN(1),
+          'lockTill': toBN(await getTxTimestamp(tx)).add(this.MIN_STAKING_TIME),
         }
     );
   });
@@ -109,22 +176,23 @@ contract('RelayerPool', function (accounts) {
   it('full withdraw by owner', async function () {
     let tx;
     const user = owner;
-    const depositAmount = new web3.utils.BN(10).mul(DECIMALS);
+    const depositAmount = toBN(10).mul(DECIMALS);
+    const txApprove = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: user});
     tx = await this.relayerPool.deposit(depositAmount, {from: user});
-    const expectedLockTill = tx.timestamp + (await this.relayerPool.MIN_STAKING_TIME());
-    const expectedDepositId = 0;
+    const expectedLockTill = toBN(await getTxTimestamp(tx)).add(this.MIN_RELAYER_STAKING_TIME);
+    const expectedDepositId = toBN(0);
     expectEvent(
         tx,
         'DepositPut',
         {
           'user': user,
           'amount': depositAmount,
-          'depositId': expectedDepositId,
+          'id': expectedDepositId,
           'lockTill': expectedLockTill,
         }
     );
 
-    await timeTravelAt(expectedLockTill);
+    await timeTravelAt(expectedLockTill.toNumber());
 
     tx = await this.relayerPool.withdraw(expectedDepositId, depositAmount, {from: user});
     expectEvent(
@@ -133,77 +201,333 @@ contract('RelayerPool', function (accounts) {
         {
           'user': user,
           'amount': depositAmount,
-          'depositId': 0,
-          'lockTill': lockTill,
-          'rest': 0,
+          'id': toBN(0),
+          'rest': toBN(0),
         }
     );
   });
 
-  it('full withdraw by user', async function () {/*todo*/});
-
-  it('partial withdraw', async function () {
+  it('full withdraw by user', async function () {
     let tx;
-    const user = owner;
-    const depositAmount = new web3.utils.BN(10).mul(DECIMALS);
+    const depositAmount = toBN(10).mul(DECIMALS);
+
+    const txApproveOwner = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: owner});
+    const txOwner = await this.relayerPool.deposit(depositAmount, {from: owner});
+    expectEvent(
+        txOwner,
+        'DepositPut',
+        {
+          'user': owner,
+          'amount': depositAmount,
+          'id': toBN(0),
+          'lockTill': toBN(await getTxTimestamp(txOwner)).add(this.MIN_RELAYER_STAKING_TIME),
+        }
+    );
+
+    const user = others[0];
+    const txApprove = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: user});
     tx = await this.relayerPool.deposit(depositAmount, {from: user});
-    const expectedLockTill = tx.timestamp + (await this.relayerPool.MIN_STAKING_TIME());
-    const expectedDepositId = 0;
+    const expectedDepositId = toBN(1);
     expectEvent(
         tx,
         'DepositPut',
         {
           'user': user,
           'amount': depositAmount,
-          'depositId': expectedDepositId,
-          'lockTill': expectedLockTill,
+          'id': expectedDepositId,
+          'lockTill': toBN(await getTxTimestamp(tx)).add(this.MIN_STAKING_TIME),
         }
     );
 
-    await timeTravelAt(expectedLockTill);
-
-    tx = await this.relayerPool.withdraw(expectedDepositId, new web3.utils.BN(2).mul(DECIMALS), {from: user});
+    await timeTravelAt(toBN(await getTxTimestamp(tx)).add(this.MIN_STAKING_TIME).toNumber());
+    tx = await this.relayerPool.withdraw(expectedDepositId, depositAmount, {from: user});
     expectEvent(
         tx,
         'DepositWithdrawn',
         {
           'user': user,
-          'amount': new web3.utils.BN(2).mul(DECIMALS),
-          'depositId': 0,
-          'lockTill': lockTill,
-          'rest': new web3.utils.BN(8).mul(DECIMALS),
+          'amount': depositAmount,
+          'id': expectedDepositId,
+          'rest': toBN(0),
         }
     );
   });
 
-  it('withdraw before unlock reverts', async function () {
-        let tx;
-    const user = owner;
-    const depositAmount = new web3.utils.BN(10).mul(DECIMALS);
+  it('partial withdraw by owner FAILED, rest owner deposit is not enough', async function () {
+    let tx;
+    const depositAmount = toBN(10).mul(DECIMALS);
+
+    const txApproveOwner = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: owner});
+    const txOwner = await this.relayerPool.deposit(depositAmount, {from: owner});
+    const expectedOwnerDepositId = toBN(0);
+    expectEvent(
+        txOwner,
+        'DepositPut',
+        {
+          'user': owner,
+          'amount': depositAmount,
+          'id': expectedOwnerDepositId,
+          'lockTill': toBN(await getTxTimestamp(txOwner)).add(this.MIN_RELAYER_STAKING_TIME),
+        }
+    );
+
+    const user = others[0];
+    const txApprove = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: user});
     tx = await this.relayerPool.deposit(depositAmount, {from: user});
-    const expectedLockTill = tx.timestamp + (await this.relayerPool.MIN_STAKING_TIME());
-    const expectedDepositId = 0;
+    const expectedUserDepositId = toBN(1);
     expectEvent(
         tx,
         'DepositPut',
         {
           'user': user,
           'amount': depositAmount,
-          'depositId': expectedDepositId,
+          'id': expectedUserDepositId,
+          'lockTill': toBN(await getTxTimestamp(tx)).add(this.MIN_STAKING_TIME),
+        }
+    );
+
+    await timeTravelAt(toBN(await getTxTimestamp(txOwner)).add(this.MIN_RELAYER_STAKING_TIME).toNumber());
+    const withdrawAmount = depositAmount.mul(toBN(9)).div(toBN(10));  // 90% - FAIL
+    await expectRevert(
+        this.relayerPool.withdraw(expectedOwnerDepositId, withdrawAmount, {from: owner}),
+        "small owner stake (ownerStaker*6 >= totalStake)",
+    );
+  })
+
+  it('getDeposit works', async function () {
+      let tx;
+      const depositAmount = toBN(10).mul(DECIMALS);
+
+      const ownerDepositId = toBN(0);
+      const txApproveOwner = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: owner});
+      const txOwner = await this.relayerPool.deposit(depositAmount, {from: owner});
+      expectEvent(
+          txOwner,
+          'DepositPut',
+          {
+              'user': owner,
+              'amount': depositAmount,
+              'id': toBN(0),
+              'lockTill': toBN(await getTxTimestamp(txOwner)).add(this.MIN_RELAYER_STAKING_TIME),
+          }
+      );
+
+      let {user, amount, lockTill} = await this.relayerPool.getDeposit(toBN(0));
+      expect(user).to.be.equal(owner);
+      expect(amount).to.be.bignumber.equal(depositAmount);
+      expect(lockTill).to.be.bignumber.equal(toBN(await getTxTimestamp(txOwner)).add(this.MIN_RELAYER_STAKING_TIME));
+  });
+
+    it('getDeposit returns zeros for non-exist', async function () {
+      const nonExist = toBN(9000);
+      let {user, amount, lockTill} = await this.relayerPool.getDeposit(nonExist);
+      expect(user).to.be.equal(ZERO_ADDRESS);
+      expect(amount).to.be.bignumber.equal(toBN(0));
+      expect(lockTill).to.be.bignumber.equal(toBN(0));
+  });
+
+  it('partial withdraw by owner OK, rest owner deposit is enough', async function () {
+    let tx;
+    const depositAmount = toBN(10).mul(DECIMALS);
+
+    const ownerDepositId = toBN(0);
+    const txApproveOwner = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: owner});
+    const txOwner = await this.relayerPool.deposit(depositAmount, {from: owner});
+    expectEvent(
+        txOwner,
+        'DepositPut',
+        {
+          'user': owner,
+          'amount': depositAmount,
+          'id': toBN(0),
+          'lockTill': toBN(await getTxTimestamp(txOwner)).add(this.MIN_RELAYER_STAKING_TIME),
+        }
+    );
+
+    const user = others[0];
+    const txApprove = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: user});
+    tx = await this.relayerPool.deposit(depositAmount, {from: user});
+    const expectedDepositId = toBN(1);
+    expectEvent(
+        tx,
+        'DepositPut',
+        {
+          'user': user,
+          'amount': depositAmount,
+          'id': expectedDepositId,
+          'lockTill': toBN(await getTxTimestamp(tx)).add(this.MIN_STAKING_TIME),
+        }
+    );
+
+    await timeTravelAt(toBN(await getTxTimestamp(txOwner)).add(this.MIN_RELAYER_STAKING_TIME).toNumber());
+    const withdrawAmount = depositAmount.mul(toBN(5)).div(toBN(10));  // 40% - OK
+    tx = await this.relayerPool.withdraw(ownerDepositId, withdrawAmount, {from: owner});
+    expectEvent(
+        tx,
+        'DepositWithdrawn',
+        {
+          'user': owner,
+          'amount': withdrawAmount,
+          'id': ownerDepositId,
+          'rest': depositAmount.sub(withdrawAmount),
+        }
+    );
+  })
+
+  it('partial withdraw by user', async function () {
+    let tx;
+    const depositAmount = toBN(10).mul(DECIMALS);
+
+    const txApproveOwner = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: owner});
+    const txOwner = await this.relayerPool.deposit(depositAmount, {from: owner});
+    expectEvent(
+        txOwner,
+        'DepositPut',
+        {
+          'user': owner,
+          'amount': depositAmount,
+          'id': toBN(0),
+          'lockTill': toBN(await getTxTimestamp(txOwner)).add(this.MIN_RELAYER_STAKING_TIME),
+        }
+    );
+
+    const user = others[0];
+    const txApprove = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: user});
+    tx = await this.relayerPool.deposit(depositAmount, {from: user});
+    const expectedDepositId = toBN(1);
+    expectEvent(
+        tx,
+        'DepositPut',
+        {
+          'user': user,
+          'amount': depositAmount,
+          'id': expectedDepositId,
+          'lockTill': toBN(await getTxTimestamp(tx)).add(this.MIN_STAKING_TIME),
+        }
+    );
+
+    await timeTravelAt(toBN(await getTxTimestamp(tx)).add(this.MIN_STAKING_TIME).toNumber());
+    const withdrawAmount = depositAmount.mul(toBN(4)).div(toBN(10));
+    tx = await this.relayerPool.withdraw(expectedDepositId, withdrawAmount, {from: user});
+    expectEvent(
+        tx,
+        'DepositWithdrawn',
+        {
+          'user': user,
+          'amount': withdrawAmount,
+          'id': expectedDepositId,
+          'rest': depositAmount.sub(withdrawAmount),
+        }
+    );
+  });
+
+  it('withdraw before unlock by owner failed', async function () {
+    let tx;
+    const depositAmount = toBN(10).mul(DECIMALS);
+    const txApprove = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: owner});
+    tx = await this.relayerPool.deposit(depositAmount, {from: owner});
+    const expectedLockTill = toBN(await getTxTimestamp(tx)).add(this.MIN_RELAYER_STAKING_TIME);
+    const expectedDepositId = toBN(0);
+    expectEvent(
+        tx,
+        'DepositPut',
+        {
+          'user': owner,
+          'amount': depositAmount,
+          'id': expectedDepositId,
           'lockTill': expectedLockTill,
         }
     );
 
-    await timeTravelAt(expectedLockTill-1);
+    await timeTravelAt(expectedLockTill.toNumber() - 10);  // unlock did not happen
+    await expectRevert(
+        this.relayerPool.withdraw(expectedDepositId, depositAmount, {from: owner}),
+        "DEPOSIT_IS_LOCKED",
+    );
+  })
+
+  it('withdraw by user DEPOSIT_IS_LOCKED', async function () {
+    let tx;
+    const depositAmount = toBN(10).mul(DECIMALS);
+
+    const txApproveOwner = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: owner});
+    const txOwner = await this.relayerPool.deposit(depositAmount, {from: owner});
+    expectEvent(
+        txOwner,
+        'DepositPut',
+        {
+          'user': owner,
+          'amount': depositAmount,
+          'id': toBN(0),
+          'lockTill': toBN(await getTxTimestamp(txOwner)).add(this.MIN_RELAYER_STAKING_TIME),
+        }
+    );
+
+    const user = others[0];
+    const txApprove = await this.depositToken.approve(this.relayerPool.address, depositAmount, {from: user});
+    tx = await this.relayerPool.deposit(depositAmount, {from: user});
+    const expectedDepositId = toBN(1);
+    expectEvent(
+        tx,
+        'DepositPut',
+        {
+          'user': user,
+          'amount': depositAmount,
+          'id': expectedDepositId,
+          'lockTill': toBN(await getTxTimestamp(tx)).add(this.MIN_STAKING_TIME),
+        }
+    );
+
+    await timeTravelAt(toBN(await getTxTimestamp(tx)).add(this.MIN_STAKING_TIME).toNumber() - 10);  // unlock did not happen
     await expectRevert(
         this.relayerPool.withdraw(expectedDepositId, depositAmount, {from: user}),
-        'DEPOSIT_IS_LOCKED',
+        "DEPOSIT_IS_LOCKED",
+    );
+  })
+
+
+  it('default RelayerStatus', async function () {
+      const status = await this.relayerPool.relayerStatus();
+      expect(status).to.be.bignumber.equal(RelayerStatus.Inactive);
+  });
+
+  it('setRelayerStatus works', async function () {
+      const tx = await this.relayerPool.setRelayerStatus(RelayerStatus.Online, {from: owner});  // online
+      const status = await this.relayerPool.relayerStatus();
+      expect(status).to.be.bignumber.equal(RelayerStatus.Online);
+  });
+
+  // it('setRelayerStatus invalid value', async function () {
+  //     const tx = await this.relayerPool.setRelayerStatus(toBN(42), {from: owner});
+  // });
+
+  it('setRelayerStatus sameValue reverts', async function () {
+      await expectRevert(
+          this.relayerPool.setRelayerStatus(RelayerStatus.Inactive, {from: owner}),
+          'SAME_VALUE',
+      );
+  });
+
+  it('setRelayerStatus not registry reverts', async function () {
+      await expectRevert(
+          this.relayerPool.setRelayerStatus(RelayerStatus.Online, {from: others[1]}),
+          'only registry',
+      );
+  });
+
+  it('setRelayerFeeNumerator works', async function () {
+      const user = owner;
+      const value = 100;  // 1%
+      const tx = await this.relayerPool.setRelayerFeeNumerator(value, {from: user});
+      expectEvent(
+        tx,
+        'RelayerFeeNumeratorSet',
+        {
+          'sender': user,
+          'value': user,
+        }
     );
   });
-  it('setRelayerStatus works', async function () {/*todo*/});
-  it('setRelayerStatus sameValue reverts', async function () {/*todo*/});
-  it('setRelayerStatus not registry reverts', async function () {/*todo*/});
-  it('setRelayerFeeNumerator works', async function () {/*todo*/});
 
   it('setRelayerFeeNumerator FEE_IS_TOO_LOW', async function () {
     await expectRevert(
@@ -214,45 +538,47 @@ contract('RelayerPool', function (accounts) {
 
   it('setRelayerFeeNumerator FEE_IS_TOO_HIGH', async function () {
     await expectRevert(
-        this.relayerPool.setRelayerFeeNumerator(9000, {from: owner}),
+        this.relayerPool.setRelayerFeeNumerator(10000 + 1, {from: owner}),
         'FEE_IS_TOO_HIGH',
     );
   });
-  it('setRelayerFeeNumerator not registry reverts', async function () {/*todo*/});
+  //
+  // it('setRelayerFeeNumerator not registry reverts', async function () {/*todo*/});
+  //
 
-  it('harvestReward', async function () {
-    let tx;
-    const user = owner;
-    const depositAmount = new web3.utils.BN(10).mul(DECIMALS);
-    tx = await this.relayerPool.deposit(depositAmount, {from: user});
-    const expectedLockTill = tx.timestamp + (await this.relayerPool.MIN_STAKING_TIME());
-    const expectedDepositId = 0;
+  it('harvest', async function () {
+    const depositOwnerAmount = toBN(10).mul(DECIMALS);
+
+    const txApproveOwner = await this.depositToken.approve(this.relayerPool.address, depositOwnerAmount, {from: owner});
+    const txOwner = await this.relayerPool.deposit(depositOwnerAmount, {from: owner});
+    expectEvent(
+        txOwner,
+        'DepositPut',
+        {
+          'user': owner,
+          'amount': depositOwnerAmount,
+          'id': toBN(0),
+          'lockTill': toBN(await getTxTimestamp(txOwner)).add(this.MIN_RELAYER_STAKING_TIME),
+        }
+    );
+
+    const user = others[0];
+    const depositUserAmount = toBN(5).mul(DECIMALS);
+    const txApprove = await this.depositToken.approve(this.relayerPool.address, depositUserAmount, {from: user});
+    tx = await this.relayerPool.deposit(depositUserAmount, {from: user});
+    const expectedDepositId = toBN(1);
     expectEvent(
         tx,
         'DepositPut',
         {
           'user': user,
-          'amount': depositAmount,
-          'depositId': expectedDepositId,
-          'lockTill': expectedLockTill,
+          'amount': depositUserAmount,
+          'id': expectedDepositId,
+          'lockTill': toBN(await getTxTimestamp(tx)).add(this.MIN_STAKING_TIME),
         }
     );
 
-    const period = 100;
-    timeTravelFor(period);
 
-    tx = await this.relayerPool.harvest({from: owner});
-    expectEvent(
-        tx,
-        'Harvest',
-        {
-          'timestamp': tx.timestamp,
-          'harvestForPeriod': period,
-          'profit': expectedDepositId,
-          'lockTill': expectedLockTill,
-        }
-    );
+  })
 
-    await timeTravelAt(expectedLockTill);
-  });
 });
