@@ -203,7 +203,7 @@ contract RelayerPool is  ReentrancyGuard {
     function getLastHarvestRewardTimestamp() external view returns (uint256) {
         return lastHarvestRewardTimestamp;
     }
-
+    //todo если валидатор плохой то перебросить средства одним коллом
     function harvestReward() external {
         // todo discuss
         // require(block.timestamp - _lastHarvestRewardTimestamp >= 24*3600)
