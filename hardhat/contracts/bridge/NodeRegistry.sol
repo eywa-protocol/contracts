@@ -24,6 +24,7 @@ contract NodeRegistry is BaseRelayRecipient {
         string  blsPubKey;
         address pool;
         uint256 version;
+        uint256 nodeId;
         uint256 relayerFeeNumerator;
         uint256 emissionRateNumerator;
         RelayerPool.RelayerStatus status; 
@@ -79,6 +80,7 @@ contract NodeRegistry is BaseRelayRecipient {
         require(node.nodeIdAddress != address(0), "0 address");
         node.relayerFeeNumerator = 100;    // TODO
         node.emissionRateNumerator = 1000; // TODO
+        node.nodeId = nodes.length();
         nodeRegistry[node.nodeIdAddress] = node;
         nodeRegistry[node.nodeIdAddress].status = RelayerPool.RelayerStatus.Online;
         nodes.add(node.nodeIdAddress);
