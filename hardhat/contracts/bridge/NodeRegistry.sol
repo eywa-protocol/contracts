@@ -2,8 +2,8 @@
 pragma solidity 0.8.0;
 
 import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol";
-import '../utils/@opengsn/contracts/src/BaseRelayRecipient.sol';
-import './RelayerPool.sol';
+import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
+import "./RelayerPool.sol";
 
 //  Создать новую ноду-релеер, требует наличия определенного залога COLLATERAL и
 //  автоматически создаёт новый смартконтракт Relayer pool, привязанный к этой ноде,
@@ -13,7 +13,6 @@ import './RelayerPool.sol';
 //  а также ему нужно передать Relayer key и другие параметры из пункта 4 из процесса регистрации
 
 contract NodeRegistry is BaseRelayRecipient {
-
     using EnumerableSet for EnumerableSet.AddressSet;
     using SafeERC20 for IERC20;
 
@@ -27,26 +26,34 @@ contract NodeRegistry is BaseRelayRecipient {
         uint256 nodeId;
         uint256 relayerFeeNumerator;
         uint256 emissionRateNumerator;
-        RelayerPool.RelayerStatus status; 
+        RelayerPool.RelayerStatus status;
         RelayerPool.RelayerType nodeType;
     }
 
     address public EYWA;
     address public consensus;
-    uint256 public constant MIN_COLLATERAL = 1 ether;  //TODO
+    uint256 public constant MIN_COLLATERAL = 1 ether; //TODO discuss
 
     EnumerableSet.AddressSet nodes;
     mapping(address => Node) public nodeRegistry;
-
     mapping(address => mapping(address => bool)) public trustListForDex;
 
-    event AddedNode(address nodeIdAddress);
+    event RelayerStatusSet(address indexed nodeIdAddress, RelayerPool.RelayerStatus indexed status);
+    event CreatedRelayer(
+        address indexed nodeIdAddress,
+        uint256 indexed nodeId,
+        address indexed relayerPool,
+        address indexed owner
+    );
 
     constructor(
         address _EYWA,
         address _consensus,
         address _forwarder
     ) {
+        require(_EYWA != address(0), Errors.ZERO_ADDRESS);
+        require(_consensus != address(0), Errors.ZERO_ADDRESS);
+        require(_forwarder != address(0), Errors.ZERO_ADDRESS);
         EYWA = _EYWA;
         consensus = _consensus;
         trustedForwarder = _forwarder;
@@ -75,11 +82,11 @@ contract NodeRegistry is BaseRelayRecipient {
 
     //TODO: discuss about check: nodeRegistry[_blsPointAddr] == address(0)
     function addNode(Node memory node) internal isNewNode(node.nodeIdAddress) {
-        require(node.owner != address(0), "0 address");
-        require(node.nodeWallet != address(0), "0 address");
-        require(node.nodeIdAddress != address(0), "0 address");
-        node.relayerFeeNumerator = 100;    // TODO
-        node.emissionRateNumerator = 1000; // TODO
+        require(node.owner != address(0), Errors.ZERO_ADDRESS);
+        require(node.nodeWallet != address(0), Errors.ZERO_ADDRESS);
+        require(node.nodeIdAddress != address(0), Errors.ZERO_ADDRESS);
+        node.relayerFeeNumerator = 100; // test only
+        node.emissionRateNumerator = 1000; // test only
         node.nodeId = nodes.length();
         nodeRegistry[node.nodeIdAddress] = node;
         nodeRegistry[node.nodeIdAddress].status = RelayerPool.RelayerStatus.Online;
@@ -87,7 +94,7 @@ contract NodeRegistry is BaseRelayRecipient {
         //TODO: discuss about pemission for certain bridge
         trustListForDex[node.nodeWallet][address(0)] = true;
 
-        emit AddedNode(node.nodeIdAddress);
+        emit CreatedRelayer(node.nodeIdAddress, node.nodeId, node.relayerPool, node.owner);
     }
 
     function getNode(address _nodeIdAddress) external view returns (Node memory) {
@@ -96,10 +103,10 @@ contract NodeRegistry is BaseRelayRecipient {
 
     function getNodes() external view returns (Node[] memory) {
         Node[] memory allNodes = new Node[](nodes.length());
-        for(uint i = 0; i<nodes.length();i++){
+        for (uint256 i = 0; i < nodes.length(); i++) {
             allNodes[i] = nodeRegistry[nodes.at(i)];
         }
-         return allNodes;
+        return allNodes;
     }
 
     function getBLSPubKeys() external view returns (string[] memory) {
@@ -132,6 +139,7 @@ contract NodeRegistry is BaseRelayRecipient {
         return trustListForDex[_node][address(0)];
     }
 
+    //TODO
     function setRelayerFee(uint256 _fee, address _nodeIdAddress) external {
         require(_msgSender() == nodeRegistry[_nodeIdAddress].owner, "only node owner");
         RelayerPool(nodeRegistry[_nodeIdAddress].pool).setRelayerFeeNumerator(_fee);
@@ -142,7 +150,7 @@ contract NodeRegistry is BaseRelayRecipient {
         require(nodeRegistry[_nodeIdAddress].status != _status, Errors.SAME_VALUE);
         nodeRegistry[_nodeIdAddress].status = _status;
         RelayerPool(nodeRegistry[_nodeIdAddress].pool).setRelayerStatus(_status);
-        // emit RelayerStatusSet(_status);
+        emit RelayerStatusSet(_nodeIdAddress, _status);
     }
 
     function createRelayer(
@@ -154,18 +162,17 @@ contract NodeRegistry is BaseRelayRecipient {
     ) external {
         RelayerPool relayerPool = new RelayerPool(
             _node.owner,
-            address(EYWA),  /* _depositToken*/
-            address(EYWA),  /* _rewardToken todo discuss with vadim */
+            address(EYWA), /* _depositToken*/
+            address(EYWA), /* _rewardToken todo discuss with vadim */
             _node.relayerFeeNumerator,
             _node.emissionRateNumerator,
-            _msgSender()  // vault
+            _msgSender() // vault
         );
         uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
         require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");
         IERC20Permit(EYWA).permit(_msgSender(), address(this), nodeBalance, _deadline, _v, _r, _s);
         IERC20(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
         addNode(_node);
-        
     }
 
     //todo если валидатор плохой то перебросить средства одним коллом с одного relayerPool на другой
