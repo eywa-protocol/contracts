@@ -43,7 +43,7 @@ contract NodeRegistry is BaseRelayRecipient {
         address indexed nodeIdAddress,
         uint256 indexed nodeId,
         address indexed relayerPool,
-        address indexed owner
+        address owner
     );
 
     constructor(
@@ -94,7 +94,7 @@ contract NodeRegistry is BaseRelayRecipient {
         //TODO: discuss about pemission for certain bridge
         trustListForDex[node.nodeWallet][address(0)] = true;
 
-        emit CreatedRelayer(node.nodeIdAddress, node.nodeId, node.relayerPool, node.owner);
+        emit CreatedRelayer(node.nodeIdAddress, node.nodeId, node.pool, node.owner);
     }
 
     function getNode(address _nodeIdAddress) external view returns (Node memory) {
