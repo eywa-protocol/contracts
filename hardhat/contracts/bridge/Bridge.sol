@@ -2,7 +2,7 @@
 pragma solidity >=0.7.6 <=0.8.0;
 
 import "./core/BridgeCore.sol";
-import "./interface/ListNodeInterface.sol";
+import "./interface/INodeRegistry.sol";
 import "@openzeppelin/contracts/cryptography/ECDSA.sol";
 
 //TODO: onlyTrustedNode has worse filled data. I.e. In func NodeList#addNode the golang node registers himself
@@ -15,7 +15,7 @@ contract Bridge is BridgeCore {
     }
 
     modifier onlyTrustedNode() {
-        require(ListNodeInterface(_listNode).checkPermissionTrustList(msg.sender) == true, "Only trusted node can invoke");
+        require(INodeRegistry(_listNode).checkPermissionTrustList(msg.sender) == true, "Only trusted node can invoke");
         _;
     }
 
