@@ -19,9 +19,10 @@ contract NodeRegistry is BaseRelayRecipient {
     struct Node {
         address owner;
         address nodeWallet;
+        address vault;
+        address pool;
         address nodeIdAddress;
         string  blsPubKey;
-        address pool;
         uint256 version;
         uint256 nodeId;
         uint256 relayerFeeNumerator;
@@ -166,12 +167,13 @@ contract NodeRegistry is BaseRelayRecipient {
             address(EYWA), /* _rewardToken todo discuss with vadim */
             _node.relayerFeeNumerator,
             _node.emissionRateNumerator,
-            _msgSender() // vault
+            _node.vault // vault
         );
         uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
         require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");
         IERC20Permit(EYWA).permit(_msgSender(), address(this), nodeBalance, _deadline, _v, _r, _s);
         IERC20(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
+        _node.pool = address(relayerPool);
         addNode(_node);
     }
 
