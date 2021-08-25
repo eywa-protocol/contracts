@@ -35,10 +35,15 @@ npx hardhat run ./scripts/amm_pool/deploy.js --network ${net}
 echo $(getField ${net}.env_file[0])
 echo $(getField ${net}.env_file[1])
 
+npx hardhat run ./scripts/amm_pool/createRepresentation.js --network ${net}
+done
+
+for net in ${nets//\,/ }
+do
+echo 'init into:' ${net}
 ##
 ## init
 ##
 npx hardhat run ./scripts/bridge/updateDexBind.js  --network ${net}
-npx hardhat run ./scripts/amm_pool/createRepresentation.js --network ${net}
 
 done

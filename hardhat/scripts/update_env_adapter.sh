@@ -5,7 +5,7 @@ MODE=${1}
 FILENAME=${2}
 if [[ "$MODE" =~ ^(create)$ ]]
 then
- rm ../${FILENAME} 2> /dev/null
+ rm ./${FILENAME} 2> /dev/null
 fi
 
 i=0
