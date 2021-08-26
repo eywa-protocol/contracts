@@ -6,6 +6,7 @@ import '@openzeppelin/contracts-newone/utils/math/SafeMath.sol';
 import '@uniswap/lib/contracts/libraries/TransferHelper.sol';
 import "./IBridge.sol";
 import "./RelayRecipient.sol";
+import "./interface/IWETH.sol";
 
 
 contract Portal is RelayRecipient {
@@ -28,14 +29,21 @@ contract Portal is RelayRecipient {
     uint256 requestCount = 1;
     mapping (bytes32 => TxState) public requests;
     mapping (bytes32 => UnsynthesizeState) public unsynthesizeStates;
+    address public immutable weth;
 
     event SynthesizeRequest(bytes32 indexed _id, address indexed _from, address indexed _to, uint _amount, address _token);
     event RevertBurnRequest(bytes32 indexed _id, address indexed _to);
     event BurnCompleted(bytes32 indexed _id, address indexed _to, uint _amount, address _token);
     event RevertSynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint _amount, address _token);
 
-    constructor(address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
+    constructor(
+        address _bridge,
+        address _trustedForwarder,
+        address _weth
+    ) RelayRecipient(_trustedForwarder) {
         bridge = _bridge;
+        require(_weth != address(0), "ZERO_ADDRESS");
+        weth = _weth;
     }
 
     modifier onlyBridge {
@@ -54,9 +62,25 @@ contract Portal is RelayRecipient {
     ) external returns (bytes32 txID) {
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] = balanceOf[_token].add(_amount);
+        return _synthesizeAfterTransfer(
+            _token,
+            _amount,
+            _chain2address,
+            _receiveSide,
+            _oppositeBridge,
+            _chainID
+        );
+    }
 
+    function _synthesizeAfterTransfer(
+        address _token,
+        uint256 _amount,
+        address _chain2address,
+        address _receiveSide,
+        address _oppositeBridge,
+        uint _chainID
+    ) internal returns (bytes32 txID) {
         txID = keccak256(abi.encodePacked(this, requestCount));
-
         bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('mintSyntheticToken(bytes32,address,uint256,address)'))), txID, _token, _amount, _chain2address);
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID);
@@ -71,6 +95,27 @@ contract Portal is RelayRecipient {
 
         emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
     }
+
+    // ETH/BNB/__naive__ -> sToken on a second chain
+    function synthesizeNative(
+        uint256 _amount,
+        address _chain2address,
+        address _receiveSide,
+        address _oppositeBridge,
+        uint _chainID
+    ) external payable returns (bytes32 txID) {
+        require(msg.value > 0, "ZERO_MSG_VALUE");
+        IWETH(weth).value(msg.value).deposit();
+        return _synthesizeAfterTransfer(
+            weth,
+            _amount,
+            _chain2address,
+            _receiveSide,
+            _oppositeBridge,
+            _chainID
+        );
+    }
+
 
     // Token -> sToken on a second chain withPermit
     function synthesizeWithPermit(
