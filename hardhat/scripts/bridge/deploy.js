@@ -27,7 +27,6 @@ async function main() {
     await forwarder.deployed();
     console.log("Forwarder address:", forwarder.address);
 
-
     networkConfig[network.name].nodeList   = nodeList.address;
     networkConfig[network.name].bridge     = bridge.address;
     networkConfig[network.name].mockDexPool= mockDexPool.address;

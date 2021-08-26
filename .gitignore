@@ -8,6 +8,7 @@ truffle/build/contracts
 **/artifacts
 **/factories
 /hardhat/yarn.lock
+/hardhat/yarn-error.log
 **/.env     
 networks_env
 

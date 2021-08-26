@@ -6,14 +6,15 @@
   "scripts": {
     "commit": "./node_modules/cz-customizable/standalone.js",
     "postinstall": "node ./utils/check-version.js",
-    "e2e:local": "export TYPE_TEST=local && npx hardhat  test ./test/integration/e2e.test.js",
-    "e2e:testnet": "export TYPE_TEST=testnet && npx hardhat  test ./test/integration/e2e.test.js",
+    "e2e:local": "export TYPE_TEST=local && npx hardhat test ./test/integration/e2e.test.js",
+    "e2e:testnet": "export TYPE_TEST=testnet && npx hardhat test ./test/integration/e2e.test.js",
     "prettier": "prettier --write 'contracts/**/*.sol'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "DigiU team",
   "license": "MIT",
   "devDependencies": {
+    "@opengsn/provider": "^2.2.2",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.4",
     "@nomiclabs/hardhat-ganache": "^2.0.0",
