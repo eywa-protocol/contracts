@@ -34,7 +34,7 @@ module.exports = {
       //   url: MAINNET_RPC_URL
       // }
     },
-    localhost: {
+    localhost: { 
         //
     },
     rinkeby: {
