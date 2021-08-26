@@ -53,10 +53,10 @@ contract RelayerPool is ReentrancyGuard {
     mapping(uint256 => Deposit) public deposits; // id -> deposit
     mapping(address => EnumerableSet.UintSet) internal userDepositIds;
     mapping(address => uint256) userTotalDeposit;
-    uint256 internal totalDeposit;
+    uint256 public totalDeposit;
     mapping(address => uint256) userClaimed;
-    uint256 internal rewardPerTokenNumerator;
-    uint256 constant REWARD_PER_TOKEN_DENOMINATOR = 10 * 18;
+    uint256 public rewardPerTokenNumerator;
+    uint256 constant REWARD_PER_TOKEN_DENOMINATOR = 10 ** 18;
     uint256 internal minOwnerCollateral;  // todo discuss shouls i use this in constructor
 
     //   Базой для расчёта начислений нужно считать, что мы закладываем фиксированный годовой процент
@@ -87,7 +87,11 @@ contract RelayerPool is ReentrancyGuard {
 
     event DepositPut(address indexed user, uint256 indexed id, uint256 amount, uint256 lockTill);
     event DepositWithdrawn(address indexed user, uint256 indexed id, uint256 amount, uint256 rest);
-    event UserHarvestReward(address indexed user, uint256 amount);
+    event UserHarvestReward(
+        address indexed user,
+        uint256 userReward,
+        uint256 userDeposit
+    );
     event RelayerStatusSet(address indexed sender, RelayerStatus status);
     event RelayerFeeNumeratorSet(address indexed sender, uint256 value);
     event EmissionAnnualRateNumeratorSet(address indexed sender, uint256 value);
@@ -98,9 +102,10 @@ contract RelayerPool is ReentrancyGuard {
         address indexed feeReceiver,
         uint256 fee,
         uint256 rewardForPool,
-        uint256 rewardPerTokenNumerator
+        uint256 rewardPerTokenNumeratorBefore,
+        uint256 rewardPerTokenNumerator,
+        uint256 totalDeposit
     );
-
 
     constructor(
         address _owner,
@@ -138,10 +143,6 @@ contract RelayerPool is ReentrancyGuard {
         _;
     }
 
-    function getTotalDeposit() external view returns (uint256) {
-        return totalDeposit;
-    }
-
     function getDeposit(uint256 _depositId) external view returns(address user, uint256 amount, uint256 lockTill) {
         Deposit memory _deposit = deposits[_depositId];
         user = _deposit.user;
@@ -160,7 +161,9 @@ contract RelayerPool is ReentrancyGuard {
         require(block.timestamp >= _deposit.lockTill, Errors.DEPOSIT_IS_LOCKED);
         require(userDepositIds[msg.sender].contains(_depositId), Errors.DATA_INCONSISTENCY);
 
-        harvestMyReward(); // ensure user collected reward
+        _harvestPoolReward();  // ensure pool received reward according to the total deposit
+        _harvestMyReward(); // ensure user collected reward
+
         userClaimed[msg.sender] -= _amount * rewardPerTokenNumerator / REWARD_PER_TOKEN_DENOMINATOR;
 
         if (_amount < _deposit.amount) {
@@ -188,6 +191,9 @@ contract RelayerPool is ReentrancyGuard {
     ///   что максимальный суммарный стейк, Pool Stake не превышает Owner stake*6, а минимальнй стейк владельца
     ///   при этом должен быть не менее COLLATERAL.
     function deposit(uint256 _amount) external {
+        _harvestPoolReward();
+        _harvestMyReward();
+
         uint256 depositId = nextDepositId++;
         uint256 lockTill;
         if (msg.sender == owner) {
@@ -213,23 +219,39 @@ contract RelayerPool is ReentrancyGuard {
 
     ///  метод для сбора вознаграждений из смартконтракте Reward, доступен с адреса, который разместил средства,
     ///  на замороженные средства также действует период заморозки
-    function harvestMyReward() public {
-        uint256 reward = ((rewardPerTokenNumerator * userTotalDeposit[msg.sender]) /
-            REWARD_PER_TOKEN_DENOMINATOR -
+    function harvestMyReward() external {
+        _harvestMyReward();
+    }
+
+    function _harvestMyReward() internal {
+        uint256 userDeposit = userTotalDeposit[msg.sender];
+        uint256 reward = (
+            (rewardPerTokenNumerator * userTotalDeposit[msg.sender]) / REWARD_PER_TOKEN_DENOMINATOR
+            -
             userClaimed[msg.sender]);
         if (reward == 0) {
             return;
         }
-        IERC20(depositToken).safeTransfer(msg.sender, reward);
+        IERC20(rewardToken).safeTransfer(msg.sender, reward);
         userClaimed[msg.sender] += reward;
-        emit UserHarvestReward(msg.sender, reward);
+        emit UserHarvestReward({
+            user: msg.sender,
+            userReward: reward,
+            userDeposit: userDeposit
+        });
     }
 
     function harvestPoolReward() external {
+        _harvestPoolReward();
+    }
+
+    function _harvestPoolReward() internal {
         // Тогда дневная прибыль валидатора day profit составляет Day profit=Pool Stake*Emission rate/100/365
         uint256 harvestForPeriod = block.timestamp - lastHarvestRewardTimestamp;
-        uint256 profit = this.getTotalDeposit() * harvestForPeriod * emissionAnnualRateNumerator / 365 days;
-        require(profit > 0, Errors.ZERO_PROFIT);
+        uint256 profit = totalDeposit * harvestForPeriod * emissionAnnualRateNumerator / 365 days;
+        if (profit == 0) {
+            return;
+        }
 
         lastHarvestRewardTimestamp = block.timestamp;
 
@@ -237,20 +259,24 @@ contract RelayerPool is ReentrancyGuard {
         uint256 fee = (profit * relayerFeeNumerator) / RELAYER_FEE_DENOMINATOR;
         uint256 rewardForPool = profit - fee;
 
+        uint256 rewardPerTokenNumeratorBefore = rewardPerTokenNumerator;
         rewardPerTokenNumerator += (rewardForPool * REWARD_PER_TOKEN_DENOMINATOR) / totalDeposit;
         IERC20(rewardToken).safeTransferFrom(address(vault), address(this), profit);
         if (fee > 0) {
-            IERC20(rewardToken).safeTransferFrom(msg.sender, owner, fee);  // todo discuss fee receiver
+            IERC20(rewardToken).safeTransferFrom(address(vault), owner, fee);  // todo discuss fee receiver
         }
-        emit HarvestPoolReward(
-            msg.sender,
-            harvestForPeriod,
-            profit,
-            owner,
-            fee,
-            rewardForPool,
-            rewardPerTokenNumerator
-        );
+
+        emit HarvestPoolReward({
+            sender: msg.sender,
+            harvestForPeriod: harvestForPeriod,
+            profit: profit,
+            feeReceiver: owner,
+            fee: fee,
+            rewardForPool: rewardForPool,
+            rewardPerTokenNumeratorBefore: rewardPerTokenNumeratorBefore,
+            rewardPerTokenNumerator: rewardPerTokenNumerator,
+            totalDeposit: totalDeposit
+        });
     }
 
     function setRelayerStatus(RelayerStatus _status) external onlyRegistry {
