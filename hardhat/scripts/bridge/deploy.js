@@ -22,9 +22,17 @@ async function main() {
     await mockDexPool.deployed();
     console.log(`MockDexPool address: ${mockDexPool.address}`);
 
+    const _Forwarder = await ethers.getContractFactory("Forwarder");
+    const forwarder  = await _Forwarder.deploy();
+    await forwarder.deployed();
+    console.log("Forwarder address:", forwarder.address);
+
+
     networkConfig[network.name].nodeList   = nodeList.address;
     networkConfig[network.name].bridge     = bridge.address;
     networkConfig[network.name].mockDexPool= mockDexPool.address;
+    networkConfig[network.name].forwarder   = forwarder.address;
+
     fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
 
     // await hre.run("verify:verify", {
