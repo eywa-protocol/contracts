@@ -4,6 +4,10 @@
   "description": "Eywa smart-contracts",
   "main": "index.js",
   "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "coverage": "env COVERAGE=true hardhat coverage",
+    "gas-report": "env ENABLE_GAS_REPORT=true npm run test",
     "commit": "./node_modules/cz-customizable/standalone.js",
     "postinstall": "node ./utils/check-version.js",
     "e2e:local": "export TYPE_TEST=local && npx hardhat test ./test/integration/e2e.test.js",
@@ -41,10 +45,12 @@
   },
   "dependencies": {
     "@opengsn/contracts": "^2.2.2",
+    "@opengsn/provider": "^2.2.2",
     "@openzeppelin/contracts": "3.4.1",
     "@openzeppelin/contracts-newone": "npm:@openzeppelin/contracts@4.1.0",
+    "cz-customizable": "^6.3.0",
     "semver": "^7.3.5",
-    "cz-customizable": "^6.3.0"
+    "solidity-coverage": "^0.7.16"
   },
   "engines": {
     "node": ">=14.0.0"

@@ -28,7 +28,8 @@
       "mumbai"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeList": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "eywa": "0x0000000000000000000000000000000000000000",
     "bridge": "0x0000000000000000000000000000000000000000",
     "mockDexPool": "0x0000000000000000000000000000000000000000",
     "portal": "0x0000000000000000000000000000000000000000",
@@ -63,7 +64,8 @@
       "hecotestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeList": "",
+    "nodeRegistry": "",
+    "eywa": "",
     "bridge": "",
     "mockDexPool": "",
     "portal": "",
@@ -98,7 +100,8 @@
       "hecotestnet"
     ],
     "paymaster": "0xeFAC0dE7B0588335010B69abb24eB01309265EA2",
-    "nodeList": "0xD915fF927E380c7d865E2Ba62B7Ba3BA6a7032d5",
+    "nodeRegistry": "0xD915fF927E380c7d865E2Ba62B7Ba3BA6a7032d5",
+    "eywa": "0x4dc43f45DC8BF89185145A9eA7505751799412ee",
     "bridge": "0x40E4248Bac40bEA657e5860004d79C08740C52DC",
     "mockDexPool": "0xE82Bda3f0DEa5F07CECe5fa9fb8Fb18394D31095",
     "portal": "0x21fC4360AB07F0E191F35148454ea0761892CF3e",
@@ -133,7 +136,8 @@
       "hecotestnet"
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeList": "",
+    "nodeRegistry": "",
+    "eywa": "",
     "bridge": "",
     "mockDexPool": "",
     "portal": "",
@@ -166,7 +170,8 @@
       "rinkeby"
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeList": "0x4c5c441Ea5d34c186C18ff70BF6e06f083BECb55",
+    "nodeRegistry": "0x4c5c441Ea5d34c186C18ff70BF6e06f083BECb55",
+    "eywa": "0x4dc43f45DC8BF89185145A9eA7505751799412ee",
     "bridge": "0x205C740e8572ffb364EcE8a9D0CC01bcA27cdD0C",
     "mockDexPool": "0xF8A748b4B8430FD76E7f9ED8A5f9a5cf400Df7fc",
     "portal": "0x6FeACfFF44afAfA65ce2395E8E8612Eb9c7b73E1",
@@ -200,7 +205,8 @@
       "network3"
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeList": "0x48a031c6ad7F74923Dd4450d4b70d9D21c52215b",
+    "nodeRegistry": "0x48a031c6ad7F74923Dd4450d4b70d9D21c52215b",
+    "eywa": "0x4dc43f45DC8BF89185145A9eA7505751799412ee",
     "bridge": "0x4bb819FA7AfC1b3F65fc47198bF3e9A4c959CbEc",
     "mockDexPool": "0xDDF1108f02C97B6594455e556aE0174381C217Bc",
     "portal": "0xD846DE1386bac441fdA49D05563bFD874F52CAb4",
@@ -234,7 +240,8 @@
       "network3"
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeList": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
+    "nodeRegistry": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
+    "eywa": "0x4dc43f45DC8BF89185145A9eA7505751799412ee",
     "bridge": "0x756b147e4Fac1E185B07bFdBb95c42eF5eCEAa4c",
     "mockDexPool": "0x59da540FeACf4DAa3c9D00DEd796EBb53Fd5342e",
     "portal": "0x329DCb6edc4D6b9110d366BCc4f52624F619176A",
@@ -268,7 +275,8 @@
       "network2"
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeList": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
+    "nodeRegistry": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
+    "eywa": "0x4dc43f45DC8BF89185145A9eA7505751799412ee",
     "bridge": "0x756b147e4Fac1E185B07bFdBb95c42eF5eCEAa4c",
     "mockDexPool": "0x59da540FeACf4DAa3c9D00DEd796EBb53Fd5342e",
     "portal": "0x329DCb6edc4D6b9110d366BCc4f52624F619176A",

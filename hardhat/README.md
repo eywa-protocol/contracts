@@ -25,6 +25,13 @@ cd hardhat
 
 - Local deploy and test should be triggered form https://gitlab.digiu.ai/blockchainlaboratory/eywa-p2p-bridge.
 
+#### Tests for local
+```bash
+cp helper-hardhat-config.json.example helper-hardhat-config.json
+cp .env.example .env
+npm hardhat test
+```
+
 ## Code Style
 
 ### Prettier
