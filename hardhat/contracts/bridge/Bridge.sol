@@ -44,6 +44,7 @@ contract Bridge is BridgeCore {
     function receiveRequestV2(
         bytes32 reqId,
         bytes memory b,
+        bytes memory sig,
         address receiveSide,
         address bridgeFrom
     ) external onlyTrustedNode {

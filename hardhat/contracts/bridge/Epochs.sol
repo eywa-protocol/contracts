@@ -30,6 +30,7 @@ contract Epochs {
         require (epochs.length == 0, "epoch exists");
         _;
     }
+
     modifier NotGenesisEpoch() {
         require (epochs.length > 0, "no epoch");
         _;

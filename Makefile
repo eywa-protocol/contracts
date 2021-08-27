@@ -20,6 +20,13 @@ wrappers: npm compile copy_configs
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/mocks/MockDexPool.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/test/TestTarget.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/Epochs.sol --pkg wrappers --out wrappers
+	go run wrappers-builder/main.go --json hardhat/artifacts/contracts/cryptography/BlsSignatureVerification.sol --pkg wrappers --out wrappers
+	go run wrappers-builder/main.go --json hardhat/artifacts/contracts/cryptography/BlsSignatureTest.sol --pkg wrappers --out wrappers
+	go run wrappers-builder/main.go --json hardhat/artifacts/contracts/crypto2/BLS.sol --pkg wrappers --out wrappers
+	go run wrappers-builder/main.go --json hardhat/artifacts/contracts/crypto2/BLSTest.sol --pkg wrappers --out wrappers
+	go run wrappers-builder/main.go --json hardhat/artifacts/contracts/crypto2/Pairing.sol --pkg wrappers --out wrappers
+	go run wrappers-builder/main.go --json hardhat/artifacts/contracts/cryptography2/BLSChecker.sol --pkg wrappers --out wrappers
+	go run wrappers-builder/main.go --json hardhat/artifacts/contracts/cryptography/bn256g1_tests.sol --pkg wrappers --out wrappers
 
 deps:
 	go mod tidy
