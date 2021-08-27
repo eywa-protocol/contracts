@@ -72,11 +72,6 @@ contract NodeRegistry is BaseRelayRecipient {
         _;
     }
 
-    modifier onlyConsensus() {
-        require(_msgSender() == consensus, "only consensus");
-        _;
-    }
-
     //TODO: discuss about check: nodeRegistry[_blsPointAddr] == address(0)
     function addNode(Node memory node) internal isNewNode(node.nodeIdAddress) {
         require(node.owner != address(0), Errors.ZERO_ADDRESS);
