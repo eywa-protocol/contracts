@@ -39,7 +39,6 @@ contract NodeRegistry is BaseRelayRecipient {
     mapping(address => Node) public nodeRegistry;
     mapping(address => mapping(address => bool)) public trustListForDex;
 
-    event RelayerStatusSet(address indexed nodeIdAddress, RelayerPool.RelayerStatus indexed status);
     event CreatedRelayer(
         address indexed nodeIdAddress,
         uint256 indexed nodeId,
