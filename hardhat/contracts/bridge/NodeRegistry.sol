@@ -19,20 +19,20 @@ contract NodeRegistry is BaseRelayRecipient {
     struct Node {
         address owner;
         address nodeWallet;
-        address vault;
         address pool;
         address nodeIdAddress;
         string  blsPubKey;
-        uint256 version;
         uint256 nodeId;
-        uint256 relayerFeeNumerator;
-        uint256 emissionRateNumerator;
-        RelayerPool.RelayerStatus status;
-        RelayerPool.RelayerType nodeType;
     }
 
+    // struct NodeInitParams {
+    //     uint256 relayerFeeNumerator;
+    //     uint256 emissionRateNumerator;
+    //     address rewardToken;
+    //     address vault;
+    // }
+
     address public EYWA;
-    address public consensus;
     uint256 public constant MIN_COLLATERAL = 1 ether; //TODO discuss
 
     EnumerableSet.AddressSet nodes;
@@ -49,14 +49,11 @@ contract NodeRegistry is BaseRelayRecipient {
 
     constructor(
         address _EYWA,
-        address _consensus,
         address _forwarder
     ) {
         require(_EYWA != address(0), Errors.ZERO_ADDRESS);
-        require(_consensus != address(0), Errors.ZERO_ADDRESS);
         require(_forwarder != address(0), Errors.ZERO_ADDRESS);
         EYWA = _EYWA;
-        consensus = _consensus;
         trustedForwarder = _forwarder;
     }
 
@@ -86,11 +83,8 @@ contract NodeRegistry is BaseRelayRecipient {
         require(node.owner != address(0), Errors.ZERO_ADDRESS);
         require(node.nodeWallet != address(0), Errors.ZERO_ADDRESS);
         require(node.nodeIdAddress != address(0), Errors.ZERO_ADDRESS);
-        node.relayerFeeNumerator = 100; // test only
-        node.emissionRateNumerator = 1000; // test only
         node.nodeId = nodes.length();
         nodeRegistry[node.nodeIdAddress] = node;
-        nodeRegistry[node.nodeIdAddress].status = RelayerPool.RelayerStatus.Online;
         nodes.add(node.nodeIdAddress);
         //TODO: discuss about pemission for certain bridge
         trustListForDex[node.nodeWallet][address(0)] = true;
@@ -140,34 +134,21 @@ contract NodeRegistry is BaseRelayRecipient {
         return trustListForDex[_node][address(0)];
     }
 
-    //TODO
-    function setRelayerFee(uint256 _fee, address _nodeIdAddress) external {
-        require(_msgSender() == nodeRegistry[_nodeIdAddress].owner, "only node owner");
-        RelayerPool(nodeRegistry[_nodeIdAddress].pool).setRelayerFeeNumerator(_fee);
-        //emit RelayerFeeSet(value);
-    }
-
-    function setRelayerStatus(RelayerPool.RelayerStatus _status, address _nodeIdAddress) external onlyConsensus {
-        require(nodeRegistry[_nodeIdAddress].status != _status, Errors.SAME_VALUE);
-        nodeRegistry[_nodeIdAddress].status = _status;
-        RelayerPool(nodeRegistry[_nodeIdAddress].pool).setRelayerStatus(_status);
-        emit RelayerStatusSet(_nodeIdAddress, _status);
-    }
-
     function createRelayer(
         Node memory _node,
+     // NodeInitParams memory _params,
         uint256 _deadline,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
     ) external {
         RelayerPool relayerPool = new RelayerPool(
-            _node.owner,
-            address(EYWA), /* _depositToken*/
-            address(EYWA), /* _rewardToken todo discuss with vadim */
-            _node.relayerFeeNumerator,
-            _node.emissionRateNumerator,
-            _node.vault // vault
+            _node.owner,   // node owner
+            address(EYWA), // depositToken
+            address(EYWA), // rewardToken            (test only)
+            100,           // relayerFeeNumerator    (test only)
+            1000,          // emissionRateNumerator  (test only)
+            _node.owner    // vault                  (test only)
         );
         uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
         require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");

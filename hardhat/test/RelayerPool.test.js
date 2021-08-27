@@ -513,29 +513,29 @@ contract('RelayerPool', function (accounts) {
       expect(status).to.be.bignumber.equal(RelayerStatus.Inactive);
   });
 
-  it('setRelayerStatus works', async function () {
-      const tx = await this.relayerPool.setRelayerStatus(RelayerStatus.Online, {from: owner});  // online
-      const status = await this.relayerPool.relayerStatus();
-      expect(status).to.be.bignumber.equal(RelayerStatus.Online);
-  });
+  // it('setRelayerStatus works', async function () {
+  //     const tx = await this.relayerPool.setRelayerStatus(RelayerStatus.Online, {from: owner});  // online
+  //     const status = await this.relayerPool.relayerStatus();
+  //     expect(status).to.be.bignumber.equal(RelayerStatus.Online);
+  // });
 
   // it('setRelayerStatus invalid value', async function () {
   //     const tx = await this.relayerPool.setRelayerStatus(toBN(42), {from: owner});
   // });
 
-  it('setRelayerStatus sameValue reverts', async function () {
-      await expectRevert(
-          this.relayerPool.setRelayerStatus(RelayerStatus.Inactive, {from: owner}),
-          'SAME_VALUE',
-      );
-  });
+  // it('setRelayerStatus sameValue reverts', async function () {
+  //     await expectRevert(
+  //         this.relayerPool.setRelayerStatus(RelayerStatus.Inactive, {from: owner}),
+  //         'SAME_VALUE',
+  //     );
+  // });
 
-  it('setRelayerStatus not registry reverts', async function () {
-      await expectRevert(
-          this.relayerPool.setRelayerStatus(RelayerStatus.Online, {from: others[1]}),
-          'only registry',
-      );
-  });
+  // it('setRelayerStatus not registry reverts', async function () {
+  //     await expectRevert(
+  //         this.relayerPool.setRelayerStatus(RelayerStatus.Online, {from: others[1]}),
+  //         'only registry',
+  //     );
+  // });
 
   it('setRelayerFeeNumerator works', async function () {
       const user = owner;
