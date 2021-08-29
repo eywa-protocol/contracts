@@ -36,8 +36,8 @@ contract NodeRegistry is BaseRelayRecipient {
     uint256 public constant MIN_COLLATERAL = 1 ether; //TODO discuss
 
     EnumerableSet.AddressSet nodes;
+    mapping(address => address) public ownedNodes;
     mapping(address => Node) public nodeRegistry;
-    mapping(address => mapping(address => bool)) public trustListForDex;
 
     event CreatedRelayer(
         address indexed nodeIdAddress,
@@ -80,8 +80,7 @@ contract NodeRegistry is BaseRelayRecipient {
         node.nodeId = nodes.length();
         nodeRegistry[node.nodeIdAddress] = node;
         nodes.add(node.nodeIdAddress);
-        //TODO: discuss about pemission for certain bridge
-        trustListForDex[node.nodeWallet][address(0)] = true;
+        ownedNodes[node.owner] = node.nodeIdAddress;
 
         emit CreatedRelayer(node.nodeIdAddress, node.nodeId, node.pool, node.owner);
     }
@@ -124,8 +123,9 @@ contract NodeRegistry is BaseRelayRecipient {
         return nodeRegistry[_nodeIdAddr].nodeWallet != address(0);
     }
 
-    function checkPermissionTrustList(address _node) external view returns (bool) {
-        return trustListForDex[_node][address(0)];
+    function checkPermissionTrustList(address _nodeOwner) external view returns (bool) {
+       return nodeRegistry[ownedNodes[_nodeOwner]].owner == _nodeOwner; // (test only)
+    // return nodeRegistry[ownedNodes[_nodeOwner]].status == 1;
     }
 
     function createRelayer(
