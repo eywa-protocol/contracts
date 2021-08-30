@@ -57,7 +57,7 @@ contract NodeRegistry is BaseRelayRecipient {
 
     modifier isNewNode(address _nodeIdAddr) {
         require(
-            nodeRegistry[_nodeIdAddr].nodeWallet == address(0),
+            nodeRegistry[_nodeIdAddr].owner == address(0),
             string(abi.encodePacked("node ", convertToString(_nodeIdAddr), " allready exists"))
         );
         _;
@@ -65,7 +65,7 @@ contract NodeRegistry is BaseRelayRecipient {
 
     modifier existingNode(address _nodeIdAddr) {
         require(
-            nodeRegistry[_nodeIdAddr].nodeWallet != address(0),
+            nodeRegistry[_nodeIdAddr].owner != address(0),
             string(abi.encodePacked("node ", convertToString(_nodeIdAddr), " does not exist"))
         );
         _;
