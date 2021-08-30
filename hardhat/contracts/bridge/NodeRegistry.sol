@@ -19,7 +19,6 @@ contract NodeRegistry is BaseRelayRecipient {
     struct Node {
         address owner;
         address pool;
-        address nodeWallet;
         address nodeIdAddress;
         string  blsPubKey;
         uint256 nodeId;
