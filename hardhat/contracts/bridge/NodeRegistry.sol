@@ -74,7 +74,6 @@ contract NodeRegistry is BaseRelayRecipient {
     //TODO: discuss about check: nodeRegistry[_blsPointAddr] == address(0)
     function addNode(Node memory node) internal isNewNode(node.nodeIdAddress) {
         require(node.owner != address(0), Errors.ZERO_ADDRESS);
-        require(node.nodeWallet != address(0), Errors.ZERO_ADDRESS);
         require(node.nodeIdAddress != address(0), Errors.ZERO_ADDRESS);
         node.nodeId = nodes.length();
         nodeRegistry[node.nodeIdAddress] = node;
@@ -119,7 +118,7 @@ contract NodeRegistry is BaseRelayRecipient {
     }
 
     function nodeExists(address _nodeIdAddr) public view returns (bool) {
-        return nodeRegistry[_nodeIdAddr].nodeWallet != address(0);
+        return nodeRegistry[_nodeIdAddr].owner != address(0);
     }
 
     function checkPermissionTrustList(address _nodeOwner) external view returns (bool) {
