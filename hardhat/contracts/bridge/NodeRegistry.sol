@@ -139,7 +139,7 @@ contract NodeRegistry is BaseRelayRecipient {
             address(EYWA), // depositToken
             address(EYWA), // rewardToken            (test only)
             100,           // relayerFeeNumerator    (test only)
-            1000,          // emissionRateNumerator  (test only)
+            4000,          // emissionRateNumerator  (test only)
             _node.owner    // vault                  (test only)
         );
         uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
