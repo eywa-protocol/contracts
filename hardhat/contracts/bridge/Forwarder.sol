@@ -44,7 +44,6 @@ contract Forwarder is IForwarder {
     }
 
 
-
     function execute(
         ForwardRequest calldata req,
         bytes32 domainSeparator,
@@ -60,14 +59,14 @@ contract Forwarder is IForwarder {
         _updateNonce(req);
 
         // solhint-disable-next-line avoid-low-level-calls
-//        (success,ret) = req.to.call{gas : req.gas, value : req.value}(abi.encodePacked(req.data, req.from));
+        //        (success,ret) = req.to.call{gas : req.gas, value : req.value}(abi.encodePacked(req.data, req.from));
 
-        execute(req.to, req.data);
-        if ( address(this).balance>0 ) {
+        execute(req.to, abi.encodePacked(req.data, req.from), req.data.length + 20);
+        if (address(this).balance > 0) {
             //can't fail: req.from signed (off-chain) the request, so it must be an EOA...
             payable(req.from).transfer(address(this).balance);
         }
-        return (success,ret);
+        return (success, ret);
     }
 
 
@@ -120,19 +119,19 @@ contract Forwarder is IForwarder {
     }
 
 
-    function getAbiEncodeRequest(ForwardRequest memory req, bytes memory reqAbiEncode) external view returns ( bytes memory ) {
-        bytes memory qwe =  abi.encode(
+    function getAbiEncodeRequest(ForwardRequest memory req, bytes memory reqAbiEncode) external view returns (bytes memory) {
+        bytes memory qwe = abi.encode(
             req.from,
             req.to,
             req.value,
             req.gas,
             req.nonce/*,
             keccak256(req.data)*/
-            );
+        );
         require(address(0) != req.from, "req.from");
         require(address(0) != req.to, "req.t0");
         require(0 != req.nonce, "req.nonce");
-        require( keccak256(qwe) == keccak256(reqAbiEncode), "hashes not match");
+        require(keccak256(qwe) == keccak256(reqAbiEncode), "hashes not match");
         return qwe;
     }
 
@@ -165,7 +164,7 @@ contract Forwarder is IForwarder {
 
     // github.com:gnosis/gp-v2-contracts/src/contracts/libraries/GPv2Interaction.sol:18
 
-    function execute(address target, bytes calldata callData ) internal {
+    function execute(address target, bytes memory callData, uint256 length) internal {
 
         uint256 value = uint256(0);
 
@@ -178,24 +177,24 @@ contract Forwarder is IForwarder {
         // <https://github.com/gnosis/gp-v2-contracts/pull/417#issuecomment-775091258>
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            let freeMemoryPointer := mload(0x40)
-            calldatacopy(freeMemoryPointer, callData.offset, callData.length)
-    if iszero(
-    call(
-    gas(),
-    target,
-    value,
-    freeMemoryPointer,
-    callData.length,
-    0,
-    0
-    )
-    ) {
-    returndatacopy(0, 0, returndatasize())
-    revert(0, returndatasize())
+        //            let freeMemoryPointer := mload(0x40)
+        //            calldatacopy(freeMemoryPointer, callData.offset, callData.length)
+            if iszero(
+            call(
+            gas(),
+            target,
+            value,
+            callData,
+            length,
+            0,
+            0
+            )
+            ) {
+                returndatacopy(0, 0, returndatasize())
+                revert(0, returndatasize())
+            }
+        }
     }
-    }
-}
 
 
 }
