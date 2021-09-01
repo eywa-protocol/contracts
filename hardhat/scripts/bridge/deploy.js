@@ -19,7 +19,7 @@ async function main() {
     const _NodeRegistry = await ethers.getContractFactory("NodeRegistry");
     //TODO: add Consensus, Forwarder (testAddress for now)
     const testAddress = "0x2e988A386a799F506693793c6A5AF6B54dfAaBfB"
-    const nodeRegistry = await _NodeRegistry.deploy(EYWA.address, testAddress /*consensus*/, testAddress /*forwarder*/);
+    const nodeRegistry = await _NodeRegistry.deploy(EYWA.address, testAddress /*consensus*/);
     await nodeRegistry.deployed();
     networkConfig[network.name].nodeRegistry = nodeRegistry.address;
     console.log("NodeRegistry address:", nodeRegistry.address);
