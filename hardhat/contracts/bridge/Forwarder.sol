@@ -45,7 +45,7 @@ contract Forwarder is IForwarder {
 
 
     function execute(
-        ForwardRequest calldata req,
+        ForwardRequest memory req,
         bytes32 domainSeparator,
         bytes32 requestTypeHash,
         bytes memory suffixData,
@@ -59,9 +59,9 @@ contract Forwarder is IForwarder {
         _updateNonce(req);
 
         // solhint-disable-next-line avoid-low-level-calls
-        //        (success,ret) = req.to.call{gas : req.gas, value : req.value}(abi.encodePacked(req.data, req.from));
-
-        execute(req.to, abi.encodePacked(req.data, req.from), req.data.length + 20);
+        (success,ret) = req.to.call{gas : req.gas, value : req.value}(abi.encodePacked(req.data, req.from));
+        require(success, "call unsuccessful");
+        // execute(req.to, abi.encodePacked(req.data, req.from));
         if (address(this).balance > 0) {
             //can't fail: req.from signed (off-chain) the request, so it must be an EOA...
             payable(req.from).transfer(address(this).balance);
@@ -164,9 +164,10 @@ contract Forwarder is IForwarder {
 
     // github.com:gnosis/gp-v2-contracts/src/contracts/libraries/GPv2Interaction.sol:18
 
-    function execute(address target, bytes memory callData, uint256 length) internal {
+    function execute(address target, bytes memory callData) internal {
 
         uint256 value = uint256(0);
+        uint256 len = callData.length;
 
         // NOTE: Use assembly to call the interaction instead of a low level
         // call for two reasons:
@@ -185,7 +186,7 @@ contract Forwarder is IForwarder {
             target,
             value,
             callData,
-            length,
+            len,
             0,
             0
             )
