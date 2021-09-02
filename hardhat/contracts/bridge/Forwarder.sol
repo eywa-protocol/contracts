@@ -57,11 +57,11 @@ contract Forwarder is IForwarder {
         _verifyNonce(req);
         _verifySig(req, domainSeparator, requestTypeHash, suffixData, sig);
         _updateNonce(req);
-
+//        require(false);
         // solhint-disable-next-line avoid-low-level-calls
-        (success,ret) = req.to.call{gas : req.gas, value : req.value}(abi.encodePacked(req.data, req.from));
-        require(success, "call unsuccessful");
-        // execute(req.to, abi.encodePacked(req.data, req.from));
+//        (success,ret) = req.to.call{gas : req.gas, value : req.value}(abi.encodePacked(req.data, req.from));
+//        require(success, "call unsuccessful");
+        (success,ret) = execute2(req);
         if (address(this).balance > 0) {
             //can't fail: req.from signed (off-chain) the request, so it must be an EOA...
             payable(req.from).transfer(address(this).balance);
@@ -98,6 +98,24 @@ contract Forwarder is IForwarder {
 
 
     event RequestTypeRegistered(bytes32 indexed typeHash, string typeStr);
+
+
+    function execute2(ForwardRequest memory req)
+    public
+    payable
+    returns (bool, bytes memory)
+    {
+        nonces[req.from] = req.nonce + 1;
+
+        (bool success, bytes memory returndata) = req.to.call{gas: req.gas, value: req.value}(
+            abi.encodePacked(req.data, req.from)
+        );
+        // Validate that the relayer has sent enough gas for the call.
+        // See https://ronan.eth.link/blog/ethereum-gas-dangers/
+        assert(gasleft() > req.gas / 63);
+
+        return (success, returndata);
+    }
 
 
     function _verifySig(
