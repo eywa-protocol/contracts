@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.0;
+
+import "../../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
+
+contract TestForward is BaseRelayRecipient {
+    uint256 public val = 1;
+    address public sender = address(0);
+
+    event FooCalled(address indexed caller, uint256 val);
+
+    constructor(address _forwarder) {
+        require(_forwarder != address(0), "ZERO ADDRESS");
+        trustedForwarder = _forwarder;
+    }
+
+    function foo(uint256 _val) public {
+        require(_val != 0, "ZERO VALUE");
+        val = _val;
+        sender = _msgSender();
+        emit FooCalled(sender, val);
+    }
+
+    string public override versionRecipient = "Hello world!";
+}
