@@ -6,6 +6,8 @@ import "../../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 contract TestForward is BaseRelayRecipient {
     uint256 public val = 1;
     address public sender = address(0);
+    string public str;
+
 
     event FooCalled(address indexed caller, uint256 val);
 
@@ -14,10 +16,12 @@ contract TestForward is BaseRelayRecipient {
         trustedForwarder = _forwarder;
     }
 
-    function foo(uint256 _val) public {
+    function foo(uint256 _val, string memory _str) public {
         require(_val != 0, "ZERO VALUE");
         val = _val;
+        str = _str;
         sender = _msgSender();
+
         emit FooCalled(sender, val);
     }
 

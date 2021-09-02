@@ -60,7 +60,7 @@ contract Forwarder is IForwarder {
 
         // solhint-disable-next-line avoid-low-level-calls
         (success,ret) = req.to.call{gas : req.gas, value : req.value}(abi.encodePacked(req.data, req.from));
-
+        require(success, "call unsuccessful");
         // execute(req.to, abi.encodePacked(req.data, req.from));
         if (address(this).balance > 0) {
             //can't fail: req.from signed (off-chain) the request, so it must be an EOA...
