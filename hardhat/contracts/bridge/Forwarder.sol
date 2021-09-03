@@ -57,8 +57,19 @@ contract Forwarder is IForwarder {
         _verifyNonce(req);
         _verifySig(req, domainSeparator, requestTypeHash, suffixData, sig);
         _updateNonce(req);
-        (success,ret) = req.to.call{gas : req.gas, value : req.value}(abi.encodePacked(req.data, req.from));
-        require(success, string(ret));
+        (success,ret) = req.to.call{gas : gasleft(), value : req.value}(abi.encodePacked(req.data, req.from));
+        if (!success) {
+            assembly {
+                let len := returndatasize()
+                if gt(len, 0) {
+                    let ptr := mload(0x40)
+                    returndatacopy(ptr, 0, len)
+                    revert(ptr, len)
+                }
+            }
+            revert("unknown failure");
+        }
+//        require(success, string(ret));
 //        (success, ret) = executeAssemblyForwarderRequest(req);
 //        (success, ret) = execute2(req);
 //        require(success, "call unsuccessful");
