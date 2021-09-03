@@ -72,7 +72,7 @@ contract NodeRegistry is BaseRelayRecipient {
     }
 
     //TODO: discuss about check: nodeRegistry[_blsPointAddr] == address(0)
-    function addNode(Node memory node) external isNewNode(node.nodeIdAddress) {
+    function addNode(Node memory node) internal isNewNode(node.nodeIdAddress) {
         require(node.owner != address(0), Errors.ZERO_ADDRESS);
         require(node.nodeIdAddress != address(0), Errors.ZERO_ADDRESS);
         node.nodeId = nodes.length();
@@ -147,7 +147,7 @@ contract NodeRegistry is BaseRelayRecipient {
         IERC20Permit(EYWA).permit(_msgSender(), address(this), nodeBalance, _deadline, _v, _r, _s);
         IERC20(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
         _node.pool = address(relayerPool);
-//        addNode(_node);
+        addNode(_node);
     }
 
     //todo если валидатор плохой то перебросить средства одним коллом с одного relayerPool на другой

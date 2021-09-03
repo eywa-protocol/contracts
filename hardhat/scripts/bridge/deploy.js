@@ -15,11 +15,18 @@ async function main() {
     networkConfig[network.name].eywa = EYWA.address;
     console.log("EYWA ERC20 address:", EYWA.address);
 
+    //Deploy Forwarder
+    const _Forwarder = await ethers.getContractFactory("Forwarder");
+    const forwarder = await _Forwarder.deploy();
+    await forwarder.deployed();
+    networkConfig[network.name].forwarder = forwarder.address;
+    console.log("Forwarder address:", forwarder.address);
+
+
     // Deploy NodeRegistry
     const _NodeRegistry = await ethers.getContractFactory("NodeRegistry");
-    //TODO: add Consensus, Forwarder (testAddress for now)
-    const testAddress = "0x2e988A386a799F506693793c6A5AF6B54dfAaBfB"
-    const nodeRegistry = await _NodeRegistry.deploy(EYWA.address, testAddress /*consensus*/);
+
+    const nodeRegistry = await _NodeRegistry.deploy(EYWA.address, forwarder.address);
     await nodeRegistry.deployed();
     networkConfig[network.name].nodeRegistry = nodeRegistry.address;
     console.log("NodeRegistry address:", nodeRegistry.address);
@@ -38,12 +45,7 @@ async function main() {
     networkConfig[network.name].mockDexPool = mockDexPool.address;
     console.log(`MockDexPool address: ${mockDexPool.address}`);
 
-    //Deploy Forwarder
-    const _Forwarder = await ethers.getContractFactory("Forwarder");
-    const forwarder = await _Forwarder.deploy();
-    await forwarder.deployed();
-    networkConfig[network.name].forwarder = forwarder.address;
-    console.log("Forwarder address:", forwarder.address);
+
 
     //Write deployed contracts addresses to config
     fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
