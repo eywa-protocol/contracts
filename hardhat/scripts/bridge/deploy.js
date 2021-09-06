@@ -33,7 +33,7 @@ async function main() {
 
     //Deploy Bridge
     const _Bridge = await ethers.getContractFactory("Bridge");
-    const bridge = await _Bridge.deploy(nodeRegistry.address);
+    const bridge = await _Bridge.deploy(nodeRegistry.address, forwarder.address);
     await bridge.deployed();
     networkConfig[network.name].bridge = bridge.address;
     console.log("Bridge address:", bridge.address);
