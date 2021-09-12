@@ -1,7 +1,7 @@
 const { ethers } = require('hardhat');
 const crypto = require('crypto');
 
-
+//utils
 function buildCreate2Address(creatorAddress, saltHex, byteCode) {
     return `0x${web3.utils.sha3(`0x${[
         'ff',
@@ -11,10 +11,11 @@ function buildCreate2Address(creatorAddress, saltHex, byteCode) {
     ].map(x => x.replace(/0x/, ''))
      .join('')}`).slice(-40)}`.toLowerCase()
 }
-
+//utils
 function getRandomAddress() {
     return crypto.randomBytes(20).toString('hex')
 }
+
 
 describe('SYNTHESIS', () => {
     const TEST_TOKEN_NAME = "TestName"
@@ -31,7 +32,7 @@ describe('SYNTHESIS', () => {
             synthesis = await Synthesis.deploy(getRandomAddress(), getRandomAddress());
             ERC20 = await ethers.getContractFactory('SyntERC20');
             originalToken = await ERC20.deploy(TEST_TOKEN_NAME, TEST_TOKEN_SYMBOL);
-            // expect(await)
+            expect(await originalToken.name()).to.equal(TEST_TOKEN_NAME)
         });
 
         it('Compute the address and deploy a representation', async function () {
@@ -53,7 +54,8 @@ describe('SYNTHESIS', () => {
         });
 
         it('Should revert with "token representation already exist"', async function () {
-            await expect(synthesis.createRepresentation(originalToken.address, TEST_TOKEN_NAME, TEST_TOKEN_SYMBOL)).to.be.revertedWith('Synt: token representation already exist')
+            await expect(synthesis.createRepresentation(originalToken.address, TEST_TOKEN_NAME, TEST_TOKEN_SYMBOL))
+            .to.be.revertedWith('Synt: token representation already exist')
 
         });
 
