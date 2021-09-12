@@ -18,8 +18,8 @@ function getRandomAddress() {
 
 
 describe('SYNTHESIS', () => {
-    const TEST_TOKEN_NAME = "TestName"
-    const TEST_TOKEN_SYMBOL = "TestSymbol"
+    const TOKEN_NAME = "TestName"
+    const TOKEN_SYMBOL = "TestSymbol"
 
     beforeEach(async () => {
         accounts = await ethers.getSigners();
@@ -31,14 +31,14 @@ describe('SYNTHESIS', () => {
             Synthesis = await ethers.getContractFactory('Synthesis');
             synthesis = await Synthesis.deploy(getRandomAddress(), getRandomAddress());
             ERC20 = await ethers.getContractFactory('SyntERC20');
-            originalToken = await ERC20.deploy(TEST_TOKEN_NAME, TEST_TOKEN_SYMBOL);
-            expect(await originalToken.name()).to.equal(TEST_TOKEN_NAME)
+            originalToken = await ERC20.deploy(TOKEN_NAME, TOKEN_SYMBOL);
+            expect(await originalToken.name()).to.equal(TOKEN_NAME)
         });
 
         it('Compute the address and deploy a representation', async function () {
             const encodedParameters = web3.eth.abi.encodeParameters(
                 ['string', 'string'],
-                [TEST_TOKEN_NAME, TEST_TOKEN_SYMBOL]
+                [TOKEN_NAME, TOKEN_SYMBOL]
             ).slice(2)
             const bytecodeWithParam = ERC20.bytecode + encodedParameters;
             const salt = web3.utils.sha3(web3.utils.toHex(originalToken.address), { encoding: "hex" });
@@ -48,13 +48,13 @@ describe('SYNTHESIS', () => {
                 bytecodeWithParam
             ))
 
-            tx = await synthesis.createRepresentation(originalToken.address, TEST_TOKEN_NAME, TEST_TOKEN_SYMBOL)
+            tx = await synthesis.createRepresentation(originalToken.address, TOKEN_NAME, TOKEN_SYMBOL)
             receipt = await tx.wait()
             expect(expectedRepresentationAddress).to.equal(receipt.events[1].args._stoken)
         });
 
         it('Should revert with "token representation already exist"', async function () {
-            await expect(synthesis.createRepresentation(originalToken.address, TEST_TOKEN_NAME, TEST_TOKEN_SYMBOL))
+            await expect(synthesis.createRepresentation(originalToken.address, TOKEN_NAME, TOKEN_SYMBOL))
             .to.be.revertedWith('Synt: token representation already exist')
 
         });
