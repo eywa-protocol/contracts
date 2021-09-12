@@ -11,6 +11,7 @@ function buildCreate2Address(creatorAddress, saltHex, byteCode) {
     ].map(x => x.replace(/0x/, ''))
      .join('')}`).slice(-40)}`.toLowerCase()
 }
+
 //utils
 function getRandomAddress() {
     return crypto.randomBytes(20).toString('hex')
@@ -22,17 +23,17 @@ describe('SYNTHESIS', () => {
     const TOKEN_SYMBOL = "TestSymbol"
 
     beforeEach(async () => {
-        accounts = await ethers.getSigners();
+        accounts = await ethers.getSigners()
     });
 
     describe('testing representation...', () => {
 
         it('Synthesis contract deployed', async function () {
-            Synthesis = await ethers.getContractFactory('Synthesis');
-            synthesis = await Synthesis.deploy(getRandomAddress(), getRandomAddress());
-            ERC20 = await ethers.getContractFactory('SyntERC20');
-            originalToken = await ERC20.deploy(TOKEN_NAME, TOKEN_SYMBOL);
-            expect(await originalToken.name()).to.equal(TOKEN_NAME)
+            Synthesis = await ethers.getContractFactory('Synthesis')
+            synthesis = await Synthesis.deploy(getRandomAddress(), getRandomAddress())
+            ERC20 = await ethers.getContractFactory('SyntERC20')
+            approvedToken = await ERC20.deploy(TOKEN_NAME, TOKEN_SYMBOL)
+            expect(await approvedToken.name()).to.equal(TOKEN_NAME)
         });
 
         it('Compute the address and deploy a representation', async function () {
@@ -40,21 +41,21 @@ describe('SYNTHESIS', () => {
                 ['string', 'string'],
                 [TOKEN_NAME, TOKEN_SYMBOL]
             ).slice(2)
-            const bytecodeWithParam = ERC20.bytecode + encodedParameters;
-            const salt = web3.utils.sha3(web3.utils.toHex(originalToken.address), { encoding: "hex" });
+            const bytecodeWithParam = ERC20.bytecode + encodedParameters
+            const salt = web3.utils.sha3(approvedToken.address)
             const expectedRepresentationAddress = web3.utils.toChecksumAddress(buildCreate2Address(
                 synthesis.address,
                 salt,
                 bytecodeWithParam
             ))
 
-            tx = await synthesis.createRepresentation(originalToken.address, TOKEN_NAME, TOKEN_SYMBOL)
+            tx = await synthesis.createRepresentation(approvedToken.address, TOKEN_NAME, TOKEN_SYMBOL)
             receipt = await tx.wait()
             expect(expectedRepresentationAddress).to.equal(receipt.events[1].args._stoken)
         });
 
         it('Should revert with "token representation already exist"', async function () {
-            await expect(synthesis.createRepresentation(originalToken.address, TOKEN_NAME, TOKEN_SYMBOL))
+            await expect(synthesis.createRepresentation(approvedToken.address, TOKEN_NAME, TOKEN_SYMBOL))
             .to.be.revertedWith('Synt: token representation already exist')
 
         });
