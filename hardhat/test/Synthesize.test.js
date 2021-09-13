@@ -1,5 +1,4 @@
 const { ethers } = require('hardhat');
-const crypto = require('crypto');
 
 describe('SYNTHESIS', () => {
     const TOKEN_NAME = "TestName"
@@ -20,7 +19,7 @@ describe('SYNTHESIS', () => {
             expect(await approvedToken.name()).to.equal(TOKEN_NAME)
         });
 
-        it('Compute the address and deploy a representation', async function () {
+        it('Compute the address and create a representation', async function () {
             const encodedParameters = web3.eth.abi.encodeParameters(
                 ['string', 'string'],
                 [TOKEN_NAME, TOKEN_SYMBOL]
@@ -58,7 +57,7 @@ describe('SYNTHESIS', () => {
     }
 
     function getRandomAddress() {
-        return crypto.randomBytes(20).toString('hex')
+        return web3.utils.randomHex(20)
     }
 
 });

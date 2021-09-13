@@ -32,7 +32,7 @@ contract Synthesis is RelayRecipient {
     event RevertSynthesizeRequest(bytes32 indexed _id, address indexed _to);
     event SynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event RevertBurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
-    event CreateRepresentation(address indexed _rtoken, address indexed _stoken);
+    event CreatedRepresentation(address indexed _rtoken, address indexed _stoken);
 
     constructor(address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
         bridge = _bridge;
@@ -171,14 +171,14 @@ contract Synthesis is RelayRecipient {
         string memory _stokenName,
         string memory _stokenSymbol
     ) external onlyOwner {
-        require(representationSynt[_rtoken] == address(0x0), "Synt: token representation already exist");
+        require(representationSynt[_rtoken] == address(0), "Synt: token representation already exist");
         address stoken = Create2.deploy(
             0,
             keccak256(abi.encodePacked(_rtoken)),
             abi.encodePacked(type(SyntERC20).creationCode, abi.encode(_stokenName, _stokenSymbol))
         );
         setRepresentation(_rtoken, stoken);
-        emit CreateRepresentation(_rtoken, stoken);
+        emit CreatedRepresentation(_rtoken, stoken);
     }
 
     // should be restricted in mainnets
