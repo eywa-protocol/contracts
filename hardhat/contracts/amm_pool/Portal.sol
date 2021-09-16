@@ -1,21 +1,34 @@
 // SPDX-License-Identifier: MIT
-pragma solidity  ^0.8.0;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-newone/access/Ownable.sol";
-import '@openzeppelin/contracts-newone/utils/math/SafeMath.sol';
-import '@uniswap/lib/contracts/libraries/TransferHelper.sol';
+import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
+import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "./IBridge.sol";
 import "./RelayRecipient.sol";
 
+//TODO: relocate
+interface IERC20 {
+    function name() external returns (string memory);
+    function symbol() external returns (string memory);
+}
 
 contract Portal is RelayRecipient {
     using SafeMath for uint256;
 
-    mapping(address => uint) public balanceOf;
+    mapping(address => uint256) public balanceOf;
     address public bridge;
 
-    enum RequestState { Default, Sent, Reverted }
-    enum UnsynthesizeState { Default, Unsynthesized, RevertRequest }
+    enum RequestState {
+        Default,
+        Sent,
+        Reverted
+    }
+    enum UnsynthesizeState {
+        Default,
+        Unsynthesized,
+        RevertRequest
+    }
 
     struct TxState {
         address recipient;
@@ -26,20 +39,29 @@ contract Portal is RelayRecipient {
     }
 
     uint256 requestCount = 1;
-    mapping (bytes32 => TxState) public requests;
-    mapping (bytes32 => UnsynthesizeState) public unsynthesizeStates;
+    mapping(bytes32 => TxState) public requests;
+    mapping(bytes32 => UnsynthesizeState) public unsynthesizeStates;
+    mapping(address => bytes) public tokenData;
 
-    event SynthesizeRequest(bytes32 indexed _id, address indexed _from, address indexed _to, uint _amount, address _token);
+    event SynthesizeRequest(
+        bytes32 indexed _id,
+        address indexed _from,
+        address indexed _to,
+        uint256 _amount,
+        address _token
+    );
     event RevertBurnRequest(bytes32 indexed _id, address indexed _to);
-    event BurnCompleted(bytes32 indexed _id, address indexed _to, uint _amount, address _token);
-    event RevertSynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint _amount, address _token);
+    event BurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
+    event RevertSynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
+    event RepresentationRequest(address indexed _rtoken);
+    event ApprovedRepresentationRequest(address indexed _rtoken);
 
     constructor(address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
         bridge = _bridge;
     }
 
-    modifier onlyBridge {
-        require(bridge == msg.sender);
+    modifier onlyBridge() {
+        require(bridge == _msgSender());
         _;
     }
 
@@ -50,24 +72,32 @@ contract Portal is RelayRecipient {
         address _chain2address,
         address _receiveSide,
         address _oppositeBridge,
-        uint _chainID
+        uint256 _chainID
     ) external returns (bytes32 txID) {
+        require(tokenData[_token].length != 0, "Portal: token must be verified");
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] = balanceOf[_token].add(_amount);
 
         txID = keccak256(abi.encodePacked(this, requestCount));
 
-        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('mintSyntheticToken(bytes32,address,uint256,address)'))), txID, _token, _amount, _chain2address);
+        bytes memory out = abi.encodeWithSelector(
+            bytes4(keccak256(bytes("mintSyntheticToken(bytes32,address,uint256,address,bytes32)"))),
+            txID,
+            _token,
+            _amount,
+            _chain2address,
+            tokenData[_token]
+        );
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID);
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID);
         TxState storage txState = requests[txID];
-        txState.recipient    = _msgSender();
-        txState.chain2address    = _chain2address;
-        txState.rtoken     = _token;
-        txState.amount     = _amount;
+        txState.recipient = _msgSender();
+        txState.chain2address = _chain2address;
+        txState.rtoken = _token;
+        txState.amount = _amount;
         txState.state = RequestState.Sent;
 
-        requestCount +=1;
+        requestCount += 1;
 
         emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
     }
@@ -80,28 +110,34 @@ contract Portal is RelayRecipient {
         address _chain2address,
         address _receiveSide,
         address _oppositeBridge,
-        uint _chainID
-    )  external returns (bytes32 txID) {
-
-        (bool _success1, ) = _token.call(_approvalData);
-        require(_success1, "Approve call failed");
-
-        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
-
+        uint256 _chainID
+    ) external returns (bytes32 txID) {
+        require(tokenData[_token].length != 0, "Portal: token must be verified");
+        {
+            (bool _success1, ) = _token.call(_approvalData);
+            require(_success1, "Approve call failed");
+            TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
+            balanceOf[_token] = balanceOf[_token].add(_amount);
+        }
         txID = keccak256(abi.encodePacked(this, requestCount));
-
-        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('mintSyntheticToken(bytes32,address,uint256,address)'))), txID, _token, _amount, _chain2address);
+        bytes memory out = abi.encodeWithSelector(
+            bytes4(keccak256(bytes("mintSyntheticToken(bytes32,address,uint256,address,bytes32)"))),
+            txID,
+            _token,
+            _amount,
+            _chain2address,
+            tokenData[_token]
+        );
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID);
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID);
         TxState storage txState = requests[txID];
-        txState.recipient    = _msgSender();
-        txState.chain2address    = _chain2address;
-        txState.rtoken     = _token;
-        txState.amount     = _amount;
+        txState.recipient = _msgSender();
+        txState.chain2address = _chain2address;
+        txState.rtoken = _token;
+        txState.amount = _amount;
         txState.state = RequestState.Sent;
 
-        requestCount +=1;
+        requestCount += 1;
 
         emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
     }
@@ -109,7 +145,7 @@ contract Portal is RelayRecipient {
     // can called only by bridge after initiation on a second chain
     function emergencyUnsynthesize(bytes32 _txID) external onlyBridge {
         TxState storage txState = requests[_txID];
-        require(txState.state == RequestState.Sent , 'Portal:state not open or tx does not exist');
+        require(txState.state == RequestState.Sent, "Portal:state not open or tx does not exist");
 
         txState.state = RequestState.Reverted; // close
         TransferHelper.safeTransfer(txState.rtoken, txState.recipient, txState.amount);
@@ -118,7 +154,12 @@ contract Portal is RelayRecipient {
     }
 
     // can called only by bridge after initiation on a second chain
-    function unsynthesize(bytes32 _txID, address _token, uint256 _amount, address _to) external onlyBridge {
+    function unsynthesize(
+        bytes32 _txID,
+        address _token,
+        uint256 _amount,
+        address _to
+    ) external onlyBridge {
         require(unsynthesizeStates[_txID] == UnsynthesizeState.Default, "Portal: syntatic tokens emergencyUnburn");
 
         TransferHelper.safeTransfer(_token, _to, _amount);
@@ -130,15 +171,30 @@ contract Portal is RelayRecipient {
     }
 
     // Revert burnSyntheticToken() operation, can be called several times
-    function emergencyUnburnRequest(bytes32 _txID, address _receiveSide, address _oppositeBridge, uint _chainId) external {
+    function emergencyUnburnRequest(
+        bytes32 _txID,
+        address _receiveSide,
+        address _oppositeBridge,
+        uint256 _chainId
+    ) external {
         require(unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized, "Portal: Real tokens already transfered");
         unsynthesizeStates[_txID] = UnsynthesizeState.RevertRequest;
 
-        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('emergencyUnburn(bytes32)'))),_txID);
+        bytes memory out = abi.encodeWithSelector(bytes4(keccak256(bytes("emergencyUnburn(bytes32)"))), _txID);
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainId);
 
         emit RevertBurnRequest(_txID, _msgSender());
+    }
+
+    function createRepresentationRequest(address _rtoken) external {
+        emit RepresentationRequest(_rtoken);
+    }
+
+    // implies manual verification point
+    function approveRepresentationRequest(address _rtoken) external onlyOwner {
+        tokenData[_rtoken] = abi.encode(IERC20(_rtoken).name(), IERC20(_rtoken).symbol());
+        emit ApprovedRepresentationRequest(_rtoken);
     }
 
     // should be restricted in mainnets
