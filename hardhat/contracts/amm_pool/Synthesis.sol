@@ -39,7 +39,7 @@ contract Synthesis is RelayRecipient {
     }
 
     modifier onlyBridge() {
-        require(bridge == msg.sender);
+        require(bridge == _msgSender());
         _;
     }
 
@@ -57,13 +57,19 @@ contract Synthesis is RelayRecipient {
         bytes32 _txID,
         address _tokenReal,
         uint256 _amount,
-        address _to
+        address _to,
+        bytes memory _tokenData
     ) external onlyBridge {
-        // TODO add chek to Default - чтобы не было по бриджу
+        // TODO add check to Default - чтобы не было по бриджу
         require(
             synthesizeStates[_txID] == SynthesizeState.Default,
             "Synt: emergencyUnsynthesizedRequest called or tokens has been already synthesized"
         );
+
+        if (representationSynt[_tokenReal] == address(0)) {
+            (string memory name, string memory symbol) = abi.decode(_tokenData, (string, string)); 
+            createRepresentation(_tokenReal, name, symbol);
+        }
 
         ISyntERC20(representationSynt[_tokenReal]).mint(_to, _amount);
         synthesizeStates[_txID] = SynthesizeState.Synthesized;
@@ -168,14 +174,13 @@ contract Synthesis is RelayRecipient {
 
     function createRepresentation(
         address _rtoken,
-        string memory _stokenName,
-        string memory _stokenSymbol
-    ) external onlyOwner {
-        require(representationSynt[_rtoken] == address(0), "Synt: token representation already exist");
+        string memory _name,
+        string memory _symbol
+    ) internal {
         address stoken = Create2.deploy(
             0,
             keccak256(abi.encodePacked(_rtoken)),
-            abi.encodePacked(type(SyntERC20).creationCode, abi.encode(_stokenName, _stokenSymbol))
+            abi.encodePacked(type(SyntERC20).creationCode, abi.encode(_name, _symbol))
         );
         setRepresentation(_rtoken, stoken);
         emit CreatedRepresentation(_rtoken, stoken);
