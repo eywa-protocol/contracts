@@ -38,14 +38,10 @@ contract Portal is RelayRecipient {
         RequestState state;
     }
 
-    struct TokenInfo {
-        bytes data; // contains token name and symbol
-    }
-
     uint256 requestCount = 1;
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => UnsynthesizeState) public unsynthesizeStates;
-    mapping(address => TokenInfo) public tokenList;
+    mapping(address => bytes) public tokenData;
 
     event SynthesizeRequest(
         bytes32 indexed _id,
@@ -78,7 +74,7 @@ contract Portal is RelayRecipient {
         address _oppositeBridge,
         uint256 _chainID
     ) external returns (bytes32 txID) {
-        require(tokenList[_token].data.length != 0, "Portal: token must be verified");
+        require(tokenData[_token].length != 0, "Portal: token must be verified");
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] = balanceOf[_token].add(_amount);
 
@@ -90,7 +86,7 @@ contract Portal is RelayRecipient {
             _token,
             _amount,
             _chain2address,
-            tokenList[_token].data
+            tokenData[_token]
         );
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID);
@@ -116,7 +112,7 @@ contract Portal is RelayRecipient {
         address _oppositeBridge,
         uint256 _chainID
     ) external returns (bytes32 txID) {
-        require(tokenList[_token].data.length != 0, "Portal: token must be verified");
+        require(tokenData[_token].length != 0, "Portal: token must be verified");
         {
             (bool _success1, ) = _token.call(_approvalData);
             require(_success1, "Approve call failed");
@@ -130,7 +126,7 @@ contract Portal is RelayRecipient {
             _token,
             _amount,
             _chain2address,
-            tokenList[_token].data
+            tokenData[_token]
         );
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID);
@@ -197,7 +193,7 @@ contract Portal is RelayRecipient {
 
     // implies manual verification point
     function approveRepresentationRequest(address _rtoken) external onlyOwner {
-        tokenList[_rtoken].data = abi.encode(IERC20(_rtoken).name(), IERC20(_rtoken).symbol());
+        tokenData[_rtoken] = abi.encode(IERC20(_rtoken).name(), IERC20(_rtoken).symbol());
         emit ApprovedRepresentationRequest(_rtoken);
     }
 
