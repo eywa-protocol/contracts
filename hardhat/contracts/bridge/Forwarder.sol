@@ -57,16 +57,60 @@ contract Forwarder is IForwarder {
         _verifyNonce(req);
         _verifySig(req, domainSeparator, requestTypeHash, suffixData, sig);
         _updateNonce(req);
-//        require(false);
-        // solhint-disable-next-line avoid-low-level-calls
-//        (success,ret) = req.to.call{gas : req.gas, value : req.value}(abi.encodePacked(req.data, req.from));
-//        require(success, "call unsuccessful");
-        (success,ret) = execute2(req);
-        if (address(this).balance > 0) {
-            //can't fail: req.from signed (off-chain) the request, so it must be an EOA...
-            payable(req.from).transfer(address(this).balance);
+        (success,ret) = req.to.call{gas : gasleft(), value : req.value}(abi.encodePacked(req.data, req.from));
+        if (!success) {
+            assembly {
+                let len := returndatasize()
+                if gt(len, 0) {
+                    let ptr := mload(0x40)
+                    returndatacopy(ptr, 0, len)
+                    revert(ptr, len)
+                }
+            }
+            revert("unknown failure");
         }
+//        require(success, string(ret));
+//        (success, ret) = executeAssemblyForwarderRequest(req);
+//        (success, ret) = execute2(req);
+//        require(success, "call unsuccessful");
         return (success, ret);
+    }
+
+
+
+
+    function executeAssemblyForwarderRequest(ForwardRequest memory req) public returns (bool, bytes memory) {
+        nonces[req.from] = req.nonce + 1;
+        address target = req.to;
+        uint value = req.value;
+        bytes memory data = req.data;
+        uint256 len = data.length;
+
+        assembly {
+            let freeMemoryPointer := mload(0x40)
+            calldatacopy(freeMemoryPointer, 40, 192)
+        if iszero(
+        call(
+        gas(),
+        target,
+        value,
+        freeMemoryPointer,
+        len,
+        0,
+        0
+        )
+        ) {
+        returndatacopy(0, 0, returndatasize())
+        revert(0, returndatasize())
+        }
+        }
+
+        // Validate that the relayer has sent enough gas for the call.
+        // See https://ronan.eth.link/blog/ethereum-gas-dangers/
+        assert(gasleft() > req.gas / 63);
+        bytes memory b = new bytes(1);
+        b[0] = 0x05;
+        return (true, b);
     }
 
 
@@ -107,7 +151,7 @@ contract Forwarder is IForwarder {
     {
         nonces[req.from] = req.nonce + 1;
 
-        (bool success, bytes memory returndata) = req.to.call{gas: req.gas, value: req.value}(
+        (bool success, bytes memory returndata) = req.to.call{gas : req.gas, value : req.value}(
             abi.encodePacked(req.data, req.from)
         );
         // Validate that the relayer has sent enough gas for the call.
@@ -116,6 +160,8 @@ contract Forwarder is IForwarder {
 
         return (success, returndata);
     }
+
+
 
 
     function _verifySig(
@@ -180,40 +226,6 @@ contract Forwarder is IForwarder {
 
 
 
-    // github.com:gnosis/gp-v2-contracts/src/contracts/libraries/GPv2Interaction.sol:18
-
-    function execute(address target, bytes memory callData) internal {
-
-        uint256 value = uint256(0);
-        uint256 len = callData.length;
-
-        // NOTE: Use assembly to call the interaction instead of a low level
-        // call for two reasons:
-        // - We don't want to copy the return data, since we discard it for
-        // interactions.
-        // - Solidity will under certain conditions generate code to copy input
-        // calldata twice to memory (the second being a "memcopy loop").
-        // <https://github.com/gnosis/gp-v2-contracts/pull/417#issuecomment-775091258>
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-        //            let freeMemoryPointer := mload(0x40)
-        //            calldatacopy(freeMemoryPointer, callData.offset, callData.length)
-            if iszero(
-            call(
-            gas(),
-            target,
-            value,
-            callData,
-            len,
-            0,
-            0
-            )
-            ) {
-                returndatacopy(0, 0, returndatasize())
-                revert(0, returndatasize())
-            }
-        }
-    }
 
 
 }
