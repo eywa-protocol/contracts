@@ -176,7 +176,7 @@ contract Synthesis is RelayRecipient {
         address _rtoken,
         string memory _name,
         string memory _symbol
-    ) internal {
+    ) public /** internal */ {
         address stoken = Create2.deploy(
             0,
             keccak256(abi.encodePacked(_rtoken)),

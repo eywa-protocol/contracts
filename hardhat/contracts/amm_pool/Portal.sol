@@ -81,7 +81,7 @@ contract Portal is RelayRecipient {
         txID = keccak256(abi.encodePacked(this, requestCount));
 
         bytes memory out = abi.encodeWithSelector(
-            bytes4(keccak256(bytes("mintSyntheticToken(bytes32,address,uint256,address,bytes32)"))),
+            bytes4(keccak256(bytes("mintSyntheticToken(bytes32,address,uint256,address,bytes)"))),
             txID,
             _token,
             _amount,
@@ -121,7 +121,7 @@ contract Portal is RelayRecipient {
         }
         txID = keccak256(abi.encodePacked(this, requestCount));
         bytes memory out = abi.encodeWithSelector(
-            bytes4(keccak256(bytes("mintSyntheticToken(bytes32,address,uint256,address,bytes32)"))),
+            bytes4(keccak256(bytes("mintSyntheticToken(bytes32,address,uint256,address,bytes)"))),
             txID,
             _token,
             _amount,
@@ -192,7 +192,7 @@ contract Portal is RelayRecipient {
     }
 
     // implies manual verification point
-    function approveRepresentationRequest(address _rtoken) external onlyOwner {
+    function approveRepresentationRequest(address _rtoken) external /**onlyOwner */ {
         tokenData[_rtoken] = abi.encode(IERC20(_rtoken).name(), IERC20(_rtoken).symbol());
         emit ApprovedRepresentationRequest(_rtoken);
     }
