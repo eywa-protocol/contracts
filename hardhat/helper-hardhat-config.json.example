@@ -1,6 +1,7 @@
 {
   "avalanchetestnet": {
     "rpcUrl": "ws://185.132.176.254:13214/ext/bc/C/ws",
+    "rpcUrl2":"https://avalanche.testnet.eywa.fi",
     "n": "AVALANCHETESTNET",
     "netwiker": "AVCH",
     "env_file": [
@@ -38,6 +39,7 @@
   },
   "hecotestnet": {
     "rpcUrl": "ws://185.132.176.254:8577",
+    "rpcUrl2":"https://huobi.testnet.eywa.fi",
     "n": "HECOTESTNET",
     "netwiker": "HECO",
     "env_file": [
@@ -75,6 +77,7 @@
   },
   "mumbai": {
     "rpcUrl": "ws://185.132.176.254:8578",
+    "rpcUrl2":"https://mumbai.testnet.eywa.fi",
     "n": "MUMBAI",
     "netwiker": "MUMBAI",
     "env_file": [
@@ -112,6 +115,7 @@
   },
   "rinkeby": {
     "rpcUrl": "wss://rinkeby.infura.io/ws/v3/ab95bf9f6dd743e6a8526579b76fe358",
+    "rpcUrl2":"https://rinkeby.infura.io/v3/ab95bf9f6dd743e6a8526579b76fe358",
     "n": "RINKEBY",
     "netwiker": "ETH",
     "env_file": [
@@ -149,6 +153,7 @@
   },
   "bsctestnet": {
     "rpcUrl": "ws://185.132.176.254:8576",
+    "rpcUrl2": "https://bsc.testnet.eywa.fi",
     "n": "BSCTESTNET",
     "netwiker": "BSC",
     "env_file": [
@@ -186,6 +191,7 @@
   },
   "ganache": {
     "rpcUrl": "http://127.0.0.1:9999",
+    "rpcUrl2": "http://127.0.0.1:9999",
     "n": "GANACHE",
     "netwiker": "GACHE",
     "env_file": [
@@ -221,6 +227,7 @@
   },
   "network1": {
     "rpcUrl": "ws://172.20.128.11:7545",
+    "rpcUrl2": "http://172.20.128.11:7545",
     "n": "NETWORK1",
     "netwiker": "NET1",
     "env_file": [
@@ -257,6 +264,7 @@
   },
   "network2": {
     "rpcUrl": "ws://172.20.128.12:8545",
+    "rpcUrl2": "http://172.20.128.12:8545",
     "n": "NETWORK2",
     "netwiker": "NET2",
     "env_file": [
@@ -293,6 +301,7 @@
   },
   "network3": {
     "rpcUrl": "ws://172.20.128.13:9545",
+    "rpcUrl2": "http://172.20.128.13:9545",
     "n": "NETWORK3",
     "netwiker": "NET3",
     "env_file": [
