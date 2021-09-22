@@ -19,7 +19,6 @@ contract NodeRegistry is BaseRelayRecipient {
     struct Node {
         address owner;
         address pool;
-        address nodeWallet;
         address nodeIdAddress;
         string  blsPubKey;
         uint256 nodeId;
@@ -58,7 +57,7 @@ contract NodeRegistry is BaseRelayRecipient {
 
     modifier isNewNode(address _nodeIdAddr) {
         require(
-            nodeRegistry[_nodeIdAddr].nodeWallet == address(0),
+            nodeRegistry[_nodeIdAddr].owner == address(0),
             string(abi.encodePacked("node ", convertToString(_nodeIdAddr), " allready exists"))
         );
         _;
@@ -66,7 +65,7 @@ contract NodeRegistry is BaseRelayRecipient {
 
     modifier existingNode(address _nodeIdAddr) {
         require(
-            nodeRegistry[_nodeIdAddr].nodeWallet != address(0),
+            nodeRegistry[_nodeIdAddr].owner != address(0),
             string(abi.encodePacked("node ", convertToString(_nodeIdAddr), " does not exist"))
         );
         _;
@@ -75,7 +74,6 @@ contract NodeRegistry is BaseRelayRecipient {
     //TODO: discuss about check: nodeRegistry[_blsPointAddr] == address(0)
     function addNode(Node memory node) internal isNewNode(node.nodeIdAddress) {
         require(node.owner != address(0), Errors.ZERO_ADDRESS);
-        require(node.nodeWallet != address(0), Errors.ZERO_ADDRESS);
         require(node.nodeIdAddress != address(0), Errors.ZERO_ADDRESS);
         node.nodeId = nodes.length();
         nodeRegistry[node.nodeIdAddress] = node;
@@ -120,7 +118,7 @@ contract NodeRegistry is BaseRelayRecipient {
     }
 
     function nodeExists(address _nodeIdAddr) public view returns (bool) {
-        return nodeRegistry[_nodeIdAddr].nodeWallet != address(0);
+        return nodeRegistry[_nodeIdAddr].owner != address(0);
     }
 
     function checkPermissionTrustList(address _nodeOwner) external view returns (bool) {
@@ -141,7 +139,7 @@ contract NodeRegistry is BaseRelayRecipient {
             address(EYWA), // depositToken
             address(EYWA), // rewardToken            (test only)
             100,           // relayerFeeNumerator    (test only)
-            1000,          // emissionRateNumerator  (test only)
+            4000,          // emissionRateNumerator  (test only)
             _node.owner    // vault                  (test only)
         );
         uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());

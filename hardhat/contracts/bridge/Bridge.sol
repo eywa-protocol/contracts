@@ -4,23 +4,25 @@ pragma solidity 0.8.0;
 import "./core/BridgeCore.sol";
 import "./interface/INodeRegistry.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
+import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 
 //TODO: onlyTrustedNode has worse filled data. I.e. In func NodeList#addNode the golang node registers himself
 // and this means every node who wants to start up can add himself in onlyTrustedNode list.
-contract Bridge is BridgeCore {
+contract Bridge is BridgeCore, BaseRelayRecipient  {
 
-    constructor (address listNode) {
+    constructor (address listNode, address forwarder) {
         _listNode = listNode;
-        _owner    = msg.sender;
+        trustedForwarder = forwarder;
+
     }
 
     modifier onlyTrustedNode() {
-        require(INodeRegistry(_listNode).checkPermissionTrustList(msg.sender) == true, "Only trusted node can invoke");
+        require(INodeRegistry(_listNode).checkPermissionTrustList(_msgSender()) == true, "Only trusted node can invoke");
         _;
     }
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
-        require(contractBind[msg.sender][oppositeBridge] == receiveSide, "UNTRUSTED CONTRACT");
+        require(contractBind[_msgSender()][oppositeBridge] == receiveSide, "UNTRUSTED CONTRACT");
         _;
     }
 
@@ -56,4 +58,7 @@ contract Bridge is BridgeCore {
 
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
     }
+
+    string public override versionRecipient = "2.2.3";
+
 }
