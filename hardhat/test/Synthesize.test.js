@@ -36,7 +36,7 @@ describe('Synthesis contract', () => {
             // determine the address
             const bytecodeWithParams = ERC20.bytecode + web3.eth.abi.encodeParameters(
                 ['string', 'string'],
-                [TOKEN_NAME, TOKEN_SYMBOL]
+                ["e"+TOKEN_NAME, "e"+TOKEN_SYMBOL]
             ).slice(2)
             const salt = web3.utils.sha3(realToken.address)
             const expectedRepresentationAddress = web3.utils.toChecksumAddress(getCreate2Address(
@@ -62,8 +62,8 @@ describe('Synthesis contract', () => {
             const syntheticToken = ERC20.attach(expectedRepresentationAddress)
             const userBalance = await syntheticToken.connect(user).balanceOf(user.address)
             await expect(userBalance).to.equal(value)
-            await expect(await syntheticToken.name()).to.equal(TOKEN_NAME)
-            await expect(await syntheticToken.symbol()).to.equal(TOKEN_SYMBOL)
+            await expect(await syntheticToken.name()).to.equal("e"+TOKEN_NAME)
+            await expect(await syntheticToken.symbol()).to.equal("e"+TOKEN_SYMBOL)
         });
 
     })

@@ -177,10 +177,12 @@ contract Synthesis is RelayRecipient {
         string memory _name,
         string memory _symbol
     ) internal {
+        string memory name = string(abi.encodePacked("e", _name));
+        string memory symbol = string(abi.encodePacked("e", _symbol));
         address stoken = Create2.deploy(
             0,
             keccak256(abi.encodePacked(_rtoken)),
-            abi.encodePacked(type(SyntERC20).creationCode, abi.encode(_name, _symbol))
+            abi.encodePacked(type(SyntERC20).creationCode, abi.encode(name, symbol))
         );
         setRepresentation(_rtoken, stoken);
         emit CreatedRepresentation(_rtoken, stoken);
