@@ -6,6 +6,8 @@ stages:
 
 deploy:
   stage: deploy
+  before_script:
+    - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
   script:
     - docker run -t --rm -v $(pwd):/app --user builder registry.digiu.ai/base/eywa-contracts:2 make -C /app eth-testnet-migrate
   only:
@@ -21,6 +23,8 @@ deploy:
 
 rebuild:
   stage: deploy
+  before_script:
+    - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
   script:
     - docker run -t --rm -v $(pwd):/app --user builder registry.digiu.ai/base/eywa-contracts:2 make -C /app wrappers
   only:
