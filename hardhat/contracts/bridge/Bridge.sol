@@ -53,7 +53,19 @@ contract Bridge is BridgeCore, BaseRelayRecipient  {
         bytes32 recreateReqId = keccak256(abi.encodePacked(nonce[bridgeFrom][senderSide], b, block.chainid));
         require(reqId == recreateReqId, 'CONSISTENCY FAILED');
         (bool success, bytes memory data) = receiveSide.call(b);
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'FAILED');
+        if (success) {
+            require(data.length == 0 || abi.decode(data, (bool)), "Unable to decode rerurned data");
+        } else {
+            assembly {
+                let len := returndatasize()
+                if gt(len, 0) {
+                    let ptr := mload(0x40)
+                    returndatacopy(ptr, 0, len)
+                    revert(ptr, len)
+                }
+            }
+            revert("Call failed with no reason");
+        }
         nonce[bridgeFrom][senderSide] = nonce[bridgeFrom][senderSide] + 1;
 
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
