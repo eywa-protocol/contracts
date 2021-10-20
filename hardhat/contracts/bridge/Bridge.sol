@@ -4,11 +4,13 @@ pragma solidity 0.8.0;
 import "./core/BridgeCore.sol";
 import "./interface/INodeRegistry.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts-newone/utils/Address.sol";
 import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 
 //TODO: onlyTrustedNode has worse filled data. I.e. In func NodeList#addNode the golang node registers himself
 // and this means every node who wants to start up can add himself in onlyTrustedNode list.
 contract Bridge is BridgeCore, BaseRelayRecipient  {
+    using Address for address;
 
     constructor (address listNode, address forwarder) {
         _listNode = listNode;
@@ -52,20 +54,8 @@ contract Bridge is BridgeCore, BaseRelayRecipient  {
         address senderSide = contractBind[receiveSide][bridgeFrom];
         bytes32 recreateReqId = keccak256(abi.encodePacked(nonce[bridgeFrom][senderSide], b, block.chainid));
         require(reqId == recreateReqId, 'CONSISTENCY FAILED');
-        (bool success, bytes memory data) = receiveSide.call(b);
-        if (success) {
-            require(data.length == 0 || abi.decode(data, (bool)), "Unable to decode rerurned data");
-        } else {
-            assembly {
-                let len := returndatasize()
-                if gt(len, 0) {
-                    let ptr := mload(0x40)
-                    returndatacopy(ptr, 0, len)
-                    revert(ptr, len)
-                }
-            }
-            revert("Call failed with no reason");
-        }
+        bytes memory data = receiveSide.functionStaticCall(b, "receiveRequestV2 failed");
+        require(data.length == 0 || abi.decode(data, (bool)), "receiveRequestV2: Unable to decode rerurned data");
         nonce[bridgeFrom][senderSide] = nonce[bridgeFrom][senderSide] + 1;
 
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
