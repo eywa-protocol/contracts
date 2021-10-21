@@ -50,16 +50,17 @@ contract Portal is RelayRecipient {
         address _chain2address,
         address _receiveSide,
         address _oppositeBridge,
-        uint _chainID
+        uint _chainID,
+        uint256 _nonce
     ) external returns (bytes32 txID) {
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] = balanceOf[_token].add(_amount);
 
-        txID = keccak256(abi.encodePacked(this, requestCount));
+        txID = IBridge(bridge).prepareRqId(_oppositeBridge, _chainID, _receiveSide, _msgSender(), _nonce);
 
         bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('mintSyntheticToken(bytes32,address,uint256,address)'))), txID, _token, _amount, _chain2address);
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID);
+        IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID, txID );
         TxState storage txState = requests[txID];
         txState.recipient    = _msgSender();
         txState.chain2address    = _chain2address;
@@ -67,7 +68,7 @@ contract Portal is RelayRecipient {
         txState.amount     = _amount;
         txState.state = RequestState.Sent;
 
-        requestCount +=1;
+        // requestCount +=1;
 
         emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
     }
@@ -80,7 +81,8 @@ contract Portal is RelayRecipient {
         address _chain2address,
         address _receiveSide,
         address _oppositeBridge,
-        uint _chainID
+        uint _chainID,
+        uint256 _nonce
     )  external returns (bytes32 txID) {
 
         (bool _success1, ) = _token.call(_approvalData);
@@ -89,11 +91,11 @@ contract Portal is RelayRecipient {
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] = balanceOf[_token].add(_amount);
 
-        txID = keccak256(abi.encodePacked(this, requestCount));
+        txID = IBridge(bridge).prepareRqId(_oppositeBridge, _chainID, _receiveSide, _msgSender(), _nonce);
 
         bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('mintSyntheticToken(bytes32,address,uint256,address)'))), txID, _token, _amount, _chain2address);
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID);
+        IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID, txID);
         TxState storage txState = requests[txID];
         txState.recipient    = _msgSender();
         txState.chain2address    = _chain2address;
@@ -101,7 +103,7 @@ contract Portal is RelayRecipient {
         txState.amount     = _amount;
         txState.state = RequestState.Sent;
 
-        requestCount +=1;
+        // requestCount +=1;
 
         emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
     }
@@ -136,7 +138,7 @@ contract Portal is RelayRecipient {
 
         bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('emergencyUnburn(bytes32)'))),_txID);
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainId);
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainId, _txID);
 
         emit RevertBurnRequest(_txID, _msgSender());
     }
