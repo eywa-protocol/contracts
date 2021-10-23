@@ -1,7 +1,7 @@
 
 let argv = null;
 if(process.env.TYPE_TEST === 'local') argv = {'typenet': 'devstand', 'net1': 'network1','net2': 'network2', 'net3': 'network3' };
-if(process.env.TYPE_TEST === 'testnet') argv = {'typenet': 'teststand', 'net1': 'rinkeby','net2': 'bsctestnet', 'net3': 'mumbai' };
+if(process.env.TYPE_TEST === 'testnet') argv = {'typenet': 'teststand', 'net1': 'avalanchetestnet','net2': 'bsctestnet', 'net3': 'rinkeby' };
  //require('minimist')(process.argv.slice(3), {string: ['typenet', 'net1', 'net2', 'net3']});
 
 const Web3 = require('web3');
@@ -72,7 +72,7 @@ contract('Bridge', (deployer, accounts) => {
             assert.equal(res, testData, `Should be ${testData}`);
         });
 
-        it('From network 2 to 1 without callback', async () => {
+        it.skip('From network 2 to 1 without callback', async () => {
 
             let res = (await this.mp1.testData({from: this.userNet1})).toString();
 
@@ -86,7 +86,7 @@ contract('Bridge', (deployer, accounts) => {
             assert.equal(res, testData, `Should be ${testData}`);
         });
 
-        it('From network 3 to 2 without callback', async () => {
+        it.skip('From network 3 to 2 without callback', async () => {
 
             let res = (await this.mp2.testData({from: this.userNet2})).toString();
 
@@ -100,7 +100,7 @@ contract('Bridge', (deployer, accounts) => {
             assert.equal(res, testData, `Should be ${testData}`);
         });
 
-        it('Negative test: From network 3 to 1. \'TO\' ALREADY EXIST', async () => {
+        it.skip('Negative test: From network 3 to 1. \'TO\' ALREADY EXIST', async () => {
             let from           = await mockPool3.new(this.br3.address, {from: this.userNet3, gasPrice: 20000000000, gas: 500_000});
             let oppositeBridge = this.br1.address;
             let to             = this.mp1.address;
@@ -114,7 +114,7 @@ contract('Bridge', (deployer, accounts) => {
             }
         });
 
-        it('Negative test: From network 1 to 2. Untrusted dex on bridge1', async () => {
+        it.skip('Negative test: From network 1 to 2. Untrusted dex on bridge1', async () => {
 
             this.mp1 = await mockPool1.new(this.br1.address, {from: this.userNet1, gasPrice: 20000000000, gas: 500_000});
             let res = (await this.mp2.testData({from: this.userNet2})).toString();

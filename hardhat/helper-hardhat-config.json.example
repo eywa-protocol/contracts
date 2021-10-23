@@ -1,4 +1,42 @@
 {
+    "avalanchetestnet": {
+    "rpcUrl": "wss://api.avax-test.network/ext/bc/C/ws",
+    "rpcUrl2": "https://api.avax-test.network/ext/bc/C/rpc",
+    "n": "AVALANCHETESTNET",
+    "netwiker": "AVCH",
+    "env_file": [
+      "networks_env/env_connect_to_avalanchetestnet.env",
+      "networks_env/env_test_for_avalanchetestnet.env"
+    ],
+    "chainId": 43113,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0xF9F4Fc354C027FEAC4698cC5514d2276795EE172",
+    "token": [
+      {
+        "address": "0xB0F79Fc1cdee2B03B8B4618AAAb4396e5c749684",
+        "name": "EYWA",
+        "symbol": "EYWA"
+      },
+      {
+        "address": "0xBb0F8F8fC4EeD9B649162bDCaaE3483737Ae68E3",
+        "name": "USDT",
+        "symbol": "USDT"
+      }
+    ],
+    "sourceForRepresentation": [
+      "rinkeby",
+      "bsctestnet",
+      "mumbai",
+      "hecotestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeList": "0x7F05d33Ef6708cE3af579c8F3e07D4FF4b684c32",
+    "bridge": "0xCe993F345e6dD930dB0a1f562b77DC22088a545d",
+    "mockDexPool": "0x8563713944374744293E889b936164fe518d7Efc",
+    "portal": "0xEf7247db485F57Ab69A3c013a1F9a57C3a4b0B16",
+    "synthesis": "0xf714bebe92Ed529205DE6ec9743Dc593b9d50E56"
+  },
   "hecotestnet": {
     "rpcUrl": "wss://ws-testnet.hecochain.com",
     "n": "HECOTESTNET",

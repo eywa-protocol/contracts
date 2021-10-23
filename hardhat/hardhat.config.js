@@ -15,6 +15,7 @@ const BINANCESCAN_API_KEY  = process.env.BINANCESCAN_API_KEY  || "0x000000000000
 const POLYGONSCAN_API_KEY  = process.env.POLYGONSCAN_API_KEY  || "0x0000000000000000000000000000000000000000";
 const HECOINFOSCAN_API_KEY = process.env.HECOINFOSCAN_API_KEY || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_HECO     = process.env.PRIVATE_KEY_HECO     || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_AVALANCHETESTNET     = process.env.PRIVATE_KEY_AVALANCHETESTNET     || "0x0000000000000000000000000000000000000000";
 
 //TODO: Need to resolve dynamic initialization for apiKey. Now it is wrong working.
 async function getKey(network) {
@@ -37,6 +38,10 @@ module.exports = {
     localhost: {
         //
     },
+    avalanchetestnet:{
+      url: networkConfig.avalanchetestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_AVALANCHETESTNET]      
+    },
     rinkeby: {
       url: networkConfig.rinkeby.rpcUrl.replace('ws','http').replace('ws/',''),
       accounts: [PRIVATE_KEY_RINKEBY]
@@ -46,24 +51,8 @@ module.exports = {
       accounts: [PRIVATE_KEY_BSC]
     },
     mumbai:{
-        url: networkConfig.mumbai.rpcUrl.replace('ws','http').replace('-ws','-rpc'),
+        url: networkConfig.mumbai.rpcUrl.replace('ws','http').replace('ws','rpc'),
         accounts: [PRIVATE_KEY_MUMBAI]
-    },
-    network1: {
-       url: networkConfig.network1.rpcUrl.replace('ws','http'),
-       accounts: [process.env.PRIVATE_KEY_NETWORK1]
-    },
-    network2: {
-      url: networkConfig.network2.rpcUrl.replace('ws','http'),
-      accounts: [process.env.PRIVATE_KEY_NETWORK2]
-    },
-    network3: {
-      url: networkConfig.network3.rpcUrl.replace('ws','http'),
-      accounts: [process.env.PRIVATE_KEY_NETWORK3]
-    },
-    ganache: {
-      url: networkConfig.ganache.rpcUrl,
-      accounts: [PRIVATE_KEY_GANACHE]
     },
     hecotestnet:{
       url: networkConfig.hecotestnet.rpcUrl.split('ws').join('http'),
