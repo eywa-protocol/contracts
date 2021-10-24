@@ -156,7 +156,7 @@ contract('Bridge', (deployer, accounts) => {
             assert.equal(res, testData, `Should be ${testData}`);
         });
 
-        it('From network 2 to 4 without callback', async () => {
+        it.skip('From network 2 to 4 without callback', async () => {
 
             let res = (await this.mp4.testData({from: this.userNet4})).toString();
             let testData = Math.floor((Math.random() * 100) + 1);
@@ -178,6 +178,19 @@ contract('Bridge', (deployer, accounts) => {
             //console.log(receipt);
             await timeout(45000); // give some time
             res = (await this.mp5.testData({from: this.userNet5})).toString();
+
+            assert.equal(res, testData, `Should be ${testData}`);
+        });
+
+        it('From network 5 to 2 without callback', async () => {
+
+            let res = (await this.mp2.testData({from: this.userNet2})).toString();
+            let testData = Math.floor((Math.random() * 100) + 1);
+            /** send end-to-end request */
+            let receipt = await this.mp5.sendRequestTestV2(testData, this.mp2.address, this.br2.address, chainId(argv.net2), {from: this.userNet5, gas: 300_000 });
+            //console.log(receipt);
+            await timeout(25000); // give some time
+            res = (await this.mp2.testData({from: this.userNet2})).toString();
 
             assert.equal(res, testData, `Should be ${testData}`);
         });
