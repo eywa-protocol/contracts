@@ -15,7 +15,7 @@ const BINANCESCAN_API_KEY  = process.env.BINANCESCAN_API_KEY  || "0x000000000000
 const POLYGONSCAN_API_KEY  = process.env.POLYGONSCAN_API_KEY  || "0x0000000000000000000000000000000000000000";
 const HECOINFOSCAN_API_KEY = process.env.HECOINFOSCAN_API_KEY || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_HECO     = process.env.PRIVATE_KEY_HECO     || "0x0000000000000000000000000000000000000000";
-const PRIVATE_KEY_AVALANCHE = process.env.PRIVATE_KEY_AVALANCHE || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_AVALANCHETESTNET     = process.env.PRIVATE_KEY_AVALANCHETESTNET     || "0x0000000000000000000000000000000000000000";
 
 //TODO: Need to resolve dynamic initialization for apiKey. Now it is wrong working.
 async function getKey(network) {
@@ -38,27 +38,25 @@ module.exports = {
     localhost: {
         //
     },
+    avalanchetestnet:{
+      url: networkConfig.avalanchetestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_AVALANCHETESTNET]      
+    },
     rinkeby: {
-      url: 'https://rinkeby.testnet.eywa.fi',
+      url: networkConfig.rinkeby.rpcUrl.replace('ws','http').replace('ws/',''),
       accounts: [PRIVATE_KEY_RINKEBY]
     },
     bsctestnet: {
-      url: 'http://65.21.81.106:8575',
-      accounts: [PRIVATE_KEY_BSC],
-      gasPrice: 8000000000
+      url: networkConfig.bsctestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_BSC]
     },
-    mumbai: {
-      url:  'http://10.1.0.14:8545',
-      accounts: [PRIVATE_KEY_MUMBAI],
-      gasPrice: 8000000000
+    mumbai:{
+        url: networkConfig.mumbai.rpcUrl.replace('ws','http').replace('ws','rpc'),
+        accounts: [PRIVATE_KEY_MUMBAI]
     },
     hecotestnet:{
-      url:  'https://huobi.testnet.eywa.fi',
+      url: networkConfig.hecotestnet.rpcUrl.split('ws').join('http'),
       accounts: [PRIVATE_KEY_HECO]
-    },
-    avalanchetestnet:{
-      url: 'https://avalanche.testnet.eywa.fi',
-      accounts: [PRIVATE_KEY_AVALANCHE]
     }
   },
   etherscan: {

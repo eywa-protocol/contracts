@@ -23,10 +23,12 @@ const checkoutProvider = (argv) => {
 
   if(argv.typenet === 'teststand'){
     const web3Net1 = new HDWalletProvider(env.parsed[getPk(argv.net1)], network[argv.net1].rpcUrl);
-    const web3Net2 = new HDWalletProvider(env.parsed[getPk(argv.net2)], network[argv.net2].rpcUrl);
+    const web3Net2 = new HDWalletProvider(env.parsed[getPk(argv.net2)], network[argv.net2].rpcUrl2);
     const web3Net3 = argv?.net3 !== void 0 ? new HDWalletProvider(env.parsed[getPk(argv.net3)], network[argv.net3].rpcUrl)  : void 0;
+    const web3Net4 = new HDWalletProvider(env.parsed[getPk(argv.net4)], network[argv.net4].rpcUrl);
+    const web3Net5 = new HDWalletProvider(env.parsed[getPk(argv.net5)], network[argv.net5].rpcUrl);
 
-    return {web3Net1, web3Net2, web3Net3};
+    return {web3Net1, web3Net2, web3Net3, web3Net4, web3Net5};
   }
 
 };
