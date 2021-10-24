@@ -7,7 +7,7 @@ contract BridgeCore {
     address public _listNode;
 
     /* bridge => nonce */
-    // mapping(address => mapping(address => uint256)) internal nonce;
+    mapping(address => uint256) internal nonces;
     mapping(address => mapping(address => address)) internal contractBind;
     mapping(address => bool) private is_in;
 
@@ -47,5 +47,14 @@ contract BridgeCore {
 
     function prepareRqId(address oppositeBridge, uint256 chainId, address receiveSide, address sender, uint256 nonce) public view returns (bytes32) {
         return keccak256(abi.encodePacked(sender, nonce, chainId, receiveSide, oppositeBridge));
+    }
+
+
+    function verifyNonce(address sender, uint256 nonce) internal view {
+        require(nonces[sender] == nonce, "nonce mismatch");
+    }
+
+    function verifyAndUpdateNonce(address sender, uint256 nonce) internal {
+        require(nonces[sender]++ == nonce, "nonce mismatch");
     }
 }

@@ -28,13 +28,16 @@ contract Bridge is BridgeCore {
         address receiveSide,
         address oppositeBridge,
         uint256 chainId,
-        bytes32 requestId
+        bytes32 requestId,
+        address sender,
+        uint256 nonce
     )
         external
         onlyTrustedContract(receiveSide, oppositeBridge)
         returns(bool)
     {
         // bytes32 requestId = prepareRqId(_selector, oppositeBridge, chainId, receiveSide, sender, nonce);
+        verifyAndUpdateNonce(sender, nonce);
         emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
         return true;
     }
