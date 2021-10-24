@@ -9,7 +9,7 @@ deploy:
   before_script:
     - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
   script:
-    - docker run -t --rm -v $(pwd):/app --user builder registry.digiu.ai/base/eywa-contracts:2 make -C /app eth-testnet-migrate
+    - docker run -t --rm -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 registry.digiu.ai/base/eywa-contracts:2 make -C /app eth-testnet-migrate
   only:
     - tags
   tags:
@@ -18,8 +18,9 @@ deploy:
   artifacts:
     paths:
         - wrappers/
-        - helper-hardhat-config.json
-        - networks_env
+        - hardhat/helper-hardhat-config.json
+        - hardhat/.env
+        - hardhat/networks_env
 
 rebuild:
   stage: deploy
@@ -35,5 +36,5 @@ rebuild:
   artifacts:
     paths:
         - wrappers/
-        - helper-hardhat-config.json
-        - networks_env
+        - hardhat/helper-hardhat-config.json
+        - hardhat/.env
