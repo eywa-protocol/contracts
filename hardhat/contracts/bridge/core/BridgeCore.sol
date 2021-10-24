@@ -2,7 +2,6 @@
 pragma solidity 0.8.0;
 
 contract BridgeCore {
-
     address public _owner;
     address public _listNode;
 
@@ -12,13 +11,13 @@ contract BridgeCore {
     mapping(address => bool) private is_in;
 
     event OracleRequest(
-        string  requestType,
+        string requestType,
         address bridge,
         bytes32 requestId,
-        bytes   selector,
+        bytes selector,
         address receiveSide,
         address oppositeBridge,
-        uint chainid
+        uint256 chainid
     );
 
     event ReceiveRequest(bytes32 reqId, address receiveSide, address bridgeFrom, address senderSide);
@@ -34,27 +33,35 @@ contract BridgeCore {
        for prevent malicious behaviour.
        2. Contract A (chain A) could be bind with several contracts where every contract from another chain. For ex: Contract A (chain A) --> Contract B (chain B) + Contract A (chain A) --> Contract B' (chain B') ... etc
     */
-    function addContractBind(address from, address oppositeBridge, address to) external {
-        require(to   != address(0), "NULL ADDRESS TO");
+    function addContractBind(
+        address from,
+        address oppositeBridge,
+        address to
+    ) external {
+        require(to != address(0), "NULL ADDRESS TO");
         require(from != address(0), "NULL ADDRESS FROM");
         require(is_in[to] == false, "TO ALREADY EXIST");
         // for prevent malicious behaviour like switching between older and newer contracts
         require(contractBind[from][oppositeBridge] == address(0), "UPDATE DOES NOT ALLOWED");
         contractBind[from][oppositeBridge] = to;
         is_in[to] = true;
-
     }
 
-    function prepareRqId(address oppositeBridge, uint256 chainId, address receiveSide, address sender, uint256 nonce) public view returns (bytes32) {
-        return keccak256(abi.encodePacked(sender, nonce, chainId, receiveSide, oppositeBridge));
+    function prepareRqId(
+        address oppositeBridge,
+        uint256 chainId,
+        address receiveSide,
+        address from,
+        uint256 nonce
+    ) public view returns (bytes32) {
+        return keccak256(abi.encodePacked(from, nonce, chainId, receiveSide, oppositeBridge));
     }
 
-
-    function verifyNonce(address sender, uint256 nonce) internal view {
-        require(nonces[sender] == nonce, "nonce mismatch");
+    function getNonce(address from) public view returns (uint256) {
+        return nonces[from];
     }
 
-    function verifyAndUpdateNonce(address sender, uint256 nonce) internal {
-        require(nonces[sender]++ == nonce, "nonce mismatch");
+    function verifyAndUpdateNonce(address from, uint256 nonce) internal {
+        require(nonces[from]++ == nonce, "nonce mismatch");
     }
 }

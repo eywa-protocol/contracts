@@ -64,9 +64,9 @@ contract('Bridge', (deployer, accounts) => {
             let res = (await this.mp2.testData({from: this.userNet2})).toString();
             let testData = Math.floor((Math.random() * 100) + 1);
             /** send end-to-end request */
-            let nonce = await web3.eth.getTransactionCount(
+            let nonce = await this.br1.getNonce(
                 this.userNet1
-            ); console.log(parseInt(nonce))
+            );
             let receipt = await this.mp1.sendRequestTestV2(testData, this.mp2.address, this.br2.address, chainId(argv.net2), parseInt(nonce), {from: this.userNet1, gasPrice: 20000000000, gas: 300_000 });
 	        //console.log(receipt);
             await timeout(25000); // give some time
@@ -81,7 +81,7 @@ contract('Bridge', (deployer, accounts) => {
 
             let testData = Math.floor((Math.random() * 100) + 1);
 
-            let nonce = await web3.eth.getTransactionCount(
+            let nonce = await this.br2.getNonce(
                 this.userNet2
             );
             /** send end-to-end request */
@@ -99,7 +99,7 @@ contract('Bridge', (deployer, accounts) => {
 
             let testData = Math.floor((Math.random() * 100) + 1);
 
-            let nonce = await web3.eth.getTransactionCount(
+            let nonce = await this.br3.getNonce(
                 this.userNet3
             );
 
@@ -133,7 +133,7 @@ contract('Bridge', (deployer, accounts) => {
 
             let testData = Math.floor((Math.random() * 100) + 1);
 
-            let nonce = await web3.eth.getTransactionCount(
+            let nonce = await this.br1.getNonce(
                 this.userNet1
             );
 

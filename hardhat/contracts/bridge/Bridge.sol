@@ -36,7 +36,6 @@ contract Bridge is BridgeCore {
         onlyTrustedContract(receiveSide, oppositeBridge)
         returns(bool)
     {
-        // bytes32 requestId = prepareRqId(_selector, oppositeBridge, chainId, receiveSide, sender, nonce);
         verifyAndUpdateNonce(sender, nonce);
         emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
         return true;
@@ -50,13 +49,8 @@ contract Bridge is BridgeCore {
     ) external onlyTrustedNode {
 
         address senderSide = contractBind[receiveSide][bridgeFrom];
-        // bytes32 recreateReqId = keccak256(abi.encodePacked(nonce[bridgeFrom][senderSide], b, block.chainid));
-        //TODO refactor check synced crosschain nonces
-//        require(reqId == recreateReqId, 'CONSISTENCY FAILED');
         (bool success, bytes memory data) = receiveSide.call(b);
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'FAILED');
-        // nonce[bridgeFrom][senderSide] = nonce[bridgeFrom][senderSide] + 1;
-
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
     }
 }
