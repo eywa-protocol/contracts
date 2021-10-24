@@ -38,9 +38,8 @@
     "synthesis": "0xf714bebe92Ed529205DE6ec9743Dc593b9d50E56"
   },
   "hecotestnet": {
-    "rpcUrl": "ws://185.132.176.254:8577",
+    "rpcUrl": "wss://ws-testnet.hecochain.com",
     "n": "HECOTESTNET",
-    "netwiker": "HECO",
     "env_file": [
       "networks_env/env_connect_to_hecotestnet.env",
       "networks_env/env_test_for_hecotestnet.env"
@@ -75,9 +74,8 @@
     "synthesis": "0x514c0E83C86a491320497d7657aF9B5b2E264f6f"
   },
   "mumbai": {
-    "rpcUrl": "ws://10.1.0.14:8546",
+    "rpcUrl": "wss://matic-testnet-archive-ws.bwarelabs.com",
     "n": "MUMBAI",
-    "netwiker": "MUMBAI",
     "env_file": [
       "networks_env/env_connect_to_mumbai.env",
       "networks_env/env_test_for_mumbai.env"
@@ -112,9 +110,8 @@
     "synthesis": "0xeEb99d96a4C51343bbb1a459b7150386013BDE99"
   },
   "rinkeby": {
-    "rpcUrl": "ws://10.1.0.42:8547",
+    "rpcUrl": "wss://rinkeby.infura.io/ws/v3/ab95bf9f6dd743e6a8526579b76fe358",
     "n": "RINKEBY",
-    "netwiker": "ETH",
     "env_file": [
       "networks_env/env_connect_to_rinkeby.env",
       "networks_env/env_test_for_rinkeby.env"
@@ -152,7 +149,6 @@
     "rpcUrl": "ws://185.132.176.254:8576",
     "rpcUrl2": "https://bsc.testnet.eywa.fi",
     "n": "BSCTESTNET",
-    "netwiker": "BSC",
     "env_file": [
       "networks_env/env_connect_to_bsctestnet.env",
       "networks_env/env_test_for_bsctestnet.env"
@@ -315,10 +311,10 @@
       "network2"
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeList": "0x1Bf2845E05Fb7CfA46f76d661C0B1b89fcee3BA0",
-    "bridge": "0xb6eB27120e75B6C49305E8f3e2e8F91c6701466A",
-    "mockDexPool": "0x7D1Cc21ef24f03A8265D5ca2647AF5B9B24C8CE6",
-    "portal": "0xBC60FfC09DaA8FBfE88d2e7F802595a56A742102",
-    "synthesis": "0xE2c8ADc930A21F8e48173dc6776fcb2B09C4A3b6"
+    "nodeList": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
+    "bridge": "0x756b147e4Fac1E185B07bFdBb95c42eF5eCEAa4c",
+    "mockDexPool": "0x59da540FeACf4DAa3c9D00DEd796EBb53Fd5342e",
+    "portal": "0x329DCb6edc4D6b9110d366BCc4f52624F619176A",
+    "synthesis": "0xBE8a929Ac944333f054D2936ba7CdcD9A457323f"
   }
 }

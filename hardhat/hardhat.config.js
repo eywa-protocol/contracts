@@ -43,7 +43,7 @@ module.exports = {
       accounts: [PRIVATE_KEY_AVALANCHETESTNET]      
     },
     rinkeby: {
-      url: 'https://rinkeby.testnet.eywa.fi',
+      url: networkConfig.rinkeby.rpcUrl.replace('ws','http').replace('ws/',''),
       accounts: [PRIVATE_KEY_RINKEBY]
     },
     bsctestnet: {
@@ -55,12 +55,8 @@ module.exports = {
         accounts: [PRIVATE_KEY_MUMBAI]
     },
     hecotestnet:{
-      url:  'https://huobi.testnet.eywa.fi',
+      url: networkConfig.hecotestnet.rpcUrl.split('ws').join('http'),
       accounts: [PRIVATE_KEY_HECO]
-    },
-    avalanchetestnet:{
-      url: 'https://avalanche.testnet.eywa.fi',
-      accounts: [PRIVATE_KEY_AVALANCHE]
     }
   },
   etherscan: {
