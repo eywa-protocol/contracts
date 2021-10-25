@@ -19,7 +19,12 @@ contract Bridge is BridgeCore {
     }
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
-        require(contractBind[msg.sender][oppositeBridge] == receiveSide, "UNTRUSTED CONTRACT");
+        require(contractBind[bytes32(uint256(uint160(msg.sender)) << 96)][bytes32(uint256(uint160(oppositeBridge)) << 96)] == bytes32(uint256(uint160(receiveSide)) << 96), "UNTRUSTED CONTRACT");
+        _;
+    }
+
+    modifier onlyTrustedContractBytes32(bytes32 receiveSide, bytes32 oppositeBridge) {
+        require(contractBind[bytes32(uint256(uint160(msg.sender)) << 96)][oppositeBridge] == receiveSide, "UNTRUSTED CONTRACT");
         _;
     }
 
@@ -41,6 +46,25 @@ contract Bridge is BridgeCore {
         return true;
     }
 
+    function transmitRequestV2(
+        bytes memory _selector,
+        bytes32 receiveSide,
+        bytes32 oppositeBridge,
+        uint256 chainId,
+        bytes32 requestId,
+        address sender,
+        uint256 nonce
+    )
+        external
+        onlyTrustedContractBytes32(receiveSide, oppositeBridge)
+        returns(bool)
+    {
+        verifyAndUpdateNonce(sender, nonce);
+        emit OracleRequestSolana("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
+        return true;
+    }
+
+
     function receiveRequestV2(
         bytes32 reqId,
         bytes memory b,
@@ -48,7 +72,7 @@ contract Bridge is BridgeCore {
         address bridgeFrom
     ) external onlyTrustedNode {
 
-        address senderSide = contractBind[receiveSide][bridgeFrom];
+        address senderSide = address(bytes20(contractBind[receiveSide][bridgeFrom]));
         (bool success, bytes memory data) = receiveSide.call(b);
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'FAILED');
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
