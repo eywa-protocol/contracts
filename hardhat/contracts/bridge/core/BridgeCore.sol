@@ -29,7 +29,9 @@ contract BridgeCore {
         bytes32 oppositeBridge,
         uint256 chainid
     );
-    event ReceiveRequest(bytes32 reqId, address receiveSide, address bridgeFrom, address senderSide);
+    // event ReceiveRequest(bytes32 reqId, address receiveSide, address bridgeFrom, address senderSide);
+    event ReceiveRequest(bytes32 reqId, bytes32 receiveSide, bytes32 bridgeFrom, bytes32 senderSide);
+
 
     modifier onlyOwner() {
         require(msg.sender == _owner, "Ownable: caller is not the owner");
