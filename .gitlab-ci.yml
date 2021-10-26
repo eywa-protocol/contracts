@@ -14,7 +14,7 @@ deploy:
     - export NETWORKS=$(echo $CI_COMMIT_TAG | cut -d '-' -f4)
     - if [[ "$NETWORKS" == "all" ]]; then export NETWORKS=${DEFAULT_NETWORKS}; fi
     - echo "$NETWORKS"
-    - if [[ "$ACTION" == "wrappers" ]]; then export RUN="wrappers"; else export RUN="$ACTION $NETWORKS"
+    - if [[ "$ACTION" == "wrappers" ]]; then export RUN="wrappers"; else export RUN="$ACTION $NETWORKS"; fi
     - echo "$RUN"
     - echo "$ACTION"
     - echo "$NETWORKS"
