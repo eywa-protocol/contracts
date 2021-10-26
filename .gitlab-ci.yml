@@ -10,7 +10,7 @@ deploy:
     - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
   script:
     - export ACTION=$(echo $CI_COMMIT_TAG | cut -d '-' -f3)
-    - if [[ "$ACTION" == "deploy" ]]; then export ACTION="eth-testnet-migrate"; echo "$ACTION"; elif [[ "$ACTION" == "wrappers" ]]; echo "$ACTION"; fi
+    - if [[ "$ACTION" == "deploy" ]]; then export ACTION="eth-testnet-migrate"; echo "$ACTION"; elif [[ "$ACTION" == "wrappers" ]];then echo "$ACTION"; fi
     - export NETWORKS=$(echo $CI_COMMIT_TAG | cut -d '-' -f4)
     - if [[ "$NETWORKS" == "all" ]]; then export NETWORKS=${DEFAULT_NETWORKS}; echo "$NETWORKS"; else echo "$NETWORKS"; if
     - if [[ "$ACTION" == "wrappers" ]]; then export RUN="wrappers"; else export RUN="$ACTION $NETWORKS"
