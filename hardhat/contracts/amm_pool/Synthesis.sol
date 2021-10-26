@@ -11,9 +11,9 @@ import "./RelayRecipient.sol";
 
 contract Synthesis is RelayRecipient {
 
-    mapping (address => address) public representationReal;
-    mapping (address => address) public representationSynt;
-    address[] private keys;
+    mapping (address => bytes32) public representationReal;
+    mapping (bytes32 => address) public representationSynt;
+    bytes32[] private keys;
     uint256 requestCount = 1;
     mapping (bytes32 => TxState) public requests;
     mapping (bytes32 => SynthesizeState) public synthesizeStates;
@@ -22,8 +22,10 @@ contract Synthesis is RelayRecipient {
     enum SynthesizeState { Default, Synthesized, RevertRequest}
 
     event BurnRequest(bytes32 indexed _id, address indexed _from, address indexed _to, uint _amount,address _token);
+    event BurnRequestSolana(bytes32 indexed _id, address indexed _from, bytes32 indexed _to, uint _amount, address _token);
     event RevertSynthesizeRequest(bytes32 indexed _id, address indexed _to);
     event SynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint _amount, address _token);
+    event SynthesizeCompletedSolana(bytes32 indexed _id, address indexed _to, uint _amount, bytes32 _token);
     event RevertBurnCompleted(bytes32 indexed _id, address indexed _to, uint _amount, address _token);
 
     constructor (address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
@@ -36,107 +38,215 @@ contract Synthesis is RelayRecipient {
     }
 
     struct TxState {
-        address recipient;
-        address chain2address;
+        bytes32 recipient;
+        bytes32 chain2address;
         uint256 amount;
-        address token;
+        bytes32 token;
         address stoken;
         RequestState state;
     }
 
-    // // can called only by bridge after initiation on a second chain
-    // function mintSyntheticToken(bytes32 _txID, address _tokenReal, uint256 _amount, address _to) external onlyBridge {
-    //     // TODO add chek to Default - чтобы не было по бриджу
-    //     require(synthesizeStates[_txID] == SynthesizeState.Default, "Synt: emergencyUnsynthesizedRequest called or tokens has been already synthesized");
+    // can called only by bridge after initiation on a second chain
+    function mintSyntheticToken(bytes32 _txID, address _tokenReal, uint256 _amount, address _to) external onlyBridge {
+        // TODO add chek to Default - чтобы не было по бриджу
+        require(synthesizeStates[_txID] == SynthesizeState.Default, "Synt: emergencyUnsynthesizedRequest called or tokens has been already synthesized");
 
-    //     ISyntERC20(representationSynt[_tokenReal]).mint(_to, _amount);
-    //     synthesizeStates[_txID] = SynthesizeState.Synthesized;
+        ISyntERC20(representationSynt[bytes32(uint256(uint160(_tokenReal))<< 96)]).mint(_to, _amount);
+        synthesizeStates[_txID] = SynthesizeState.Synthesized;
 
-    //     emit SynthesizeCompleted(_txID, _to, _amount, _tokenReal);
-    // }
+        emit SynthesizeCompleted(_txID, _to, _amount, _tokenReal);
+    }
 
-    // // Revert synthesize() operation, can be called several times
-    // function emergencyUnsyntesizeRequest(bytes32 _txID,address _receiveSide, address _oppositeBridge, uint _chainID, uint256 _nonce) external {
+    // can called only by bridge after initiation on a second chain
+    // Solana
+    function mintSyntheticToken(bytes32 _txID, bytes32 _tokenReal, uint256 _amount, address _to) external onlyBridge {
+        // TODO add chek to Default - чтобы не было по бриджу
+        require(synthesizeStates[_txID] == SynthesizeState.Default, "Synt: emergencyUnsynthesizedRequest called or tokens has been already synthesized");
 
-    //     require(synthesizeStates[_txID]!= SynthesizeState.Synthesized, "Synt: syntatic tokens already minted");
-    //     synthesizeStates[_txID] = SynthesizeState.RevertRequest;// close
-    //     bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('emergencyUnsynthesize(bytes32)'))),_txID);
-    //     // TODO add payment by token
-    //     IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID, _txID, _msgSender(), _nonce);
+        ISyntERC20(representationSynt[_tokenReal]).mint(_to, _amount);
+        synthesizeStates[_txID] = SynthesizeState.Synthesized;
 
-    //     emit RevertSynthesizeRequest(_txID, _msgSender());
-    // }
+        emit SynthesizeCompletedSolana(_txID, _to, _amount, _tokenReal);
+    }
 
-    // // sToken -> Token on a second chain
-    // function burnSyntheticToken(
-    //     address _stoken,
-    //     uint256 _amount,
-    //     address _chain2address,
-    //     address _receiveSide,
-    //     address _oppositeBridge,
-    //     uint _chainID,
-    //     uint256 _nonce
-    // ) external returns (bytes32 txID) {
-    //     ISyntERC20(_stoken).burn(_msgSender(), _amount);
-    //     txID = IBridge(bridge).prepareRqId(_oppositeBridge, _chainID, _receiveSide, _msgSender(), _nonce);
 
-    //     bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('unsynthesize(bytes32,address,uint256,address)'))),txID, representationReal[_stoken], _amount, _chain2address);
-    //     // TODO add payment by token
-    //     IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), _nonce);
-    //     TxState storage txState = requests[txID];
-    //     txState.recipient    = _msgSender();
-    //     txState.chain2address    = _chain2address;
-    //     txState.stoken     = _stoken;
-    //     txState.amount     = _amount;
-    //     txState.state = RequestState.Sent;
+    // Revert synthesize() operation, can be called several times
+    function emergencyUnsyntesizeRequest(bytes32 _txID, address _receiveSide, address _oppositeBridge, uint _chainID) external {
 
-    //     // requestCount += 1;
+        require(synthesizeStates[_txID]!= SynthesizeState.Synthesized, "Synt: syntatic tokens already minted");
+        synthesizeStates[_txID] = SynthesizeState.RevertRequest;// close
+        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('emergencyUnsynthesize(bytes32)'))),_txID);
+        // TODO add payment by token
+        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+        bytes32 txID = IBridge(bridge).prepareRqId(bytes32(uint256(uint160(_oppositeBridge))), _chainID, bytes32(uint256(uint160(_receiveSide))),  bytes32(uint256(uint160(_msgSender()))), nonce);
+        IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
 
-    //     emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
-    // }
+        emit RevertSynthesizeRequest(txID, _msgSender());
+    }
 
-    // function burnSyntheticTokenWithPermit(
-    //     bytes calldata _approvalData,
-    //     address _stoken,
-    //     uint256 _amount,
-    //     address _chain2address,
-    //     address _receiveSide,
-    //     address _oppositeBridge,
-    //     uint _chainID,
-    //     uint256 _nonce
-    // ) external returns (bytes32 txID) {
-    //     (bool _success1, ) = _stoken.call(_approvalData);
-    //     require(_success1, "Approve call failed");
+    // Revert synthesize() operation, can be called several times
+    // Solana
+    function emergencyUnsyntesizeRequest(bytes32 _txID, bytes32 _receiveSide, bytes32 _oppositeBridge, uint _chainID) external {
 
-    //     ISyntERC20(_stoken).burn(_msgSender(), _amount);
-    //     txID = IBridge(bridge).prepareRqId(_oppositeBridge, _chainID, _receiveSide, _msgSender(), _nonce);
+        require(synthesizeStates[_txID]!= SynthesizeState.Synthesized, "Synt: syntatic tokens already minted");
+        synthesizeStates[_txID] = SynthesizeState.RevertRequest;// close
+        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('emergencyUnsynthesize(bytes32)'))),_txID);
+        // TODO add payment by token
+        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+        bytes32 txID = IBridge(bridge).prepareRqId(_oppositeBridge, _chainID, _receiveSide,  bytes32(uint256(uint160(_msgSender()))), nonce);
+        IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
 
-    //     bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('unsynthesize(bytes32,address,uint256,address)'))),txID, representationReal[_stoken], _amount, _chain2address);
-    //     // TODO add payment by token
-    //     IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), _nonce);
-    //     TxState storage txState = requests[txID];
-    //     txState.recipient    = _msgSender();
-    //     txState.chain2address    = _chain2address;
-    //     txState.stoken     = _stoken;
-    //     txState.amount     = _amount;
-    //     txState.state = RequestState.Sent;
+        emit RevertSynthesizeRequest(txID, _msgSender());
+    }
 
-    //     requestCount += 1;
 
-    //     emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
-    // }
+    // sToken -> Token on a second chain
+    function burnSyntheticToken(
+        address _stoken,
+        uint256 _amount,
+        address _chain2address,
+        address _receiveSide,
+        address _oppositeBridge,
+        uint _chainID
+    ) external returns (bytes32 txID) {
+        ISyntERC20(_stoken).burn(_msgSender(), _amount);
+        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+        txID = IBridge(bridge).prepareRqId(
+            bytes32(uint256(uint160(_oppositeBridge))),
+            _chainID,
+            bytes32(uint256(uint160(_receiveSide))),
+            bytes32(uint256(uint160(_msgSender()))),
+            nonce
+        );
 
-    // // can called only by bridge after initiation on a second chain
-    // function emergencyUnburn(bytes32 _txID) external onlyBridge {
-    //     TxState storage txState = requests[_txID];
-    //     require(txState.state ==  RequestState.Sent, 'Synt: state not open or tx does not exist');
-    //     txState.state = RequestState.Reverted; // close
-    //     ISyntERC20(txState.stoken).mint(txState.recipient, txState.amount);
+        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('unsynthesize(bytes32,address,uint256,address)'))),txID, representationReal[_stoken], _amount, _chain2address);
+        // TODO add payment by token
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        TxState storage txState = requests[txID];
+        txState.recipient    = bytes32(uint256(uint160(_msgSender())));
+        txState.chain2address    = bytes32(uint256(uint160(_chain2address)));
+        txState.stoken     = _stoken;
+        txState.amount     = _amount;
+        txState.state = RequestState.Sent;
 
-    //     emit RevertBurnCompleted(_txID, txState.recipient, txState.amount, txState.stoken);
-    // }
+        emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
+    }
 
-    function createRepresentation(address _rtoken, string memory _stokenName,string memory _stokenSymbol) external onlyOwner {
+
+    // sToken -> Token on a second chain
+    // Solana
+    function burnSyntheticToken(
+        address _stoken,
+        uint256 _amount,
+        bytes32 _chain2address,
+        bytes32 _receiveSide,
+        bytes32 _oppositeBridge,
+        uint _chainID
+    ) external returns (bytes32 txID) {
+        ISyntERC20(_stoken).burn(_msgSender(), _amount);
+        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+        txID = IBridge(bridge).prepareRqId(_oppositeBridge, _chainID, _receiveSide, bytes32(uint256(uint160(_msgSender()))), nonce);
+
+        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('unsynthesize(bytes32,bytes32,uint256,bytes32)'))),txID, representationReal[_stoken], _amount, _chain2address);
+        // TODO add payment by token
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        TxState storage txState = requests[txID];
+        txState.recipient    = bytes32(uint256(uint160(_msgSender())));
+        txState.chain2address    = _chain2address;
+        txState.stoken     = _stoken;
+        txState.amount     = _amount;
+        txState.state = RequestState.Sent;
+
+        emit BurnRequestSolana(txID, _msgSender(), _chain2address, _amount, _stoken);
+    }
+
+
+  // sToken -> Token on a second chain
+    function burnSyntheticTokenWithPermit(
+        bytes calldata _approvalData,
+        address _stoken,
+        uint256 _amount,
+        address _chain2address,
+        address _receiveSide,
+        address _oppositeBridge,
+        uint _chainID
+    ) external returns (bytes32 txID) {
+        (bool _success1, ) = _stoken.call(_approvalData);
+        require(_success1, "Approve call failed");
+
+        ISyntERC20(_stoken).burn(_msgSender(), _amount);
+        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+
+        txID = IBridge(bridge).prepareRqId(
+            bytes32(uint256(uint160(_oppositeBridge))),
+            _chainID,
+            bytes32(uint256(uint160(_receiveSide))),
+            bytes32(uint256(uint160(_msgSender()))),
+            nonce
+        );
+
+        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('unsynthesize(bytes32,address,uint256,address)'))),txID, representationReal[_stoken], _amount, _chain2address);
+        // TODO add payment by token
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        TxState storage txState = requests[txID];
+        txState.recipient    = bytes32(uint256(uint160(_msgSender())));
+        txState.chain2address    = bytes32(uint256(uint160(_chain2address)));
+        txState.stoken     = _stoken;
+        txState.amount     = _amount;
+        txState.state = RequestState.Sent;
+
+        emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
+    }
+
+    // Solana
+     function burnSyntheticTokenWithPermit(
+        bytes calldata _approvalData,
+        address _stoken,
+        uint256 _amount,
+        bytes32 _chain2address,
+        bytes32 _receiveSide,
+        bytes32 _oppositeBridge,
+        uint _chainID
+    ) external returns (bytes32 txID) {
+        (bool _success1, ) = _stoken.call(_approvalData);
+        require(_success1, "Approve call failed");
+
+        ISyntERC20(_stoken).burn(_msgSender(), _amount);
+        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+        
+        txID = IBridge(bridge).prepareRqId(
+            _oppositeBridge,
+            _chainID,
+            _receiveSide,
+            bytes32(uint256(uint160(_msgSender()))),
+            nonce
+        );
+
+        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('unsynthesize(bytes32,bytes32,uint256,bytes32)'))),txID, representationReal[_stoken], _amount, _chain2address);
+        // TODO add payment by token
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        TxState storage txState = requests[txID];
+        txState.recipient    = bytes32(uint256(uint160(_msgSender())));
+        txState.chain2address    = _chain2address;
+        txState.stoken     = _stoken;
+        txState.amount     = _amount;
+        txState.state = RequestState.Sent;
+
+        emit BurnRequestSolana(txID, _msgSender(), _chain2address, _amount, _stoken);
+    }
+
+
+    // can called only by bridge after initiation on a second chain
+    function emergencyUnburn(bytes32 _txID) external onlyBridge {
+        TxState storage txState = requests[_txID];
+        require(txState.state ==  RequestState.Sent, 'Synt: state not open or tx does not exist');
+        txState.state = RequestState.Reverted; // close
+        ISyntERC20(txState.stoken).mint(address(bytes20(txState.recipient)), txState.amount);
+
+        emit RevertBurnCompleted(_txID, address(bytes20(txState.recipient)), txState.amount, txState.stoken);
+    }
+
+    function createRepresentation(bytes32 _rtoken, string memory _stokenName,string memory _stokenSymbol) external onlyOwner {
         //address stoken = representationSynt[_rtoken];
         //require(stoken == address(0x0), "Synt: token representation already exist");
         SyntERC20 syntToken = new SyntERC20(_stokenName,_stokenSymbol);
@@ -153,13 +263,13 @@ contract Synthesis is RelayRecipient {
     }
 
     // utils
-    function setRepresentation (address _rtoken, address _stoken) internal {
+    function setRepresentation (bytes32 _rtoken, address _stoken) internal {
         representationSynt[_rtoken] = _stoken;
         representationReal[_stoken] = _rtoken;
         keys.push(_rtoken);
     }
 
-    function getListRepresentation() external view returns(address[] memory, address[] memory) {
+    function getListRepresentation() external view returns(bytes32[] memory, address[] memory) {
        uint256 len = keys.length;
        address[] memory sToken = new address[](len);
        for (uint256 i = 0; i < len; i++) {
