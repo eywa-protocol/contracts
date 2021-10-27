@@ -77,6 +77,9 @@ const makeGsnProvider = async(adr_paymaster, currentProvider, adr_token) => {
 };
 
 
+const addressToBytes32 = async(address) => {
+    return '0x' + web3.utils.padLeft(address.replace('0x', ''), 64);
+}
 
 
 module.exports = {
@@ -86,5 +89,6 @@ module.exports = {
     timeout,
     chainId,
     makeGsnProvider,
-    specialQuikHackProvider
+    specialQuikHackProvider,
+    addressToBytes32
 };

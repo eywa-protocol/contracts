@@ -1,5 +1,6 @@
 let networkConfig = require('../../helper-hardhat-config.json')
 const hre = require("hardhat");
+const { addressToBytes32 } = require('../../utils/helper');
 
 async function main() {
 
@@ -24,12 +25,24 @@ async function main() {
        let mockDexPool  = networkConfig[netw].mockDexPool;
        let chainid  = networkConfig[netw].chainId;
     try{
-       this.tx = await bridgeA.addContractBind(this.s, bridgeB, portal);
+       this.tx = await bridgeA.addContractBind(
+        addressToBytes32(this.s),
+        addressToBytes32(bridgeB),
+        addressToBytes32(portal)
+        );
        console.log(`addContractBind for synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
-       this.tx = await bridgeA.addContractBind(this.p, bridgeB, synth);
+       this.tx = await bridgeA.addContractBind(
+        addressToBytes32(this.p),
+        addressToBytes32(bridgeB),
+        addressToBytes32(synth)
+        );
        console.log(`addContractBind for portal on ${network.name} with ${netw}: ${this.tx.hash}`);
 
-       this.tx = await bridgeA.addContractBind(mDP, bridgeB, mockDexPool);
+       this.tx = await bridgeA.addContractBind(
+        addressToBytes32(mDP),
+        addressToBytes32(bridgeB),
+        addressToBytes32(mockDexPool)
+        );
        console.log(`addContractBind for mockDexPool on ${network.name} with ${netw}: ${this.tx.hash}`);
      }catch(e){
           const nuLL = '0x0000000000000000000000000000000000000000';
