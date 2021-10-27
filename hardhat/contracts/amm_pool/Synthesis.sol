@@ -14,7 +14,7 @@ contract Synthesis is RelayRecipient {
     mapping (address => bytes32) public representationReal;
     mapping (bytes32 => address) public representationSynt;
     bytes32[] private keys;
-    uint256 requestCount = 1;
+    // uint256 requestCount = 1;
     mapping (bytes32 => TxState) public requests;
     mapping (bytes32 => SynthesizeState) public synthesizeStates;
     address public bridge;
@@ -51,7 +51,7 @@ contract Synthesis is RelayRecipient {
         // TODO add chek to Default - чтобы не было по бриджу
         require(synthesizeStates[_txID] == SynthesizeState.Default, "Synt: emergencyUnsynthesizedRequest called or tokens has been already synthesized");
 
-        ISyntERC20(representationSynt[bytes32(uint256(uint160(_tokenReal))<< 96)]).mint(_to, _amount);
+        ISyntERC20(representationSynt[bytes32(uint256(uint160(_tokenReal)))]).mint(_to, _amount);
         synthesizeStates[_txID] = SynthesizeState.Synthesized;
 
         emit SynthesizeCompleted(_txID, _to, _amount, _tokenReal);
@@ -241,12 +241,12 @@ contract Synthesis is RelayRecipient {
         TxState storage txState = requests[_txID];
         require(txState.state ==  RequestState.Sent, 'Synt: state not open or tx does not exist');
         txState.state = RequestState.Reverted; // close
-        ISyntERC20(txState.stoken).mint(address(bytes20(txState.recipient)), txState.amount);
+        ISyntERC20(txState.stoken).mint(address(uint160(uint256(txState.recipient))), txState.amount);
 
-        emit RevertBurnCompleted(_txID, address(bytes20(txState.recipient)), txState.amount, txState.stoken);
+        emit RevertBurnCompleted(_txID, address(uint160(uint256(txState.recipient))), txState.amount, txState.stoken);
     }
 
-    function createRepresentation(bytes32 _rtoken, string memory _stokenName,string memory _stokenSymbol) external onlyOwner {
+    function createRepresentation(bytes32 _rtoken, string memory _stokenName, string memory _stokenSymbol) external onlyOwner {
         //address stoken = representationSynt[_rtoken];
         //require(stoken == address(0x0), "Synt: token representation already exist");
         SyntERC20 syntToken = new SyntERC20(_stokenName,_stokenSymbol);

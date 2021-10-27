@@ -79,9 +79,9 @@ contract Portal is RelayRecipient {
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
-        txState.recipient    = bytes32(uint256(uint160(_msgSender())) << 96);
-        txState.chain2address    = bytes32(uint256(uint160(_chain2address)) << 96);
-        txState.rtoken     = bytes32(uint256(uint160(_token)) << 96);
+        txState.recipient    = bytes32(uint256(uint160(_msgSender())) );
+        txState.chain2address    = bytes32(uint256(uint160(_chain2address)) );
+        txState.rtoken     = bytes32(uint256(uint160(_token)) );
         txState.amount     = _amount;
         txState.state = RequestState.Sent;
 
@@ -108,9 +108,9 @@ contract Portal is RelayRecipient {
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
-        txState.recipient    = bytes32(uint256(uint160(_msgSender()))<< 96);
+        txState.recipient    = bytes32(uint256(uint160(_msgSender())));
         txState.chain2address    = _chain2address;
-        txState.rtoken     = bytes32(uint256(uint160(_token))<< 96);
+        txState.rtoken     = bytes32(uint256(uint160(_token)));
         txState.amount     = _amount;
         txState.state = RequestState.Sent;
 
@@ -148,9 +148,9 @@ contract Portal is RelayRecipient {
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
-        txState.recipient    = bytes32(uint256(uint160(_msgSender()))<< 96);
-        txState.chain2address    = bytes32(uint256(uint160(_chain2address))<< 96);
-        txState.rtoken     = bytes32(uint256(uint160(_token))<< 96);
+        txState.recipient    = bytes32(uint256(uint160(_msgSender())));
+        txState.chain2address    = bytes32(uint256(uint160(_chain2address)));
+        txState.rtoken     = bytes32(uint256(uint160(_token)));
         txState.amount     = _amount;
         txState.state = RequestState.Sent;
 
@@ -178,13 +178,13 @@ contract Portal is RelayRecipient {
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(_oppositeBridge, _chainID, _receiveSide, bytes32(uint256(uint160(_msgSender()))), nonce);
 
-        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('mintSyntheticToken(bytes32,bytes32,uint256,bytes32)'))), txID, bytes32(uint256(uint160(_token))<< 96), _amount, _chain2address);
+        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('mintSyntheticToken(bytes32,bytes32,uint256,bytes32)'))), txID, bytes32(uint256(uint160(_token))), _amount, _chain2address);
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
-        txState.recipient    = bytes32(uint256(uint160(_msgSender()))<< 96);
+        txState.recipient    = bytes32(uint256(uint160(_msgSender())));
         txState.chain2address    = _chain2address;
-        txState.rtoken     = bytes32(uint256(uint160(_token))<< 96);
+        txState.rtoken     = bytes32(uint256(uint160(_token)));
         txState.amount     = _amount;
         txState.state = RequestState.Sent;
 
@@ -198,9 +198,9 @@ contract Portal is RelayRecipient {
         require(txState.state == RequestState.Sent , 'Portal:state not open or tx does not exist');
 
         txState.state = RequestState.Reverted; // close
-        TransferHelper.safeTransfer(address(bytes20(txState.rtoken)), address(bytes20(txState.recipient)), txState.amount);
+        TransferHelper.safeTransfer(address(uint160(uint256(txState.rtoken))), address(uint160(uint256(txState.recipient))), txState.amount);
 
-        emit RevertSynthesizeCompleted(_txID, address(bytes20(txState.recipient)), txState.amount, address(bytes20(txState.rtoken)));
+        emit RevertSynthesizeCompleted(_txID, address(uint160(uint256(txState.recipient))), txState.amount, address(uint160(uint256(txState.rtoken))));
     }
 
     // can called only by bridge after initiation on a second chain

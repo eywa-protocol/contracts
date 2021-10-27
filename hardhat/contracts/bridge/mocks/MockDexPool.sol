@@ -36,7 +36,7 @@ contract MockDexPool {
 		// ...
 
 		bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('receiveRequestTest(uint256)'))), testData_);
-        bytes32 requestId = Bridge(bridge).prepareRqId( bytes32(uint256(uint160(oppBridge)) << 96), chainId,   bytes32(uint256(uint160(secondPartPool)) << 96), bytes32(uint256(uint160(msg.sender)) << 96) , nonce);
+        bytes32 requestId = Bridge(bridge).prepareRqId( bytes32(uint256(uint160(oppBridge))), chainId,   bytes32(uint256(uint160(secondPartPool))), bytes32(uint256(uint160(msg.sender))) , nonce);
 		bool success = Bridge(bridge).transmitRequestV2(out, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
 
 		emit RequestSended(requestId);

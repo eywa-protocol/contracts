@@ -19,12 +19,12 @@ contract Bridge is BridgeCore {
     }
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
-        require(contractBind[bytes32(uint256(uint160(msg.sender)) << 96)][bytes32(uint256(uint160(oppositeBridge)) << 96)] == bytes32(uint256(uint160(receiveSide)) << 96), "UNTRUSTED CONTRACT");
+        require(contractBind[bytes32(uint256(uint160(msg.sender)))][bytes32(uint256(uint160(oppositeBridge)))] == bytes32(uint256(uint160(receiveSide))), "UNTRUSTED CONTRACT");
         _;
     }
 
     modifier onlyTrustedContractBytes32(bytes32 receiveSide, bytes32 oppositeBridge) {
-        require(contractBind[bytes32(uint256(uint160(msg.sender)) << 96)][oppositeBridge] == receiveSide, "UNTRUSTED CONTRACT");
+        require(contractBind[bytes32(uint256(uint160(msg.sender)))][oppositeBridge] == receiveSide, "UNTRUSTED CONTRACT");
         _;
     }
 
