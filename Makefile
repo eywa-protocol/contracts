@@ -38,6 +38,7 @@ eth-local-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh network1,network2,network3
 
 eth-testnet-migrate: deps npm wrappers
+	echo ${NETWORKS}
 	cd hardhat;./scripts/deploy.sh ${NETWORKS}
 
 copy_configs:
