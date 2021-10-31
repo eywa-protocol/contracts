@@ -1,6 +1,7 @@
 
 all:
 	echo ${PATH}
+	a=$(echo $CI_COMMIT_TAG | cut -d '-' -f4")
 
 deps:
 	echo ${PATH}
@@ -10,4 +11,4 @@ eth-testnet-migrate: deps
 	echo ${PATH}
 	echo ${ACTION}
 	echo ${NETWORKS}
-	echo "echo $CI_COMMIT_TAG | cut -d '-' -f4"
+	echo ${a}
