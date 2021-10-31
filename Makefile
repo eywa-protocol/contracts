@@ -1,6 +1,6 @@
 
 all:
-        echo ${PATH}
+	echo ${PATH}
 
 deps:
 	echo ${PATH}
