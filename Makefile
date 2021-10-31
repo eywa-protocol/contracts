@@ -1,7 +1,8 @@
+export a = $(echo $CI_COMMIT_TAG | cut -d '-' -f4")
+export TAG = CI_COMMIT_TAG
 
-all:
+all: 
 	echo ${PATH}
-	a=$(echo $CI_COMMIT_TAG | cut -d '-' -f4")
 
 deps:
 	echo ${PATH}
@@ -12,3 +13,4 @@ eth-testnet-migrate: deps
 	echo ${ACTION}
 	echo ${NETWORKS}
 	echo ${a}
+	echo ${TAG}
