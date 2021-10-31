@@ -54,7 +54,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient  {
         address senderSide = contractBind[receiveSide][bridgeFrom];
         bytes32 recreateReqId = keccak256(abi.encodePacked(nonce[bridgeFrom][senderSide], b, block.chainid));
         require(reqId == recreateReqId, 'CONSISTENCY FAILED');
-        bytes memory data = receiveSide.functionStaticCall(b, "receiveRequestV2 failed");
+        bytes memory data = receiveSide.functionCall(b, "receiveRequestV2 failed");
         require(data.length == 0 || abi.decode(data, (bool)), "receiveRequestV2: Unable to decode rerurned data");
         nonce[bridgeFrom][senderSide] = nonce[bridgeFrom][senderSide] + 1;
 
