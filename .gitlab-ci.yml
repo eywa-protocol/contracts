@@ -9,32 +9,21 @@ deploy:
   before_script:
     - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
   script:
-    - docker run -t --rm -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 registry.digiu.ai/base/eywa-contracts:2 make -C /app eth-testnet-migrate
-  only:
-    - tags
+    - export ACTION=$(echo $CI_COMMIT_TAG | cut -d '-' -f3)
+    - export NETWORKS=$(echo $CI_COMMIT_TAG | cut -d '-' -f4)
+    - if [[ "$ACTION" == "deploy" ]]; then export ACTION="eth-testnet-migrate"; fi
+    - if [[ "$NETWORKS" == "all" ]]; then export NETWORKS=${DEFAULT_NETWORKS}; fi
+    - echo "it will be launched $ACTION"
+    - echo "for this networks $NETWORKS"
+    - docker run -t --rm -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e NETWORKS=${NETWORKS} registry.digiu.ai/base/eywa-contracts:3 make -C /app "$ACTION"
   tags:
     - docker
-  when: manual
   artifacts:
     paths:
         - wrappers/
         - hardhat/helper-hardhat-config.json
         - hardhat/.env
         - hardhat/networks_env
-
-rebuild:
-  stage: deploy
-  before_script:
-    - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
-  script:
-    - docker run -t --rm -v $(pwd):/app --user builder registry.digiu.ai/base/eywa-contracts:2 make -C /app wrappers
-  only:
-    - tags
-  tags:
-    - docker
-  when: manual
-  artifacts:
-    paths:
-        - wrappers/
-        - hardhat/helper-hardhat-config.json
-        - hardhat/.env
+        - hardhat/contracts
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^[A-Z]{3,15}-\d+-(deploy|wrappers)-[a-z,]{3,50}$/'
