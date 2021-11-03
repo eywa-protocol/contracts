@@ -26,4 +26,4 @@ deploy:
         - hardhat/networks_env
         - hardhat/contracts
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^[A-Z]{3,15}-\d+-(deploy|wrappers)-[a-z,]{3,50}$/'
+    - if: '$CI_COMMIT_TAG =~ /^[A-Z]{3,15}-\d+-(deploy|wrappers)-[a-z,]{3,100}$/'
