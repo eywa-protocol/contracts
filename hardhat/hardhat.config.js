@@ -52,7 +52,8 @@ module.exports = {
     },
     mumbai:{
         url: networkConfig.mumbai.rpcUrl.replace('ws','http').replace('ws','rpc'),
-        accounts: [PRIVATE_KEY_MUMBAI]
+        accounts: [PRIVATE_KEY_MUMBAI],
+        gasPrice: 2_000_000_000
     },
     hecotestnet:{
       url: networkConfig.hecotestnet.rpcUrl.split('ws').join('http'),
