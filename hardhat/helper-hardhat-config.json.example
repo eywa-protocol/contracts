@@ -11,7 +11,7 @@
     "chainId": 43113,
     "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
-    "amm_pool": "0xF9F4Fc354C027FEAC4698cC5514d2276795EE172",
+    "amm_pool": "0x2D99ABD9008Dc933ff5c0CD271B88309593aB921",
     "token": [
       {
         "address": "0xB0F79Fc1cdee2B03B8B4618AAAb4396e5c749684",
@@ -40,6 +40,7 @@
   "hecotestnet": {
     "rpcUrl": "wss://ws-testnet.hecochain.com",
     "n": "HECOTESTNET",
+    "netwiker": "HECO",
     "env_file": [
       "networks_env/env_connect_to_hecotestnet.env",
       "networks_env/env_test_for_hecotestnet.env"
@@ -76,6 +77,7 @@
   "mumbai": {
     "rpcUrl": "wss://matic-testnet-archive-ws.bwarelabs.com",
     "n": "MUMBAI",
+    "netwiker": "POLYGON",
     "env_file": [
       "networks_env/env_connect_to_mumbai.env",
       "networks_env/env_test_for_mumbai.env"
@@ -83,7 +85,7 @@
     "chainId": 80001,
     "relayHub": "0x6C28AfC105e65782D9Ea6F2cA68df84C9e7d750d",
     "forwarder": "0xdA78a11FD57aF7be2eDD804840eA7f4c2A38801d",
-    "amm_pool": "0xe712D9eac03B3480D204602f5aE188B718FbbC2E",
+    "amm_pool": "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506",
     "token": [
       {
         "address": "0xDA53403DF5ff2058feb9C6729FAfb3996b84545b",
@@ -112,6 +114,7 @@
   "rinkeby": {
     "rpcUrl": "wss://rinkeby.infura.io/ws/v3/ab95bf9f6dd743e6a8526579b76fe358",
     "n": "RINKEBY",
+    "netwiker": "ETH",
     "env_file": [
       "networks_env/env_connect_to_rinkeby.env",
       "networks_env/env_test_for_rinkeby.env"
@@ -138,7 +141,7 @@
       "hecotestnet",
       "avalanchetestnet"
     ],
-    "paymaster": "0xeFAC0dE7B0588335010B69abb24eB01309265EA2",
+    "paymaster": "0xA6e10aA9B038c9Cddea24D2ae77eC3cE38a0c016",
     "nodeList": "0x67180A99b91282D1A646Daa36B3Bea955c31cC6b",
     "bridge": "0xD334CD76A6BBB87214471D1f6F0181e97E9EC26a",
     "mockDexPool": "0x32a4011F0f0eB337288783Ac8b85771BA8BF74B5",
@@ -149,6 +152,7 @@
     "rpcUrl": "ws://185.132.176.254:8576",
     "rpcUrl2": "https://bsc.testnet.eywa.fi",
     "n": "BSCTESTNET",
+    "netwiker": "BSC",
     "env_file": [
       "networks_env/env_connect_to_bsctestnet.env",
       "networks_env/env_test_for_bsctestnet.env"
@@ -185,6 +189,7 @@
   "ganache": {
     "rpcUrl": "http://127.0.0.1:9999",
     "n": "GANACHE",
+    "netwiker": "GNE",
     "env_file": [
       "networks_env/env_connect_to_ganache.env",
       "networks_env/env_test_for_ganache.env"
@@ -218,6 +223,7 @@
   "network1": {
     "rpcUrl": "ws://172.20.128.11:7545",
     "n": "NETWORK1",
+    "netwiker": "AVCH",
     "env_file": [
       "networks_env/env_connect_to_network1.env",
       "networks_env/env_test_for_network1.env"
@@ -252,6 +258,7 @@
   "network2": {
     "rpcUrl": "ws://172.20.128.12:8545",
     "n": "NETWORK2",
+    "netwiker": "NET2",
     "env_file": [
       "networks_env/env_connect_to_network2.env",
       "networks_env/env_test_for_network2.env"
@@ -286,6 +293,7 @@
   "network3": {
     "rpcUrl": "ws://172.20.128.13:9545",
     "n": "NETWORK3",
+    "netwiker": "NET3",
     "env_file": [
       "networks_env/env_connect_to_network3.env",
       "networks_env/env_test_for_network3.env"
