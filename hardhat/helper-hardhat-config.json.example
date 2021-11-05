@@ -223,7 +223,7 @@
   "network1": {
     "rpcUrl": "ws://172.20.128.11:7545",
     "n": "NETWORK1",
-    "netwiker": "AVCH",
+    "netwiker": "NET1",
     "env_file": [
       "networks_env/env_connect_to_network1.env",
       "networks_env/env_test_for_network1.env"
