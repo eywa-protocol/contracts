@@ -1,5 +1,6 @@
 let networkConfig = require('../../helper-hardhat-config.json')
 const hre = require("hardhat");
+const h = require("../../utils/helper");
 
 async function main() {
 
@@ -26,11 +27,14 @@ async function main() {
     try{
        this.tx = await bridgeA.addContractBind(this.s, bridgeB, portal);
        console.log(`addContractBind for synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
+       await h.timeout(5_000);
        this.tx = await bridgeA.addContractBind(this.p, bridgeB, synth);
        console.log(`addContractBind for portal on ${network.name} with ${netw}: ${this.tx.hash}`);
+       await h.timeout(5_000);
 
        this.tx = await bridgeA.addContractBind(mDP, bridgeB, mockDexPool);
        console.log(`addContractBind for mockDexPool on ${network.name} with ${netw}: ${this.tx.hash}`);
+       await h.timeout(5_000);
      }catch(e){
           const nuLL = '0x0000000000000000000000000000000000000000';
           if(e.message.indexOf('cannot estimate gas') >= 0 &&
