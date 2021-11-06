@@ -1,5 +1,6 @@
 let networkConfig = require('../../helper-hardhat-config.json')
 const hre = require("hardhat");
+const h = require("../../utils/helper");
 
 async function main() {
 
@@ -18,6 +19,7 @@ async function main() {
         if(await synthesis.representationSynt(t.address) === '0x0000000000000000000000000000000000000000'){
            this.tx = await synthesis.createRepresentation(t.address, `e${t.name}`, `e${t.symbol}(${networkConfig[netw].netwiker})`);
            console.log(`createRepresentation for synthesis on ${network.name} source from ${netw}: ${this.tx.hash}`); 
+           await h.timeout(5_000);
         }
       }
     }
