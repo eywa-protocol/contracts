@@ -4,34 +4,25 @@ pragma solidity 0.8.0;
 import "./core/BridgeCore.sol";
 import "./interface/INodeRegistry.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
+import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 
 //TODO: onlyTrustedNode has worse filled data. I.e. In func NodeList#addNode the golang node registers himself
 // and this means every node who wants to start up can add himself in onlyTrustedNode list.
-contract Bridge is BridgeCore {
-    constructor(address listNode) {
+contract Bridge is BridgeCore, BaseRelayRecipient  {
+
+    constructor (address listNode, address forwarder) {
         _listNode = listNode;
-        _owner = msg.sender;
+        trustedForwarder = forwarder;
+
     }
 
     modifier onlyTrustedNode() {
-        require(INodeRegistry(_listNode).checkPermissionTrustList(msg.sender) == true, "Only trusted node can invoke");
+        require(INodeRegistry(_listNode).checkPermissionTrustList(_msgSender()) == true, "Only trusted node can invoke");
         _;
     }
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
-        require(
-            contractBind[bytes32(uint256(uint160(msg.sender)))][bytes32(uint256(uint160(oppositeBridge)))] ==
-                bytes32(uint256(uint160(receiveSide))),
-            "UNTRUSTED CONTRACT"
-        );
-        _;
-    }
-
-    modifier onlyTrustedContractBytes32(bytes32 receiveSide, bytes32 oppositeBridge) {
-        require(
-            contractBind[bytes32(uint256(uint160(msg.sender)))][oppositeBridge] == receiveSide,
-            "UNTRUSTED CONTRACT"
-        );
+        require(contractBind[_msgSender()][oppositeBridge] == receiveSide, "UNTRUSTED CONTRACT");
         _;
     }
 
@@ -77,9 +68,16 @@ contract Bridge is BridgeCore {
         bytes32 receiveSide,
         bytes32 bridgeFrom
     ) external onlyTrustedNode {
-        bytes32 senderSide = contractBind[receiveSide][bridgeFrom];
-        (bool success, bytes memory data) = address(bytes20(receiveSide)).call(b);
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "FAILED");
+
+        address senderSide = contractBind[receiveSide][bridgeFrom];
+        bytes32 recreateReqId = keccak256(abi.encodePacked(nonce[bridgeFrom][senderSide], b, block.chainid));
+        (bool success, bytes memory data) = receiveSide.call(b);
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'FAILED');
+        nonce[bridgeFrom][senderSide] = nonce[bridgeFrom][senderSide] + 1;
+
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
     }
+
+    string public override versionRecipient = "2.2.3";
+
 }

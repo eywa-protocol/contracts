@@ -18,28 +18,26 @@ contract NodeRegistry is BaseRelayRecipient {
 
     struct Node {
         address owner;
-        address nodeWallet;
-        address vault;
         address pool;
         address nodeIdAddress;
         string  blsPubKey;
-        uint256 version;
         uint256 nodeId;
-        uint256 relayerFeeNumerator;
-        uint256 emissionRateNumerator;
-        RelayerPool.RelayerStatus status;
-        RelayerPool.RelayerType nodeType;
     }
 
+    // struct NodeInitParams {
+    //     uint256 relayerFeeNumerator;
+    //     uint256 emissionRateNumerator;
+    //     address rewardToken;
+    //     address vault;
+    // }
+
     address public EYWA;
-    address public consensus;
     uint256 public constant MIN_COLLATERAL = 1 ether; //TODO discuss
 
     EnumerableSet.AddressSet nodes;
+    mapping(address => address) public ownedNodes;
     mapping(address => Node) public nodeRegistry;
-    mapping(address => mapping(address => bool)) public trustListForDex;
 
-    event RelayerStatusSet(address indexed nodeIdAddress, RelayerPool.RelayerStatus indexed status);
     event CreatedRelayer(
         address indexed nodeIdAddress,
         uint256 indexed nodeId,
@@ -49,20 +47,17 @@ contract NodeRegistry is BaseRelayRecipient {
 
     constructor(
         address _EYWA,
-        address _consensus,
         address _forwarder
     ) {
         require(_EYWA != address(0), Errors.ZERO_ADDRESS);
-        require(_consensus != address(0), Errors.ZERO_ADDRESS);
         require(_forwarder != address(0), Errors.ZERO_ADDRESS);
         EYWA = _EYWA;
-        consensus = _consensus;
         trustedForwarder = _forwarder;
     }
 
     modifier isNewNode(address _nodeIdAddr) {
         require(
-            nodeRegistry[_nodeIdAddr].nodeWallet == address(0),
+            nodeRegistry[_nodeIdAddr].owner == address(0),
             string(abi.encodePacked("node ", convertToString(_nodeIdAddr), " allready exists"))
         );
         _;
@@ -70,30 +65,20 @@ contract NodeRegistry is BaseRelayRecipient {
 
     modifier existingNode(address _nodeIdAddr) {
         require(
-            nodeRegistry[_nodeIdAddr].nodeWallet != address(0),
+            nodeRegistry[_nodeIdAddr].owner != address(0),
             string(abi.encodePacked("node ", convertToString(_nodeIdAddr), " does not exist"))
         );
-        _;
-    }
-
-    modifier onlyConsensus() {
-        require(_msgSender() == consensus, "only consensus");
         _;
     }
 
     //TODO: discuss about check: nodeRegistry[_blsPointAddr] == address(0)
     function addNode(Node memory node) internal isNewNode(node.nodeIdAddress) {
         require(node.owner != address(0), Errors.ZERO_ADDRESS);
-        require(node.nodeWallet != address(0), Errors.ZERO_ADDRESS);
         require(node.nodeIdAddress != address(0), Errors.ZERO_ADDRESS);
-        node.relayerFeeNumerator = 100; // test only
-        node.emissionRateNumerator = 1000; // test only
         node.nodeId = nodes.length();
         nodeRegistry[node.nodeIdAddress] = node;
-        nodeRegistry[node.nodeIdAddress].status = RelayerPool.RelayerStatus.Online;
         nodes.add(node.nodeIdAddress);
-        //TODO: discuss about pemission for certain bridge
-        trustListForDex[node.nodeWallet][address(0)] = true;
+        ownedNodes[node.owner] = node.nodeIdAddress;
 
         emit CreatedRelayer(node.nodeIdAddress, node.nodeId, node.pool, node.owner);
     }
@@ -133,41 +118,29 @@ contract NodeRegistry is BaseRelayRecipient {
     }
 
     function nodeExists(address _nodeIdAddr) public view returns (bool) {
-        return nodeRegistry[_nodeIdAddr].nodeWallet != address(0);
+        return nodeRegistry[_nodeIdAddr].owner != address(0);
     }
 
-    function checkPermissionTrustList(address _node) external view returns (bool) {
-        return trustListForDex[_node][address(0)];
-    }
-
-    //TODO
-    function setRelayerFee(uint256 _fee, address _nodeIdAddress) external {
-        require(_msgSender() == nodeRegistry[_nodeIdAddress].owner, "only node owner");
-        RelayerPool(nodeRegistry[_nodeIdAddress].pool).setRelayerFeeNumerator(_fee);
-        //emit RelayerFeeSet(value);
-    }
-
-    function setRelayerStatus(RelayerPool.RelayerStatus _status, address _nodeIdAddress) external onlyConsensus {
-        require(nodeRegistry[_nodeIdAddress].status != _status, Errors.SAME_VALUE);
-        nodeRegistry[_nodeIdAddress].status = _status;
-        RelayerPool(nodeRegistry[_nodeIdAddress].pool).setRelayerStatus(_status);
-        emit RelayerStatusSet(_nodeIdAddress, _status);
+    function checkPermissionTrustList(address _nodeOwner) external view returns (bool) {
+       return nodeRegistry[ownedNodes[_nodeOwner]].owner == _nodeOwner; // (test only)
+    // return nodeRegistry[ownedNodes[_nodeOwner]].status == 1;
     }
 
     function createRelayer(
         Node memory _node,
+     // NodeInitParams memory _params,
         uint256 _deadline,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
     ) external {
         RelayerPool relayerPool = new RelayerPool(
-            _node.owner,
-            address(EYWA),
-            address(EYWA), 
-            _node.relayerFeeNumerator,
-            _node.emissionRateNumerator,
-            _node.vault
+            _node.owner,   // node owner
+            address(EYWA), // depositToken
+            address(EYWA), // rewardToken            (test only)
+            100,           // relayerFeeNumerator    (test only)
+            4000,          // emissionRateNumerator  (test only)
+            _node.owner    // vault                  (test only)
         );
         uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
         require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");

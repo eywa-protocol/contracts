@@ -2,7 +2,6 @@
 pragma solidity 0.8.0;
 
 contract BridgeCore {
-    address public _owner;
     address public _listNode;
 
     /* bridge => nonce */
@@ -33,10 +32,10 @@ contract BridgeCore {
     event ReceiveRequest(bytes32 reqId, bytes32 receiveSide, bytes32 bridgeFrom, bytes32 senderSide);
 
 
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "Ownable: caller is not the owner");
-        _;
-    }
+//    modifier onlyOwner() {
+//        require(msg.sender == _msgSender(), "Ownable: caller is not the owner");
+//        _;
+//    }
 
     /**
        Mandatory for participants who wants to use a own contracts

@@ -279,20 +279,20 @@ contract RelayerPool is ReentrancyGuard {
         });
     }
 
-    function setRelayerStatus(RelayerStatus _status) external onlyRegistry {
-        require(relayerStatus != _status, Errors.SAME_VALUE);
-        relayerStatus = _status;
-        emit RelayerStatusSet(msg.sender, _status);
-    }
+    // function setRelayerStatus(RelayerStatus _status) external onlyRegistry {
+    //     require(relayerStatus != _status, Errors.SAME_VALUE);
+    //     relayerStatus = _status;
+    //     emit RelayerStatusSet(msg.sender, _status);
+    // }
 
-    function setRelayerFeeNumerator(uint256 _value) external onlyRegistry {
+    function setRelayerFeeNumerator(uint256 _value) external onlyOwner {
         require(_value >= RELAYER_FEE_MIN_NUMERATOR, Errors.FEE_IS_TOO_LOW);
         require(_value <= RELAYER_FEE_DENOMINATOR, Errors.FEE_IS_TOO_HIGH);
         relayerFeeNumerator = _value;
         emit RelayerFeeNumeratorSet(msg.sender, _value);
     }
 
-    function setEmissionAnnualRateNumerator(uint256 _value) external onlyRegistry {
+    function setEmissionAnnualRateNumerator(uint256 _value) external onlyOwner {
         require(_value * 10000 >= 365 days, Errors.EMISSION_ANNUAL_RATE_IS_TOO_LOW);  // 0.01%
         require(_value <= 100 * 365 days, Errors.EMISSION_ANNUAL_RATE_IS_TOO_HIGH);   // 10000%
         emissionAnnualRateNumerator = _value;
