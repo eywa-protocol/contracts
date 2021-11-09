@@ -77,7 +77,7 @@ contract Synthesis is RelayRecipient {
 
     // can called only by bridge after initiation on a second chain
     // Solana
-    function mintSyntheticToken(
+    function mintSyntheticToken_32(
         bytes32 _txID,
         bytes32 _tokenReal,
         uint256 _amount,
@@ -121,7 +121,7 @@ contract Synthesis is RelayRecipient {
 
     // Revert synthesize() operation, can be called several times
     // Solana
-    function emergencyUnsyntesizeRequest(
+    function emergencyUnsyntesizeRequest_32(
         bytes32 _txID,
         bytes32 _receiveSide,
         bytes32 _oppositeBridge,
@@ -139,7 +139,7 @@ contract Synthesis is RelayRecipient {
             bytes32(uint256(uint160(_msgSender()))),
             nonce
         );
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2_32(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
 
         emit RevertSynthesizeRequest(txID, _msgSender());
     }
@@ -184,7 +184,7 @@ contract Synthesis is RelayRecipient {
 
     // sToken -> Token on a second chain
     // Solana
-    function burnSyntheticToken(
+    function burnSyntheticToken_32(
         address _stoken,
         uint256 _amount,
         bytes32 _chain2address,
@@ -210,7 +210,7 @@ contract Synthesis is RelayRecipient {
             _chain2address
         );
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2_32(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
         txState.recipient = bytes32(uint256(uint160(_msgSender())));
         txState.chain2address = _chain2address;
@@ -265,7 +265,7 @@ contract Synthesis is RelayRecipient {
     }
 
     // Solana
-    function burnSyntheticTokenWithPermit(
+    function burnSyntheticTokenWithPermit_32(
         bytes calldata _approvalData,
         address _stoken,
         uint256 _amount,
@@ -296,7 +296,7 @@ contract Synthesis is RelayRecipient {
             _chain2address
         );
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2_32(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
         txState.recipient = bytes32(uint256(uint160(_msgSender())));
         txState.chain2address = _chain2address;

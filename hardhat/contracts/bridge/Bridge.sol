@@ -51,7 +51,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient  {
         return true;
     }
 
-    function transmitRequestV2(
+    function transmitRequestV2_32(
         bytes memory _selector,
         bytes32 receiveSide,
         bytes32 oppositeBridge,

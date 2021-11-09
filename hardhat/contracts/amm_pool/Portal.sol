@@ -104,7 +104,7 @@ contract Portal is RelayRecipient {
     }
 
     // Solana
-    function synthesize(
+    function synthesize_32(
         address _token,
         uint256 _amount,
         bytes32 _chain2address,
@@ -132,7 +132,7 @@ contract Portal is RelayRecipient {
             _chain2address
         );
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2_32(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
         txState.recipient = bytes32(uint256(uint160(_msgSender())));
         txState.chain2address = _chain2address;
@@ -188,7 +188,7 @@ contract Portal is RelayRecipient {
     }
 
     // Solana
-    function synthesizeWithPermit(
+    function synthesizeWithPermit_32(
         bytes calldata _approvalData,
         address _token,
         uint256 _amount,
@@ -220,7 +220,7 @@ contract Portal is RelayRecipient {
             _chain2address
         );
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2_32(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
         txState.recipient = bytes32(uint256(uint160(_msgSender())));
         txState.chain2address = _chain2address;
@@ -295,7 +295,7 @@ contract Portal is RelayRecipient {
 
     // Revert burnSyntheticToken() operation, can be called several times
     // Solana
-    function emergencyUnburnRequest(
+    function emergencyUnburnRequest_32(
         bytes32 _txID,
         bytes32 _receiveSide,
         bytes32 _oppositeBridge,
@@ -314,7 +314,7 @@ contract Portal is RelayRecipient {
             bytes32(uint256(uint160(_msgSender()))),
             nonce
         );
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainId, txID, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2_32(out, _receiveSide, _oppositeBridge, _chainId, txID, _msgSender(), nonce);
 
         emit RevertBurnRequest(txID, _msgSender());
     }
