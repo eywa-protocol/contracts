@@ -21,6 +21,12 @@ cd hardhat
 ./scripts/deploy.sh network1,network2,network3
 ```
 
+### create network_env files
+```bash
+cd hardhat
+./scripts/deploy.sh
+```
+
 ### Tests
 
 - Local deploy and test should be triggered form https://gitlab.digiu.ai/blockchainlaboratory/eywa-p2p-bridge.
