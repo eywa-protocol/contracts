@@ -163,11 +163,11 @@ contract NodeRegistry is BaseRelayRecipient {
     ) external {
         RelayerPool relayerPool = new RelayerPool(
             _node.owner,
-            address(EYWA), /* _depositToken*/
-            address(EYWA), /* _rewardToken todo discuss with vadim */
+            address(EYWA),
+            address(EYWA), 
             _node.relayerFeeNumerator,
             _node.emissionRateNumerator,
-            _node.vault // vault
+            _node.vault
         );
         uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
         require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");
@@ -176,8 +176,6 @@ contract NodeRegistry is BaseRelayRecipient {
         _node.pool = address(relayerPool);
         addNode(_node);
     }
-
-    //todo если валидатор плохой то перебросить средства одним коллом с одного relayerPool на другой
 
     string public override versionRecipient = "2.2.3";
 }

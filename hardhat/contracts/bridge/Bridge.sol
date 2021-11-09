@@ -8,10 +8,9 @@ import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 //TODO: onlyTrustedNode has worse filled data. I.e. In func NodeList#addNode the golang node registers himself
 // and this means every node who wants to start up can add himself in onlyTrustedNode list.
 contract Bridge is BridgeCore {
-
-    constructor (address listNode) {
+    constructor(address listNode) {
         _listNode = listNode;
-        _owner    = msg.sender;
+        _owner = msg.sender;
     }
 
     modifier onlyTrustedNode() {
@@ -20,12 +19,19 @@ contract Bridge is BridgeCore {
     }
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
-        require(contractBind[bytes32(uint256(uint160(msg.sender)))][bytes32(uint256(uint160(oppositeBridge)))] == bytes32(uint256(uint160(receiveSide))), "UNTRUSTED CONTRACT");
+        require(
+            contractBind[bytes32(uint256(uint160(msg.sender)))][bytes32(uint256(uint160(oppositeBridge)))] ==
+                bytes32(uint256(uint160(receiveSide))),
+            "UNTRUSTED CONTRACT"
+        );
         _;
     }
 
     modifier onlyTrustedContractBytes32(bytes32 receiveSide, bytes32 oppositeBridge) {
-        require(contractBind[bytes32(uint256(uint160(msg.sender)))][oppositeBridge] == receiveSide, "UNTRUSTED CONTRACT");
+        require(
+            contractBind[bytes32(uint256(uint160(msg.sender)))][oppositeBridge] == receiveSide,
+            "UNTRUSTED CONTRACT"
+        );
         _;
     }
 
@@ -37,11 +43,7 @@ contract Bridge is BridgeCore {
         bytes32 requestId,
         address sender,
         uint256 nonce
-    )
-        external
-        onlyTrustedContract(receiveSide, oppositeBridge)
-        returns(bool)
-    {
+    ) external onlyTrustedContract(receiveSide, oppositeBridge) returns (bool) {
         verifyAndUpdateNonce(sender, nonce);
         emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
         return true;
@@ -55,16 +57,19 @@ contract Bridge is BridgeCore {
         bytes32 requestId,
         address sender,
         uint256 nonce
-    )
-        external
-        onlyTrustedContractBytes32(receiveSide, oppositeBridge)
-        returns(bool)
-    {
+    ) external onlyTrustedContractBytes32(receiveSide, oppositeBridge) returns (bool) {
         verifyAndUpdateNonce(sender, nonce);
-        emit OracleRequestSolana("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
+        emit OracleRequestSolana(
+            "setRequest",
+            address(this),
+            requestId,
+            _selector,
+            receiveSide,
+            oppositeBridge,
+            chainId
+        );
         return true;
     }
-
 
     function receiveRequestV2(
         bytes32 reqId,
@@ -72,10 +77,9 @@ contract Bridge is BridgeCore {
         bytes32 receiveSide,
         bytes32 bridgeFrom
     ) external onlyTrustedNode {
-
         bytes32 senderSide = contractBind[receiveSide][bridgeFrom];
         (bool success, bytes memory data) = address(bytes20(receiveSide)).call(b);
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'FAILED');
+        require(success && (data.length == 0 || abi.decode(data, (bool))), "FAILED");
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
     }
 }
