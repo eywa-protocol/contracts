@@ -56,13 +56,13 @@ contract Synthesis is RelayRecipient {
     }
 
     // Revert synthesize() operation, can be called several times
-    function emergencyUnsyntesizeRequest(bytes32 _txID,address _receiveSide, address _oppositeBridge, uint _chainID) external {
+    function emergencyUnsyntesizeRequest(bytes32 _txID,address _receiveSide, address _oppositeBridge, uint _chainID, uint256 _nonce) external {
 
         require(synthesizeStates[_txID]!= SynthesizeState.Synthesized, "Synt: syntatic tokens already minted");
         synthesizeStates[_txID] = SynthesizeState.RevertRequest;// close
         bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('emergencyUnsynthesize(bytes32)'))),_txID);
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID);
+        IBridge(bridge).transmitRequestV2(out,_receiveSide, _oppositeBridge, _chainID, _txID, _msgSender(), _nonce);
 
         emit RevertSynthesizeRequest(_txID, _msgSender());
     }
@@ -74,14 +74,15 @@ contract Synthesis is RelayRecipient {
         address _chain2address,
         address _receiveSide,
         address _oppositeBridge,
-        uint _chainID
+        uint _chainID,
+        uint256 _nonce
     ) external returns (bytes32 txID) {
         ISyntERC20(_stoken).burn(_msgSender(), _amount);
-        txID = keccak256(abi.encodePacked(this, requestCount));
+        txID = IBridge(bridge).prepareRqId(_oppositeBridge, _chainID, _receiveSide, _msgSender(), _nonce);
 
         bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('unsynthesize(bytes32,address,uint256,address)'))),txID, representationReal[_stoken], _amount, _chain2address);
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID);
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), _nonce);
         TxState storage txState = requests[txID];
         txState.recipient    = _msgSender();
         txState.chain2address    = _chain2address;
@@ -89,7 +90,7 @@ contract Synthesis is RelayRecipient {
         txState.amount     = _amount;
         txState.state = RequestState.Sent;
 
-        requestCount += 1;
+        // requestCount += 1;
 
         emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
     }
@@ -101,17 +102,18 @@ contract Synthesis is RelayRecipient {
         address _chain2address,
         address _receiveSide,
         address _oppositeBridge,
-        uint _chainID
+        uint _chainID,
+        uint256 _nonce
     ) external returns (bytes32 txID) {
         (bool _success1, ) = _stoken.call(_approvalData);
         require(_success1, "Approve call failed");
 
         ISyntERC20(_stoken).burn(_msgSender(), _amount);
-        txID = keccak256(abi.encodePacked(this, requestCount));
+        txID = IBridge(bridge).prepareRqId(_oppositeBridge, _chainID, _receiveSide, _msgSender(), _nonce);
 
         bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('unsynthesize(bytes32,address,uint256,address)'))),txID, representationReal[_stoken], _amount, _chain2address);
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID);
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), _nonce);
         TxState storage txState = requests[txID];
         txState.recipient    = _msgSender();
         txState.chain2address    = _chain2address;
