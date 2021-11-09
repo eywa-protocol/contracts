@@ -7,8 +7,6 @@ import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 
 
-//TODO: onlyTrustedNode has worse filled data. I.e. In func NodeList#addNode the golang node registers himself
-// and this means every node who wants to start up can add himself in onlyTrustedNode list.
 contract Bridge is BridgeCore, BaseRelayRecipient  {
 
   constructor (address listNode, address forwarder) {
