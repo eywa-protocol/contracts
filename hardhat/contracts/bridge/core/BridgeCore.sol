@@ -4,7 +4,6 @@ pragma solidity 0.8.0;
 contract BridgeCore {
     address public _listNode;
 
-    /* bridge => nonce */
     mapping(address => uint256) internal nonces;
     mapping(bytes32 => mapping(bytes32 => bytes32)) internal contractBind;
     mapping(bytes32 => bool) private is_in;
@@ -32,13 +31,8 @@ contract BridgeCore {
     event ReceiveRequest(bytes32 reqId, bytes32 receiveSide, bytes32 bridgeFrom, bytes32 senderSide);
 
 
-//    modifier onlyOwner() {
-//        require(msg.sender == _msgSender(), "Ownable: caller is not the owner");
-//        _;
-//    }
-
     /**
-       Mandatory for participants who wants to use a own contracts
+       Mandatory for participants who wants to use their own contracts
        1. Contract A (chain A) should be bind with Contract B (chain B) only once! It's not allowed to  switch Contract A (chain A) to Contract C (chain B). This mandatory
        for prevent malicious behaviour.
        2. Contract A (chain A) could be bind with several contracts where every contract from another chain. For ex: Contract A (chain A) --> Contract B (chain B) + Contract A (chain A) --> Contract B' (chain B') ... etc
@@ -51,7 +45,7 @@ contract BridgeCore {
         require(to != "", "NULL ADDRESS TO");
         require(from != "", "NULL ADDRESS FROM");
         require(is_in[to] == false, "TO ALREADY EXIST");
-        // for prevent malicious behaviour like switching between older and newer contracts
+        // to prevent malicious behaviour like switching between older and newer contracts
         require(contractBind[from][oppositeBridge] == "", "UPDATE DOES NOT ALLOWED");
         contractBind[from][oppositeBridge] = to;
         is_in[to] = true;
