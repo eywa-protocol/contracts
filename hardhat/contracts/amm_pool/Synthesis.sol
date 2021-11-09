@@ -83,7 +83,7 @@ contract Synthesis is RelayRecipient {
         uint256 _amount,
         address _to
     ) external onlyBridge {
-        // TODO add chek to Default - чтобы не было по бриджу
+        // TODO add chek to Default
         require(
             synthesizeStates[_txID] == SynthesizeState.Default,
             "Synt: emergencyUnsynthesizedRequest called or tokens has been already synthesized"
