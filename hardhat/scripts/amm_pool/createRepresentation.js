@@ -16,8 +16,9 @@ async function main() {
     for(let netw of this.sourceForRepresentation) {
       let tokens = networkConfig[netw].token;
       for(let t of tokens) {
-        if(await synthesis.representationSynt(t.address) === '0x0000000000000000000000000000000000000000'){
-           this.tx = await synthesis.createRepresentation(t.address, `e${t.name}`, `e${t.symbol}(${networkConfig[netw].netwiker})`);
+        let tokenAddressBytes32 = addressToBytes32(t.address);
+        if(await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000'){
+           this.tx = await synthesis.createRepresentation(tokenAddressBytes32, `s${t.name}`, `s${t.symbol}`);
            console.log(`createRepresentation for synthesis on ${network.name} source from ${netw}: ${this.tx.hash}`); 
         }
       }

@@ -28,7 +28,7 @@ contract BridgeCore {
         uint256 chainid
     );
     // event ReceiveRequest(bytes32 reqId, address receiveSide, address bridgeFrom, address senderSide);
-    event ReceiveRequest(bytes32 reqId, bytes32 receiveSide, bytes32 bridgeFrom, bytes32 senderSide);
+    event ReceiveRequest(bytes32 reqId, address receiveSide, bytes32 bridgeFrom, bytes32 senderSide);
 
 
     /**

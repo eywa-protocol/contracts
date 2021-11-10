@@ -71,11 +71,11 @@ contract Bridge is BridgeCore, BaseRelayRecipient  {
     function receiveRequestV2(
         bytes32 reqId,
         bytes memory b,
-        bytes32 receiveSide,
+        address receiveSide,
         bytes32 bridgeFrom
     ) external onlyTrustedNode {
 
-        bytes32 senderSide = contractBind[receiveSide][bridgeFrom];
+        bytes32 senderSide = contractBind[bytes32(uint256(uint160(receiveSide)))][bridgeFrom];
         (bool success, bytes memory data) = address(bytes20(receiveSide)).call(b);
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'FAILED');
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
