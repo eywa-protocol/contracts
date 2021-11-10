@@ -27,15 +27,19 @@ contract BridgeCore {
         bytes32 oppositeBridge,
         uint256 chainid
     );
-    // event ReceiveRequest(bytes32 reqId, address receiveSide, address bridgeFrom, address senderSide);
+
     event ReceiveRequest(bytes32 reqId, address receiveSide, bytes32 bridgeFrom, bytes32 senderSide);
 
 
     /**
-       Mandatory for participants who wants to use their own contracts
-       1. Contract A (chain A) should be bind with Contract B (chain B) only once! It's not allowed to  switch Contract A (chain A) to Contract C (chain B). This mandatory
-       for prevent malicious behaviour.
-       2. Contract A (chain A) could be bind with several contracts where every contract from another chain. For ex: Contract A (chain A) --> Contract B (chain B) + Contract A (chain A) --> Contract B' (chain B') ... etc
+    @dev Mandatory for all participants who wants to use their own contracts
+    1. Contract A (chain A) should be binded with Contract B (chain B) only once! It's not allowed to switch Contract A (chain A) to Contract C (chain B). This is mandatory
+    to prevent malicious behaviour.
+    2. Contract A (chain A) could be binded with several contracts where every contract from another chain. 
+    For ex: Contract A (chain A) --> Contract B (chain B) + Contract A (chain A) --> Contract B' (chain B') ... etc
+    @param from padded sender's address
+    @param oppositeBridge padded opposite bridge address 
+    @param to padded recipient address
     */
     function addContractBind(
         bytes32 from,
@@ -51,6 +55,14 @@ contract BridgeCore {
         is_in[to] = true;
     }
 
+    /** 
+    @dev Prepares the request ID.
+    @param oppositeBridge padded opposite bridge address
+    @param chainId opposite chain ID
+    @param receiveSide padded receive contract address
+    @param from padded sender's address 
+    @param nonce current nonce
+    */
     function prepareRqId(
         bytes32 oppositeBridge,
         uint256 chainId,
@@ -61,11 +73,19 @@ contract BridgeCore {
         return keccak256(abi.encodePacked(from, nonce, chainId, receiveSide, oppositeBridge));
     }
 
-
+    /** 
+    @dev Get the nonce of the current sender.
+    @param from sender's address
+    */
     function getNonce(address from) public view returns (uint256) {
         return nonces[from];
     }
 
+    /** 
+    @dev Verifies and updates the sender's nonce.
+    @param from sender's address
+    @param nonce provided sender's nonce
+    */
     function verifyAndUpdateNonce(address from, uint256 nonce) internal {
         require(nonces[from]++ == nonce, "nonce mismatch");
     }

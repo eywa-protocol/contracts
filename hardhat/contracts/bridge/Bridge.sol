@@ -31,6 +31,17 @@ contract Bridge is BridgeCore, BaseRelayRecipient  {
         _;
     }
 
+
+    /** 
+    @dev Transmit crosschain request v2.
+    @param _selector call data
+    @param receiveSide receive contract address
+    @param oppositeBridge opposite bridge address
+    @param chainId opposite chain ID 
+    @param requestId request ID
+    @param sender sender's address
+    @param nonce sender's nonce
+    */
     function transmitRequestV2(
         bytes memory _selector,
         address receiveSide,
@@ -49,6 +60,16 @@ contract Bridge is BridgeCore, BaseRelayRecipient  {
         return true;
     }
 
+    /** 
+    @dev Transmit crosschain request v2 with bytes32.
+    @param _selector call data
+    @param receiveSide receive contract address
+    @param oppositeBridge opposite bridge address
+    @param chainId opposite chain ID 
+    @param requestId request ID
+    @param sender sender's address
+    @param nonce sender's nonce
+    */
     function transmitRequestV2_32(
         bytes memory _selector,
         bytes32 receiveSide,
@@ -68,6 +89,13 @@ contract Bridge is BridgeCore, BaseRelayRecipient  {
     }
 
 
+    /** 
+    @dev Receive crosschain request v2.
+    @param reqId request ID
+    @param b call data
+    @param receiveSide receiver address
+    @param bridgeFrom opposite bridge address
+    */
     function receiveRequestV2(
         bytes32 reqId,
         bytes memory b,
