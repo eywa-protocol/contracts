@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-newone/utils/Create2.sol";
 import "./IBridge.sol";
 import "./ISyntERC20.sol";
 import "./SyntERC20.sol";
@@ -38,6 +39,11 @@ contract Synthesis is RelayRecipient {
     event SynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event SynthesizeCompletedSolana(bytes32 indexed _id, address indexed _to, uint256 _amount, bytes32 _token);
     event RevertBurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
+    event CreatedRepresentation(
+        bytes32 indexed _rtoken,
+        address indexed _stoken
+    );
+
 
     constructor(address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
         bridge = _bridge;
@@ -369,19 +375,29 @@ contract Synthesis is RelayRecipient {
     /** 
     * @dev Creates a representation with the given arguments.
     * @param _rtoken real token address
-    * @param _stokenName synth token name
-    * @param _stokenSymbol synth token name symbol
+    * @param _name real token name
+    * @param _symbol real token symbol
     */
     function createRepresentation(
         bytes32 _rtoken,
-        string memory _stokenName,
-        string memory _stokenSymbol
+        string memory _name,
+        string memory _symbol
     ) external onlyOwner {
-        //address stoken = representationSynt[_rtoken];
-        //require(stoken == address(0x0), "Synt: token representation already exist");
-        SyntERC20 syntToken = new SyntERC20(_stokenName, _stokenSymbol);
-        setRepresentation(_rtoken, address(syntToken));
+        address stoken = Create2.deploy(
+            0,
+            keccak256(abi.encodePacked(_rtoken)),
+            abi.encodePacked(
+                type(SyntERC20).creationCode,
+                abi.encode(
+                    string(abi.encodePacked("e", _name)),
+                    string(abi.encodePacked("e", _symbol))
+                )
+            )
+        );
+        setRepresentation(_rtoken, stoken);
+        emit CreatedRepresentation(_rtoken, stoken);
     }
+
 
     // should be restricted in mainnets
     function changeBridge(address _bridge) external onlyOwner {

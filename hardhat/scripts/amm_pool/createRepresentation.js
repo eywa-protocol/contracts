@@ -1,6 +1,6 @@
 let networkConfig = require('../../helper-hardhat-config.json')
-const hre = require("hardhat");
 const { addressToBytes32 } = require('../../utils/helper');
+const hre = require("hardhat");
 
 async function main() {
 
@@ -16,15 +16,14 @@ async function main() {
     for(let netw of this.sourceForRepresentation) {
       let tokens = networkConfig[netw].token;
       for(let t of tokens) {
-        let tokenAddressBytes32 = addressToBytes32(t.address);
+        let tokenAddressBytes32 = addressToBytes32(t.address); 
         if(await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000'){
-           this.tx = await synthesis.createRepresentation(tokenAddressBytes32, `s${t.name}`, `s${t.symbol}`);
+           this.tx = await synthesis.createRepresentation(tokenAddressBytes32, `e${t.name}`, `e${t.symbol}(${networkConfig[netw].netwiker})`);
            console.log(`createRepresentation for synthesis on ${network.name} source from ${netw}: ${this.tx.hash}`); 
         }
       }
     }
 }
-
 
 main()
     .then(() => process.exit(0))
