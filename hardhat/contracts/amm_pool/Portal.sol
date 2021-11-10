@@ -65,13 +65,13 @@ contract Portal is RelayRecipient {
 
 
     /** 
-    @dev Synthesize token request.
-    @param _token token address to synthesize
-    @param _amount amount to synthesize 
-    @param _chain2address amount recipient address
-    @param _receiveSide request recipient address
-    @param _oppositeBridge opposite bridge address
-    @param _chainID opposite chain ID
+    * @dev Synthesize token request.
+    * @param _token token address to synthesize
+    * @param _amount amount to synthesize 
+    * @param _chain2address amount recipient address
+    * @param _receiveSide request recipient address
+    * @param _oppositeBridge opposite bridge address
+    * @param _chainID opposite chain ID
     */
     function synthesize(
         address _token,
@@ -114,13 +114,13 @@ contract Portal is RelayRecipient {
 
 
     /** 
-    @dev Synthesize token request with bytes32 support.
-    @param _token token address to synthesize
-    @param _amount amount to synthesize 
-    @param _chain2address recipient address
-    @param _receiveSide request recipient address
-    @param _oppositeBridge opposite bridge address
-    @param _chainID opposite chain ID
+    * @dev Synthesize token request with bytes32 support.
+    * @param _token token address to synthesize
+    * @param _amount amount to synthesize 
+    * @param _chain2address recipient address
+    * @param _receiveSide request recipient address
+    * @param _oppositeBridge opposite bridge address
+    * @param _chainID opposite chain ID
     */
     function synthesize_32(
         address _token,
@@ -163,14 +163,14 @@ contract Portal is RelayRecipient {
 
 
     /** 
-    @dev Synthesize token request with permit.
-    @param _approvalData permit data
-    @param _token token address to synthesize
-    @param _amount amount to synthesize 
-    @param _chain2address amount recipient address
-    @param _receiveSide request recipient address
-    @param _oppositeBridge opposite bridge address
-    @param _chainID opposite chain ID
+    * @dev Synthesize token request with permit.
+    * @param _approvalData permit data
+    * @param _token token address to synthesize
+    * @param _amount amount to synthesize 
+    * @param _chain2address amount recipient address
+    * @param _receiveSide request recipient address
+    * @param _oppositeBridge opposite bridge address
+    * @param _chainID opposite chain ID
     */
     function synthesizeWithPermit(
         bytes calldata _approvalData,
@@ -216,14 +216,14 @@ contract Portal is RelayRecipient {
     }
 
     /** 
-    @dev Synthesize token request with permit and bytes32 support.
-    @param _approvalData permit data
-    @param _token token address to synthesize
-    @param _amount amount to synthesize 
-    @param _chain2address recipient address
-    @param _receiveSide request recipient address
-    @param _oppositeBridge opposite bridge address
-    @param _chainID opposite chain ID
+    * @dev Synthesize token request with permit and bytes32 support.
+    * @param _approvalData permit data
+    * @param _token token address to synthesize
+    * @param _amount amount to synthesize 
+    * @param _chain2address recipient address
+    * @param _receiveSide request recipient address
+    * @param _oppositeBridge opposite bridge address
+    * @param _chainID opposite chain ID
     */
     function synthesizeWithPermit_32(
         bytes calldata _approvalData,
@@ -269,8 +269,8 @@ contract Portal is RelayRecipient {
     }
 
     /** 
-    @dev Emergency unsynthesize request. Can be called only by bridge after initiation on a second chain
-    @param _txID transaction ID to unsynth 
+    * @dev Emergency unsynthesize request. Can be called only by bridge after initiation on a second chain
+    * @param _txID transaction ID to unsynth 
     */
     function emergencyUnsynthesize(bytes32 _txID) external onlyBridge {
         TxState storage txState = requests[_txID];
@@ -292,11 +292,11 @@ contract Portal is RelayRecipient {
     }
 
     /** 
-    @dev Unsynthesize request. Can be called only by bridge after initiation on a second chain
-    @param _txID transaction ID to unsynth 
-    @param _token token address to unsynth 
-    @param _amount amount to unsynth 
-    @param _to recipient address
+    * @dev Unsynthesize request. Can be called only by bridge after initiation on a second chain
+    * @param _txID transaction ID to unsynth 
+    * @param _token token address to unsynth 
+    * @param _amount amount to unsynth 
+    * @param _to recipient address
     */
     function unsynthesize(
         bytes32 _txID,
@@ -315,11 +315,11 @@ contract Portal is RelayRecipient {
     }
 
     /** 
-    @dev Revert burnSyntheticToken() operation, can be called several times.
-    @param _txID transaction ID to unburn
-    @param _receiveSide receiver contract address
-    @param _oppositeBridge opposite bridge address
-    @param _chainId opposite chain ID
+    * @dev Revert burnSyntheticToken() operation, can be called several times.
+    * @param _txID transaction ID to unburn
+    * @param _receiveSide receiver contract address
+    * @param _oppositeBridge opposite bridge address
+    * @param _chainId opposite chain ID
     */
     function emergencyUnburnRequest(
         bytes32 _txID,
@@ -346,11 +346,11 @@ contract Portal is RelayRecipient {
     }
 
     /** 
-    @dev Revert burnSyntheticToken() operation with bytes32 support. Can be called several times.
-    @param _txID transaction ID to unburn
-    @param _receiveSide receiver contract address
-    @param _oppositeBridge opposite bridge address
-    @param _chainId opposite chain ID
+    * @dev Revert burnSyntheticToken() operation with bytes32 support. Can be called several times.
+    * @param _txID transaction ID to unburn
+    * @param _receiveSide receiver contract address
+    * @param _oppositeBridge opposite bridge address
+    * @param _chainId opposite chain ID
     */
     function emergencyUnburnRequest_32(
         bytes32 _txID,
