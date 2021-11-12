@@ -47,7 +47,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient  {
         bytes memory b,
         address receiveSide,
         address bridgeFrom
-    ) external onlyTrustedNode {
+    ) external {
 
         address senderSide = contractBind[receiveSide][bridgeFrom];
         bytes32 recreateReqId = keccak256(abi.encodePacked(nonce[bridgeFrom][senderSide], b, block.chainid));
