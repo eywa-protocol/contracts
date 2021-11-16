@@ -23,7 +23,7 @@ wrappers: npm compile copy_configs
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/test/TestTarget.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/test/TestForward.sol --pkg wrappers --out wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/test/TestERC20Permit.sol --pkg wrappers --out wrappers
-
+	go run wrappers-builder/main.go --json ${ARTIFACTS}/merkle/MerkleTest.sol --pkg wrappers --out wrappers
 deps:
 	go mod tidy
 	go mod download
