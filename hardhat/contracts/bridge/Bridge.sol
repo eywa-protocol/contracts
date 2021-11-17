@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.0;
 
+import "./bls/BlsSignatureVerification.sol";
 import "./core/BridgeCore.sol";
 import "./interface/INodeRegistry.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 
+contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
 
-contract Bridge is BridgeCore, BaseRelayRecipient  {
+    E2Point private epochKey;
 
   constructor (address listNode, address forwarder) {
         _listNode = listNode;
@@ -31,7 +33,14 @@ contract Bridge is BridgeCore, BaseRelayRecipient  {
         _;
     }
 
-
+    function updateEpoch(E2Point memory _newKey, E2Point memory _votersPubKey, E1Point memory _votersSignature, uint _votersMask) external {
+        if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
+            bytes memory data = abi.encodePacked(epochKey.x, epochKey.y, _newKey.x, _newKey.y);
+            require(verifyMultisig(epochKey, _votersPubKey, data, _votersSignature, _votersMask), "multisig mismatch");
+        }
+        epochKey = _newKey;
+    }
+    
     /** 
     * @dev Transmit crosschain request v2.
     * @param _selector call data
