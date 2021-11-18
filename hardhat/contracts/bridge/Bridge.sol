@@ -9,7 +9,13 @@ import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 
 contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
 
+    string public override versionRecipient = "2.2.3";
     E2Point private epochKey;
+    address public dao;
+
+    event NewEpoch(E2Point epochKey);
+    event NewEpochRequested();
+    event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
   constructor (address listNode, address forwarder) {
         _listNode = listNode;
@@ -33,12 +39,18 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         _;
     }
 
+    modifier onlyDao() {
+        require(_msgSender() == dao, "Only DAO");
+        _;
+    }
+
     function updateEpoch(E2Point memory _newKey, E2Point memory _votersPubKey, E1Point memory _votersSignature, uint _votersMask) external {
         if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
             bytes memory data = abi.encodePacked(epochKey.x, epochKey.y, _newKey.x, _newKey.y);
             require(verifyMultisig(epochKey, _votersPubKey, data, _votersSignature, _votersMask), "multisig mismatch");
         }
         epochKey = _newKey;
+        emit NewEpoch(epochKey);
     }
     
     /** 
@@ -118,5 +130,13 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
     }
 
-     string public override versionRecipient = "2.2.3";
+    function daoUpdateEpochRequest() external onlyDao {
+        emit NewEpochRequested();
+    }
+
+    function daoTransferOwnership(address newDao) public {
+        require(dao == address(0) || _msgSender() == dao, "only DAO");
+        emit OwnershipTransferred(dao, newDao);
+        dao = newDao;
+    }
 }
