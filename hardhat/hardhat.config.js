@@ -16,6 +16,8 @@ const POLYGONSCAN_API_KEY  = process.env.POLYGONSCAN_API_KEY  || "0x000000000000
 const HECOINFOSCAN_API_KEY = process.env.HECOINFOSCAN_API_KEY || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_HECO     = process.env.PRIVATE_KEY_HECO     || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_AVALANCHE= process.env.PRIVATE_KEY_AVALANCHE|| "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_CELOTESTNET= process.env.PRIVATE_KEY_CELOTESTNET|| "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_COINEXTESTNET= process.env.PRIVATE_KEY_COINEXTESTNET|| "0x0000000000000000000000000000000000000000";
 
 //TODO: Need to resolve dynamic initialization for apiKey. Now it is wrong working.
 async function getKey(network) {
@@ -73,6 +75,14 @@ module.exports = {
     avalanchetestnet:{
       url: networkConfig.avalanchetestnet.rpcUrl2,
       accounts: [PRIVATE_KEY_AVALANCHE]
+    },
+    celotestnet:{
+      url: networkConfig.celotestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_CELOTESTNET]
+    },
+    coinextestnet:{
+      url: networkConfig.coinextestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_COINEXTESTNET]
     }
   },
   etherscan: {

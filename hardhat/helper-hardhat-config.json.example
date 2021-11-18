@@ -189,6 +189,84 @@
     "portal": "0xBC60FfC09DaA8FBfE88d2e7F802595a56A742102",
     "synthesis": "0xE2c8ADc930A21F8e48173dc6776fcb2B09C4A3b6"
   },
+  "celotestnet": {
+    "rpcUrl": "https://alfajores-forno.celo-testnet.org",
+    "rpcUrl2": "https://alfajores-forno.celo-testnet.org",
+    "n": "CELOTESTNET",
+    "netwiker": "CELO",
+    "env_file": [
+      "networks_env/env_connect_to_celotestnet.env",
+      "networks_env/env_test_for_celotestnet.env"
+    ],
+    "chainId": 44787,
+    "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
+    "forwarder": "0xeB230bF62267E94e657b5cbE74bdcea78EB3a5AB",
+    "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
+    "token": [
+      {
+        "address": "0xc0924cC9113588c93b6990D15723d0C80acf0dA6",
+        "name": "EYWA",
+        "symbol": "EYWA"
+      },
+      {
+        "address": "0x98e8927207C6C221A5eb4a3575925717Fa6303a8",
+        "name": "USDT",
+        "symbol": "USDT"
+      }
+    ],
+    "sourceForRepresentation": [
+      "rinkeby",
+      "mumbai",
+      "hecotestnet",
+      "avalanchetestnet",
+      "bsctestnet"
+    ],
+    "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
+    "nodeList": "0x69445262ff03136Ee97551551969CE5f905769B0",
+    "bridge": "0xfc192C47d37295E87cfDbcAc8B66fC1092355CB9",
+    "mockDexPool": "0xC355ABEBd81A3b760acf28dAf4559010e3eFb407",
+    "portal": "0xde77E4e9d1C450B2e6311dDC55CB0706F5D6Abfd",
+    "synthesis": "0x4dd967e4C397E4E696d0FCaE8C889E3E6f68eF9A"
+  },
+  "coinextestnet": {
+    "rpcUrl": "https://testnet-rpc.coinex.net/",
+    "rpcUrl2": "https://testnet-rpc.coinex.net/",
+    "n": "COINEXTESTNET",
+    "netwiker": "CET",
+    "env_file": [
+      "networks_env/env_connect_to_coinextestnet.env",
+      "networks_env/env_test_for_coinextestnet.env"
+    ],
+    "chainId": 53,
+    "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
+    "forwarder": "0xeB230bF62267E94e657b5cbE74bdcea78EB3a5AB",
+    "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
+    "token": [
+      {
+        "address": "0xc0924cC9113588c93b6990D15723d0C80acf0dA6",
+        "name": "EYWA",
+        "symbol": "EYWA"
+      },
+      {
+        "address": "0x98e8927207C6C221A5eb4a3575925717Fa6303a8",
+        "name": "USDT",
+        "symbol": "USDT"
+      }
+    ],
+    "sourceForRepresentation": [
+      "rinkeby",
+      "mumbai",
+      "hecotestnet",
+      "avalanchetestnet",
+      "bsctestnet"
+    ],
+    "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
+    "nodeList": "0x69445262ff03136Ee97551551969CE5f905769B0",
+    "bridge": "0xfc192C47d37295E87cfDbcAc8B66fC1092355CB9",
+    "mockDexPool": "0xC355ABEBd81A3b760acf28dAf4559010e3eFb407",
+    "portal": "0xde77E4e9d1C450B2e6311dDC55CB0706F5D6Abfd",
+    "synthesis": "0x4dd967e4C397E4E696d0FCaE8C889E3E6f68eF9A"
+  },
   "ganache": {
     "rpcUrl": "http://127.0.0.1:9999",
     "rpcUrl2": "http://127.0.0.1:9999",

@@ -3,7 +3,8 @@ const networkConfig = require('../../helper-hardhat-config.json')
 const hre = require("hardhat");
 
 const name = hre.network.name;
-const addr = process.env.ADDR.trim();
+const addr = process.env.ADDR.trim();   
+console.log("Network:", name)
 
 async function main() {
   const [deployer] = await ethers.getSigners();
