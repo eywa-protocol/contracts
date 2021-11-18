@@ -13,7 +13,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     E2Point private epochKey;
     address public dao;
 
-    event NewEpoch(E2Point epochKey);
+    event NewEpoch(bytes oldEpochKey, bytes newEpochKey);
     event NewEpochRequested();
     event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
@@ -44,13 +44,23 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         _;
     }
 
-    function updateEpoch(E2Point memory _newKey, E2Point memory _votersPubKey, E1Point memory _votersSignature, uint _votersMask) external {
+    function updateEpoch(
+        bytes calldata _newKey,
+        bytes calldata _votersPubKey,
+        bytes calldata _votersSignature,
+        uint256 _votersMask
+    ) external {
+        E2Point memory newKey = decodeE2Point(_newKey);
+        E2Point memory votersPubKey = decodeE2Point(_votersPubKey);
+        E1Point memory votersSignature = decodeE1Point(_votersSignature);
+
         if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
-            bytes memory data = abi.encodePacked(epochKey.x, epochKey.y, _newKey.x, _newKey.y);
-            require(verifyMultisig(epochKey, _votersPubKey, data, _votersSignature, _votersMask), "multisig mismatch");
+            bytes memory data = abi.encodePacked(epochKey.x, epochKey.y, newKey.x, newKey.y);
+            require(verifyMultisig(epochKey, votersPubKey, data, votersSignature, _votersMask), "multisig mismatch");
         }
-        epochKey = _newKey;
-        emit NewEpoch(epochKey);
+
+        emit NewEpoch(abi.encode(epochKey), abi.encode(newKey));
+        epochKey = newKey;
     }
     
     /** 
@@ -138,5 +148,27 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         require(dao == address(0) || _msgSender() == dao, "only DAO");
         emit OwnershipTransferred(dao, newDao);
         dao = newDao;
+    }
+
+    function decodeE2Point(bytes memory _pubKey) private pure returns (E2Point memory pubKey) {
+        uint256[] memory output = new uint256[](4);
+        for (uint256 i = 32; i <= output.length * 32; i += 32) {
+            assembly { mstore(add(output, i), mload(add(_pubKey, i))) }
+        }
+
+        pubKey.x[0] = output[0];
+        pubKey.x[1] = output[1];
+        pubKey.y[0] = output[2];
+        pubKey.y[1] = output[3];
+    }
+
+    function decodeE1Point(bytes memory _sig) private pure returns (E1Point memory signature) {
+        uint256[] memory output = new uint256[](2);
+        for (uint256 i = 32; i <= output.length * 32; i += 32) {
+            assembly { mstore(add(output, i), mload(add(_sig, i))) }
+        }
+
+        signature.x = output[0];
+        signature.y = output[1];
     }
 }
