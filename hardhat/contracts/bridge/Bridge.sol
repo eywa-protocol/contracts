@@ -55,6 +55,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         E1Point memory votersSignature = decodeE1Point(_votersSignature);
 
         if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
+            require(popcnt(_votersMask) >= 3, "not enough participants"); // TODO
             bytes memory data = abi.encodePacked(epochKey.x, epochKey.y, newKey.x, newKey.y);
             require(verifyMultisig(epochKey, votersPubKey, data, votersSignature, _votersMask), "multisig mismatch");
         }
@@ -170,5 +171,12 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
 
         signature.x = output[0];
         signature.y = output[1];
+    }
+
+    function popcnt(uint256 mask) private pure returns(uint256 cnt) {
+        while(mask != 0) {
+            mask = mask & (mask - 1);
+            cnt++;
+        }
     }
 }
