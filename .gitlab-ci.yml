@@ -21,7 +21,6 @@ generate:
     - docker
   artifacts:
     paths:
-      #выгрузка получившегося конфига
       - generated-config.yml
   # artifacts:
   #   paths:
