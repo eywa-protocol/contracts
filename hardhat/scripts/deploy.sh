@@ -6,12 +6,18 @@ getField(){
  node -pe 'JSON.parse(process.argv[1]).'$1 "$(cat ./helper-hardhat-config.json)"
 }
 
+echo "getField"
+
 nets=${1}
+echo "$nets"
 if [[ ${1} =~ ^('')$ ]]
  then
+   echo "Start if"
   nets=$(jq 'keys[]' ./helper-hardhat-config.json)
+  echo "$nets"
   nets=${nets//\"/ }
   echo '> Create (override) env files only'
+  echo "for"
   for net in ${nets//\,/ }
   do
     ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  RPC_URL=$(getField ${net}.rpcUrl) NETWORK_ID=$(getField ${net}.chainId) BRIDGE_ADDRESS=$(getField ${net}.bridge) NODELIST_ADDRESS=$(getField ${net}.nodeList) DEXPOOL_ADDRESS=$(getField ${net}.mockDexPool) PORTAL_ADDRESS=$(getField ${net}.portal) SYNTHESIS_ADDRESS=$(getField ${net}.synthesis) PAYMASTER_ADDRESS=$(getField ${net}.paymaster)
@@ -19,5 +25,6 @@ if [[ ${1} =~ ^('')$ ]]
     echo $(getField ${net}.env_file[0])
     echo $(getField ${net}.env_file[1])
   done
+  echo "for end"
   exit 0
  fi
