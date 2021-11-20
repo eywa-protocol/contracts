@@ -1,5 +1,7 @@
 #! /bin/bash
 
+echo "Update script"
+
 mkdir -p ~/contracts/networks_env
 MODE=${1}
 FILENAME=${2}

@@ -1,5 +1,7 @@
 #! /bin/bash
 
+echo "Deploy script"
+
 getField(){
  node -pe 'JSON.parse(process.argv[1]).'$1 "$(cat ./helper-hardhat-config.json)"
 }
