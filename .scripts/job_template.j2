@@ -7,6 +7,5 @@
     - echo "for this networks {{ network }}"
     - docker run -t -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e NETWORKS={{ network }} registry.digiu.ai/base/eywa-contracts:3 make -C /app "{{ action }}"
 #    - docker run -t --rm -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e NETWORKS={{ network }} registry.digiu.ai/base/eywa-contracts:3 make -C /app "{{ action }}"
-    - touch ~/contracts/{{ network }}
   tags:
     - docker
