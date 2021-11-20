@@ -1,6 +1,5 @@
 #! /bin/bash
 
-echo "Update script"
 
 mkdir -p ~/contracts/networks_env
 MODE=${1}
@@ -16,11 +15,11 @@ do
     # update or create
     if [[ "$MODE" =~ ^(create)$ ]]
     then
-cat << EOF >> ./${FILENAME}
+cat << EOF >> ${FILENAME}
 ${pass}
 EOF
      else
-cat << EOF >> ./${FILENAME}
+cat << EOF >> ${FILENAME}
 ${pass}
 EOF
     fi
