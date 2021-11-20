@@ -4,6 +4,8 @@ from os import getenv
 networks = getenv("CI_COMMIT_TAG").split('-')[3].split(',')
 action = getenv("CI_COMMIT_TAG").split('-')[2]
 
+action = "eth-testnet-migrate" if action == "deploy" else "wrappers"
+
 print(networks)
 print(action)
 
