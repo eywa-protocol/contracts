@@ -5,8 +5,8 @@
     "n": "AVALANCHETESTNET",
     "netwiker": "AVCH",
     "env_file": [
-      "networks_env/env_connect_to_avalanchetestnet.env",
-      "networks_env/env_test_for_avalanchetestnet.env"
+      "~/contracts/networks_env/env_connect_to_avalanchetestnet.env",
+      "~/contracts/networks_env/env_test_for_avalanchetestnet.env"
     ],
     "chainId": 43113,
     "relayHub": "0x0000000000000000000000000000000000000000",
@@ -42,8 +42,8 @@
     "n": "HECOTESTNET",
     "netwiker": "HECO",
     "env_file": [
-      "networks_env/env_connect_to_hecotestnet.env",
-      "networks_env/env_test_for_hecotestnet.env"
+      "~/contracts/networks_env/env_connect_to_hecotestnet.env",
+      "~/contracts/networks_env/env_test_for_hecotestnet.env"
     ],
     "chainId": 256,
     "relayHub": "0x0000000000000000000000000000000000000000",
@@ -79,8 +79,8 @@
     "n": "MUMBAI",
     "netwiker": "POLYGON",
     "env_file": [
-      "networks_env/env_connect_to_mumbai.env",
-      "networks_env/env_test_for_mumbai.env"
+      "~/contracts/networks_env/env_connect_to_mumbai.env",
+      "~/contracts/networks_env/env_test_for_mumbai.env"
     ],
     "chainId": 80001,
     "relayHub": "0x6C28AfC105e65782D9Ea6F2cA68df84C9e7d750d",
@@ -116,8 +116,8 @@
     "n": "RINKEBY",
     "netwiker": "ETH",
     "env_file": [
-      "networks_env/env_connect_to_rinkeby.env",
-      "networks_env/env_test_for_rinkeby.env"
+      "~/contracts/networks_env/env_connect_to_rinkeby.env",
+      "~/contracts/networks_env/env_test_for_rinkeby.env"
     ],
     "chainId": 4,
     "relayHub": "0x6650d69225CA31049DB7Bd210aE4671c0B1ca132",
@@ -154,8 +154,8 @@
     "n": "BSCTESTNET",
     "netwiker": "BSC",
     "env_file": [
-      "networks_env/env_connect_to_bsctestnet.env",
-      "networks_env/env_test_for_bsctestnet.env"
+      "~/contracts/networks_env/env_connect_to_bsctestnet.env",
+      "~/contracts/networks_env/env_test_for_bsctestnet.env"
     ],
     "chainId": 97,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
@@ -191,8 +191,8 @@
     "n": "GANACHE",
     "netwiker": "GNE",
     "env_file": [
-      "networks_env/env_connect_to_ganache.env",
-      "networks_env/env_test_for_ganache.env"
+      "~/contracts/networks_env/env_connect_to_ganache.env",
+      "~/contracts/networks_env/env_test_for_ganache.env"
     ],
     "chainId": 0,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
@@ -225,8 +225,8 @@
     "n": "NETWORK1",
     "netwiker": "NET1",
     "env_file": [
-      "networks_env/env_connect_to_network1.env",
-      "networks_env/env_test_for_network1.env"
+      "~/contracts/networks_env/env_connect_to_network1.env",
+      "~/contracts/networks_env/env_test_for_network1.env"
     ],
     "chainId": 1111,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
@@ -260,8 +260,8 @@
     "n": "NETWORK2",
     "netwiker": "NET2",
     "env_file": [
-      "networks_env/env_connect_to_network2.env",
-      "networks_env/env_test_for_network2.env"
+      "~/contracts/networks_env/env_connect_to_network2.env",
+      "~/contracts/networks_env/env_test_for_network2.env"
     ],
     "chainId": 1112,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
@@ -295,8 +295,8 @@
     "n": "NETWORK3",
     "netwiker": "NET3",
     "env_file": [
-      "networks_env/env_connect_to_network3.env",
-      "networks_env/env_test_for_network3.env"
+      "~/contracts/networks_env/env_connect_to_network3.env",
+      "~/contracts/networks_env/env_test_for_network3.env"
     ],
     "chainId": 1113,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
