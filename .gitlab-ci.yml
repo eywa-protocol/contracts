@@ -2,6 +2,7 @@ services:
   - docker:bind
 
 stages:
+  - generate
   - deploy
 
 deploy:
