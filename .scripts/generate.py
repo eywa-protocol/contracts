@@ -1,7 +1,7 @@
 from jinja2 import Template
 from os import getenv
 
-networks = getenv("CI_COMMIT_TAG").split('-')[3]
+networks = getenv("CI_COMMIT_TAG").split('-')[3].split(',')
 action = getenv("CI_COMMIT_TAG").split('-')[2]
 
 print(networks)
