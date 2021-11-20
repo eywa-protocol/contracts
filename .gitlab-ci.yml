@@ -5,7 +5,7 @@ stages:
   - generate
   - deploy
 
-deploy:
+generate:
   stage: generate
   before_script:
     - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
