@@ -22,13 +22,6 @@ generate:
   artifacts:
     paths:
       - generated-config.yml
-  # artifacts:
-  #   paths:
-  #       - wrappers/
-  #       - hardhat/helper-hardhat-config.json
-  #       - hardhat/.env
-  #       - hardhat/networks_env
-  #       - hardhat/contracts
   rules:
     - if: '$CI_COMMIT_TAG =~ /^[A-Z]{3,15}-\d+-(deploy|wrappers)-[a-z,]{3,100}$/'
 
