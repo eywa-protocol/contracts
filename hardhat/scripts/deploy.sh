@@ -39,7 +39,7 @@ if [[ "$nets" =~ ^('')$ ]]
  echo $(getField ${net}.env_file[0])
  echo $(getField ${net}.env_file[1])
 
- python3 .scripts/render_helper.py "$net"
+ python3 ../.scripts/render_helper.py "$net"
  # npx hardhat run ./scripts/amm_pool/createRepresentation.js --network ${net}
  done
 

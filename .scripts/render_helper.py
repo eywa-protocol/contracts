@@ -15,5 +15,5 @@ for address in new_addresses:
     addr = address.split('=')[1].strip()
     data[net_name][name] = addr
 
-with open('/contracts/helper-hardhat-config.json', 'w') as f:
+with open('/contracts/helper-hardhat-config.j2', 'w') as f:
     json.dump(data, f, indent=4)
