@@ -1,4 +1,4 @@
-let networkConfig = require('../../helper-hardhat-config.json')
+let networkConfig = require('/contracts/helper-hardhat-config.json')
 const hre = require("hardhat");
 const h = require("../../utils/helper");
 

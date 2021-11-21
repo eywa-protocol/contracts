@@ -26,11 +26,11 @@ if [[ "$nets" =~ ^('')$ ]]
 
  for net in ${nets//\,/ }
  do
- echo 'bash script for network:' ${net}
+ echo 'bash script deploy for network:' ${net}
  echo '==========================================='
  echo ''
  ## NOTE !!!!! : gsn-node where owner is opengsn. Uncomment for our ralyer gsn.
- #npx hardhat run ./scripts/gassless/deploy.js --network ${net}
+ # npx hardhat run ./scripts/gassless/deploy.js --network ${net}
  # npx hardhat run ./scripts/bridge/deploy.js   --network ${net}
  # npx hardhat run ./scripts/amm_pool/deploy.js --network ${net}
 
@@ -40,15 +40,4 @@ if [[ "$nets" =~ ^('')$ ]]
  echo $(getField ${net}.env_file[1])
 
  python3 ../.scripts/render_helper.py "$net"
- # npx hardhat run ./scripts/amm_pool/createRepresentation.js --network ${net}
- done
-
- for net in ${nets//\,/ }
- do
- echo 'init into:' ${net}
- ##
- ## init
- ##
- # npx hardhat run ./scripts/bridge/updateDexBind.js  --network ${net}
-
  done
