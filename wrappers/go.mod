@@ -1,4 +1,4 @@
-module gitlab.digiu.ai/blockchainlaboratory/wrappers
+module github.com/eywa-protocol/contracts/wrappers
 
 go 1.16
 
