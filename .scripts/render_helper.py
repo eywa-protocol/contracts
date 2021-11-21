@@ -2,7 +2,7 @@ import json
 import sys
 
 net_name = sys.argv[1]
-with open('/app/.script/helper-hardhat-config.j2') as f:
+with open('/app/.scripts/helper-hardhat-config.j2') as f:
     data = json.load(f)
 
 
