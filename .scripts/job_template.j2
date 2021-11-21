@@ -1,9 +1,9 @@
 stages:
-  - contract:deploy
-  - contract:init
+  - contract-deploy
+  - contract-init
 
 {{ network }}.deploy:
-  stage: contract:deploy
+  stage: contract-deploy
   before_script:
     - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
   script:
@@ -15,7 +15,7 @@ stages:
     - docker
 
 {{ network }}.init:
-  stage: contract:init
+  stage: contract-init
   script:
     - cd hardhat;./scripts/init.sh {{ network }}
   tags:
