@@ -39,5 +39,4 @@ if [[ "$nets" =~ ^('')$ ]]
  echo $(getField ${net}.env_file[0])
  echo $(getField ${net}.env_file[1])
 
- python3 ../.scripts/render_helper.py "$net"
  done
