@@ -2,7 +2,7 @@ import json
 import sys
 
 net_name = sys.argv[1]
-with open('/app/.script/helper-hardhat-config.json') as f:
+with open('/app/.script/helper-hardhat-config.j2') as f:
     data = json.load(f)
 
 
@@ -15,5 +15,5 @@ for address in new_addresses:
     addr = address.split('=')[1].strip()
     data[net_name][name] = addr
 
-with open('/contracts/helper-hardhat-config.j2', 'w') as f:
+with open('/contracts/helper-hardhat-config.json', 'w') as f:
     json.dump(data, f, indent=4)
