@@ -13,7 +13,7 @@ j2 = open('.scripts/job_template.j2').read()
 t = Template(j2)
 
 with open('generated-config.yml', 'a') as ci_config:
-    ci_config.write(t.render(networks=networks, action=action, CI_COMMIT_TAG=CI_COMMIT_TAG))
+    ci_config.write(t.render(networks=networks, action=action, CI_COMMIT_TAG=getenv("CI_COMMIT_TAG")))
 
 
 # for network in networks:
