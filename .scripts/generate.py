@@ -12,8 +12,12 @@ print(action)
 j2 = open('.scripts/job_template.j2').read()
 t = Template(j2)
 
-for network in networks:
-    print("generate start")
-    print(network)
-    with open('generated-config.yml', 'a') as ci_config:
-        ci_config.write(t.render(network=network, action=action))
+with open('generated-config.yml', 'a') as ci_config:
+    ci_config.write(t.render(networks=networks, action=action))
+
+
+# for network in networks:
+#     print("generate start")
+#     print(network)
+#     with open('generated-config.yml', 'a') as ci_config:
+#         ci_config.write(t.render(network=network, action=action))
