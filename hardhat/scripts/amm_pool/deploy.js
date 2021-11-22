@@ -1,5 +1,5 @@
 const fs = require("fs");
-let networkConfig = require('../../helper-hardhat-config.json')
+let networkConfig = require('/contracts/helper-hardhat-config.json')
 const hre = require("hardhat");
 
 async function main() {
