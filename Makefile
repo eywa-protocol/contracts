@@ -41,6 +41,10 @@ eth-testnet-migrate: deps npm wrappers
 	echo ${NETWORKS}
 	cd hardhat;./scripts/deploy.sh ${NETWORKS}
 
+eth-testnet-init: deps npm wrappers
+	echo ${NETWORKS}
+	cd hardhat;./scripts/init.sh ${NETWORKS}
+
 copy_configs:
 	cp ./hardhat/.env.example ./hardhat/.env;
 
