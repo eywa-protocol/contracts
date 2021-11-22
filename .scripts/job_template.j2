@@ -31,6 +31,7 @@ artifacts:
   stage: artifacts
   script:
     - echo "get artifacts"
+    - mkdir ./artifacts/
     - cp -r /var/lib/gitlab-runner/contracts/* ./artifacts/
   tags:
     - docker
