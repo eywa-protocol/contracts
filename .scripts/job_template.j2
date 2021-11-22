@@ -22,7 +22,7 @@ stages:
   tags:
     - docker
   when: manual
-  dependencies:
+  needs:
     - {{ network }}.deploy
 {% endfor %}
 
