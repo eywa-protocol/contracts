@@ -11,14 +11,15 @@ stages:
   script:
     - echo "it will be launched {{ action }}"
     - echo "for this networks {{ network }}"
-    - docker run -t -v /var/lib/gitlab-runner/contracts/:/contracts -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e NETWORKS={{ network }} {{ eywa_base_image }}:{{ eywa_base_tag }} make -C /app "{{ action }}"
+#    - docker run -t -v /var/lib/gitlab-runner/contracts/:/contracts -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e NETWORKS={{ network }} {{ eywa_base_image }}:{{ eywa_base_tag }} make -C /app "{{ action }}"
   tags:
     - docker
 
 {{ network }}.init:
   stage: contract-init
   script:
-    - docker run -t -v /var/lib/gitlab-runner/contracts/:/contracts -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e NETWORKS={{ network }} {{ eywa_base_image }}:{{ eywa_base_tag }} make -C /app "eth-testnet-init"
+    - echp "init"
+#    - docker run -t -v /var/lib/gitlab-runner/contracts/:/contracts -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e NETWORKS={{ network }} {{ eywa_base_image }}:{{ eywa_base_tag }} make -C /app "eth-testnet-init"
   tags:
     - docker
   when: manual
@@ -30,11 +31,12 @@ artifacts:
   stage: artifacts
   script:
     - echo "get artifacts"
+    - cp -r /var/lib/gitlab-runner/contracts/* ./artifacts/
   tags:
     - docker
   artifacts:
     paths:
-      - /var/lib/gitlab-runner/contracts
+      - ./artifacts/
   needs:
 {% for network in networks %}
     - {{ network }}.init
