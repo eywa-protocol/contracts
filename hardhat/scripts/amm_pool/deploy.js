@@ -19,7 +19,7 @@ async function main() {
 
     networkConfig[network.name].portal    = portal.address;
     networkConfig[network.name].synthesis = synthesis.address;
-    fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
+    fs.writeFileSync("/contracts/helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
 
     // await hre.run("verify:verify", {
     //     address: paymaster.address,
