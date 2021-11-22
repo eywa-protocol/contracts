@@ -23,7 +23,7 @@ stages:
     - docker
   when: manual
   dependencies:
-    - {{ network }}.deploy:
+    - {{ network }}.deploy
 {% endfor %}
 
 artifacts:
