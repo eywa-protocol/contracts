@@ -36,4 +36,6 @@ artifacts:
     paths:
       - /var/lib/gitlab-runner/contracts
   needs:
+{% for network in networks %}
     - {{ network }}.init
+{% endfor %}
