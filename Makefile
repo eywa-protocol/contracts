@@ -48,7 +48,7 @@ eth-testnet-init: deps npm wrappers
 copy_configs:
 	if [ ! -f /contracts/helper-hardhat-config.json ]; then
 		cp ./hardhat/helper-hardhat-config.json.example /contracts/helper-hardhat-config.json
-  fi
+  fi;
   cp ./hardhat/.env.example ./hardhat/.env
 
 compile:
