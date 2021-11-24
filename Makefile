@@ -46,10 +46,7 @@ eth-testnet-init: deps npm wrappers
 	cd hardhat;./scripts/init.sh ${NETWORKS}
 
 copy_configs:
-	if [ ! -f /contracts/helper-hardhat-config.json ]; then
-		cp ./hardhat/helper-hardhat-config.json.example /contracts/helper-hardhat-config.json
-  fi;
-  cp ./hardhat/.env.example ./hardhat/.env
-
+	./copy.sh
+	
 compile:
 	cd hardhat;npx hardhat compile
