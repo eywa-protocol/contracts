@@ -7,11 +7,19 @@ import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "./IBridge.sol";
 import "./RelayRecipient.sol";
 
+//TODO: relocate
+interface IERC20 {
+    function name() external returns (string memory);
+    function symbol() external returns (string memory);
+}
+
 contract Portal is RelayRecipient {
     using SafeMath for uint256;
 
     mapping(address => uint256) public balanceOf;
     address public bridge;
+    address public proxy;
+
 
     enum RequestState {
         Default,
@@ -32,9 +40,17 @@ contract Portal is RelayRecipient {
         RequestState state;
     }
 
+    struct SynthParams {
+        address chain2address;
+        address receiveSide;
+        address oppositeBridge;
+        uint256 chainID;
+    }
+
     uint256 requestCount = 1;
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => UnsynthesizeState) public unsynthesizeStates;
+    mapping(address => bytes) public tokenData;
 
     event SynthesizeRequest(
         bytes32 indexed _id,
@@ -53,6 +69,9 @@ contract Portal is RelayRecipient {
     event RevertBurnRequest(bytes32 indexed _id, address indexed _to);
     event BurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event RevertSynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
+    event RepresentationRequest(address indexed _rtoken);
+    event ApprovedRepresentationRequest(address indexed _rtoken);
+
 
     constructor(address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
         bridge = _bridge;
@@ -383,5 +402,160 @@ contract Portal is RelayRecipient {
 
     function versionRecipient() public view returns (string memory) {
         return "2.0.1";
+    }
+
+    function createRepresentationRequest(address _rtoken) external {
+        emit RepresentationRequest(_rtoken);
+    }
+
+    // implies manual verification point
+    function approveRepresentationRequest(address _rtoken) external /**onlyOwner */ {
+        tokenData[_rtoken] = abi.encode(IERC20(_rtoken).name(), IERC20(_rtoken).symbol());
+        emit ApprovedRepresentationRequest(_rtoken);
+    }
+
+
+//TODO
+    function getTxId() external returns (bytes32) {
+
+        return keccak256(abi.encodePacked(this, block.timestamp));
+    }
+
+    function setProxyCurve(address _proxy) external onlyOwner {
+        proxy = _proxy;
+    }
+
+    function synthesize_transit(
+        address _token,
+        uint256 _amount,
+        //////////////////////
+        address _chain2address,
+        address _receiveSide,
+        address _oppositeBridge,
+        uint256 _chainID,
+        bytes memory _out
+    ) external returns (bytes32 txId) {
+        // require(
+        //     tokenData[_token].length != 0,
+        //     "Portal: token must be verified"
+        // );
+        TransferHelper.safeTransferFrom(
+            _token,
+            _msgSender(),
+            address(this),
+            _amount
+        );
+        balanceOf[_token] = balanceOf[_token].add(_amount);
+
+        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+
+        txId = IBridge(bridge).prepareRqId(
+            bytes32(uint256(uint160(_oppositeBridge))),
+            _chainID,
+            bytes32(uint256(uint160(_receiveSide))),
+            bytes32(uint256(uint160(_msgSender()))),
+            nonce
+        );
+
+
+        // TODO add payment by token
+        IBridge(bridge).transmitRequestV2(_out,_receiveSide, _oppositeBridge, _chainID, txId, _msgSender(), nonce);
+        TxState storage txState = requests[txId];
+        txState.recipient = bytes32(uint256(uint160(_msgSender()))); //change!
+        txState.chain2address = bytes32(uint256(uint160(_chain2address)));
+        txState.rtoken = bytes32(uint256(uint160(_token)));
+        txState.amount = _amount;
+        txState.state = RequestState.Sent;
+
+
+        emit SynthesizeRequest(
+            txId,
+            _msgSender(),
+            _chain2address,
+            _amount,
+            _token
+        );
+    }
+
+    // portal => proxy
+    function synthesize_batch_transit(
+        address[] memory _tokens,
+        uint256[] memory _amounts, // set the amount in order to initiate a synthesize request
+        SynthParams memory _synth_params,
+        bytes4 _selector,
+        bytes memory _transit_data
+    ) external  {
+
+        bytes32[] memory txId = new bytes32[](_tokens.length);
+
+        //synthesize request
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            if(_amounts[i] > 0){
+                TransferHelper.safeTransferFrom(
+                    _tokens[i],
+                    _msgSender(),
+                    address(this),
+                    _amounts[i]
+                );
+
+                balanceOf[_tokens[i]] = balanceOf[_tokens[i]].add(_amounts[i]);
+                uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+
+                txId[i] =  keccak256(abi.encodePacked(IBridge(bridge).prepareRqId(
+                    bytes32(uint256(uint160(_synth_params.oppositeBridge))),
+                    _synth_params.chainID,
+                    bytes32(uint256(uint160(_synth_params.receiveSide))),
+                    bytes32(uint256(uint160(_msgSender()))),
+                    nonce
+                 ),i))  ;
+
+                // TODO add payment by token
+                TxState storage txState = requests[txId[i]];
+                txState.recipient = bytes32(uint256(uint160(_msgSender()))); //change!
+                txState.chain2address = bytes32(uint256(uint160(_synth_params.chain2address)));
+                txState.rtoken = bytes32(uint256(uint160(_tokens[i])));
+                txState.amount = _amounts[i];
+                txState.state = RequestState.Sent;
+
+
+
+                emit SynthesizeRequest(
+                    txId[i],
+                    _msgSender(),
+                    _synth_params.chain2address,
+                    _amounts[i],
+                    _tokens[i]
+                );
+            }
+        }
+
+        // encode call
+        bytes memory out = abi.encodePacked(
+            _selector,
+            _transit_data,
+            //////////////
+            _tokens,
+            _amounts,
+            txId
+        );
+
+        uint256 general_nonce = IBridge(bridge).getNonce(_msgSender());
+        bytes32 general_txId = IBridge(bridge).prepareRqId(
+                    bytes32(uint256(uint160(_synth_params.oppositeBridge))),
+                    _synth_params.chainID,
+                    bytes32(uint256(uint160(_synth_params.receiveSide))),
+                    bytes32(uint256(uint160(_msgSender()))),
+                    general_nonce
+                 );
+                 
+        IBridge(bridge).transmitRequestV2(
+            out,
+            _synth_params.receiveSide,
+            _synth_params.oppositeBridge,
+            _synth_params.chainID,
+            general_txId,
+            _msgSender(),
+            general_nonce
+        );
     }
 }

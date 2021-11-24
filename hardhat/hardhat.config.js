@@ -1,6 +1,7 @@
 require("@nomiclabs/hardhat-truffle5");
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
+require("@nomiclabs/hardhat-vyper");
 require("hardhat-gas-reporter");
 
 require('dotenv').config();
@@ -16,7 +17,7 @@ const POLYGONSCAN_API_KEY  = process.env.POLYGONSCAN_API_KEY  || "0x000000000000
 const HECOINFOSCAN_API_KEY = process.env.HECOINFOSCAN_API_KEY || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_HECO     = process.env.PRIVATE_KEY_HECO     || "0x0000000000000000000000000000000000000000";
 
-//TODO: Need to resolve dynamic initialization for apiKey. Now it is wrong working.
+//TODO: Need to resolve dynamic initialization for apiKey. Now it is not working.
 async function getKey(network) {
   if (network === 'rinkeby')    { console.log(ETHERSCAN_API_KEY); return ETHERSCAN_API_KEY; }
   if (network === 'bsctestnet') { console.log(BINANCESCAN_API_KEY); return BINANCESCAN_API_KEY; }
@@ -93,6 +94,9 @@ module.exports = {
         }
       }
     }]
+  },
+  vyper: {
+    version: "0.2.4",
   },
   mocha: {
     timeout: 100000

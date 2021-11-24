@@ -16,6 +16,8 @@ contract Synthesis is RelayRecipient {
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => SynthesizeState) public synthesizeStates;
     address public bridge;
+    address public proxy;
+    
     enum RequestState {
         Default,
         Sent,
@@ -422,5 +424,43 @@ contract Synthesis is RelayRecipient {
             sToken[i] = representationSynt[keys[i]];
         }
         return (keys, sToken);
+    }
+
+        function setProxyCurve(address _proxy) external onlyOwner {
+        proxy = _proxy;
+    }
+
+    //TODO
+    function getTxId() external returns (bytes32) {
+        return keccak256(abi.encodePacked(this, block.timestamp));
+    }
+
+    function burnSyntheticToken_transit(
+        address _stoken,
+        uint256 _amount,
+        address _chain2address,
+        address _receiveSide,
+        address _oppositeBridge,
+        uint256 _chainID,
+        bytes memory _out
+    ) external returns (bytes32 txID) {
+        ISyntERC20(_stoken).burn(_msgSender(), _amount);
+        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+        
+        txID = IBridge(bridge).prepareRqId(
+            bytes32(uint256(uint160(_oppositeBridge))),
+            _chainID,
+            bytes32(uint256(uint160(_receiveSide))),
+            bytes32(uint256(uint160(_msgSender()))),
+            nonce
+        );
+
+
+        // TODO add payment by token
+        IBridge(bridge).transmitRequestV2(_out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        TxState storage txState = requests[txID];
+        txState.state = RequestState.Sent;
+
+        emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
     }
 }
