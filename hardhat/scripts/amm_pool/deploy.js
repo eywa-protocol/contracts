@@ -19,6 +19,10 @@ async function main() {
 
     networkConfig[network.name].portal    = portal.address;
     networkConfig[network.name].synthesis = synthesis.address;
+
+    const jsonEnvFileName = "/contracts/networks_env/env_" + networkConfig[network.name] + "_amm.json"
+    fs.writeFileSync(jsonEnvFileName, JSON.stringify(networkConfig[network.name], undefined, 2));
+
     // fs.writeFileSync("/contracts/helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
 
     // await hre.run("verify:verify", {

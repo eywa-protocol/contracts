@@ -25,6 +25,9 @@ async function main() {
     networkConfig[network.name].nodeList   = nodeList.address;
     networkConfig[network.name].bridge     = bridge.address;
     networkConfig[network.name].mockDexPool= mockDexPool.address;
+    const jsonEnvFileName = "/contracts/networks_env/env_" + networkConfig[network.name] + "_bridge.json"
+    fs.writeFileSync(jsonEnvFileName, JSON.stringify(networkConfig[network.name], undefined, 2));
+
     // fs.writeFileSync("/contracts/helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
 
     // await hre.run("verify:verify", {
