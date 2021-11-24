@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:14-alpine
 WORKDIR /app
 RUN npm install -g ganache-cli
 EXPOSE 7545
