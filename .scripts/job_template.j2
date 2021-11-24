@@ -40,9 +40,9 @@ helper.update:
   tags:
     - docker
     needs:
-  {% for network in networks %}
-      - {{ network }}.deploy
-  {% endfor %}
+{% for network in networks %}
+    - {{ network }}.deploy
+{%- endfor %}
 
 artifacts:
   stage: artifacts
@@ -58,4 +58,4 @@ artifacts:
   needs:
 {% for network in networks %}
     - {{ network }}.init
-{% endfor %}
+{%- endfor %}
