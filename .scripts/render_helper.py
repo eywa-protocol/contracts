@@ -6,8 +6,6 @@ networks = getenv("CI_COMMIT_TAG").split('-')[3].split(',')
 with open('/app/.scripts/helper-hardhat-config.j2') as f:
     data = json.load(f)
 
-    const jsonEnvFileName = "/contracts/networks_env/env_" + network.name + ".json"
-
 for net in networks:
     new_file = f"/contracts/networks_env/env_{net}.json"
     with open(new_file) as f:
