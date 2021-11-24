@@ -1,5 +1,8 @@
 const fs = require("fs");
+const jsonEnvFilePath = "/contracts/networks_env/env_" + network.name + ".json"
 let networkConfig = require('/contracts/helper-hardhat-config.json')
+let jsonEnvFile = JSON.parse(fs.readFileSync(jsonEnvFilePath, 'utf8'))
+
 const hre = require("hardhat");
 
 async function main() {
@@ -20,12 +23,10 @@ async function main() {
     networkConfig[network.name].portal    = portal.address;
     networkConfig[network.name].synthesis = synthesis.address;
 
-    const newJson = {
-        portal: portal.address,
-        synthesis: synthesis.address
-    }
-    const jsonEnvFileName = "/contracts/networks_env/env_" + network.name + "_amm.json"
-    fs.writeFileSync(jsonEnvFileName, JSON.stringify(newJson, undefined, 1));
+    jsonEnvFile.portal = portal.address,
+    jsonEnvFile.synthesis = synthesis.address,
+
+    fs.writeFileSync(jsonEnvFilePath, JSON.stringify(jsonEnvFile, undefined, 1));
 
     // fs.writeFileSync("/contracts/helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
 
