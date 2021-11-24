@@ -34,9 +34,9 @@ if [[ "$nets" =~ ^('')$ ]]
  npx hardhat run ./scripts/bridge/deploy.js   --network ${net}
  npx hardhat run ./scripts/amm_pool/deploy.js --network ${net}
 
- ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  rpcUrl=$(getField ${net}.rpcUrl) chainId=$(getField ${net}.chainId) bridge=$(getField ${net}.bridge) nodeList=$(getField ${net}.nodeList) mockDexPool=$(getField ${net}.mockDexPool) portal=$(getField ${net}.portal) synthesis=$(getField ${net}.synthesis) paymaster=$(getField ${net}.paymaster)
- ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[1]) BRIDGE_$(getField ${net}.n)=$(getField ${net}.bridge) NODELIST_$(getField ${net}.n)=$(getField ${net}.nodeList) DEXPOOL_$(getField ${net}.n)=$(getField ${net}.mockDexPool) PORTAL_$(getField ${net}.n)=$(getField ${net}.portal) SYNTHESIS_$(getField ${net}.n)=$(getField ${net}.synthesis) PAYMASTER_$(getField ${net}.n)=$(getField ${net}.paymaster)
- echo $(getField ${net}.env_file[0])
- echo $(getField ${net}.env_file[1])
+ # ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  rpcUrl=$(getField ${net}.rpcUrl) chainId=$(getField ${net}.chainId) bridge=$(getField ${net}.bridge) nodeList=$(getField ${net}.nodeList) mockDexPool=$(getField ${net}.mockDexPool) portal=$(getField ${net}.portal) synthesis=$(getField ${net}.synthesis) paymaster=$(getField ${net}.paymaster)
+ # ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[1]) BRIDGE_$(getField ${net}.n)=$(getField ${net}.bridge) NODELIST_$(getField ${net}.n)=$(getField ${net}.nodeList) DEXPOOL_$(getField ${net}.n)=$(getField ${net}.mockDexPool) PORTAL_$(getField ${net}.n)=$(getField ${net}.portal) SYNTHESIS_$(getField ${net}.n)=$(getField ${net}.synthesis) PAYMASTER_$(getField ${net}.n)=$(getField ${net}.paymaster)
+ # echo $(getField ${net}.env_file[0])
+ # echo $(getField ${net}.env_file[1])
 
  done
