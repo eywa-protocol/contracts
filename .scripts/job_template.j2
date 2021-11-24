@@ -39,8 +39,8 @@ helper.update:
     - docker rm update-helper
   tags:
     - docker
-    needs:
-{% for network in networks %}
+  needs:
+{%- for network in networks %}
     - {{ network }}.deploy
 {%- endfor %}
 
@@ -56,6 +56,6 @@ artifacts:
     paths:
       - ./artifacts/
   needs:
-{% for network in networks %}
+{%- for network in networks %}
     - {{ network }}.init
 {%- endfor %}
