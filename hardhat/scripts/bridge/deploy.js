@@ -33,7 +33,7 @@ async function main() {
         mockDexPool: mockDexPool.address
     }
     const jsonEnvFileName = "/contracts/networks_env/env_" + network.name + "_bridge.json"
-    fs.writeFileSync(jsonEnvFileName, newJson, undefined, 2));
+    fs.writeFileSync(jsonEnvFileName, newJson);
 
     // fs.writeFileSync("/contracts/helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
 
