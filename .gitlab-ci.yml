@@ -13,7 +13,7 @@ generate:
     - export ACTION=$(echo $CI_COMMIT_TAG | cut -d '-' -f3)
     - export FPATH=$(echo $CI_COMMIT_TAG | cut -d '-' -f1 | tr '[:upper:]' '[:lower:]')
     - export NETWORKS=$(echo $CI_COMMIT_TAG | cut -d '-' -f4)
-    - mkdir /var/lib/gitlab-runner/contracts/${FPATH}
+    - mkdir -p /var/lib/gitlab-runner/contracts/${FPATH}
     - cp -n ./hardhat/helper-hardhat-config.json.example /var/lib/gitlab-runner/contracts/${FPATH}/helper-hardhat-config.json
     - if [[ "$ACTION" == "deploy" ]]; then export ACTION="eth-testnet-migrate"; fi
     - if [[ "$NETWORKS" == "all" ]]; then export NETWORKS=${DEFAULT_NETWORKS}; fi
