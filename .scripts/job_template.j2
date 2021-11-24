@@ -35,10 +35,14 @@ helper.update:
   script:
     - echo "it will be launched {{ action }}"
     - echo "for this networks {{ network }}"
-    - docker run --name update-helper -t -v /var/lib/gitlab-runner/contracts/:/contracts -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e CI_COMMIT_TAG={{ CI_COMMIT_TAG }} {{ eywa_base_image }}:{{ eywa_base_tag }} python3 /app/.scripts/render_helper.py
+    - docker run --name update-helper -t -v /var/lib/gitlab-runner/contracts/{{ path }}:/contracts -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e CI_COMMIT_TAG={{ CI_COMMIT_TAG }} {{ eywa_base_image }}:{{ eywa_base_tag }} python3 /app/.scripts/render_helper.py
     - docker rm update-helper
   tags:
     - docker
+    needs:
+  {% for network in networks %}
+      - {{ network }}.deploy
+  {% endfor %}
 
 artifacts:
   stage: artifacts
