@@ -141,8 +141,14 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
     }
 
-    function daoUpdateEpochRequest() external onlyDao {
-        emit NewEpochRequested();
+    function daoUpdateEpochRequest(bool resetEpoch) external onlyDao {
+        if (resetEpoch) {
+            E2Point memory zero;
+            emit NewEpoch(abi.encode(epochKey), abi.encode(zero));
+            epochKey = zero;
+        } else {
+            emit NewEpochRequested();
+        }
     }
 
     function daoTransferOwnership(address newDao) public {
