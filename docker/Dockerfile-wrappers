@@ -1,0 +1,5 @@
+FROM alpine
+
+WORKDIR /wrappers
+
+ADD ./artifacts/wrappers .

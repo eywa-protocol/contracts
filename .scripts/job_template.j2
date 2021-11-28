@@ -46,10 +46,15 @@ helper.update:
 
 artifacts:
   stage: artifacts
+  before_script:
+    - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
   script:
     - echo "get artifacts"
     - mkdir ./artifacts/
-    - cp -r /var/lib/gitlab-runner/contracts/* ./artifacts/
+    - cp -r /var/lib/gitlab-runner/contracts/{{ path }}/* ./artifacts/
+    - docker build -t registry.digiu.ai/eywa-contracts/wrappers -f docker/Dockerfile-wrappers .
+    - docker push registry.digiu.ai/eywa-contracts/wrappers
+    - docker rmi registry.digiu.ai/eywa-contracts/wrappers
   tags:
     - docker
   artifacts:

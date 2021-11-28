@@ -10,16 +10,10 @@ generate:
   before_script:
     - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
   script:
-    - export ACTION=$(echo $CI_COMMIT_TAG | cut -d '-' -f3)
     - export FPATH=$(echo $CI_COMMIT_TAG | cut -d '-' -f1 | tr '[:upper:]' '[:lower:]')
-    - export NETWORKS=$(echo $CI_COMMIT_TAG | cut -d '-' -f4)
     - mkdir -p /var/lib/gitlab-runner/contracts/${FPATH}
     - mkdir -p /var/lib/gitlab-runner/contracts/${FPATH}/wrappers
     - cp -n ./hardhat/helper-hardhat-config.json.example /var/lib/gitlab-runner/contracts/${FPATH}/helper-hardhat-config.json
-    - if [[ "$ACTION" == "deploy" ]]; then export ACTION="eth-testnet-migrate"; fi
-    - if [[ "$NETWORKS" == "all" ]]; then export NETWORKS=${DEFAULT_NETWORKS}; fi
-    - echo "it will be launched $ACTION"
-    - echo "for this networks $NETWORKS"
     - python .scripts/generate.py
   tags:
     - docker
