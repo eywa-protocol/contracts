@@ -40,10 +40,10 @@ async function main() {
   // creating local eth tokens for specified networks
   if (network.name == "network1" || network.name == "rinkeby") {
     for (let i = 0; i < poolSize; i++) {
-      localToken[i] = await ERC20.deploy(network.name + "TokenETH" + i, "TKETH" + i)
-      await localToken[i].deployed()
-      // ethToken[i] = localToken[i].address
-      deployInfo[network.name].ethToken.push({ address: localToken[i].address, name: await localToken[i].name(), symbol: await localToken[i].symbol() });
+      ethToken[i] = await ERC20.deploy(network.name + "TokenETH" + i, "TKETH" + i)
+      await ethToken[i].deployed()
+      // ethToken[i] = ethToken[i].address
+      deployInfo[network.name].ethToken.push({ address: ethToken[i].address, name: await ethToken[i].name(), symbol: await ethToken[i].symbol() });
       ethPoolCoins.push(await getRepresentation(deployInfo[network.name].ethToken[i], deployInfo["mumbai"].synthesis))
     }
 
