@@ -10,9 +10,9 @@ import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
 
     string public override versionRecipient = "2.2.3";
-    E2Point private epochKey;
-    address public dao;
-    uint8 public epochParticipants;
+    E2Point private epochKey;           // Aggregated public key of all paricipants of the current epoch
+    address public dao;                 // Address of the DAO
+    uint8 public epochParticipantsNum;  // Number of participants contributed to the epochKey
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey);
     event NewEpochRequested();
@@ -46,41 +46,50 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     }
 
     function getEpoch() public returns(bytes memory, uint8) {
-        return (abi.encode(epochKey), epochParticipants);
+        return (abi.encode(epochKey), epochParticipantsNum);
     }
 
+    /**
+     * @dev Updates current epoch.
+     * @param _newKey aggregated public key of all new epoch participants
+     * @param _votersPubKey aggregated public key of the old epoch participants, who voted for the update
+     * @param _votersSignature aggregated signature of the old epoch participants, who voted for the update
+     * @param _votersMask bitmask of old epoch participants, who voted, amoung all participants
+     * @param _newEpochParticipantsNum number of the participants
+     */
     function updateEpoch(
         bytes calldata _newKey,
         bytes calldata _votersPubKey,
         bytes calldata _votersSignature,
         uint256 _votersMask,
-        uint8 _epochParticipants
+        uint8 _newEpochParticipantsNum
     ) external {
         E2Point memory newKey = decodeE2Point(_newKey);
         E2Point memory votersPubKey = decodeE2Point(_votersPubKey);
         E1Point memory votersSignature = decodeE1Point(_votersSignature);
 
         if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
-            require(popcnt(_votersMask) >= uint(epochParticipants) * 2 / 3, "not enough participants"); // TODO configure
-            bytes memory data = abi.encodePacked(epochKey.x, epochKey.y, newKey.x, newKey.y, _epochParticipants);
+            require(popcnt(_votersMask) >= uint(epochParticipantsNum) * 2 / 3, "not enough participants"); // TODO configure
+            require(epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum), "bitmask too big");
+            bytes memory data = abi.encodePacked(epochKey.x, epochKey.y, newKey.x, newKey.y, _newEpochParticipantsNum);
             require(verifyMultisig(epochKey, votersPubKey, data, votersSignature, _votersMask), "multisig mismatch");
         }
 
         emit NewEpoch(abi.encode(epochKey), abi.encode(newKey));
         epochKey = newKey;
-        epochParticipants = _epochParticipants;
+        epochParticipantsNum = _newEpochParticipantsNum;
     }
-    
-    /** 
-    * @dev Transmit crosschain request v2.
-    * @param _selector call data
-    * @param receiveSide receive contract address
-    * @param oppositeBridge opposite bridge address
-    * @param chainId opposite chain ID 
-    * @param requestId request ID
-    * @param sender sender's address
-    * @param nonce sender's nonce
-    */
+
+    /**
+     * @dev Transmit crosschain request v2.
+     * @param _selector call data
+     * @param receiveSide receive contract address
+     * @param oppositeBridge opposite bridge address
+     * @param chainId opposite chain ID
+     * @param requestId request ID
+     * @param sender sender's address
+     * @param nonce sender's nonce
+     */
     function transmitRequestV2(
         bytes memory _selector,
         address receiveSide,
@@ -99,16 +108,16 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         return true;
     }
 
-    /** 
-    * @dev Transmit crosschain request v2 with bytes32.
-    * @param _selector call data
-    * @param receiveSide receive contract address
-    * @param oppositeBridge opposite bridge address
-    * @param chainId opposite chain ID 
-    * @param requestId request ID
-    * @param sender sender's address
-    * @param nonce sender's nonce
-    */
+    /**
+     * @dev Transmit crosschain request v2 with bytes32.
+     * @param _selector call data
+     * @param receiveSide receive contract address
+     * @param oppositeBridge opposite bridge address
+     * @param chainId opposite chain ID
+     * @param requestId request ID
+     * @param sender sender's address
+     * @param nonce sender's nonce
+     */
     function transmitRequestV2_32(
         bytes memory _selector,
         bytes32 receiveSide,
@@ -128,13 +137,13 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     }
 
 
-    /** 
-    * @dev Receive crosschain request v2.
-    * @param reqId request ID
-    * @param b call data
-    * @param receiveSide receiver address
-    * @param bridgeFrom opposite bridge address
-    */
+    /**
+     * @dev Receive crosschain request v2.
+     * @param reqId request ID
+     * @param b call data
+     * @param receiveSide receiver address
+     * @param bridgeFrom opposite bridge address
+     */
     function receiveRequestV2(
         bytes32 reqId,
         bytes memory b,
@@ -148,6 +157,12 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
     }
 
+    /**
+     * @dev Request updating epoch. Only DAO may call it.
+     * @param resetEpoch true to reset the epoch to zero so anyone can set up a new one, without any check,
+     *                   false to request the change from the current one, so current participants must
+     *                   successfully vote for it
+     */
     function daoUpdateEpochRequest(bool resetEpoch) external onlyDao {
         if (resetEpoch) {
             E2Point memory zero;
@@ -158,7 +173,10 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         }
     }
 
-    function daoTransferOwnership(address newDao) public {
+    /**
+     * @dev Transfer DAO to another address.
+     */
+    function daoTransferOwnership(address newDao) external {
         require(dao == address(0) || _msgSender() == dao, "only DAO");
         emit OwnershipTransferred(dao, newDao);
         dao = newDao;
