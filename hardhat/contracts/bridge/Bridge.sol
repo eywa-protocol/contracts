@@ -12,6 +12,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     string public override versionRecipient = "2.2.3";
     E2Point private epochKey;
     address public dao;
+    uint8 public epochParticipants;
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey);
     event NewEpochRequested();
@@ -44,24 +45,30 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         _;
     }
 
+    function getEpoch() public returns(bytes memory, uint8) {
+        return (abi.encode(epochKey), epochParticipants);
+    }
+
     function updateEpoch(
         bytes calldata _newKey,
         bytes calldata _votersPubKey,
         bytes calldata _votersSignature,
-        uint256 _votersMask
+        uint256 _votersMask,
+        uint8 _epochParticipants
     ) external {
         E2Point memory newKey = decodeE2Point(_newKey);
         E2Point memory votersPubKey = decodeE2Point(_votersPubKey);
         E1Point memory votersSignature = decodeE1Point(_votersSignature);
 
         if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
-            require(popcnt(_votersMask) >= 3, "not enough participants"); // TODO
-            bytes memory data = abi.encodePacked(epochKey.x, epochKey.y, newKey.x, newKey.y);
+            require(popcnt(_votersMask) >= uint(epochParticipants) * 2 / 3, "not enough participants"); // TODO configure
+            bytes memory data = abi.encodePacked(epochKey.x, epochKey.y, newKey.x, newKey.y, _epochParticipants);
             require(verifyMultisig(epochKey, votersPubKey, data, votersSignature, _votersMask), "multisig mismatch");
         }
 
         emit NewEpoch(abi.encode(epochKey), abi.encode(newKey));
         epochKey = newKey;
+        epochParticipants = _epochParticipants;
     }
     
     /** 
