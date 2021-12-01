@@ -5,12 +5,6 @@ import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.
 import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "./RelayerPool.sol";
 
-//  Создать новую ноду-релеер, требует наличия определенного залога COLLATERAL и
-//  автоматически создаёт новый смартконтракт Relayer pool, привязанный к этой ноде,
-//  COLLATERAL забирается с кошелька и помещается в связанный контракт Relayer pool.
-//  Статус в этом случае выставляется в значение online.
-//  Для успешного вызова этого метода обязательно требуется наличие COLLATERAL на кошельке,
-//  а также ему нужно передать Relayer key и другие параметры из пункта 4 из процесса регистрации
 
 contract NodeRegistry is BaseRelayRecipient {
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -71,7 +65,7 @@ contract NodeRegistry is BaseRelayRecipient {
         _;
     }
 
-    //TODO: discuss about check: nodeRegistry[_blsPointAddr] == address(0)
+    //TODO: check: nodeRegistry[_blsPointAddr] == address(0)
     function addNode(Node memory node) internal isNewNode(node.nodeIdAddress) {
         require(node.owner != address(0), Errors.ZERO_ADDRESS);
         require(node.nodeIdAddress != address(0), Errors.ZERO_ADDRESS);
@@ -103,7 +97,7 @@ contract NodeRegistry is BaseRelayRecipient {
         return pubKeys;
     }
 
-    /// @notice Преобразовать адрес в строку для require()
+
     function convertToString(address account) public pure returns (string memory s) {
         bytes memory alphabet = "0123456789abcdef";
         bytes memory data = abi.encodePacked(account);
@@ -149,8 +143,6 @@ contract NodeRegistry is BaseRelayRecipient {
         _node.pool = address(relayerPool);
         addNode(_node);
     }
-
-    //todo если валидатор плохой то перебросить средства одним коллом с одного relayerPool на другой
 
     string public override versionRecipient = "2.2.3";
 }

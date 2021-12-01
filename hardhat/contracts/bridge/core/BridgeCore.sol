@@ -2,50 +2,91 @@
 pragma solidity 0.8.0;
 
 contract BridgeCore {
-
     address public _listNode;
 
-    /* bridge => nonce */
-    mapping(address => mapping(address => uint256)) internal nonce;
-    mapping(address => mapping(address => address)) internal contractBind;
-    mapping(address => bool) private is_in;
+    mapping(address => uint256) internal nonces;
+    mapping(bytes32 => mapping(bytes32 => bytes32)) internal contractBind;
+    mapping(bytes32 => bool) private is_in;
 
     event OracleRequest(
-        string  requestType,
+        string requestType,
         address bridge,
         bytes32 requestId,
-        bytes   selector,
+        bytes selector,
         address receiveSide,
         address oppositeBridge,
-        uint chainid
+        uint256 chainid
     );
 
-    event ReceiveRequest(bytes32 reqId, address receiveSide, address bridgeFrom, address senderSide);
+    event OracleRequestSolana(
+        string requestType,
+        address bridge,
+        bytes32 requestId,
+        bytes selector,
+        bytes32 receiveSide,
+        bytes32 oppositeBridge,
+        uint256 chainid
+    );
 
-//    modifier onlyOwner() {
-//        require(msg.sender == _msgSender(), "Ownable: caller is not the owner");
-//        _;
-//    }
+    event ReceiveRequest(bytes32 reqId, address receiveSide, bytes32 bridgeFrom, bytes32 senderSide);
+
 
     /**
-       Mandatory for participants who wants to use a own contracts
-       1. Contract A (chain A) should be bind with Contract B (chain B) only once! It's not allowed to  switch Contract A (chain A) to Contract C (chain B). This mandatory
-       for prevent malicious behaviour.
-       2. Contract A (chain A) could be bind with several contracts where every contract from another chain. For ex: Contract A (chain A) --> Contract B (chain B) + Contract A (chain A) --> Contract B' (chain B') ... etc
+    * @dev Mandatory for all participants who wants to use their own contracts
+    * 1. Contract A (chain A) should be binded with Contract B (chain B) only once! It's not allowed to switch Contract A (chain A) to Contract C (chain B). This is mandatory
+    * to prevent malicious behaviour.
+    * 2. Contract A (chain A) could be binded with several contracts where every contract from another chain. 
+    * For ex: Contract A (chain A) --> Contract B (chain B) + Contract A (chain A) --> Contract B' (chain B') ... etc
+    * @param from padded sender's address
+    * @param oppositeBridge padded opposite bridge address 
+    * @param to padded recipient address
     */
-    function addContractBind(address from, address oppositeBridge, address to) external {
-        require(to   != address(0), "NULL ADDRESS TO");
-        require(from != address(0), "NULL ADDRESS FROM");
+    function addContractBind(
+        bytes32 from,
+        bytes32 oppositeBridge,
+        bytes32 to
+    ) external {
+        require(to != "", "NULL ADDRESS TO");
+        require(from != "", "NULL ADDRESS FROM");
         require(is_in[to] == false, "TO ALREADY EXIST");
-        // for prevent malicious behaviour like switching between older and newer contracts
-        require(contractBind[from][oppositeBridge] == address(0), "UPDATE DOES NOT ALLOWED");
+        // to prevent malicious behaviour like switching between older and newer contracts
+        require(contractBind[from][oppositeBridge] == "", "UPDATE DOES NOT ALLOWED");
         contractBind[from][oppositeBridge] = to;
         is_in[to] = true;
-
     }
 
-    function prepareRqId(bytes memory  _selector, address oppositeBridge, uint256 chainId, address receiveSide) internal view returns (bytes32) {
-        bytes32 requestId = keccak256(abi.encodePacked(nonce[oppositeBridge][receiveSide], _selector, chainId));
-        return requestId;
+    /** 
+    * @dev Prepares a request ID with the given arguments.
+    * @param oppositeBridge padded opposite bridge address
+    * @param chainId opposite chain ID
+    * @param receiveSide padded receive contract address
+    * @param from padded sender's address 
+    * @param nonce current nonce
+    */
+    function prepareRqId(
+        bytes32 oppositeBridge,
+        uint256 chainId,
+        bytes32 receiveSide,
+        bytes32 from,
+        uint256 nonce
+    ) public view returns (bytes32) {
+        return keccak256(abi.encodePacked(from, nonce, chainId, receiveSide, oppositeBridge));
+    }
+
+    /** 
+    * @dev Get the nonce of the current sender.
+    * @param from sender's address
+    */
+    function getNonce(address from) public view returns (uint256) {
+        return nonces[from];
+    }
+
+    /** 
+    * @dev Verifies and updates the sender's nonce.
+    * @param from sender's address
+    * @param nonce provided sender's nonce
+    */
+    function verifyAndUpdateNonce(address from, uint256 nonce) internal {
+        require(nonces[from]++ == nonce, "nonce mismatch");
     }
 }

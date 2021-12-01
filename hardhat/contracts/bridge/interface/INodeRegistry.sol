@@ -7,16 +7,10 @@ import "./IRelayerPool.sol";
 interface INodeRegistry {
     struct Node {
         address owner;
-        address nodeWallet;
+        address pool;
         address nodeIdAddress;
         string  blsPubKey;
-        address pool;
-        uint256 version;
         uint256 nodeId;
-        uint256 relayerFeeNumerator;
-        uint256 emissionRateNumerator;
-        IRelayerPool.RelayerStatus status;
-        IRelayerPool.RelayerType nodeType;
     }
 
     function addNode(Node memory node) external;

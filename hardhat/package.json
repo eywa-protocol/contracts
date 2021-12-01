@@ -4,7 +4,7 @@
   "description": "Eywa smart-contracts",
   "main": "index.js",
   "scripts": {
-    "test": "hardhat test",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "hardhat compile",
     "coverage": "env COVERAGE=true hardhat coverage",
     "gas-report": "env ENABLE_GAS_REPORT=true npm run test",
@@ -12,45 +12,45 @@
     "postinstall": "node ./utils/check-version.js",
     "e2e:local": "export TYPE_TEST=local && npx hardhat test ./test/integration/e2e.test.js",
     "e2e:testnet": "export TYPE_TEST=testnet && npx hardhat test ./test/integration/e2e.test.js",
-    "prettier": "prettier --write 'contracts/**/*.sol'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:typecast": "hardhat test ./test/typecast.test.js",
+    "prettier": "prettier --write 'contracts/**/*.sol'"
   },
   "author": "DigiU team",
   "license": "MIT",
   "devDependencies": {
-    "@opengsn/provider": "^2.2.2",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.4",
     "@nomiclabs/hardhat-ganache": "^2.0.0",
     "@nomiclabs/hardhat-truffle5": "^2.0.0",
+    "@nomiclabs/hardhat-vyper": "^2.0.1",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@nomiclabs/hardhat-web3": "^2.0.0",
+    "@opengsn/provider": "^2.2.2",
     "@openzeppelin/test-helpers": "^0.5.10",
     "@truffle/hdwallet-provider": "^1.4.3",
     "@uniswap/lib": "^4.0.1-alpha",
     "chai": "^4.3.4",
     "commit-message-validator": "^1.0.0",
     "commitizen": "^4.2.4",
+    "cz-customizable": "^6.3.0",
     "dotenv": "^10.0.0",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.4.1",
     "hardhat": "^2.4.3",
     "hardhat-gas-reporter": "^1.0.4",
     "minimist": "^1.2.5",
+    "pify": "^5.0.0",
     "prettier": "^2.3.2",
     "prettier-plugin-solidity": "^1.0.0-beta.15",
+    "semver": "^7.3.5",
     "solhint": "^3.3.6",
     "solhint-plugin-prettier": "0.0.5",
     "web3": "^1.4.0"
   },
   "dependencies": {
     "@opengsn/contracts": "^2.2.2",
-    "@opengsn/provider": "^2.2.2",
     "@openzeppelin/contracts": "3.4.1",
-    "@openzeppelin/contracts-newone": "npm:@openzeppelin/contracts@4.1.0",
-    "cz-customizable": "^6.3.0",
-    "semver": "^7.3.5",
-    "solidity-coverage": "^0.7.16"
+    "@openzeppelin/contracts-newone": "npm:@openzeppelin/contracts@4.1.0"
   },
   "engines": {
     "node": ">=14.0.0"

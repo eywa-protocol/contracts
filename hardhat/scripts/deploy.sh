@@ -85,3 +85,19 @@ echo 'init into:' ${net}
 npx hardhat run ./scripts/bridge/updateDexBind.js  --network ${net}
 
 done
+
+
+for net in ${nets//\,/ }
+  do
+  npx hardhat run ./scripts/meta_exchange/deploy-local-pool.js --network ${net}
+  done
+
+for net in ${nets//\,/ }
+  do
+  npx hardhat run ./scripts/meta_exchange/deploy-eth-pool.js --network ${net}
+  done
+ 
+for net in ${nets//\,/ }
+  do
+  npx hardhat run ./scripts/meta_exchange/deploy-crosschain-pool.js --network ${net}
+  done
