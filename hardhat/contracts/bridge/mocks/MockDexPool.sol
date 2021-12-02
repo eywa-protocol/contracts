@@ -30,13 +30,18 @@ contract MockDexPool {
      * @dev ${this func} ->  bridge#transmitRequest -> node -> adpater#receiveRequest -> mockDexPool_2#receiveRequestTest -> bridge#transmitResponse(reqId) -> node -> adpater#receiveResponse -> mockDexPool_1#setPendingRequestsDone
      *
      */
-	function sendRequestTestV2(uint256 testData_, address secondPartPool, address oppBridge, uint chainId, uint256 nonce) external {
+	function sendRequestTestV2(uint256 testData_, address secondPartPool, address oppBridge, uint chainId) external {
 		require(secondPartPool != address(0), "BAD ADDRESS");
 		// todo some stuff on this part pool
 		// ...
-
+                uint256 nonce = Bridge(bridge).getNonce(msg.sender);
 		bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('receiveRequestTest(uint256)'))), testData_);
-        bytes32 requestId = Bridge(bridge).prepareRqId( bytes32(uint256(uint160(oppBridge))), chainId,   bytes32(uint256(uint160(secondPartPool))), bytes32(uint256(uint160(msg.sender))) , nonce);
+                bytes32 requestId = Bridge(bridge).prepareRqId(
+                    bytes32(uint256(uint160(oppBridge))),
+                    chainId,
+                    bytes32(uint256(uint160(secondPartPool))),
+                    bytes32(uint256(uint160(msg.sender))),
+                    nonce);
 		bool success = Bridge(bridge).transmitRequestV2(out, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
 
 		emit RequestSended(requestId);
@@ -52,6 +57,6 @@ contract MockDexPool {
 	function receiveRequestTest(uint256 _testData) public {
    		require(msg.sender == bridge, "ONLY CERTAIN BRIDGE");
 
-     	testData = _testData;
+                testData = _testData;
 	}
 }
