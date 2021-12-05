@@ -45,9 +45,9 @@ echo 'bash script for network:' ${net}
 echo '==========================================='
 echo ''
 ## NOTE !!!!! : gsn-node where owner is opengsn. Uncomment for our ralyer gsn.
-#npx hardhat run ./scripts/gassless/deploy.js --network ${net}
-npx hardhat run ./scripts/bridge/deploy.js   --network ${net}
-npx hardhat run ./scripts/amm_pool/deploy.js --network ${net}
+#npx hardhat run --no-compile ./scripts/gassless/deploy.js --network ${net}
+npx hardhat run --no-compile ./scripts/bridge/deploy.js   --network ${net}
+npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
 
 ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
   RPC_URL=$(getField ${net}.rpcUrl) \
@@ -73,7 +73,7 @@ npx hardhat run ./scripts/amm_pool/deploy.js --network ${net}
   FORWARDER_$(getField ${net}.n)=$(getField ${net}.forwarder) \
 && echo $(getField ${net}.env_file[1])
 
-npx hardhat run ./scripts/amm_pool/createRepresentation.js --network ${net}
+npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
 done
 
 for net in ${nets//\,/ }
@@ -82,22 +82,22 @@ echo 'init into:' ${net}
 ##
 ## init
 ##
-npx hardhat run ./scripts/bridge/updateDexBind.js  --network ${net}
+npx hardhat run --no-compile ./scripts/bridge/updateDexBind.js  --network ${net}
 
 done
 
 
 for net in ${nets//\,/ }
   do
-  npx hardhat run ./scripts/meta_exchange/deploy-local-pool.js --network ${net}
+  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-local-pool.js --network ${net}
   done
 
 for net in ${nets//\,/ }
   do
-  npx hardhat run ./scripts/meta_exchange/deploy-eth-pool.js --network ${net}
+  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network ${net}
   done
  
 for net in ${nets//\,/ }
   do
-  npx hardhat run ./scripts/meta_exchange/deploy-crosschain-pool.js --network ${net}
+  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network ${net}
   done
