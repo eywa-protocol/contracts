@@ -1,16 +1,32 @@
-// SPDX-License-Identifier:MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/drafts/ERC20Permit.sol";
 
-contract TestToken is ERC20 {
-    constructor(string memory n1, string memory n2) ERC20(n1, n2) {
-        _mint(msg.sender, 100e18);
+// Synthesis must be owner of this contract
+contract TestToken is  Ownable, ERC20Permit {
+
+    constructor (string memory name_, string memory symbol_) ERC20Permit("TestToken") ERC20(name_,symbol_) {}
+
+    function mint(address account, uint256 amount) external /*onlyOwner*/ {
+        _mint(account, amount);
     }
 
-    function mint(address rec, uint256 amount) public {
-        _mint(rec, amount);
-        //_approve(rec, spender[0], amount);
-        //_approve(rec, spender[1], amount);
+    function mintWithAllowance(address account, address spender, uint256 amount) external /*onlyOwner*/ {
+        _mint(account, amount);
+        _approve(account, spender, allowance(account, spender) + amount);
+    }
+
+    function burn(address account, uint256 amount) external /*onlyOwner*/ {
+        _burn(account, amount);
+    }
+
+    function burnWithAllowanceDecrease(address account, address spender, uint256 amount) external /*onlyOwner*/ {
+        uint256 currentAllowance = allowance(account, spender);
+        require(currentAllowance >= amount, "ERC20: decreased allowance below zero");
+
+        _approve(account, spender, currentAllowance - amount);
+        _burn(account, amount);
     }
 }
