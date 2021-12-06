@@ -45,7 +45,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         _;
     }
 
-    function getEpoch() public returns(bytes memory, uint8) {
+    function getEpoch() public view returns(bytes memory, uint8) {
         return (abi.encode(epochKey), epochParticipantsNum);
     }
 
