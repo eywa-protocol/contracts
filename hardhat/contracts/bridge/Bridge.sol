@@ -45,7 +45,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         _;
     }
 
-    function getEpoch() public returns(bytes memory, uint8) {
+    function getEpoch() public view returns(bytes memory, uint8) {
         return (abi.encode(epochKey), epochParticipantsNum);
     }
 
@@ -71,7 +71,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
             require(popcnt(_votersMask) >= uint(epochParticipantsNum) * 2 / 3, "not enough participants"); // TODO configure
             require(epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum), "bitmask too big");
-            bytes memory data = abi.encodePacked(epochKey.x, epochKey.y, newKey.x, newKey.y, _newEpochParticipantsNum);
+            bytes memory data = abi.encodePacked(newKey.x, newKey.y, _newEpochParticipantsNum);
             require(verifyMultisig(epochKey, votersPubKey, data, votersSignature, _votersMask), "multisig mismatch");
         }
 
