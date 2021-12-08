@@ -1,8 +1,10 @@
 #! /bin/bash
 
-mkdir -p ./networks_env
+
+mkdir -p /contracts/networks_env
 MODE=${1}
 FILENAME=${2}
+echo "" > $FILENAME
 if [[ "$MODE" =~ ^(create)$ ]]
 then
  rm ./${FILENAME} 2> /dev/null
@@ -14,11 +16,11 @@ do
     # update or create
     if [[ "$MODE" =~ ^(create)$ ]]
     then
-cat << EOF >> ./${FILENAME}
+cat << EOF >> ${FILENAME}
 ${pass}
 EOF
      else
-cat << EOF >> ./${FILENAME}
+cat << EOF >> ${FILENAME}
 ${pass}
 EOF
     fi

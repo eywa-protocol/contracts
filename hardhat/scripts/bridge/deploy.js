@@ -1,5 +1,5 @@
 const fs = require("fs");
-let networkConfig = require('../../helper-hardhat-config.json')
+let networkConfig = require('/contracts/helper-hardhat-config.json')
 const hre = require("hardhat");
 
 async function main() {
@@ -25,7 +25,17 @@ async function main() {
     networkConfig[network.name].nodeList   = nodeList.address;
     networkConfig[network.name].bridge     = bridge.address;
     networkConfig[network.name].mockDexPool= mockDexPool.address;
-    fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
+
+    const newJson = {
+        owner: deployer.address,
+        nodeList: nodeList.address,
+        bridge: bridge.address,
+        mockDexPool: mockDexPool.address
+    }
+    const jsonEnvFileName = "/contracts/networks_env/env_" + network.name + ".json"
+    fs.writeFileSync(jsonEnvFileName, JSON.stringify(newJson, undefined, 1));
+
+    // fs.writeFileSync("/contracts/helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
 
     // await hre.run("verify:verify", {
     //     address: paymaster.address,

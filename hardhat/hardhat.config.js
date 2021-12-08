@@ -4,7 +4,7 @@ require("@nomiclabs/hardhat-etherscan");
 require("hardhat-gas-reporter");
 
 require('dotenv').config();
-const networkConfig = require('./helper-hardhat-config.json');
+const networkConfig = require('/contracts/helper-hardhat-config.json');
 
 const PRIVATE_KEY_RINKEBY  = process.env.PRIVATE_KEY_RINKEBY  || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_BSC      = process.env.PRIVATE_KEY_BSC      || "0x0000000000000000000000000000000000000000";
@@ -40,7 +40,7 @@ module.exports = {
     },
     avalanchetestnet:{
       url: networkConfig.avalanchetestnet.rpcUrl2,
-      accounts: [PRIVATE_KEY_AVALANCHETESTNET]      
+      accounts: [PRIVATE_KEY_AVALANCHETESTNET]
     },
     rinkeby: {
       url: networkConfig.rinkeby.rpcUrl.replace('ws','http').replace('ws/',''),
