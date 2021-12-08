@@ -165,4 +165,9 @@ contract Synthesis is RelayRecipient {
        }
        return (keys, sToken);
     }
+
+    function getRepresentation(address _rtoken) external view returns (address){
+        return representationSynt[_rtoken];
+    }
+
 }
