@@ -5,8 +5,8 @@
     "n": "AVALANCHETESTNET",
     "netwiker": "AVCH",
     "env_file": [
-      "/contracts/networks_env/env_connect_to_avalanchetestnet.env",
-      "/contracts/networks_env/env_test_for_avalanchetestnet.env"
+      "networks_env/env_connect_to_avalanchetestnet.env",
+      "networks_env/env_test_for_avalanchetestnet.env"
     ],
     "chainId": 43113,
     "relayHub": "0x0000000000000000000000000000000000000000",
@@ -14,12 +14,12 @@
     "amm_pool": "0x2D99ABD9008Dc933ff5c0CD271B88309593aB921",
     "token": [
       {
-        "address": "0xB0F79Fc1cdee2B03B8B4618AAAb4396e5c749684",
+        "address": "0x1e3817FD91Cc66d3137043ac45B1d3acDe288C0c",
         "name": "EYWA",
         "symbol": "EYWA"
       },
       {
-        "address": "0xBb0F8F8fC4EeD9B649162bDCaaE3483737Ae68E3",
+        "address": "0xd8b917cf32022e35E09Bac2c6F16a64fa7D1DEC9",
         "name": "USDT",
         "symbol": "USDT"
       }
@@ -42,8 +42,8 @@
     "n": "HECOTESTNET",
     "netwiker": "HECO",
     "env_file": [
-      "/contracts/networks_env/env_connect_to_hecotestnet.env",
-      "/contracts/networks_env/env_test_for_hecotestnet.env"
+      "networks_env/env_connect_to_hecotestnet.env",
+      "networks_env/env_test_for_hecotestnet.env"
     ],
     "chainId": 256,
     "relayHub": "0x0000000000000000000000000000000000000000",
@@ -51,12 +51,12 @@
     "amm_pool": "0x2bCeC25644e56422bEFd3feA5286344369396fF1",
     "token": [
       {
-        "address": "0x7475FfD4170f67aC64a688d813b9b402700667c2",
+        "address": "0x330B6f89235900A328Bd31025a6aF8f4C63734d8",
         "name": "EYWA",
         "symbol": "EYWA"
       },
       {
-        "address": "0xcdec93702Fba053877988443112Cb8F7F1BebA27",
+        "address": "0x8781f0Fe84cc9Aa55F3e0F622001F816ccA61Cc9",
         "name": "USDT",
         "symbol": "USDT"
       }
@@ -79,8 +79,8 @@
     "n": "MUMBAI",
     "netwiker": "POLYGON",
     "env_file": [
-      "/contracts/networks_env/env_connect_to_mumbai.env",
-      "/contracts/networks_env/env_test_for_mumbai.env"
+      "networks_env/env_connect_to_mumbai.env",
+      "networks_env/env_test_for_mumbai.env"
     ],
     "chainId": 80001,
     "relayHub": "0x6C28AfC105e65782D9Ea6F2cA68df84C9e7d750d",
@@ -88,12 +88,12 @@
     "amm_pool": "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506",
     "token": [
       {
-        "address": "0xDA53403DF5ff2058feb9C6729FAfb3996b84545b",
+        "address": "0x8198a5716de98ba81b75bf6cEBFd3f27053876B9",
         "name": "EYWA",
         "symbol": "EYWA"
       },
       {
-        "address": "0xe07D7B44D340216723eD5eA33c724908B817EE9D",
+        "address": "0x55c18d10ded7968Cd980AbfE0547B410DF284413",
         "name": "USDT",
         "symbol": "USDT"
       }
@@ -116,8 +116,8 @@
     "n": "RINKEBY",
     "netwiker": "ETH",
     "env_file": [
-      "/contracts/networks_env/env_connect_to_rinkeby.env",
-      "/contracts/networks_env/env_test_for_rinkeby.env"
+      "networks_env/env_connect_to_rinkeby.env",
+      "networks_env/env_test_for_rinkeby.env"
     ],
     "chainId": 4,
     "relayHub": "0x6650d69225CA31049DB7Bd210aE4671c0B1ca132",
@@ -125,12 +125,12 @@
     "amm_pool": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",
     "token": [
       {
-        "address": "0x08Ffcb0Ca216Bb3C12855910Ee4014191D81eeba",
+        "address": "0xA9A689d9A0C7a018FAacd90662acE690Fb09a623",
         "name": "EYWA",
         "symbol": "EYWA"
       },
       {
-        "address": "0xa9E233E2c06fbAFf7d1D913060d5F4e159092414",
+        "address": "0x77c24f0Af71257C0ee26e0E0a108F940D1698d53",
         "name": "USDT",
         "symbol": "USDT"
       }
@@ -154,8 +154,8 @@
     "n": "BSCTESTNET",
     "netwiker": "BSC",
     "env_file": [
-      "/contracts/networks_env/env_connect_to_bsctestnet.env",
-      "/contracts/networks_env/env_test_for_bsctestnet.env"
+      "networks_env/env_connect_to_bsctestnet.env",
+      "networks_env/env_test_for_bsctestnet.env"
     ],
     "chainId": 97,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
@@ -163,12 +163,12 @@
     "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
     "token": [
       {
-        "address": "0xc0924cC9113588c93b6990D15723d0C80acf0dA6",
+        "address": "0xB81547FA8E4e37A410a42acA3aE28A7dc170Bb23",
         "name": "EYWA",
         "symbol": "EYWA"
       },
       {
-        "address": "0x98e8927207C6C221A5eb4a3575925717Fa6303a8",
+        "address": "0x786Ba7a3B3229B0eD707aFf2731DFa4a4E6CB104",
         "name": "USDT",
         "symbol": "USDT"
       }
@@ -191,8 +191,8 @@
     "n": "GANACHE",
     "netwiker": "GNE",
     "env_file": [
-      "/contracts/networks_env/env_connect_to_ganache.env",
-      "/contracts/networks_env/env_test_for_ganache.env"
+      "networks_env/env_connect_to_ganache.env",
+      "networks_env/env_test_for_ganache.env"
     ],
     "chainId": 0,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
@@ -225,8 +225,8 @@
     "n": "NETWORK1",
     "netwiker": "NET1",
     "env_file": [
-      "/contracts/networks_env/env_connect_to_network1.env",
-      "/contracts/networks_env/env_test_for_network1.env"
+      "networks_env/env_connect_to_network1.env",
+      "networks_env/env_test_for_network1.env"
     ],
     "chainId": 1111,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
@@ -260,8 +260,8 @@
     "n": "NETWORK2",
     "netwiker": "NET2",
     "env_file": [
-      "/contracts/networks_env/env_connect_to_network2.env",
-      "/contracts/networks_env/env_test_for_network2.env"
+      "networks_env/env_connect_to_network2.env",
+      "networks_env/env_test_for_network2.env"
     ],
     "chainId": 1112,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
@@ -295,8 +295,8 @@
     "n": "NETWORK3",
     "netwiker": "NET3",
     "env_file": [
-      "/contracts/networks_env/env_connect_to_network3.env",
-      "/contracts/networks_env/env_test_for_network3.env"
+      "networks_env/env_connect_to_network3.env",
+      "networks_env/env_test_for_network3.env"
     ],
     "chainId": 1113,
     "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
