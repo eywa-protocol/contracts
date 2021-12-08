@@ -17,6 +17,14 @@ async function main() {
     await synthesis.deployed();
     console.log("Synthesis address:", synthesis.address);
 
+    //Deploy FrontHelper
+    const _FrontHelper = await ethers.getContractFactory("FrontHelper");
+    const frontHelper = await _FrontHelper.deploy();
+    await frontHelper.deployed();
+    networkConfig[network.name].frontHelper = frontHelper.address;
+    console.log(`FrontHelper address: ${frontHelper.address}`);
+    
+
     networkConfig[network.name].portal    = portal.address;
     networkConfig[network.name].synthesis = synthesis.address;
     fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
