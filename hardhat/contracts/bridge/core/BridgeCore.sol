@@ -20,7 +20,7 @@ contract BridgeCore {
 
     event OracleRequestSolana(
         string requestType,
-        address bridge,
+        bytes32 bridge,
         bytes32 requestId,
         bytes selector,
         bytes32 receiveSide,

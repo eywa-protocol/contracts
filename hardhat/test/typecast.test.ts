@@ -1,7 +1,10 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+import { artifacts, contract, ethers } from 'hardhat';
+import { assert, expect } from 'chai';
 
-const Typecast = artifacts.require("Typecast");
+import type { Typecast } from '../artifacts-types/Typecast';
+
+const CTypecast = artifacts.require("Typecast");
+
 
 const a1 = '0x1234567890123456789012345678901234567890';
 const x1 = '0x0000000000000000000000001234567890123456789012345678901234567890';
@@ -9,7 +12,7 @@ const x1 = '0x0000000000000000000000001234567890123456789012345678901234567890';
 
 contract("Typecast from web3", (/* accounts */) => {
   it("Should cast", async function () {
-    const caster = await Typecast.new();
+    const caster = await CTypecast.new();
 
     const x2 = await caster.methods['castToBytes(address)'](a1);
     // console.log('x2:', x2);
@@ -25,7 +28,7 @@ contract("Typecast from web3", (/* accounts */) => {
 describe("Typecast from ethers", function () {
   it("Should cast", async function () {
     const Сaster = await ethers.getContractFactory("Typecast");
-    const caster = await Сaster.deploy();
+    const caster = await Сaster.deploy() as Typecast;
     await caster.deployed();
 
     const x2 = await caster['castToBytes(address)'](a1);
