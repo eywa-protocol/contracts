@@ -20,7 +20,7 @@ contract BridgeCore {
 
     event OracleRequestSolana(
         string requestType,
-        address bridge,
+        bytes32 bridge,
         bytes32 requestId,
         bytes selector,
         bytes32 receiveSide,
@@ -45,14 +45,12 @@ contract BridgeCore {
         bytes32 from,
         bytes32 oppositeBridge,
         bytes32 to
-    ) external {
+    ) external /** onlyDAO || onlyOwner */ {
         require(to != "", "NULL ADDRESS TO");
         require(from != "", "NULL ADDRESS FROM");
-        require(is_in[to] == false, "TO ALREADY EXIST");
-        // to prevent malicious behaviour like switching between older and newer contracts
-        require(contractBind[from][oppositeBridge] == "", "UPDATE DOES NOT ALLOWED");
+        // TODO
+        // to prevent malicious behaviour like switching between older and newer contracts (need to use DAO/Owner for this!)
         contractBind[from][oppositeBridge] = to;
-        is_in[to] = true;
     }
 
     /** 

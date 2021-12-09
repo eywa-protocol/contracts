@@ -45,6 +45,6 @@ export default {
     outDir: 'artifacts-types',
     target: 'ethers-v5',
     alwaysGenerateOverloads: true,
-    // externalArtifacts: ['externalArtifacts/*.json'],
+    externalArtifacts: ['externalArtifacts/*.json'],
   },
 };

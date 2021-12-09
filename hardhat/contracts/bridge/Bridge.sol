@@ -4,11 +4,13 @@ pragma solidity 0.8.0;
 import "./bls/BlsSignatureVerification.sol";
 import "./core/BridgeCore.sol";
 import "./interface/INodeRegistry.sol";
+import "@openzeppelin/contracts-newone/utils/Address.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 
 contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
-
+    using Address for address;
+    
     string public override versionRecipient = "2.2.3";
     E2Point private epochKey;           // Aggregated public key of all paricipants of the current epoch
     address public dao;                 // Address of the DAO
@@ -18,7 +20,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     event NewEpochRequested();
     event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
-  constructor (address listNode, address forwarder) {
+    constructor (address listNode, address forwarder) {
         _listNode = listNode;
         trustedForwarder = forwarder;
 
@@ -132,10 +134,9 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         returns(bool)
     {
         verifyAndUpdateNonce(sender, nonce);
-        emit OracleRequestSolana("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
+        emit OracleRequestSolana("setRequest", bytes32(uint256(uint160(address(this)))), requestId, _selector, receiveSide, oppositeBridge, chainId);
         return true;
     }
-
 
     /**
      * @dev Receive crosschain request v2.
@@ -149,11 +150,10 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         bytes memory b,
         address receiveSide,
         bytes32 bridgeFrom
-    ) external /** onlyTrustedNode */{
-
+    ) external {
         bytes32 senderSide = contractBind[bytes32(uint256(uint160(receiveSide)))][bridgeFrom];
-        (bool success, bytes memory data) = address(bytes20(receiveSide)).call(b);
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'FAILED');
+        bytes memory data = receiveSide.functionCall(b, "receiveRequestV2 failed");
+        require(data.length == 0 || abi.decode(data, (bool)), "receiveRequestV2: Unable to decode rerurned data");
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
     }
 

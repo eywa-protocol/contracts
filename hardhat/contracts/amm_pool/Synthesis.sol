@@ -8,8 +8,9 @@ import "./IBridge.sol";
 import "./ISyntERC20.sol";
 import "./SyntERC20.sol";
 import "./RelayRecipient.sol";
+import "./SolanaSerialize.sol";
 
-contract Synthesis is RelayRecipient {
+contract Synthesis is RelayRecipient, SolanaSerialize {
     mapping(address => bytes32) public representationReal;
     mapping(bytes32 => address) public representationSynt;
     bytes32[] private keys;

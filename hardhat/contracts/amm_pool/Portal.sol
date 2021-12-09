@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "./IBridge.sol";
 import "./RelayRecipient.sol";
+import "./SolanaSerialize.sol";
 
 //TODO: relocate
 interface IERC20 {
@@ -13,7 +14,7 @@ interface IERC20 {
     function symbol() external returns (string memory);
 }
 
-contract Portal is RelayRecipient {
+contract Portal is RelayRecipient, SolanaSerialize {
     using SafeMath for uint256;
 
     mapping(address => uint256) public balanceOf;
