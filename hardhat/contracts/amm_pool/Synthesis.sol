@@ -110,13 +110,13 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     }
 
     /** 
-    * @dev Mints synthetic token with bytes32 support. Can be called only by bridge after initiation on a second chain
+    * @dev Mints synthetic token with bytes32 support for Solana. Can be called only by bridge after initiation on a second chain
     * @param _txID transaction ID
     * @param _tokenReal real token address 
     * @param _amount amount to mint
     * @param _to recipient address
     */
-    function mintSyntheticToken_32(
+    function mintSyntheticToken_solana(
         bytes32 _txID,
         bytes32 _tokenReal,
         uint256 _amount,
@@ -164,14 +164,13 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         emit RevertSynthesizeRequest(txID, _msgSender());
     }
 
-    /* * 
-    * @dev Revert synthesize() operation with bytes32 support. Can be called several times
-    * @param _txID transaction ID
-    * @param _receiveSide request recipient address 
-    * @param _oppositeBridge opposite bridge address
+    /** 
+    * @dev Revert synthesize() operation with bytes32 support for Solana. Can be called several times
+    * @param _pubkeys unsynth data for Solana
+    * @param _bumpSynthesizeRequest synthesize request bump 
     * @param _chainId opposite chain ID
     */
-    function emergencyUnsyntesizeRequest_32(
+    function emergencyUnsyntesizeRequest_solana(
         bytes32[] calldata _pubkeys,
         bytes1 _bumpSynthesizeRequest,
         uint256 _chainId
@@ -200,7 +199,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_32(
+        IBridge(bridge).transmitRequestV2_solana(
             serializeSolanaStandaloneInstruction( SolanaStandaloneInstruction(
                 /* programId: */ _pubkeys[uint(UnsynthesizePubkeys.receiveSide)],
                 /* accounts: */ accounts,
@@ -264,7 +263,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     }
 
     /* * 
-    * @dev Burns synthetic token with unsynthesize request and bytes32 support.
+    * @dev Burns synthetic token with unsynthesize request and bytes32 support for Solana.
     * @param _stoken representation address
     * @param _amount amount to burn
     * @param _chain2address recipient address
@@ -272,7 +271,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     * @param _oppositeBridge opposite bridge address
     * @param _chainId opposite chain ID
     */
-    function burnSyntheticToken_32(
+    function burnSyntheticToken_solana(
         address _stoken,
         bytes32[] calldata _pubkeys,
         uint256 _amount,
@@ -313,7 +312,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         accounts[8] = SolanaAccountMeta({ pubkey: SOLANA_SYSTEM_PROGRAM, isSigner: false, isWritable: false });
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_32(
+        IBridge(bridge).transmitRequestV2_solana(
             serializeSolanaStandaloneInstruction( SolanaStandaloneInstruction(
                 /* programId: */ _pubkeys[uint(UnsynthesizePubkeys.receiveSide)],
                 /* accounts: */ accounts,
@@ -336,152 +335,6 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
 
         emit BurnRequestSolana(txID, _msgSender(), _pubkeys[uint(UnsynthesizePubkeys.destination)], _amount, _stoken);
     }
-
-    /** 
-    * @dev Burns synthetic token with permit. unsynthesize request and bytes32 support.
-    * @param _stoken transaction ID
-    * @param _amount amount to burn
-    * @param _chain2address recipient address
-    * @param _receiveSide request recipient address
-    * @param _oppositeBridge opposite bridge address
-    * @param _chainID opposite chain ID
-    */
-    function burnSyntheticTokenWithPermit(
-        bytes calldata _approvalData,
-        address _stoken,
-        uint256 _amount,
-        address _chain2address,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID
-    ) external returns (bytes32 txID) {
-        (bool _success1, ) = _stoken.call(_approvalData);
-        require(_success1, "Approve call failed");
-
-        ISyntERC20(_stoken).burn(_msgSender(), _amount);
-        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-
-        txID = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_oppositeBridge))),
-            _chainID,
-            bytes32(uint256(uint160(_receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
-            nonce
-        );
-
-        bytes memory out = abi.encodeWithSelector(
-            bytes4(keccak256(bytes("unsynthesize(bytes32,address,uint256,address)"))),
-            txID,
-            representationReal[_stoken],
-            _amount,
-            _chain2address
-        );
-        // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
-        TxState storage txState = requests[txID];
-        txState.recipient = bytes32(uint256(uint160(_msgSender())));
-        txState.chain2address = bytes32(uint256(uint160(_chain2address)));
-        txState.stoken = _stoken;
-        txState.amount = _amount;
-        txState.state = RequestState.Sent;
-
-        emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
-    }
-
-    // /** 
-    // * @dev Burns synthetic token with permit. unsynthesize request and bytes32 support.
-    // * @param _stoken transaction ID
-    // * @param _amount amount to burn
-    // * @param _chain2address recipient address
-    // * @param _receiveSide request recipient address
-    // * @param _oppositeBridge opposite bridge address
-    // * @param _chainID opposite chain ID
-    // */
-    // function burnSyntheticTokenWithPermit(
-    //     bytes calldata _approvalData,
-    //     address _stoken,
-    //     uint256 _amount,
-    //     address _chain2address,
-    //     address _receiveSide,
-    //     address _oppositeBridge,
-    //     uint256 _chainID
-    // ) external returns (bytes32 txID) {
-    //     (bool _success1, ) = _stoken.call(_approvalData);
-    //     require(_success1, "Approve call failed");
-
-    //     ISyntERC20(_stoken).burn(_msgSender(), _amount);
-    //     uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-
-    //     txID = IBridge(bridge).prepareRqId(
-    //         bytes32(uint256(uint160(_oppositeBridge))),
-    //         _chainID,
-    //         bytes32(uint256(uint160(_receiveSide))),
-    //         bytes32(uint256(uint160(_msgSender()))),
-    //         nonce
-    //     );
-
-    //     bytes memory out = abi.encodeWithSelector(
-    //         bytes4(keccak256(bytes("unsynthesize(bytes32,address,uint256,address)"))),
-    //         txID,
-    //         representationReal[_stoken],
-    //         _amount,
-    //         _chain2address
-    //     );
-    //     // TODO add payment by token
-    //     IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
-    //     TxState storage txState = requests[txID];
-    //     txState.recipient = bytes32(uint256(uint160(_msgSender())));
-    //     txState.chain2address = bytes32(uint256(uint160(_chain2address)));
-    //     txState.stoken = _stoken;
-    //     txState.amount = _amount;
-    //     txState.state = RequestState.Sent;
-
-    //     emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
-    // }
-
-    // // Solana
-    // function burnSyntheticTokenWithPermit_32(
-    //     bytes calldata _approvalData,
-    //     address _stoken,
-    //     uint256 _amount,
-    //     bytes32 _chain2address,
-    //     bytes32 _receiveSide,
-    //     bytes32 _oppositeBridge,
-    //     uint256 _chainID
-    // ) external returns (bytes32 txID) {
-    //     (bool _success1, ) = _stoken.call(_approvalData);
-    //     require(_success1, "Approve call failed");
-
-    //     ISyntERC20(_stoken).burn(_msgSender(), _amount);
-    //     uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-
-    //     txID = IBridge(bridge).prepareRqId(
-    //         _oppositeBridge,
-    //         _chainID,
-    //         _receiveSide,
-    //         bytes32(uint256(uint160(_msgSender()))),
-    //         nonce
-    //     );
-
-    //     bytes memory out = abi.encodeWithSelector(
-    //         bytes4(keccak256(bytes("unsynthesize(bytes32,bytes32,uint256,bytes32)"))),
-    //         txID,
-    //         representationReal[_stoken],
-    //         _amount,
-    //         _chain2address
-    //     );
-    //     // TODO add payment by token
-    //     IBridge(bridge).transmitRequestV2_32(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
-    //     TxState storage txState = requests[txID];
-    //     txState.recipient = bytes32(uint256(uint160(_msgSender())));
-    //     txState.chain2address = _chain2address;
-    //     txState.stoken = _stoken;
-    //     txState.amount = _amount;
-    //     txState.state = RequestState.Sent;
-
-    //     emit BurnRequestSolana(txID, _msgSender(), _chain2address, _amount, _stoken);
-    // }
-
 
     /** 
     * @dev Emergency unburn request. Can be called only by bridge after initiation on a second chain

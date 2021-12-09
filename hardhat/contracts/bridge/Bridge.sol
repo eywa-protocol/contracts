@@ -111,7 +111,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     }
 
     /**
-     * @dev Transmit crosschain request v2 with bytes32.
+     * @dev Transmit crosschain request v2 with bytes32 to Solana.
      * @param _selector call data
      * @param receiveSide receive contract address
      * @param oppositeBridge opposite bridge address
@@ -120,7 +120,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
      * @param sender sender's address
      * @param nonce sender's nonce
      */
-    function transmitRequestV2_32(
+    function transmitRequestV2_solana(
         bytes memory _selector,
         bytes32 receiveSide,
         bytes32 oppositeBridge,
