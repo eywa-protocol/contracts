@@ -8,7 +8,7 @@ stages:
 prepare:
   stage: prepare
   script:
-    - docker rm $(docker ps -a | grep {{ CI_COMMIT_TAG }} | cut -d ' ' -f1)
+    - docker rm $(docker ps -a | grep {{ CI_COMMIT_TAG }} | cut -d ' ' -f1) || echo "nothing to do"
   tags:
     - docker
 
