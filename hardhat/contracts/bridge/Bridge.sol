@@ -16,8 +16,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     address public dao; // Address of the DAO
     uint8 public epochParticipantsNum; // Number of participants contributed to the epochKey
 
-    event NewEpoch(bytes oldEpochKey, bytes newEpochKey);
-    event NewEpochRequested();
+    event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested);
     event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
     constructor(address listNode, address forwarder) {
@@ -85,9 +84,9 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
             require(verifyMultisig(epochKey, votersPubKey, data, votersSignature, _votersMask), "multisig mismatch");
         }
 
-        emit NewEpoch(abi.encode(epochKey), abi.encode(newKey));
+        emit NewEpoch(abi.encode(epochKey), abi.encode(newKey), false);
         epochKey = newKey;
-        epochParticipantsNum = _newEpochParticipantsNum;
+        epochParticipantsNum = _newEpochParticipantsNum; // TODO: require minimum
     }
 
     /**
@@ -172,12 +171,13 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
      *                   successfully vote for it
      */
     function daoUpdateEpochRequest(bool resetEpoch) external onlyDao {
+        bytes memory epochKeyBytes = abi.encode(epochKey);
         if (resetEpoch) {
             E2Point memory zero;
-            emit NewEpoch(abi.encode(epochKey), abi.encode(zero));
+            emit NewEpoch(epochKeyBytes, abi.encode(zero), true);
             epochKey = zero;
         } else {
-            emit NewEpochRequested();
+            emit NewEpoch(epochKeyBytes, epochKeyBytes, true);
         }
     }
 
