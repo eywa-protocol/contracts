@@ -3,7 +3,7 @@ from os import getenv
 
 networks = getenv("CI_COMMIT_TAG").split('-')[3].split(',')
 
-with open('/app/.scripts/helper-hardhat-config.j2') as f:
+with open('/app/hardhat/helper-hardhat-config.json.example') as f:
     data = json.load(f)
 
 for net in networks:

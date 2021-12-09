@@ -1,8 +1,16 @@
 stages:
+  - prepare
   - contract-deploy
   - helper-update
   - contract-init
   - artifacts
+
+prepare:
+  stage: prepare
+  script:
+    - docker rm $(docker ps -a | grep {{ CI_COMMIT_TAG }} | cut -d ' ' -f1)
+  tags:
+    - docker
 
 {% for network in networks %}
 {{ network }}.deploy:
@@ -12,7 +20,7 @@ stages:
   script:
     - echo "it will be launched {{ action }}"
     - echo "for this networks {{ network }}"
-    - docker run -t --name deploy-{{ network }} -v /var/lib/gitlab-runner/contracts/{{ path }}/wrappers:/app/wrappers -v /var/lib/gitlab-runner/contracts/{{ path }}:/contracts -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e NETWORKS={{ network }} {{ eywa_base_image }}:{{ eywa_base_tag }} make -C /app "{{ action }}"
+    - docker run -t --name deploy-{{ network }}-{{ CI_COMMIT_TAG }} -v /var/lib/gitlab-runner/contracts/{{ path }}/wrappers:/app/wrappers -v /var/lib/gitlab-runner/contracts/{{ path }}:/contracts -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e NETWORKS={{ network }} {{ eywa_base_image }}:{{ eywa_base_tag }} make -C /app "{{ action }}"
     - docker rm deploy-{{ network }}
   tags:
     - docker
@@ -21,7 +29,7 @@ stages:
   stage: contract-init
   script:
     - echo "init"
-    - docker run -t --name init-{{ network }} -v /var/lib/gitlab-runner/contracts/{{ path }}/wrappers:/app/wrappers -v /var/lib/gitlab-runner/contracts/{{ path }}:/contracts -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e NETWORKS={{ network }} {{ eywa_base_image }}:{{ eywa_base_tag }} make -C /app "eth-testnet-init"
+    - docker run -t --name init-{{ network }}-{{ CI_COMMIT_TAG }} -v /var/lib/gitlab-runner/contracts/{{ path }}/wrappers:/app/wrappers -v /var/lib/gitlab-runner/contracts/{{ path }}:/contracts -v $(pwd):/app --user builder --add-host=mumbai.testnet.eywa.fi:10.1.0.21 --add-host=huobi.testnet.eywa.fi:10.1.0.21 --add-host=rinkeby.testnet.eywa.fi:10.1.0.21 --add-host=bsc.testnet.eywa.fi:10.1.0.21 -e NETWORKS={{ network }} {{ eywa_base_image }}:{{ eywa_base_tag }} make -C /app "eth-testnet-init"
     - docker rm init-{{ network }}
   tags:
     - docker
