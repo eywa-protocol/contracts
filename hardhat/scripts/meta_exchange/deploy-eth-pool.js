@@ -53,11 +53,10 @@ async function main() {
       ethPoolCoins.push(await getRepresentation(deployInfo[network.name].ethToken[i], deployInfo["mumbai"].synthesis))
     }
     if(network.name == "network1")
-    deployInfo["network2"].ethPoolCoins = ethPoolCoins
+      deployInfo["network2"].ethPoolCoins = ethPoolCoins
     if(network.name == "rinkeby")
-    deployInfo["mumbai"].ethPoolCoins = ethPoolCoins
+      deployInfo["mumbai"].ethPoolCoins = ethPoolCoins
 
-    console.log("ethPoolCoins",ethPoolCoins);
   }
 
   // creating the ETH pool for specified networks

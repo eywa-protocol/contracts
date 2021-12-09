@@ -8,6 +8,7 @@ async function main() {
     this.bridgeAdr  = networkConfig[network.name].bridge;
     this.s          = networkConfig[network.name].synthesis;
     this.p          = networkConfig[network.name].portal;
+    this.cp         = networkConfig[network.name].curveProxy;
     this.sourceForRepresentation =  networkConfig[network.name].sourceForRepresentation;
 
     const [deployer] = await ethers.getSigners();
@@ -23,6 +24,7 @@ async function main() {
        let bridgeB = networkConfig[netw].bridge;
        let portal  = networkConfig[netw].portal;
        let synth   = networkConfig[netw].synthesis;
+       let curveProxy  = networkConfig[netw].curveProxy;
        let mockDexPool  = networkConfig[netw].mockDexPool;
        let chainid  = networkConfig[netw].chainId;
     try{
@@ -47,10 +49,51 @@ async function main() {
         );
        console.log(`addContractBind for mockDexPool on ${network.name} with ${netw}: ${this.tx.hash}`);
        await h.timeout(5_000);
+//-----
+      this.tx = await bridgeA.addContractBind(
+        addressToBytes32(this.p),
+        addressToBytes32(bridgeB),
+        addressToBytes32(curveProxy)
+        );
+      console.log(`addContractBind for Curve proxy > Portal on ${network.name} with ${netw}: ${this.tx.hash}`);
+      await h.timeout(5_000);
+
+      this.tx = await bridgeA.addContractBind(
+        addressToBytes32(this.s),
+        addressToBytes32(bridgeB),
+        addressToBytes32(curveProxy)
+        );
+      console.log(`addContractBind for Curve proxy > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
+      await h.timeout(5_000);
+      
+       this.tx = await bridgeA.addContractBind(
+        addressToBytes32(this.cp),
+        addressToBytes32(bridgeB),
+        addressToBytes32(portal)
+        );
+       console.log(`addContractBind for Curve proxy > Portal on ${network.name} with ${netw}: ${this.tx.hash}`);
+       await h.timeout(5_000);
+
+       this.tx = await bridgeA.addContractBind(
+        addressToBytes32(this.cp),
+        addressToBytes32(bridgeB),
+        addressToBytes32(synth)
+        );
+       console.log(`addContractBind for Curve proxy > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
+       await h.timeout(5_000);
+
+       this.tx = await bridgeA.addContractBind(
+        addressToBytes32(this.cp),
+        addressToBytes32(bridgeB),
+        addressToBytes32(curveProxy)
+        );
+       console.log(`addContractBind for Curve proxy > Curve proxy on ${network.name} with ${netw}: ${this.tx.hash}`);
+       await h.timeout(5_000);
+
      }catch(e){
           const nuLL = '0x0000000000000000000000000000000000000000';
           if(e.message.indexOf('cannot estimate gas') >= 0 &&
-             (portal === nuLL || bridgeB === nuLL || mockDexPool === nuLL)){
+             (portal === nuLL || bridgeB === nuLL || mockDexPool === nuLL || curveProxy === nuLL)){
             console.log(`WARNING: Can't bind with ${netw}. Check json config.`);
             break;
           }

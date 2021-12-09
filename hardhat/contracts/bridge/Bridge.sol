@@ -31,12 +31,12 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
 
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
-        require(contractBind[bytes32(uint256(uint160(msg.sender)))][bytes32(uint256(uint160(oppositeBridge)))] == bytes32(uint256(uint160(receiveSide))), "UNTRUSTED CONTRACT");
+        require(contractBind[bytes32(uint256(uint160(address(_msgSender()))))][bytes32(uint256(uint160(oppositeBridge)))] == bytes32(uint256(uint160(receiveSide))), "UNTRUSTED CONTRACT");
         _;
     }
 
     modifier onlyTrustedContractBytes32(bytes32 receiveSide, bytes32 oppositeBridge) {
-        require(contractBind[bytes32(uint256(uint160(msg.sender)))][oppositeBridge] == receiveSide, "UNTRUSTED CONTRACT");
+        require(contractBind[bytes32(uint256(uint160(address(_msgSender()))))][oppositeBridge] == receiveSide, "UNTRUSTED CONTRACT");
         _;
     }
 

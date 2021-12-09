@@ -76,28 +76,30 @@ npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
 npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
 done
 
-for net in ${nets//\,/ }
-do
-echo 'init into:' ${net}
-##
-## init
-##
-npx hardhat run --no-compile ./scripts/bridge/updateDexBind.js  --network ${net}
 
-done
+
 
 
 for net in ${nets//\,/ }
   do
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-local-pool.js --network ${net}
-  done
+done
 
 for net in ${nets//\,/ }
   do
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network ${net}
-  done
+done
  
 for net in ${nets//\,/ }
   do
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network ${net}
-  done
+done
+
+for net in ${nets//\,/ }
+  do
+  echo 'init into:' ${net}
+  ##
+  ## init
+  ##
+  npx hardhat run --no-compile ./scripts/bridge/updateDexBind.js  --network ${net}
+done

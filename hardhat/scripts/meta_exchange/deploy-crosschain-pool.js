@@ -53,7 +53,6 @@ async function main() {
     }
   }
 
-  console.log("Crosschain Coins", crosschainCoins)
 
   // deploy LP token
   crosschainLp = await CurveTokenV2.deploy("LpCrosschain", "LPC", "18", 0)
