@@ -33,7 +33,7 @@ contract BridgeCore {
 
     /**
     * @dev Mandatory for all participants who wants to use their own contracts
-    * 1. Contract A (chain A) should be binded with Contract B (chain B) only once! It's not allowed to switch Contract A (chain A) to Contract C (chain B). This is mandatory
+    * 1. Contract A (chain A) should be binded with Contract B (chain B) only once! It's not allowed to switch Contract A (chain A) to Contract C (chain B).
     * to prevent malicious behaviour.
     * 2. Contract A (chain A) could be binded with several contracts where every contract from another chain. 
     * For ex: Contract A (chain A) --> Contract B (chain B) + Contract A (chain A) --> Contract B' (chain B') ... etc
@@ -45,7 +45,7 @@ contract BridgeCore {
         bytes32 from,
         bytes32 oppositeBridge,
         bytes32 to
-    ) external /** onlyDAO || onlyOwner */ {
+    ) external /** onlyOwner */ {
         require(to != "", "NULL ADDRESS TO");
         require(from != "", "NULL ADDRESS FROM");
         // TODO

@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-
 abstract contract SolanaSerialize {
-
     // Solana constants
     uint256 public constant SOLANA_CHAIN_ID = 501501501;
     // base58: TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
@@ -25,27 +23,23 @@ abstract contract SolanaSerialize {
         bytes data;
     }
 
-
-    function serializeSolanaStandaloneInstruction(
-        SolanaStandaloneInstruction memory ix
-    )
-        public pure
-        returns (bytes memory /* data */)
+    function serializeSolanaStandaloneInstruction(SolanaStandaloneInstruction memory ix)
+        public
+        pure
+        returns (
+            bytes memory /* data */
+        )
     {
         uint32 _len = uint32(ix.accounts.length);
         // swap bytes
         _len = ((_len & 0xFF00FF00) >> 8) | ((_len & 0x00FF00FF) << 8);
         // swap 2-byte long pairs
         _len = (_len >> 16) | (_len << 16);
-    
+
         bytes memory _data = abi.encodePacked(_len);
         bytes memory _d;
-        for(uint i = 0; i < ix.accounts.length; i++) {
-            _d = abi.encodePacked(
-                ix.accounts[i].pubkey,
-                ix.accounts[i].isSigner,
-                ix.accounts[i].isWritable
-            );
+        for (uint256 i = 0; i < ix.accounts.length; i++) {
+            _d = abi.encodePacked(ix.accounts[i].pubkey, ix.accounts[i].isSigner, ix.accounts[i].isWritable);
             _data = abi.encodePacked(_data, _d);
         }
 

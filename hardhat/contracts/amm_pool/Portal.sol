@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-newone/access/Ownable.sol";
 import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "./IBridge.sol";
@@ -11,6 +10,7 @@ import "./SolanaSerialize.sol";
 //TODO: relocate
 interface IERC20 {
     function name() external returns (string memory);
+
     function symbol() external returns (string memory);
 }
 
@@ -21,12 +21,10 @@ contract Portal is RelayRecipient, SolanaSerialize {
     address public bridge;
     address public proxy;
 
-    bytes public constant sighashMintSyntheticToken = abi.encodePacked(
-        uint8(44), uint8(253), uint8(1), uint8(101), uint8(130), uint8(139), uint8(18), uint8(78)
-    );
-    bytes public constant sighashEmergencyUnburn = abi.encodePacked(
-        uint8(149), uint8(132), uint8(104), uint8(123), uint8(157), uint8(85), uint8(21), uint8(161)
-    );
+    bytes public constant sighashMintSyntheticToken =
+        abi.encodePacked(uint8(44), uint8(253), uint8(1), uint8(101), uint8(130), uint8(139), uint8(18), uint8(78));
+    bytes public constant sighashEmergencyUnburn =
+        abi.encodePacked(uint8(149), uint8(132), uint8(104), uint8(123), uint8(157), uint8(85), uint8(21), uint8(161));
 
     enum SynthesizePubkeys {
         chain2address,
@@ -90,7 +88,6 @@ contract Portal is RelayRecipient, SolanaSerialize {
     event RepresentationRequest(address indexed _rtoken);
     event ApprovedRepresentationRequest(address indexed _rtoken);
 
-
     constructor(address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
         bridge = _bridge;
     }
@@ -100,16 +97,15 @@ contract Portal is RelayRecipient, SolanaSerialize {
         _;
     }
 
-
-    /** 
-    * @dev Synthesize token request.
-    * @param _token token address to synthesize
-    * @param _amount amount to synthesize 
-    * @param _chain2address amount recipient address
-    * @param _receiveSide request recipient address
-    * @param _oppositeBridge opposite bridge address
-    * @param _chainID opposite chain ID
-    */
+    /**
+     * @dev Synthesize token request.
+     * @param _token token address to synthesize
+     * @param _amount amount to synthesize
+     * @param _chain2address amount recipient address
+     * @param _receiveSide request recipient address
+     * @param _oppositeBridge opposite bridge address
+     * @param _chainID opposite chain ID
+     */
     function synthesize(
         address _token,
         uint256 _amount,
@@ -149,15 +145,14 @@ contract Portal is RelayRecipient, SolanaSerialize {
         emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
     }
 
-
-    /** 
-    * @dev Synthesize token request with bytes32 support for Solana.
-    * @param _token token address to synthesize
-    * @param _amount amount to synthesize 
-    * @param _pubkeys synth data for Solana
-    * @param _txStateBump transaction state bump
-    * @param _chainId opposite chain ID
-    */
+    /**
+     * @dev Synthesize token request with bytes32 support for Solana.
+     * @param _token token address to synthesize
+     * @param _amount amount to synthesize
+     * @param _pubkeys synth data for Solana
+     * @param _txStateBump transaction state bump
+     * @param _chainId opposite chain ID
+     */
     function synthesize_solana(
         address _token,
         uint256 _amount,
@@ -182,33 +177,62 @@ contract Portal is RelayRecipient, SolanaSerialize {
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
-            _pubkeys[uint(SynthesizePubkeys.oppositeBridge)],
+            _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
-            _pubkeys[uint(SynthesizePubkeys.receiveSide)],
+            _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
             bytes32(uint256(uint160(_msgSender()))),
             nonce
         );
 
         SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](9);
-        accounts[0] = SolanaAccountMeta({ pubkey: _pubkeys[uint(SynthesizePubkeys.receiveSideData)], isSigner: false, isWritable: true });
-        accounts[1] = SolanaAccountMeta({ pubkey: _pubkeys[uint(SynthesizePubkeys.syntToken)], isSigner: false, isWritable: true });
-        accounts[2] = SolanaAccountMeta({ pubkey: _pubkeys[uint(SynthesizePubkeys.syntTokenData)], isSigner: false, isWritable: false });
-        accounts[3] = SolanaAccountMeta({ pubkey: _pubkeys[uint(SynthesizePubkeys.txState)], isSigner: false, isWritable: true });
-        accounts[4] = SolanaAccountMeta({ pubkey: _pubkeys[uint(SynthesizePubkeys.chain2address)], isSigner: false, isWritable: true });
+        accounts[0] = SolanaAccountMeta({
+            pubkey: _pubkeys[uint256(SynthesizePubkeys.receiveSideData)],
+            isSigner: false,
+            isWritable: true
+        });
+        accounts[1] = SolanaAccountMeta({
+            pubkey: _pubkeys[uint256(SynthesizePubkeys.syntToken)],
+            isSigner: false,
+            isWritable: true
+        });
+        accounts[2] = SolanaAccountMeta({
+            pubkey: _pubkeys[uint256(SynthesizePubkeys.syntTokenData)],
+            isSigner: false,
+            isWritable: false
+        });
+        accounts[3] = SolanaAccountMeta({
+            pubkey: _pubkeys[uint256(SynthesizePubkeys.txState)],
+            isSigner: false,
+            isWritable: true
+        });
+        accounts[4] = SolanaAccountMeta({
+            pubkey: _pubkeys[uint256(SynthesizePubkeys.chain2address)],
+            isSigner: false,
+            isWritable: true
+        });
         accounts[5] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
         accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_SYSTEM_PROGRAM, isSigner: false, isWritable: false });
         accounts[7] = SolanaAccountMeta({ pubkey: SOLANA_RENT, isSigner: false, isWritable: false });
-        accounts[8] = SolanaAccountMeta({ pubkey: _pubkeys[uint(SynthesizePubkeys.oppositeBridgeData)], isSigner: true, isWritable: false });
+        accounts[8] = SolanaAccountMeta({
+            pubkey: _pubkeys[uint256(SynthesizePubkeys.oppositeBridgeData)],
+            isSigner: true,
+            isWritable: false
+        });
 
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2_solana(
-            serializeSolanaStandaloneInstruction( SolanaStandaloneInstruction(
-                /* programId: */ _pubkeys[uint(SynthesizePubkeys.receiveSide)],
-                /* accounts: */ accounts,
-                /* data: */ abi.encodePacked(sighashMintSyntheticToken, txID, _txStateBump, solAmount)
-            )),
-            _pubkeys[uint(SynthesizePubkeys.receiveSide)],
-            _pubkeys[uint(SynthesizePubkeys.oppositeBridge)],
+            serializeSolanaStandaloneInstruction(
+                SolanaStandaloneInstruction(
+                    /* programId: */
+                    _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
+                    /* accounts: */
+                    accounts,
+                    /* data: */
+                    abi.encodePacked(sighashMintSyntheticToken, txID, _txStateBump, solAmount)
+                )
+            ),
+            _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
+            _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             txID,
             _msgSender(),
@@ -217,25 +241,30 @@ contract Portal is RelayRecipient, SolanaSerialize {
 
         TxState storage txState = requests[txID];
         txState.recipient = bytes32(uint256(uint160(_msgSender())));
-        txState.chain2address = _pubkeys[uint(SynthesizePubkeys.chain2address)];
+        txState.chain2address = _pubkeys[uint256(SynthesizePubkeys.chain2address)];
         txState.rtoken = bytes32(uint256(uint160(_token)));
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
-        emit SynthesizeRequestSolana(txID, _msgSender(), _pubkeys[uint(SynthesizePubkeys.chain2address)], _amount, _token);
+        emit SynthesizeRequestSolana(
+            txID,
+            _msgSender(),
+            _pubkeys[uint256(SynthesizePubkeys.chain2address)],
+            _amount,
+            _token
+        );
     }
 
-
-    /** 
-    * @dev Synthesize token request with permit.
-    * @param _approvalData permit data
-    * @param _token token address to synthesize
-    * @param _amount amount to synthesize 
-    * @param _chain2address amount recipient address
-    * @param _receiveSide request recipient address
-    * @param _oppositeBridge opposite bridge address
-    * @param _chainID opposite chain ID
-    */
+    /**
+     * @dev Synthesize token request with permit.
+     * @param _approvalData permit data
+     * @param _token token address to synthesize
+     * @param _amount amount to synthesize
+     * @param _chain2address amount recipient address
+     * @param _receiveSide request recipient address
+     * @param _oppositeBridge opposite bridge address
+     * @param _chainID opposite chain ID
+     */
     function synthesizeWithPermit(
         bytes calldata _approvalData,
         address _token,
@@ -333,10 +362,10 @@ contract Portal is RelayRecipient, SolanaSerialize {
     }
     */
 
-    /** 
-    * @dev Emergency unsynthesize request. Can be called only by bridge after initiation on a second chain
-    * @param _txID transaction ID to unsynth 
-    */
+    /**
+     * @dev Emergency unsynthesize request. Can be called only by bridge after initiation on a second chain
+     * @param _txID transaction ID to unsynth
+     */
     function emergencyUnsynthesize(bytes32 _txID) external onlyBridge {
         TxState storage txState = requests[_txID];
         require(txState.state == RequestState.Sent, "Portal:state not open or tx does not exist");
@@ -356,13 +385,13 @@ contract Portal is RelayRecipient, SolanaSerialize {
         );
     }
 
-    /** 
-    * @dev Unsynthesize request. Can be called only by bridge after initiation on a second chain
-    * @param _txID transaction ID to unsynth 
-    * @param _token token address to unsynth 
-    * @param _amount amount to unsynth 
-    * @param _to recipient address
-    */
+    /**
+     * @dev Unsynthesize request. Can be called only by bridge after initiation on a second chain
+     * @param _txID transaction ID to unsynth
+     * @param _token token address to unsynth
+     * @param _amount amount to unsynth
+     * @param _to recipient address
+     */
     function unsynthesize(
         bytes32 _txID,
         address _token,
@@ -379,13 +408,13 @@ contract Portal is RelayRecipient, SolanaSerialize {
         emit BurnCompleted(_txID, _to, _amount, _token);
     }
 
-    /** 
-    * @dev Revert burnSyntheticToken() operation, can be called several times.
-    * @param _txID transaction ID to unburn
-    * @param _receiveSide receiver contract address
-    * @param _oppositeBridge opposite bridge address
-    * @param _chainId opposite chain ID
-    */
+    /**
+     * @dev Revert burnSyntheticToken() operation, can be called several times.
+     * @param _txID transaction ID to unburn
+     * @param _receiveSide receiver contract address
+     * @param _oppositeBridge opposite bridge address
+     * @param _chainId opposite chain ID
+     */
     function emergencyUnburnRequest(
         bytes32 _txID,
         address _receiveSide,
@@ -410,12 +439,12 @@ contract Portal is RelayRecipient, SolanaSerialize {
         emit RevertBurnRequest(txID, _msgSender());
     }
 
-    /** 
-    * @dev Revert burnSyntheticToken() operation with bytes32 support for Solana. Can be called several times.
-    * @param _txID transaction ID to unburn
-    * @param _pubkeys unsynth data for Solana
-    * @param _chainId opposite chain ID
-    */
+    /**
+     * @dev Revert burnSyntheticToken() operation with bytes32 support for Solana. Can be called several times.
+     * @param _txID transaction ID to unburn
+     * @param _pubkeys unsynth data for Solana
+     * @param _chainId opposite chain ID
+     */
     function emergencyUnburnRequest_solana(
         bytes32 _txID,
         bytes32[] calldata _pubkeys,
@@ -428,31 +457,60 @@ contract Portal is RelayRecipient, SolanaSerialize {
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 txID = IBridge(bridge).prepareRqId(
-            _pubkeys[uint(SynthesizePubkeys.oppositeBridge)],
+            _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
-            _pubkeys[uint(SynthesizePubkeys.receiveSide)],
+            _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
             bytes32(uint256(uint160(_msgSender()))),
             nonce
         );
 
         SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](7);
-        accounts[0] = SolanaAccountMeta({ pubkey: _pubkeys[uint(SynthesizePubkeys.receiveSideData)], isSigner: false, isWritable: false });
-        accounts[1] = SolanaAccountMeta({ pubkey: _pubkeys[uint(SynthesizePubkeys.txState)], isSigner: false, isWritable: true });
-        accounts[2] = SolanaAccountMeta({ pubkey: _pubkeys[uint(SynthesizePubkeys.syntToken)], isSigner: false, isWritable: true });
-        accounts[3] = SolanaAccountMeta({ pubkey: _pubkeys[uint(SynthesizePubkeys.syntTokenData)], isSigner: false, isWritable: false });
-        accounts[4] = SolanaAccountMeta({ pubkey: _pubkeys[uint(SynthesizePubkeys.chain2address)], isSigner: false, isWritable: true });
+        accounts[0] = SolanaAccountMeta({
+            pubkey: _pubkeys[uint256(SynthesizePubkeys.receiveSideData)],
+            isSigner: false,
+            isWritable: false
+        });
+        accounts[1] = SolanaAccountMeta({
+            pubkey: _pubkeys[uint256(SynthesizePubkeys.txState)],
+            isSigner: false,
+            isWritable: true
+        });
+        accounts[2] = SolanaAccountMeta({
+            pubkey: _pubkeys[uint256(SynthesizePubkeys.syntToken)],
+            isSigner: false,
+            isWritable: true
+        });
+        accounts[3] = SolanaAccountMeta({
+            pubkey: _pubkeys[uint256(SynthesizePubkeys.syntTokenData)],
+            isSigner: false,
+            isWritable: false
+        });
+        accounts[4] = SolanaAccountMeta({
+            pubkey: _pubkeys[uint256(SynthesizePubkeys.chain2address)],
+            isSigner: false,
+            isWritable: true
+        });
         accounts[5] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
-        accounts[6] = SolanaAccountMeta({ pubkey: _pubkeys[uint(SynthesizePubkeys.oppositeBridgeData)], isSigner: true, isWritable: false });
+        accounts[6] = SolanaAccountMeta({
+            pubkey: _pubkeys[uint256(SynthesizePubkeys.oppositeBridgeData)],
+            isSigner: true,
+            isWritable: false
+        });
 
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2_solana(
-            serializeSolanaStandaloneInstruction( SolanaStandaloneInstruction(
-                /* programId: */ _pubkeys[uint(SynthesizePubkeys.receiveSide)],
-                /* accounts: */ accounts,
-                /* data: */ abi.encodePacked(sighashEmergencyUnburn)
-            )),
-            _pubkeys[uint(SynthesizePubkeys.receiveSide)],
-            _pubkeys[uint(SynthesizePubkeys.oppositeBridge)],
+            serializeSolanaStandaloneInstruction(
+                SolanaStandaloneInstruction(
+                    /* programId: */
+                    _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
+                    /* accounts: */
+                    accounts,
+                    /* data: */
+                    abi.encodePacked(sighashEmergencyUnburn)
+                )
+            ),
+            _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
+            _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             txID,
             _msgSender(),
@@ -476,15 +534,14 @@ contract Portal is RelayRecipient, SolanaSerialize {
     }
 
     // implies manual verification point
-    function approveRepresentationRequest(address _rtoken) external /**onlyOwner */ {
+    function approveRepresentationRequest(address _rtoken) external /**onlyOwner */
+    {
         tokenData[_rtoken] = abi.encode(IERC20(_rtoken).name(), IERC20(_rtoken).symbol());
         emit ApprovedRepresentationRequest(_rtoken);
     }
 
-
-//TODO
+    //TODO
     function getTxId() external returns (bytes32) {
-
         return keccak256(abi.encodePacked(this, block.timestamp));
     }
 
@@ -506,12 +563,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         //     tokenData[_token].length != 0,
         //     "Portal: token must be verified"
         // );
-        TransferHelper.safeTransferFrom(
-            _token,
-            _msgSender(),
-            address(this),
-            _amount
-        );
+        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] = balanceOf[_token].add(_amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
@@ -524,9 +576,8 @@ contract Portal is RelayRecipient, SolanaSerialize {
             nonce
         );
 
-
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(_out,_receiveSide, _oppositeBridge, _chainID, txId, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2(_out, _receiveSide, _oppositeBridge, _chainID, txId, _msgSender(), nonce);
         TxState storage txState = requests[txId];
         txState.recipient = bytes32(uint256(uint160(_msgSender()))); //change!
         txState.chain2address = bytes32(uint256(uint160(_chain2address)));
@@ -534,14 +585,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
-
-        emit SynthesizeRequest(
-            txId,
-            _msgSender(),
-            _chain2address,
-            _amount,
-            _token
-        );
+        emit SynthesizeRequest(txId, _msgSender(), _chain2address, _amount, _token);
     }
 
     // portal => proxy
@@ -551,30 +595,29 @@ contract Portal is RelayRecipient, SolanaSerialize {
         SynthParams memory _synth_params,
         bytes4 _selector,
         bytes memory _transit_data
-    ) external  {
-
+    ) external {
         bytes32[] memory txId = new bytes32[](_tokens.length);
 
         //synthesize request
         for (uint256 i = 0; i < _tokens.length; i++) {
-            if(_amounts[i] > 0){
-                TransferHelper.safeTransferFrom(
-                    _tokens[i],
-                    _msgSender(),
-                    address(this),
-                    _amounts[i]
-                );
+            if (_amounts[i] > 0) {
+                TransferHelper.safeTransferFrom(_tokens[i], _msgSender(), address(this), _amounts[i]);
 
                 balanceOf[_tokens[i]] = balanceOf[_tokens[i]].add(_amounts[i]);
                 uint256 nonce = IBridge(bridge).getNonce(_msgSender());
 
-                txId[i] =  keccak256(abi.encodePacked(IBridge(bridge).prepareRqId(
-                    bytes32(uint256(uint160(_synth_params.oppositeBridge))),
-                    _synth_params.chainID,
-                    bytes32(uint256(uint160(_synth_params.receiveSide))),
-                    bytes32(uint256(uint160(_msgSender()))),
-                    nonce
-                 ),i))  ;
+                txId[i] = keccak256(
+                    abi.encodePacked(
+                        IBridge(bridge).prepareRqId(
+                            bytes32(uint256(uint160(_synth_params.oppositeBridge))),
+                            _synth_params.chainID,
+                            bytes32(uint256(uint160(_synth_params.receiveSide))),
+                            bytes32(uint256(uint160(_msgSender()))),
+                            nonce
+                        ),
+                        i
+                    )
+                );
 
                 // TODO add payment by token
                 TxState storage txState = requests[txId[i]];
@@ -584,15 +627,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
                 txState.amount = _amounts[i];
                 txState.state = RequestState.Sent;
 
-
-
-                emit SynthesizeRequest(
-                    txId[i],
-                    _msgSender(),
-                    _synth_params.chain2address,
-                    _amounts[i],
-                    _tokens[i]
-                );
+                emit SynthesizeRequest(txId[i], _msgSender(), _synth_params.chain2address, _amounts[i], _tokens[i]);
             }
         }
 
@@ -608,13 +643,13 @@ contract Portal is RelayRecipient, SolanaSerialize {
 
         uint256 general_nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 general_txId = IBridge(bridge).prepareRqId(
-                    bytes32(uint256(uint160(_synth_params.oppositeBridge))),
-                    _synth_params.chainID,
-                    bytes32(uint256(uint160(_synth_params.receiveSide))),
-                    bytes32(uint256(uint160(_msgSender()))),
-                    general_nonce
-                 );
-                 
+            bytes32(uint256(uint160(_synth_params.oppositeBridge))),
+            _synth_params.chainID,
+            bytes32(uint256(uint160(_synth_params.receiveSide))),
+            bytes32(uint256(uint160(_msgSender()))),
+            general_nonce
+        );
+
         IBridge(bridge).transmitRequestV2(
             out,
             _synth_params.receiveSide,
