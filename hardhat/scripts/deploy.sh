@@ -72,12 +72,7 @@ npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
   EYWA_TOKEN_$(getField ${net}.n)=$(getField ${net}.eywa) \
   FORWARDER_$(getField ${net}.n)=$(getField ${net}.forwarder) \
 && echo $(getField ${net}.env_file[1])
-
-npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
 done
-
-
-
 
 
 for net in ${nets//\,/ }
@@ -95,11 +90,24 @@ for net in ${nets//\,/ }
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network ${net}
 done
 
+
 for net in ${nets//\,/ }
   do
   echo 'init into:' ${net}
-  ##
-  ## init
-  ##
+  npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
+done
+
+
+for net in ${nets//\,/ }
+  do
+  echo 'init into:' ${net}
   npx hardhat run --no-compile ./scripts/bridge/updateDexBind.js  --network ${net}
 done
+
+
+# for net in ${nets//\,/ }
+#   do
+#   echo 'init into:' ${net}
+#   npx hardhat run --no-compile ./scripts/meta_exchange/add-liquidity-eth-pool.js  --network ${net}
+# done
+

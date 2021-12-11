@@ -77,16 +77,16 @@ const makeGsnProvider = async (adr_paymaster, currentProvider, adr_token) => {
 };
 
 
-const addressToBytes32 = async (address) => {
+const addressToBytes32 = (address) => {
     return '0x' + web3.utils.padLeft(address.replace('0x', ''), 64);
 }
 
 const getCreate2Address = (creatorAddress, saltHex, byteCode) => {
-    return `0x${web3.utils.sha3(`0x${[
+    return `0x${web3.utils.keccak256(`0x${[
         'ff',
         creatorAddress,
         saltHex,
-        web3.utils.sha3(byteCode)
+        web3.utils.keccak256(byteCode)
     ].map(x => x.replace(/0x/, ''))
         .join('')}`).slice(-40)}`.toLowerCase()
 }
@@ -97,7 +97,7 @@ const getRepresentation = async (realToken, synthesisAddress) => {
         ['string', 'string'],
         ["e" + realToken.name, "e" + realToken.symbol]
     ).slice(2)
-    const salt = web3.utils.sha3(realToken.address)
+    const salt = web3.utils.keccak256(addressToBytes32(realToken.address))
     return web3.utils.toChecksumAddress(getCreate2Address(
         synthesisAddress,
         salt,

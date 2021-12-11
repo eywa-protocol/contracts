@@ -64,7 +64,7 @@ interface ISynthesis {
         bytes memory _out
     ) external returns (bytes32 txId);
 
-    function getRepresentation(address _rtoken) external view returns (address);
+    function getRepresentation(bytes32 _rtoken) external view returns (address);
 
     function getTxId() external returns (bytes32);
 }
@@ -311,7 +311,7 @@ contract CurveProxy is BaseRelayRecipient {
 
             //exchange stage
             address representation = ISynthesis(synthesis).getRepresentation(
-                _synth_token
+                 bytes32(uint256(uint160(_synth_token))) 
             );
             IERC20(representation).approve(
                 _params.exchange,
@@ -354,7 +354,7 @@ contract CurveProxy is BaseRelayRecipient {
         // initiates unsynthesize request if mentioned
         if (_params.receiveSide != address(0)) {
             address representation = ISynthesis(synthesis).getRepresentation(
-                _params.unsynth_token
+                bytes32(uint256(uint160(_params.unsynth_token)))               
             );
             uint256 unsynth_amount = IERC20(representation).balanceOf(
                 address(this)
@@ -503,7 +503,7 @@ contract CurveProxy is BaseRelayRecipient {
         for (uint256 i = 0; i < _txId.length; i++) {
             // console.logBytes32(_txId[i]); console.logUint(_synth_amount[i]);
             representation[i] = ISynthesis(synthesis).getRepresentation(
-                _synth_token[i]
+                bytes32(uint256(uint160(_synth_token[i])))
             );
             if (_synth_amount[i] > 0) {
                 ISynthesis(synthesis).mintSyntheticToken(
@@ -521,10 +521,11 @@ contract CurveProxy is BaseRelayRecipient {
                 _synth_amount[i] = 0;
             }
         }
-
+// uint256 min_mint_amount = 990000000000000000000;
         //add liquidity stage
         uint256 min_mint_amount = IStableSwapPool(_params.add)
             .calc_token_amount(_synth_amount, true); //console.logUint(_params.expected_min_mint_amount-min_mint_amount);
+
         // inconsistency check
         if (_params.expected_min_mint_amount > min_mint_amount) {
             for (uint256 i = 0; i < representation.length; i++) {
@@ -553,11 +554,6 @@ contract CurveProxy is BaseRelayRecipient {
             IERC20(lp_token[_params.add]).balanceOf(address(this))
         );
 
-        //////////
-        console.log(
-            "BALANCE OF LP %s",
-            IERC20(lp_token[_params.add]).balanceOf(_params.to)
-        );
     }
 
     function transit_synth_batch_meta_exchange_eth(
@@ -573,7 +569,7 @@ contract CurveProxy is BaseRelayRecipient {
             for (uint256 i = 0; i < _txId.length; i++) {
                 // console.logBytes32(_txId[i]); console.logUint(_synth_amount[i]);
                 representation[i] = ISynthesis(synthesis).getRepresentation(
-                    _synth_token[i]
+                    bytes32(uint256(uint160(_synth_token[i])))
                 );
                 if (_synth_amount[i] > 0) {
                     ISynthesis(synthesis).mintSyntheticToken(
@@ -663,7 +659,7 @@ contract CurveProxy is BaseRelayRecipient {
         // initiates unsynthesize request if mentioned
         if (_params.receiveSide != address(0)) {
             address representation = ISynthesis(synthesis).getRepresentation(
-                _params.unsynth_token
+               bytes32(uint256(uint160(_params.unsynth_token))) 
             );
             uint256 unsynth_amount = IERC20(representation).balanceOf(
                 address(this)

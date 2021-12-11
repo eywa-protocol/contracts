@@ -8,13 +8,16 @@ import "@openzeppelin/contracts-newone/utils/Address.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 
+
 contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     using Address for address;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
     string public override versionRecipient = "2.2.3";
     E2Point private epochKey; // Aggregated public key of all paricipants of the current epoch
     address public dao; // Address of the DAO
     uint8 public epochParticipantsNum; // Number of participants contributed to the epochKey
+    address public owner;
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey);
     event NewEpochRequested();
@@ -23,6 +26,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     constructor(address listNode, address forwarder) {
         _listNode = listNode;
         trustedForwarder = forwarder;
+        owner = _msgSender();
     }
 
     modifier onlyTrustedNode() {
@@ -35,8 +39,8 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
         require(
-            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][bytes32(uint256(uint160(oppositeBridge)))] ==
-                bytes32(uint256(uint160(receiveSide))),
+            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][bytes32(uint256(uint160(oppositeBridge)))].contains(
+                bytes32(uint256(uint160(receiveSide)))),
             "UNTRUSTED CONTRACT"
         );
         _;
@@ -44,7 +48,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
 
     modifier onlyTrustedContractBytes32(bytes32 receiveSide, bytes32 oppositeBridge) {
         require(
-            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][oppositeBridge] == receiveSide,
+            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][oppositeBridge].contains(receiveSide),
             "UNTRUSTED CONTRACT"
         );
         _;
@@ -159,10 +163,12 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         address receiveSide,
         bytes32 bridgeFrom
     ) external {
-        bytes32 senderSide = contractBind[bytes32(uint256(uint160(receiveSide)))][bridgeFrom];
+        // TODO senderSide
+        // bytes32 senderSide = contractBind[bytes32(uint256(uint160(receiveSide)))][bridgeFrom];
         bytes memory data = receiveSide.functionCall(b, "receiveRequestV2 failed");
         require(data.length == 0 || abi.decode(data, (bool)), "receiveRequestV2: Unable to decode rerurned data");
-        emit ReceiveRequest(reqId, receiveSide, bridgeFrom, senderSide);
+        emit ReceiveRequest(reqId, receiveSide, bridgeFrom, bytes32("")/*senderSide*/);
+        
     }
 
     /**

@@ -70,6 +70,11 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         _;
     }
 
+    modifier onlyTrusted() {
+        require(bridge == msg.sender || proxy == msg.sender );
+        _;
+    }
+
     struct TxState {
         bytes32 recipient;
         bytes32 chain2address;
@@ -91,7 +96,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         address _tokenReal,
         uint256 _amount,
         address _to
-    ) external onlyBridge {
+    ) external onlyTrusted {
         require(
             synthesizeStates[_txID] == SynthesizeState.Default,
             "Synt: emergencyUnsynthesizedRequest called or tokens has been already synthesized"
@@ -419,6 +424,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         string memory _symbol
     ) external onlyOwner {
         require(representationSynt[_rtoken] == address(0), "Representation already exists");
+        require(representationReal[address(uint160(uint256(_rtoken)))] == 0, "Representation already exists");
         address stoken = Create2.deploy(
             0,
             keccak256(abi.encodePacked(_rtoken)),
@@ -445,6 +451,14 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         representationSynt[_rtoken] = _stoken;
         representationReal[_stoken] = _rtoken;
         keys.push(_rtoken);
+    }
+
+    function getRepresentation(bytes32 _rtoken)
+        external
+        view
+        returns (address)
+    {
+        return representationSynt[_rtoken];
     }
 
     function getListRepresentation() external view returns (bytes32[] memory, address[] memory) {

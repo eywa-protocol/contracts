@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.0;
+import "@openzeppelin/contracts-newone/utils/structs/EnumerableSet.sol";
 
-contract BridgeCore {
+abstract contract BridgeCore {
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
     address public _listNode;
 
     mapping(address => uint256) internal nonces;
-    mapping(bytes32 => mapping(bytes32 => bytes32)) internal contractBind;
+    mapping(bytes32 => mapping(bytes32 =>  EnumerableSet.Bytes32Set)) internal contractBind;
     mapping(bytes32 => bool) private is_in;
 
     event OracleRequest(
@@ -45,12 +48,12 @@ contract BridgeCore {
         bytes32 from,
         bytes32 oppositeBridge,
         bytes32 to
-    ) external /** onlyOwner */ {
+    ) external virtual/**  onlyOwner*/  {
         require(to != "", "NULL ADDRESS TO");
         require(from != "", "NULL ADDRESS FROM");
         // TODO
         // to prevent malicious behaviour like switching between older and newer contracts (need to use DAO/Owner for this!)
-        contractBind[from][oppositeBridge] = to;
+        contractBind[from][oppositeBridge].add(to);
     }
 
     /** 

@@ -33,7 +33,7 @@ async function main() {
         addressToBytes32(bridgeB),
         addressToBytes32(portal)
         );
-       console.log(`addContractBind for synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
+       console.log(`addContractBind for synthesis on ${network.name} with ${netw}: ${this.tx.hash}`); 
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.p),
         addressToBytes32(bridgeB),

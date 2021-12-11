@@ -1,6 +1,8 @@
 const fs = require("fs");
 const { network } = require("hardhat");
 let deployInfo = require('../../helper-hardhat-config.json')
+const { addressToBytes32, getRepresentation } = require('../../utils/helper');
+require('dotenv').config();
 
 async function main() {
   const [owner] = await ethers.getSigners();
@@ -23,41 +25,19 @@ async function main() {
 
   const totalSupply = ethers.utils.parseEther("10000000000.0")
 
-  // add liquidity to local pool
-  // const _localPool = StableSwap3Pool.attach(deployInfo[network.name].localPool)
   
-  // for(let i=0;i<deployInfo[network.name].localPoolCoins.length;i++){
-  //   await ERC20.attach(deployInfo[network.name].localToken[i].address).mint(owner.address, totalSupply)
-  //   await (await ERC20.attach(deployInfo[network.name].localToken[i].address).approve(deployInfo[network.name].localPool, totalSupply)).wait()
-  // }
 
-  // const amounts = new Array(3).fill(ethers.utils.parseEther("100000.0"))
-  // const min_mint_amount = await _localPool.calc_token_amount(amounts, true); //ethers.utils.parseEther("99999.0")    
-
-  // const res = await _localPool.add_liquidity(
-  //   amounts,
-  //   min_mint_amount,
-  //   {
-  //     gasLimit: '5000000'
-  //   }
-  // )
-
-  //  x = await _localPool.balances(0)
-  //   console.log("awf", x)
-
-
-
-//================================================================
+//==========================ETH-POOL-CROSSCHAIN======================================
   // add liquidity to ETH pool
-  let synthParams,addLiquidityParams;
+  let synthParams, addLiquidityParams;
   let coinsToSynth = []
   selector = web3.eth.abi.encodeFunctionSignature(
     'transit_synth_batch_add_liquidity_3pool((address,address,uint256),address[3],uint256[3],bytes32[3])'
   )
 
-  // initial approval for proxy
+  // initial approval for portal
   if (network.name == "network1" || network.name == "rinkeby") {
-    for(let i=0;i<deployInfo[network.name].localPoolCoins.length;i++){
+    for (let i = 0; i < deployInfo[network.name].localPoolCoins.length; i++) {
       await ERC20.attach(deployInfo[network.name].ethToken[i].address).mint(owner.address, totalSupply)
       await (await ERC20.attach(deployInfo[network.name].ethToken[i].address).approve(deployInfo[network.name].portal, totalSupply)).wait()
       coinsToSynth.push(deployInfo[network.name].ethToken[i].address)
@@ -65,8 +45,8 @@ async function main() {
   }
   console.log(coinsToSynth)
   //add liquidity amount params
-  const amounts = new Array(3).fill(ethers.utils.parseEther("1000.0"))
-  const expected_min_mint_amount = ethers.utils.parseEther("9990.0")
+  const amountsEth = new Array(3).fill(ethers.utils.parseEther("1000.0"))
+  const expected_min_mint_amount = ethers.utils.parseEther("990.0")
 
 
 
@@ -100,7 +80,7 @@ async function main() {
       break;
   }
 
- 
+
 
   const encodedTransitData = web3.eth.abi.encodeParameters(
     ['address', 'address', 'uint256'],
@@ -112,7 +92,7 @@ async function main() {
 
   tx = await Portal.attach(deployInfo[network.name].portal).synthesize_batch_transit(
     coinsToSynth,
-    amounts,
+    amountsEth,
     synthParams,
     selector,
     encodedTransitData,
@@ -122,10 +102,14 @@ async function main() {
   )
   await tx.wait()
   console.log("synthesize_batch_transit",tx.hash)
+ //=================================================================================
 
 
+
+
+//==========================CROSSCHAIN-POOL-CROSSCHAIN=============================
   // add liquidity to crosschain pool
-
+//=================================================================================
 
 
 
@@ -134,7 +118,7 @@ async function main() {
   // write out the deploy configuration 
   console.log("_______________________________________");
   fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
-  console.log("Local Pool Deployed! (saved)\n");
+  // console.log("Local Pool Deployed! (saved)\n");
 
 }
 
