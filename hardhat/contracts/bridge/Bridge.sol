@@ -14,19 +14,17 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     string public override versionRecipient = "2.2.3";
-    E2Point private epochKey; // Aggregated public key of all paricipants of the current epoch
-    address public dao; // Address of the DAO
-    uint8 public epochParticipantsNum; // Number of participants contributed to the epochKey
-    address public owner;
+    E2Point private epochKey;           // Aggregated public key of all paricipants of the current epoch
+    address public dao;                 // Address of the DAO
+    uint8 public epochParticipantsNum;  // Number of participants contributed to the epochKey
+    uint32 public epochNum;             // Sequential number of the epoch
 
-    event NewEpoch(bytes oldEpochKey, bytes newEpochKey);
-    event NewEpochRequested();
+    event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
     event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
     constructor(address listNode, address forwarder) {
         _listNode = listNode;
         trustedForwarder = forwarder;
-        owner = _msgSender();
     }
 
     modifier onlyTrustedNode() {
@@ -59,8 +57,8 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         _;
     }
 
-    function getEpoch() public view returns (bytes memory, uint8) {
-        return (abi.encode(epochKey), epochParticipantsNum);
+    function getEpoch() public view returns(bytes memory, uint8, uint32) {
+        return (abi.encode(epochKey), epochParticipantsNum, epochNum);
     }
 
     /**
@@ -76,8 +74,11 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         bytes calldata _votersPubKey,
         bytes calldata _votersSignature,
         uint256 _votersMask,
-        uint8 _newEpochParticipantsNum
+        uint8 _newEpochParticipantsNum,
+        uint32 _newEpochNum
     ) external {
+        require(epochNum + 1 == _newEpochNum, "wrong epoch number");
+
         E2Point memory newKey = decodeE2Point(_newKey);
         E2Point memory votersPubKey = decodeE2Point(_votersPubKey);
         E1Point memory votersSignature = decodeE1Point(_votersSignature);
@@ -85,13 +86,14 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
             require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "not enough participants"); // TODO configure
             require(epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum), "bitmask too big");
-            bytes memory data = abi.encodePacked(newKey.x, newKey.y, _newEpochParticipantsNum);
+            bytes memory data = abi.encodePacked(newKey.x, newKey.y, _newEpochParticipantsNum, _newEpochNum);
             require(verifyMultisig(epochKey, votersPubKey, data, votersSignature, _votersMask), "multisig mismatch");
         }
 
-        emit NewEpoch(abi.encode(epochKey), abi.encode(newKey));
+        emit NewEpoch(abi.encode(epochKey), abi.encode(newKey), false, _newEpochNum);
         epochKey = newKey;
-        epochParticipantsNum = _newEpochParticipantsNum;
+        epochParticipantsNum = _newEpochParticipantsNum; // TODO: require minimum
+        epochNum = _newEpochNum;
     }
 
     /**
@@ -178,12 +180,14 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
      *                   successfully vote for it
      */
     function daoUpdateEpochRequest(bool resetEpoch) external onlyDao {
+        bytes memory epochKeyBytes = abi.encode(epochKey);
         if (resetEpoch) {
+            epochNum++;
             E2Point memory zero;
-            emit NewEpoch(abi.encode(epochKey), abi.encode(zero));
+            emit NewEpoch(epochKeyBytes, abi.encode(zero), true, epochNum);
             epochKey = zero;
         } else {
-            emit NewEpochRequested();
+            emit NewEpoch(epochKeyBytes, epochKeyBytes, true, epochNum);
         }
     }
 
