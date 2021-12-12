@@ -1,6 +1,7 @@
 const { network } = require("hardhat");
 let deployInfo = require('../../helper-hardhat-config.json')
 
+
 async function main() {
   console.log("\n ADD LIQUIDITY TO LOCAL POOL")
   const [owner] = await ethers.getSigners();
@@ -18,10 +19,8 @@ async function main() {
 
   const totalSupply = ethers.utils.parseEther("100000000000.0")
 
-
   //===============================LOCAL-POOL========================================
-  // add liquidity to local pool
-  const _localPool = StableSwap3Pool.attach(deployInfo[network.name].localPool)
+  const localPool = StableSwap3Pool.attach(deployInfo[network.name].localPool)
 
   for (let i = 0; i < deployInfo[network.name].localPoolCoins.length; i++) {
     await ERC20.attach(deployInfo[network.name].localToken[i].address).mint(owner.address, totalSupply)
@@ -29,11 +28,11 @@ async function main() {
   }
 
   const amounts = new Array(3).fill(ethers.utils.parseEther("100000000.0"))
-  // const min_mint_amount = await _localPool.calc_token_amount(amounts, true); 
-  // const min_mint_amount = amounts.reduce((a, b) => BigInt(a) + BigInt(b), 0) //0
   let min_mint_amount = 0
+  // const min_mint_amount = await localPool.calc_token_amount(amounts, true)
+  // const min_mint_amount = amounts.reduce((a, b) => BigInt(a) + BigInt(b), 0)
 
-  this.tx = await _localPool.add_liquidity(
+  this.tx = await localPool.add_liquidity(
     amounts,
     min_mint_amount,
     {

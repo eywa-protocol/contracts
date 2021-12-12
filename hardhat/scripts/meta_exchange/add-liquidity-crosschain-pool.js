@@ -2,6 +2,7 @@ const { network } = require("hardhat");
 let deployInfo = require('../../helper-hardhat-config.json')
 require('dotenv').config();
 
+
 async function main() {
   console.log("\n ADD LIQUIDITY TO CROSSCHAIN POOL")
   const [owner] = await ethers.getSigners();
@@ -34,6 +35,7 @@ async function main() {
   //==========================CROSSCHAIN-POOL-CROSSCHAIN=============================
 
   let amounts = []
+  let min_mint_amount = 0
 
   for (let crosschainLp of this.crosschainPoolCoins) {
     const lp = ERC20.attach(crosschainLp);
@@ -41,13 +43,8 @@ async function main() {
     amounts.push(localLpBalance)
     await (await lp.approve(crosschainPool.address, 0)).wait()
     await (await lp.approve(crosschainPool.address, totalSupply)).wait()
-
   }
 
-
-  let min_mint_amount = 0
-
-  // console.log(parseInt(min_mint_amount))
   this.tx = await crosschainPool.add_liquidity(
     amounts,
     min_mint_amount,
@@ -62,7 +59,6 @@ async function main() {
   //=================================================================================
 
 }
-
 
 
 main()

@@ -3,6 +3,7 @@ let deployInfo = require('../../helper-hardhat-config.json')
 const h = require("../../utils/helper");
 require('dotenv').config();
 
+
 async function main() {
   console.log("\n ADD LIQUIDITY TO ETH POOL")
   const [owner] = await ethers.getSigners();
@@ -52,7 +53,6 @@ async function main() {
     }
   }
 
-
   // add_liquidity to ethPool
   if (network.name == "network2" /*|| network.name == "mumbai"*/) {
 
@@ -62,7 +62,6 @@ async function main() {
     }
 
     let amountEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"))
-    // let min_mint_amount = ethers.utils.parseEther("100000000.0")
     let min_mint_amount = 0
 
     tx = await StableSwap3Pool.attach(deployInfo[network.name].ethPool).add_liquidity(
@@ -77,10 +76,7 @@ async function main() {
 
     await h.timeout(5_000);
   }
-
   //=================================================================================
-
-
 }
 
 
