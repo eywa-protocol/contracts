@@ -4,7 +4,7 @@ require('dotenv').config();
 
 
 async function main() {
-  console.log("\n ADD LIQUIDITY TO ETH POOL Proxy")
+  console.log("\n ADD LIQUIDITY TO ETH POOL WITH PROXY")
   const [owner] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
@@ -67,8 +67,6 @@ async function main() {
       }
       break;
   }
-
-
 
   const encodedTransitData = web3.eth.abi.encodeParameters(
     ['address', 'address', 'uint256'],

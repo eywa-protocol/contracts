@@ -29,11 +29,9 @@ async function main() {
     // case "mumbai":
     //   crosschainPool = StableSwap5Pool.attach(deployInfo[network.name].crosschainPool);
     //   break;
-
   }
 
   //==========================CROSSCHAIN-POOL-CROSSCHAIN=============================
-
   let amounts = []
   let min_mint_amount = 0
 
@@ -53,11 +51,8 @@ async function main() {
     }
   )
   await this.tx.wait()
-
   console.log(`add liquidity to crosschain pool on ${network.name}: ${this.tx.hash}`);
-
   //=================================================================================
-
 }
 
 

@@ -29,6 +29,7 @@ async function main() {
     for (let i = 0; i < deployInfo[network.name].ethToken.length; i++) {
       await ERC20.attach(deployInfo[network.name].ethToken[i].address).mint(owner.address, totalSupply)
       await (await ERC20.attach(deployInfo[network.name].ethToken[i].address).approve(deployInfo[network.name].portal, totalSupply)).wait()
+
       let coinToSynth = deployInfo[network.name].ethToken[i].address;
       let amount = ethers.utils.parseEther("100000000.0")
       let chain2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK2)
@@ -61,9 +62,8 @@ async function main() {
       await (await ERC20.attach(deployInfo[network.name].ethPoolCoins[i]).approve(deployInfo[network.name].ethPool, totalSupply)).wait()
     }
 
-    let amountEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"))
-    let min_mint_amount = 0
-
+    const amountEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"))
+    const min_mint_amount = 0
     tx = await StableSwap3Pool.attach(deployInfo[network.name].ethPool).add_liquidity(
       amountEth,
       min_mint_amount,
@@ -73,7 +73,6 @@ async function main() {
     )
     await tx.wait()
     console.log("add_liquidity ETH pool", tx.hash)
-
     await h.timeout(5_000);
   }
   //=================================================================================

@@ -24,6 +24,7 @@ async function main() {
   const lp = ERC20.attach(lpToken.address)
   const balanceOfLocalLp = await lp.balanceOf(owner.address)
   const valueToSend = (BigInt(balanceOfLocalLp) / (BigInt(this.sourceForRepresentation.length + 1)))
+  
   await (await lp.approve(deployInfo[network.name].portal, 0)).wait()
   await (await lp.approve(deployInfo[network.name].portal, totalSupply)).wait()
 
@@ -47,10 +48,7 @@ async function main() {
     await tx.wait()
     console.log(`synthesize for local pool LP from ${network.name} to ${netw}: ${this.tx.hash}`);
     await h.timeout(8_000);
-
   }
-
-
   //=================================================================================
 
 }

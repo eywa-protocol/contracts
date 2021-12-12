@@ -39,9 +39,7 @@ async function main() {
       gasLimit: '5000000'
     }
   )
-
   console.log("add_liquidity to local pool:", tx.hash)
-
   //=================================================================================
 
 }
