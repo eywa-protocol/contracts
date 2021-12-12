@@ -10,7 +10,7 @@ const poolSize = 3
 
 
 async function main() {
-  console.log("\nLOCAL POOL DEPLOYMENT\n");
+  console.log("\n LOCAL POOL DEPLOYMENT");
   const [deployer] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());

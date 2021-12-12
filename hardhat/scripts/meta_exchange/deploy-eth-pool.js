@@ -10,7 +10,7 @@ const admin_fee = 5000000000
 const poolSize = 3
 
 async function main() {
-  console.log("\nETH POOL DEPLOYMENT\n");
+  console.log("\n ETH POOL DEPLOYMENT");
   const [deployer] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());

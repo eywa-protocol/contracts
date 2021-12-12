@@ -104,10 +104,3 @@ for net in ${nets//\,/ }
   npx hardhat run --no-compile ./scripts/bridge/updateDexBind.js  --network ${net}
 done
 
-
-# for net in ${nets//\,/ }
-#   do
-#   echo 'init into:' ${net}
-#   npx hardhat run --no-compile ./scripts/meta_exchange/add-liquidity-eth-pool.js  --network ${net}
-# done
-

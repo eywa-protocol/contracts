@@ -1,10 +1,9 @@
-const fs = require("fs");
 const { network } = require("hardhat");
 let deployInfo = require('../../helper-hardhat-config.json')
-const { addressToBytes32, getRepresentation } = require('../../utils/helper');
 require('dotenv').config();
 
 async function main() {
+  console.log("\n ADD LIQUIDITY TO ETH POOL Proxy")
   const [owner] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
@@ -13,21 +12,21 @@ async function main() {
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
   const ERC20 = await ethers.getContractFactory('ERC20Mock')
-  const Bridge = await ethers.getContractFactory('Bridge')
+  // const Bridge = await ethers.getContractFactory('Bridge')
   const Portal = await ethers.getContractFactory('Portal')
-  const Synthesis = await ethers.getContractFactory('Synthesis')
-  const CurveProxy = await ethers.getContractFactory('CurveProxy');
-  const CurveTokenV2 = await ethers.getContractFactory('CurveTokenV2')
-  const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
-  const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
-  const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
-  const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
+  // const Synthesis = await ethers.getContractFactory('Synthesis')
+  // const CurveProxy = await ethers.getContractFactory('CurveProxy');
+  // const CurveTokenV2 = await ethers.getContractFactory('CurveTokenV2')
+  // const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
+  // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
+  // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
+  // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
 
-  const totalSupply = ethers.utils.parseEther("10000000000.0")
+  const totalSupply = ethers.utils.parseEther("100000000000.0")
 
-  
 
-//==========================ETH-POOL-CROSSCHAIN======================================
+
+  //==========================ETH-POOL-CROSSCHAIN======================================
   // add liquidity to ETH pool
   let synthParams, addLiquidityParams;
   let coinsToSynth = []
@@ -45,8 +44,8 @@ async function main() {
   }
   console.log(coinsToSynth)
   //add liquidity amount params
-  const amountsEth = new Array(3).fill(ethers.utils.parseEther("1000.0"))
-  const expected_min_mint_amount = ethers.utils.parseEther("990.0")
+  const amountsEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"))
+  const expected_min_mint_amount = ethers.utils.parseEther("100000000.0")
 
 
 
@@ -101,24 +100,8 @@ async function main() {
     }
   )
   await tx.wait()
-  console.log("synthesize_batch_transit",tx.hash)
- //=================================================================================
-
-
-
-
-//==========================CROSSCHAIN-POOL-CROSSCHAIN=============================
-  // add liquidity to crosschain pool
-//=================================================================================
-
-
-
-
-
-  // write out the deploy configuration 
-  console.log("_______________________________________");
-  fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
-  // console.log("Local Pool Deployed! (saved)\n");
+  console.log("synthesize_batch_transit", tx.hash)
+  //=================================================================================
 
 }
 

@@ -7,7 +7,7 @@ const { network } = require("hardhat");
 
 
 async function main() {
-  console.log("\nCROSSCHAIN POOL DEPLOYMENT\n");
+  console.log("\n CROSSCHAIN POOL DEPLOYMENT");
   const [deployer] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
