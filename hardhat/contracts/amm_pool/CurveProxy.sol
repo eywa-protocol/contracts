@@ -355,7 +355,7 @@ contract CurveProxy is BaseRelayRecipient {
             uint256 min_amount = IStableSwapPool(_params.remove).calc_withdraw_one_coin(token_amount, _params.x);
 
             // inconsistency check
-            if (_params.expected_min_amount < min_amount) {
+            if (_params.expected_min_amount > min_amount) {
                 IERC20(lpToken).safeTransfer(_params.to, token_amount);
                 emit InconsistencyCallback(_params.remove, lpToken, _params.to, token_amount);
                 return;
