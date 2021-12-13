@@ -97,6 +97,11 @@ contract Portal is RelayRecipient, SolanaSerialize {
         _;
     }
 
+    modifier onlyTrusted() {
+        require(bridge == msg.sender || proxy == msg.sender );
+        _;
+    }
+
     /**
      * @dev Synthesize token request.
      * @param _token token address to synthesize
@@ -397,7 +402,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         address _token,
         uint256 _amount,
         address _to
-    ) external onlyBridge {
+    ) external onlyTrusted {
         require(unsynthesizeStates[_txID] == UnsynthesizeState.Default, "Portal: syntatic tokens emergencyUnburn");
 
         TransferHelper.safeTransfer(_token, _to, _amount);
