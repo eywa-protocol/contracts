@@ -308,60 +308,6 @@ contract Portal is RelayRecipient, SolanaSerialize {
         emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
     }
 
-    /* * TODO
-    * @dev Synthesize token request with permit and bytes32 support.
-    * @param _approvalData permit data
-    * @param _token token address to synthesize
-    * @param _amount amount to synthesize 
-    * @param _chain2address recipient address
-    * @param _receiveSide request recipient address
-    * @param _oppositeBridge opposite bridge address
-    * @param _chainID opposite chain ID
-    * /
-    function synthesizeWithPermit_solana(
-        bytes calldata _approvalData,
-        address _token,
-        uint256 _amount,
-        bytes32 _chain2address,
-        bytes32 _receiveSide,
-        bytes32 _oppositeBridge,
-        uint256 _chainID
-    ) external returns (bytes32 txID) {
-        (bool _success1, ) = _token.call(_approvalData);
-        require(_success1, "Approve call failed");
-
-        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
-
-        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-        txID = IBridge(bridge).prepareRqId(
-            _oppositeBridge,
-            _chainID,
-            _receiveSide,
-            bytes32(uint256(uint160(_msgSender()))),
-            nonce
-        );
-
-        bytes memory out = abi.encodeWithSelector(
-            bytes4(keccak256(bytes("mintSyntheticToken(bytes32,bytes32,uint256,bytes32)"))),
-            txID,
-            bytes32(uint256(uint160(_token))),
-            _amount,
-            _chain2address
-        );
-        // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_solana(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
-        TxState storage txState = requests[txID];
-        txState.recipient = bytes32(uint256(uint160(_msgSender())));
-        txState.chain2address = _chain2address;
-        txState.rtoken = bytes32(uint256(uint160(_token)));
-        txState.amount = _amount;
-        txState.state = RequestState.Sent;
-
-        emit SynthesizeRequestSolana(txID, _msgSender(), _chain2address, _amount, _token);
-    }
-    */
-
     /**
      * @dev Emergency unsynthesize request. Can be called only by bridge after initiation on a second chain
      * @param _txID transaction ID to unsynth
