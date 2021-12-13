@@ -202,6 +202,7 @@ contract CurveProxy is BaseRelayRecipient {
         //approve LP for Portal
         address lp = lp_token[_add];
         uint256 this_balance = IERC20(lp).balanceOf(address(this));
+        IERC20(lp).approve(portal, 0);  // CurveV2 token support
         IERC20(lp).approve(portal, this_balance);
 
         //pack synthesize request with transit
@@ -251,6 +252,7 @@ contract CurveProxy is BaseRelayRecipient {
         synth_amount[_opposite_pool_numbers[1]] = IERC20(synth_token[_opposite_pool_numbers[1]]).balanceOf(
             address(this)
         );
+        IERC20(synth_token[_opposite_pool_numbers[1]]).approve(portal, 0);  // CurveV2 token support
         IERC20(synth_token[_opposite_pool_numbers[1]]).approve(portal, synth_amount[_opposite_pool_numbers[1]]);
 
         // synthesize batch transit => transit_synth_add_liquidity_[_opposite_pool_numbers[0]]pool
@@ -288,6 +290,7 @@ contract CurveProxy is BaseRelayRecipient {
 
             //exchange stage
             address representation = ISynthesis(synthesis).getRepresentation(bytes32(uint256(uint160(_synth_token))));
+            IERC20(representation).approve(_params.exchange, 0);
             IERC20(representation).approve(_params.exchange, IERC20(representation).balanceOf(address(this)));
 
             uint256 dx = IERC20(representation).balanceOf(address(this)); //amount to swap
@@ -348,7 +351,7 @@ contract CurveProxy is BaseRelayRecipient {
         } else {
             //remove liquidity one coin stage
             address lpToken = lp_token[_params.remove];
-            // IERC20(lpToken).approve(_params.remove, 0);  // CurveV2 token support
+            IERC20(lpToken).approve(_params.remove, 0);  // CurveV2 token support
             IERC20(lpToken).approve(_params.remove, IERC20(lpToken).balanceOf(address(this)));
 
             uint256 token_amount = IERC20(lpToken).balanceOf(address(this));
@@ -397,6 +400,7 @@ contract CurveProxy is BaseRelayRecipient {
         IPortal(portal).unsynthesize(_txId, _token, _amount, address(this));
 
         //remove liquidity one coin
+        IERC20(_token).approve(_remove, 0);  // CurveV2 token support
         IERC20(_token).approve(_remove, IERC20(_token).balanceOf(address(this)));
 
         uint256 token_amount = IERC20(_token).balanceOf(address(this));
@@ -510,6 +514,7 @@ contract CurveProxy is BaseRelayRecipient {
         {
             address lpLocalPool = lp_token[_params.add];
 
+            IERC20(lpLocalPool).approve(_params.exchange, 0);  // CurveV2 token support
             IERC20(lpLocalPool).approve(_params.exchange, IERC20(lpLocalPool).balanceOf(address(this)));
 
             uint256 dx = IERC20(lpLocalPool).balanceOf(address(this)); //amount to swap
@@ -570,7 +575,7 @@ contract CurveProxy is BaseRelayRecipient {
         } else {
             //remove liquidity one coin stage
             address lpToken = lp_token[_params.remove];
-            // IERC20(lpToken).approve(_params.remove, 0);  // CurveV2 token support
+            IERC20(lpToken).approve(_params.remove, 0);  // CurveV2 token support
             IERC20(lpToken).approve(_params.remove, IERC20(lpToken).balanceOf(address(this)));
 
             uint256 token_amount = IERC20(lpToken).balanceOf(address(this));
