@@ -154,23 +154,35 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
 
     /**
      * @dev Receive crosschain request v2.
-     * @param reqId request ID
-     * @param b call data
-     * @param receiveSide receiver address
-     * @param bridgeFrom opposite bridge address
+     * @param _reqId request ID
+     * @param _sel function selector
+     * @param _receiveSide receiver address
+     * @param _bridgeFrom opposite bridge address
+     * @param _votersPubKey aggregated public key of the old epoch participants, who voted for the update
+     * @param _votersSignature aggregated signature of the old epoch participants, who voted for the update
+     * @param _votersMask bitmask of old epoch participants, who voted, amoung all participants
      */
     function receiveRequestV2(
-        bytes32 reqId,
-        bytes memory b,
-        address receiveSide,
-        bytes32 bridgeFrom
+        bytes32 _reqId,
+        bytes memory _sel,
+        address _receiveSide,
+        bytes32 _bridgeFrom,
+        bytes calldata _votersPubKey,
+        bytes calldata _votersSignature,
+        uint256 _votersMask
     ) external {
-        // TODO senderSide
-        // bytes32 senderSide = contractBind[bytes32(uint256(uint160(receiveSide)))][bridgeFrom];
-        bytes memory data = receiveSide.functionCall(b, "receiveRequestV2 failed");
+        require(epochKey.x[0] != 0 || epochKey.x[1] != 0, "epoch not set");
+        require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "not enough participants"); // TODO configure
+        require(epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum), "bitmask too big");
+
+        E2Point memory votersPubKey = decodeE2Point(_votersPubKey);
+        E1Point memory votersSignature = decodeE1Point(_votersSignature);
+        bytes memory sigData = abi.encodePacked(_reqId, _sel, _receiveSide, _bridgeFrom, epochNum);
+        require(verifyMultisig(epochKey, votersPubKey, sigData, votersSignature, _votersMask), "multisig mismatch");
+
+        bytes memory data = _receiveSide.functionCall(_sel, "receiveRequestV2 failed");
         require(data.length == 0 || abi.decode(data, (bool)), "receiveRequestV2: Unable to decode rerurned data");
-        emit ReceiveRequest(reqId, receiveSide, bridgeFrom, bytes32("")/*senderSide*/);
-        
+        emit ReceiveRequest(_reqId, _receiveSide, _bridgeFrom);
     }
 
     /**

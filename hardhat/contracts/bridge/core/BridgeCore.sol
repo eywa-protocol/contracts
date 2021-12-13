@@ -31,17 +31,17 @@ abstract contract BridgeCore {
         uint256 chainid
     );
 
-    event ReceiveRequest(bytes32 reqId, address receiveSide, bytes32 bridgeFrom, bytes32 senderSide);
+    event ReceiveRequest(bytes32 reqId, address receiveSide, bytes32 bridgeFrom);
 
 
     /**
     * @dev Mandatory for all participants who wants to use their own contracts
     * 1. Contract A (chain A) should be binded with Contract B (chain B) only once! It's not allowed to switch Contract A (chain A) to Contract C (chain B).
     * to prevent malicious behaviour.
-    * 2. Contract A (chain A) could be binded with several contracts where every contract from another chain. 
+    * 2. Contract A (chain A) could be binded with several contracts where every contract from another chain.
     * For ex: Contract A (chain A) --> Contract B (chain B) + Contract A (chain A) --> Contract B' (chain B') ... etc
     * @param from padded sender's address
-    * @param oppositeBridge padded opposite bridge address 
+    * @param oppositeBridge padded opposite bridge address
     * @param to padded recipient address
     */
     function addContractBind(
@@ -56,12 +56,12 @@ abstract contract BridgeCore {
         contractBind[from][oppositeBridge].add(to);
     }
 
-    /** 
+    /**
     * @dev Prepares a request ID with the given arguments.
     * @param oppositeBridge padded opposite bridge address
     * @param chainId opposite chain ID
     * @param receiveSide padded receive contract address
-    * @param from padded sender's address 
+    * @param from padded sender's address
     * @param nonce current nonce
     */
     function prepareRqId(
@@ -74,7 +74,7 @@ abstract contract BridgeCore {
         return keccak256(abi.encodePacked(from, nonce, chainId, receiveSide, oppositeBridge));
     }
 
-    /** 
+    /**
     * @dev Get the nonce of the current sender.
     * @param from sender's address
     */
@@ -82,7 +82,7 @@ abstract contract BridgeCore {
         return nonces[from];
     }
 
-    /** 
+    /**
     * @dev Verifies and updates the sender's nonce.
     * @param from sender's address
     * @param nonce provided sender's nonce
