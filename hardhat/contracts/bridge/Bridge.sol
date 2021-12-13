@@ -165,12 +165,10 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         address receiveSide,
         bytes32 bridgeFrom
     ) external {
-        // TODO senderSide
-        // bytes32 senderSide = contractBind[bytes32(uint256(uint160(receiveSide)))][bridgeFrom];
         bytes memory data = receiveSide.functionCall(b, "receiveRequestV2 failed");
         require(data.length == 0 || abi.decode(data, (bool)), "receiveRequestV2: Unable to decode rerurned data");
-        emit ReceiveRequest(reqId, receiveSide, bridgeFrom, bytes32("")/*senderSide*/);
-        
+        emit ReceiveRequest(reqId, receiveSide, bridgeFrom);
+
     }
 
     /**
