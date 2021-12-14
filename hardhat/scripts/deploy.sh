@@ -15,6 +15,7 @@ if [[ ${1} =~ ^('')$ ]]
     ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
       RPC_URL=$(getField ${net}.rpcUrl) \
       NETWORK_ID=$(getField ${net}.chainId) \
+      NETWORK_NAME=${net} \
       BRIDGE_ADDRESS=$(getField ${net}.bridge) \
       DEXPOOL_ADDRESS=$(getField ${net}.mockDexPool) \
       PORTAL_ADDRESS=$(getField ${net}.portal) \
@@ -39,6 +40,8 @@ if [[ ${1} =~ ^('')$ ]]
   exit 0
  fi
 
+
+regnet=$(cut -d "," -f1 <<<$nets)
 for net in ${nets//\,/ }
 do
 echo 'bash script for network:' ${net}
@@ -49,9 +52,17 @@ echo ''
 npx hardhat run --no-compile ./scripts/bridge/deploy.js   --network ${net}
 npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
 
+if [ ${net} == ${regnet} ]
+then
+    echo 'deploying registry stuff to' ${regnet}
+    echo '=========================================='
+    npx hardhat run --no-compile ./scripts/bridge/deployNodeRegistry.js --network ${regnet}
+fi
+
 ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
   RPC_URL=$(getField ${net}.rpcUrl) \
   NETWORK_ID=$(getField ${net}.chainId) \
+  NETWORK_NAME=${net} \
   BRIDGE_ADDRESS=$(getField ${net}.bridge) \
   NODEREGISTRY_ADDRESS=$(getField ${net}.nodeRegistry) \
   DEXPOOL_ADDRESS=$(getField ${net}.mockDexPool) \
@@ -84,7 +95,7 @@ for net in ${nets//\,/ }
   do
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network ${net}
 done
- 
+
 for net in ${nets//\,/ }
   do
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network ${net}
@@ -103,4 +114,3 @@ for net in ${nets//\,/ }
   echo 'init into:' ${net}
   npx hardhat run --no-compile ./scripts/bridge/updateDexBind.js  --network ${net}
 done
-

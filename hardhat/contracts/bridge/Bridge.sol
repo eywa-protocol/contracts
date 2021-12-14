@@ -22,17 +22,8 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
     event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
-    constructor(address listNode, address forwarder) {
-        _listNode = listNode;
+    constructor(address forwarder) {
         trustedForwarder = forwarder;
-    }
-
-    modifier onlyTrustedNode() {
-        require(
-            INodeRegistry(_listNode).checkPermissionTrustList(_msgSender()) == true,
-            "Only trusted node can invoke"
-        );
-        _;
     }
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
