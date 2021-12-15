@@ -25,12 +25,21 @@ contract NodeRegistry is BaseRelayRecipient {
     //     address vault;
     // }
 
-    address public EYWA;
-    uint256 public constant MIN_COLLATERAL = 1 ether; //TODO discuss
+    struct Snapshot {
+        uint256 lastTouchTime;
+        string[] blsPubKeys;
+    }
 
+
+    uint256 constant SnapshotTtl = 10 seconds;
+    uint256 constant SnapshotMaxSize = 50;
+    uint256 public constant MIN_COLLATERAL = 1 ether; // TODO discuss
+
+    address public EYWA;
     EnumerableSet.AddressSet nodes;
     mapping(address => address) public ownedNodes;
     mapping(address => Node) public nodeRegistry;
+    Snapshot public snapshot;
 
     event CreatedRelayer(
         address indexed nodeIdAddress,
@@ -142,6 +151,34 @@ contract NodeRegistry is BaseRelayRecipient {
         IERC20(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
         _node.pool = address(relayerPool);
         addNode(_node);
+    }
+
+    function getSnapshotPubKeys() external view returns (string[] memory) {
+        return snapshot.blsPubKeys;
+    }
+
+    function touchSnapshot() external {
+        require(ownedNodes[_msgSender()] != address(0), "Only nodes");
+        if (block.timestamp - snapshot.lastTouchTime > SnapshotTtl) {
+            delete snapshot;
+
+            uint256[] memory indexes = new uint256[](nodes.length());
+            for (uint256 i = 0; i < nodes.length(); i++) {
+                indexes[i] = i;
+            }
+
+            uint256 rand = uint256(blockhash(block.number-1));  // TODO unsafe
+            uint256 len = nodes.length();
+            if (len > SnapshotMaxSize) len = SnapshotMaxSize;
+            for (uint256 i = 0; i < len; i++) {
+                // https://en.wikipedia.org/wiki/Linear_congruential_generator
+                unchecked { rand = rand*6364136223846793005 + 1442695040888963407; }   // TODO unsafe
+                uint256 j = i + (rand % (nodes.length() - i));
+                snapshot.blsPubKeys.push(nodeRegistry[nodes.at(indexes[j])].blsPubKey);
+                indexes[j] = indexes[i];
+            }
+        }
+        snapshot.lastTouchTime = block.timestamp;
     }
 
     string public override versionRecipient = "2.2.3";
