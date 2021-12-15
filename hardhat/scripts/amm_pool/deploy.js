@@ -12,12 +12,12 @@ async function main() {
     console.log("Owner:", deployer.address);
 
     const _Portal = await ethers.getContractFactory("Portal");
-    const portal  = await _Portal.deploy(newNetworkConfig[network.name].bridge, networkConfig[network.name].forwarder);
+    const portal  = await _Portal.deploy(newNetworkConfig.bridge, networkConfig[network.name].forwarder);
     await portal.deployed();
     console.log("Portal address:", portal.address);
 
     const _Synthesis = await ethers.getContractFactory("Synthesis");
-    const synthesis  = await _Synthesis.deploy(newNetworkConfig[network.name].bridge, networkConfig[network.name].forwarder);
+    const synthesis  = await _Synthesis.deploy(newNetworkConfig.bridge, networkConfig[network.name].forwarder);
     await synthesis.deployed();
     console.log("Synthesis address:", synthesis.address);
 
