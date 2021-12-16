@@ -26,12 +26,14 @@ contract NodeRegistry is BaseRelayRecipient {
     // }
 
     struct Snapshot {
+        uint256 snapNum;
         uint256 lastTouchTime;
         string[] blsPubKeys;
     }
 
 
     uint256 constant SnapshotTtl = 10 seconds;
+    uint256 constant SnapshotMinTouchTime = 5 seconds;
     uint256 constant SnapshotMaxSize = 50;
     uint256 public constant MIN_COLLATERAL = 1 ether; // TODO discuss
 
@@ -41,6 +43,7 @@ contract NodeRegistry is BaseRelayRecipient {
     mapping(address => Node) public nodeRegistry;
     Snapshot public snapshot;
 
+    event NewSnapshot(uint256 snapNum);
     event CreatedRelayer(
         address indexed nodeIdAddress,
         uint256 indexed nodeId,
@@ -153,13 +156,15 @@ contract NodeRegistry is BaseRelayRecipient {
         addNode(_node);
     }
 
-    function getSnapshotPubKeys() external view returns (string[] memory) {
-        return snapshot.blsPubKeys;
+    function getSnapshotPubKeys() external view returns (string[] memory, uint256) {
+        return (snapshot.blsPubKeys, snapshot.snapNum);
     }
 
     function touchSnapshot() external {
+        require(block.timestamp - snapshot.lastTouchTime > SnapshotMinTouchTime, "Just touched");
         require(ownedNodes[_msgSender()] != address(0), "Only nodes");
         if (block.timestamp - snapshot.lastTouchTime > SnapshotTtl) {
+            uint256 snapNum = snapshot.snapNum + 1;
             delete snapshot;
 
             uint256[] memory indexes = new uint256[](nodes.length());
@@ -177,6 +182,9 @@ contract NodeRegistry is BaseRelayRecipient {
                 snapshot.blsPubKeys.push(nodeRegistry[nodes.at(indexes[j])].blsPubKey);
                 indexes[j] = indexes[i];
             }
+
+            snapshot.snapNum = snapNum;
+            emit NewSnapshot(snapNum);
         }
         snapshot.lastTouchTime = block.timestamp;
     }
