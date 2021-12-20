@@ -11,11 +11,11 @@ contract NodeRegistry is BaseRelayRecipient {
     using SafeERC20 for IERC20;
 
     struct Node {
-        address owner;
-        address pool;
-        address nodeIdAddress;
-        string  blsPubKey;
-        uint256 nodeId;
+        address owner;     // address of node signer key
+        address pool;      // RelayerPool for this node
+        string  hostId;    // libp2p host ID
+        string  blsPubKey; // BLS public key
+        uint256 nodeId;    // absolute sequential number
     }
 
     // struct NodeInitParams {
@@ -29,6 +29,7 @@ contract NodeRegistry is BaseRelayRecipient {
         uint256 snapNum;
         uint256 lastTouchTime;
         string[] blsPubKeys;
+        string[] hostIds;
     }
 
 
@@ -39,16 +40,17 @@ contract NodeRegistry is BaseRelayRecipient {
 
     address public EYWA;
     EnumerableSet.AddressSet nodes;
-    mapping(address => address) public ownedNodes;
-    mapping(address => Node) public nodeRegistry;
+    mapping(address => Node) public ownedNodes;
+    mapping(string => address) public hostIds;
     Snapshot public snapshot;
 
     event NewSnapshot(uint256 snapNum);
     event CreatedRelayer(
-        address indexed nodeIdAddress,
-        uint256 indexed nodeId,
-        address indexed relayerPool,
-        address owner
+        address indexed owner,
+        address relayerPool,
+        string hostId,
+        string blsPubKey,
+        uint256 nodeId
     );
 
     constructor(
@@ -61,42 +63,43 @@ contract NodeRegistry is BaseRelayRecipient {
         trustedForwarder = _forwarder;
     }
 
-    modifier isNewNode(address _nodeIdAddr) {
+    modifier isNewNode(address _owner) {
         require(
-            nodeRegistry[_nodeIdAddr].owner == address(0),
-            string(abi.encodePacked("node ", convertToString(_nodeIdAddr), " allready exists"))
+            ownedNodes[_owner].owner == address(0),
+            string(abi.encodePacked("node already exists"))
         );
         _;
     }
 
-    modifier existingNode(address _nodeIdAddr) {
+    modifier existingNode(address _owner) {
         require(
-            nodeRegistry[_nodeIdAddr].owner != address(0),
-            string(abi.encodePacked("node ", convertToString(_nodeIdAddr), " does not exist"))
+            ownedNodes[_owner].owner != address(0),
+            string(abi.encodePacked("node does not exist"))
         );
         _;
     }
 
     //TODO: check: nodeRegistry[_blsPointAddr] == address(0)
-    function addNode(Node memory node) internal isNewNode(node.nodeIdAddress) {
-        require(node.owner != address(0), Errors.ZERO_ADDRESS);
-        require(node.nodeIdAddress != address(0), Errors.ZERO_ADDRESS);
+    function addNode(Node memory node) internal isNewNode(node.owner) {
+        //require(node.owner != address(0), Errors.ZERO_ADDRESS);
+        require(node.owner == _msgSender(), Errors.ZERO_ADDRESS);
+        require(bytes(node.hostId).length != 0, Errors.ZERO_ADDRESS);
         node.nodeId = nodes.length();
-        nodeRegistry[node.nodeIdAddress] = node;
-        nodes.add(node.nodeIdAddress);
-        ownedNodes[node.owner] = node.nodeIdAddress;
+        hostIds[node.hostId] = node.owner;
+        nodes.add(node.owner);
+        ownedNodes[node.owner] = node;
 
-        emit CreatedRelayer(node.nodeIdAddress, node.nodeId, node.pool, node.owner);
+        emit CreatedRelayer(node.owner, node.pool, node.hostId, node.blsPubKey, node.nodeId);
     }
 
-    function getNode(address _nodeIdAddress) external view returns (Node memory) {
-        return nodeRegistry[_nodeIdAddress];
+    function getNode(address _owner) external view returns (Node memory) {
+        return ownedNodes[_owner];
     }
 
     function getNodes() external view returns (Node[] memory) {
         Node[] memory allNodes = new Node[](nodes.length());
         for (uint256 i = 0; i < nodes.length(); i++) {
-            allNodes[i] = nodeRegistry[nodes.at(i)];
+            allNodes[i] = ownedNodes[nodes.at(i)];
         }
         return allNodes;
     }
@@ -104,32 +107,19 @@ contract NodeRegistry is BaseRelayRecipient {
     function getBLSPubKeys() external view returns (string[] memory) {
         string[] memory pubKeys = new string[](nodes.length());
         for (uint256 i = 0; i < nodes.length(); i++) {
-            pubKeys[i] = nodeRegistry[nodes.at(i)].blsPubKey;
+            pubKeys[i] = ownedNodes[nodes.at(i)].blsPubKey;
         }
         return pubKeys;
     }
 
 
-    function convertToString(address account) public pure returns (string memory s) {
-        bytes memory alphabet = "0123456789abcdef";
-        bytes memory data = abi.encodePacked(account);
-        bytes memory result = new bytes(2 + data.length * 2);
-        result[0] = "0";
-        result[1] = "x";
-        for (uint256 i = 0; i < data.length; i++) {
-            result[2 + i * 2] = alphabet[uint256(uint8(data[i] >> 4))];
-            result[3 + i * 2] = alphabet[uint256(uint8(data[i] & 0x0f))];
-        }
-        return string(result);
+    function nodeExists(address _owner) external view returns (bool) {
+        return ownedNodes[_owner].owner != address(0);
     }
 
-    function nodeExists(address _nodeIdAddr) public view returns (bool) {
-        return nodeRegistry[_nodeIdAddr].owner != address(0);
-    }
-
-    function checkPermissionTrustList(address _nodeOwner) external view returns (bool) {
-       return nodeRegistry[ownedNodes[_nodeOwner]].owner == _nodeOwner; // (test only)
-    // return nodeRegistry[ownedNodes[_nodeOwner]].status == 1;
+    function checkPermissionTrustList(address _owner) external view returns (bool) {
+       return ownedNodes[_owner].owner == _owner; // (test only)
+    // return ownedNodes[_owner].status == 1;
     }
 
     function createRelayer(
@@ -156,13 +146,13 @@ contract NodeRegistry is BaseRelayRecipient {
         addNode(_node);
     }
 
-    function getSnapshotPubKeys() external view returns (string[] memory, uint256) {
-        return (snapshot.blsPubKeys, snapshot.snapNum);
+    function getSnapshot() external view returns (string[] memory, string[] memory, uint256) {
+        return (snapshot.blsPubKeys, snapshot.hostIds, snapshot.snapNum);
     }
 
     function touchSnapshot() external {
         require(block.timestamp - snapshot.lastTouchTime > SnapshotMinTouchTime, "Just touched");
-        require(ownedNodes[_msgSender()] != address(0), "Only nodes");
+        require(ownedNodes[_msgSender()].owner == _msgSender(), "Only nodes");
         if (block.timestamp - snapshot.lastTouchTime > SnapshotTtl) {
             uint256 snapNum = snapshot.snapNum + 1;
             delete snapshot;
@@ -179,7 +169,9 @@ contract NodeRegistry is BaseRelayRecipient {
                 // https://en.wikipedia.org/wiki/Linear_congruential_generator
                 unchecked { rand = rand*6364136223846793005 + 1442695040888963407; }   // TODO unsafe
                 uint256 j = i + (rand % (nodes.length() - i));
-                snapshot.blsPubKeys.push(nodeRegistry[nodes.at(indexes[j])].blsPubKey);
+                Node storage n = ownedNodes[nodes.at(indexes[j])];
+                snapshot.blsPubKeys.push(n.blsPubKey);
+                snapshot.hostIds.push(n.hostId);
                 indexes[j] = indexes[i];
             }
 
