@@ -6,6 +6,7 @@ import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "./IBridge.sol";
 import "./RelayRecipient.sol";
 import "./SolanaSerialize.sol";
+import "../utils/Typecast.sol";
 
 //TODO: relocate
 interface IERC20 {
@@ -14,7 +15,7 @@ interface IERC20 {
     function symbol() external returns (string memory);
 }
 
-contract Portal is RelayRecipient, SolanaSerialize {
+contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     using SafeMath for uint256;
 
     mapping(address => uint256) public balanceOf;
@@ -27,8 +28,8 @@ contract Portal is RelayRecipient, SolanaSerialize {
         abi.encodePacked(uint8(149), uint8(132), uint8(104), uint8(123), uint8(157), uint8(85), uint8(21), uint8(161));
 
     enum SynthesizePubkeys {
-        chain2address,
-        receiveSide,
+        recipientAddress,
+        callDestination,
         receiveSideData,
         oppositeBridge,
         oppositeBridgeData,
@@ -49,16 +50,16 @@ contract Portal is RelayRecipient, SolanaSerialize {
     }
 
     struct TxState {
-        bytes32 recipient;
-        bytes32 chain2address;
+        bytes32 sender;
+        bytes32 recipientAddress;
         uint256 amount;
         bytes32 rtoken;
         RequestState state;
     }
 
     struct SynthParams {
-        address chain2address;
-        address receiveSide;
+        address recipientAddress;
+        address callDestination;
         address oppositeBridge;
         uint256 chainID;
     }
@@ -71,108 +72,110 @@ contract Portal is RelayRecipient, SolanaSerialize {
     event SynthesizeRequest(
         bytes32 indexed _id,
         address indexed _from,
-        address indexed _to,
-        uint256 _amount,
-        address _token
+        address indexed to,
+        uint256 amount,
+        address token
     );
     event SynthesizeRequestSolana(
         bytes32 indexed _id,
         address indexed _from,
-        bytes32 indexed _to,
-        uint256 _amount,
-        address _token
+        bytes32 indexed to,
+        uint256 amount,
+        address token
     );
-    event RevertBurnRequest(bytes32 indexed _id, address indexed _to);
-    event BurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
-    event RevertSynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
-    event RepresentationRequest(address indexed _rtoken);
-    event ApprovedRepresentationRequest(address indexed _rtoken);
+    event RevertBurnRequest(bytes32 indexed _id, address indexed to);
+    event BurnCompleted(bytes32 indexed _id, address indexed to, uint256 amount, address token);
+    event RevertSynthesizeCompleted(bytes32 indexed _id, address indexed to, uint256 amount, address token);
+    event RepresentationRequest(address indexed rtoken);
+    event ApprovedRepresentationRequest(address indexed rtoken);
 
     constructor(address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
         bridge = _bridge;
     }
 
     modifier onlyBridge() {
-        require(bridge == msg.sender);
+        require(bridge == _msgSender());
         _;
     }
 
     modifier onlyTrusted() {
-        require(bridge == msg.sender || proxy == msg.sender );
+        require(bridge == _msgSender() || proxy == _msgSender());
         _;
     }
 
     /**
      * @dev Synthesize token request.
-     * @param _token token address to synthesize
-     * @param _amount amount to synthesize
-     * @param _chain2address amount recipient address
-     * @param _receiveSide request recipient address
-     * @param _oppositeBridge opposite bridge address
-     * @param _chainID opposite chain ID
+     * @param token token address to synthesize
+     * @param amount amount to synthesize
+     * @param recipientAddress outcome recipient address
+     * @param callDestination request recipient address
+     * @param oppositeBridge opposite bridge address
+     * @param chainID opposite chain ID
      */
     function synthesize(
-        address _token,
-        uint256 _amount,
-        address _chain2address,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID
+        address token,
+        uint256 amount,
+        address recipientAddress,
+        address callDestination,
+        address oppositeBridge,
+        uint256 chainID
     ) external returns (bytes32 txID) {
-        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
+        require(tokenData[token].length != 0, "Portal: token must be verified");
+        TransferHelper.safeTransferFrom(token, _msgSender(), address(this), amount);
+        balanceOf[token] = balanceOf[token].add(amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_oppositeBridge))),
-            _chainID,
-            bytes32(uint256(uint160(_receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(oppositeBridge),
+            chainID,
+            castToBytes32(callDestination),
+            castToBytes32(_msgSender()),
             nonce
         );
 
         bytes memory out = abi.encodeWithSelector(
             bytes4(keccak256(bytes("mintSyntheticToken(bytes32,address,uint256,address)"))),
             txID,
-            _token,
-            _amount,
-            _chain2address
+            token,
+            amount,
+            recipientAddress
         );
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2(out, callDestination, oppositeBridge, chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
-        txState.recipient = bytes32(uint256(uint160(_msgSender())));
-        txState.chain2address = bytes32(uint256(uint160(_chain2address)));
-        txState.rtoken = bytes32(uint256(uint160(_token)));
-        txState.amount = _amount;
+        txState.sender = castToBytes32(_msgSender());
+        txState.recipientAddress = castToBytes32(recipientAddress);
+        txState.rtoken = castToBytes32(token);
+        txState.amount = amount;
         txState.state = RequestState.Sent;
 
-        emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
+        emit SynthesizeRequest(txID, _msgSender(), recipientAddress, amount, token);
     }
 
     /**
      * @dev Synthesize token request with bytes32 support for Solana.
-     * @param _token token address to synthesize
-     * @param _amount amount to synthesize
-     * @param _pubkeys synth data for Solana
-     * @param _txStateBump transaction state bump
-     * @param _chainId opposite chain ID
+     * @param token token address to synthesize
+     * @param amount amount to synthesize
+     * @param pubkeys synth data for Solana
+     * @param txStateBump transaction state bump
+     * @param chainId opposite chain ID
      */
     function synthesize_solana(
-        address _token,
-        uint256 _amount,
-        bytes32[] calldata _pubkeys,
-        bytes1 _txStateBump,
-        uint256 _chainId
+        address token,
+        uint256 amount,
+        bytes32[] calldata pubkeys,
+        bytes1 txStateBump,
+        uint256 chainId
     ) external returns (bytes32 txID) {
-        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
+        require(tokenData[token].length != 0, "Portal: token must be verified");
+        TransferHelper.safeTransferFrom(token, _msgSender(), address(this), amount);
+        balanceOf[token] = balanceOf[token].add(amount);
 
-        require(_chainId == SOLANA_CHAIN_ID, "incorrect chainID");
+        require(chainId == SOLANA_CHAIN_ID, "incorrect chainID");
 
         // TODO: fix amount digits for solana (digits 18 -> 6)
-        require(_amount < type(uint64).max, "amount too large");
-        uint64 solAmount = uint64(_amount);
+        require(amount < type(uint64).max, "amount too large");
+        uint64 solAmount = uint64(amount);
         // swap bytes
         solAmount = ((solAmount & 0xFF00FF00FF00FF00) >> 8) | ((solAmount & 0x00FF00FF00FF00FF) << 8);
         // swap 2-byte long pairs
@@ -182,36 +185,36 @@ contract Portal is RelayRecipient, SolanaSerialize {
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
-            _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
+            pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
-            _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
-            bytes32(uint256(uint160(_msgSender()))),
+            pubkeys[uint256(SynthesizePubkeys.callDestination)],
+            castToBytes32(_msgSender()),
             nonce
         );
 
         SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](9);
         accounts[0] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.receiveSideData)],
+            pubkey: pubkeys[uint256(SynthesizePubkeys.receiveSideData)],
             isSigner: false,
             isWritable: true
         });
         accounts[1] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.syntToken)],
+            pubkey: pubkeys[uint256(SynthesizePubkeys.syntToken)],
             isSigner: false,
             isWritable: true
         });
         accounts[2] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.syntTokenData)],
+            pubkey: pubkeys[uint256(SynthesizePubkeys.syntTokenData)],
             isSigner: false,
             isWritable: false
         });
         accounts[3] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.txState)],
+            pubkey: pubkeys[uint256(SynthesizePubkeys.txState)],
             isSigner: false,
             isWritable: true
         });
         accounts[4] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.chain2address)],
+            pubkey: pubkeys[uint256(SynthesizePubkeys.recipientAddress)],
             isSigner: false,
             isWritable: true
         });
@@ -219,7 +222,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_SYSTEM_PROGRAM, isSigner: false, isWritable: false });
         accounts[7] = SolanaAccountMeta({ pubkey: SOLANA_RENT, isSigner: false, isWritable: false });
         accounts[8] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.oppositeBridgeData)],
+            pubkey: pubkeys[uint256(SynthesizePubkeys.oppositeBridgeData)],
             isSigner: true,
             isWritable: false
         });
@@ -229,15 +232,15 @@ contract Portal is RelayRecipient, SolanaSerialize {
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                     /* programId: */
-                    _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
+                    pubkeys[uint256(SynthesizePubkeys.callDestination)],
                     /* accounts: */
                     accounts,
                     /* data: */
-                    abi.encodePacked(sighashMintSyntheticToken, txID, _txStateBump, solAmount)
+                    abi.encodePacked(sighashMintSyntheticToken, txID, txStateBump, solAmount)
                 )
             ),
-            _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
-            _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
+            pubkeys[uint256(SynthesizePubkeys.callDestination)],
+            pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             txID,
             _msgSender(),
@@ -245,259 +248,202 @@ contract Portal is RelayRecipient, SolanaSerialize {
         );
 
         TxState storage txState = requests[txID];
-        txState.recipient = bytes32(uint256(uint160(_msgSender())));
-        txState.chain2address = _pubkeys[uint256(SynthesizePubkeys.chain2address)];
-        txState.rtoken = bytes32(uint256(uint160(_token)));
-        txState.amount = _amount;
+        txState.sender = castToBytes32(_msgSender());
+        txState.recipientAddress = pubkeys[uint256(SynthesizePubkeys.recipientAddress)];
+        txState.rtoken = castToBytes32(token);
+        txState.amount = amount;
         txState.state = RequestState.Sent;
 
         emit SynthesizeRequestSolana(
             txID,
             _msgSender(),
-            _pubkeys[uint256(SynthesizePubkeys.chain2address)],
-            _amount,
-            _token
+            pubkeys[uint256(SynthesizePubkeys.recipientAddress)],
+            amount,
+            token
         );
     }
 
     /**
      * @dev Synthesize token request with permit.
-     * @param _approvalData permit data
-     * @param _token token address to synthesize
-     * @param _amount amount to synthesize
-     * @param _chain2address amount recipient address
-     * @param _receiveSide request recipient address
-     * @param _oppositeBridge opposite bridge address
-     * @param _chainID opposite chain ID
+     * @param approvalData permit data
+     * @param token token address to synthesize
+     * @param amount amount to synthesize
+     * @param recipientAddress amount recipient address
+     * @param callDestination request recipient address
+     * @param oppositeBridge opposite bridge address
+     * @param chainID opposite chain ID
      */
     function synthesizeWithPermit(
-        bytes calldata _approvalData,
-        address _token,
-        uint256 _amount,
-        address _chain2address,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID
+        bytes calldata approvalData,
+        address token,
+        uint256 amount,
+        address recipientAddress,
+        address callDestination,
+        address oppositeBridge,
+        uint256 chainID
     ) external returns (bytes32 txID) {
-        (bool _success1, ) = _token.call(_approvalData);
+        require(tokenData[token].length != 0, "Portal: token must be verified");
+        (bool _success1, ) = token.call(approvalData);
         require(_success1, "Approve call failed");
 
-        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
+        TransferHelper.safeTransferFrom(token, _msgSender(), address(this), amount);
+        balanceOf[token] = balanceOf[token].add(amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_oppositeBridge))),
-            _chainID,
-            bytes32(uint256(uint160(_receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(oppositeBridge),
+            chainID,
+            castToBytes32(callDestination),
+            castToBytes32(_msgSender()),
             nonce
         );
 
         bytes memory out = abi.encodeWithSelector(
             bytes4(keccak256(bytes("mintSyntheticToken(bytes32,address,uint256,address)"))),
             txID,
-            _token,
-            _amount,
-            _chain2address
+            token,
+            amount,
+            recipientAddress
         );
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2(out, callDestination, oppositeBridge, chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
-        txState.recipient = bytes32(uint256(uint160(_msgSender())));
-        txState.chain2address = bytes32(uint256(uint160(_chain2address)));
-        txState.rtoken = bytes32(uint256(uint160(_token)));
-        txState.amount = _amount;
+        txState.sender = castToBytes32(_msgSender());
+        txState.recipientAddress = castToBytes32(recipientAddress);
+        txState.rtoken = castToBytes32(token);
+        txState.amount = amount;
         txState.state = RequestState.Sent;
 
-        emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
+        emit SynthesizeRequest(txID, _msgSender(), recipientAddress, amount, token);
     }
-
-    /* * TODO
-    * @dev Synthesize token request with permit and bytes32 support.
-    * @param _approvalData permit data
-    * @param _token token address to synthesize
-    * @param _amount amount to synthesize 
-    * @param _chain2address recipient address
-    * @param _receiveSide request recipient address
-    * @param _oppositeBridge opposite bridge address
-    * @param _chainID opposite chain ID
-    * /
-    function synthesizeWithPermit_solana(
-        bytes calldata _approvalData,
-        address _token,
-        uint256 _amount,
-        bytes32 _chain2address,
-        bytes32 _receiveSide,
-        bytes32 _oppositeBridge,
-        uint256 _chainID
-    ) external returns (bytes32 txID) {
-        (bool _success1, ) = _token.call(_approvalData);
-        require(_success1, "Approve call failed");
-
-        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
-
-        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-        txID = IBridge(bridge).prepareRqId(
-            _oppositeBridge,
-            _chainID,
-            _receiveSide,
-            bytes32(uint256(uint160(_msgSender()))),
-            nonce
-        );
-
-        bytes memory out = abi.encodeWithSelector(
-            bytes4(keccak256(bytes("mintSyntheticToken(bytes32,bytes32,uint256,bytes32)"))),
-            txID,
-            bytes32(uint256(uint160(_token))),
-            _amount,
-            _chain2address
-        );
-        // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_solana(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
-        TxState storage txState = requests[txID];
-        txState.recipient = bytes32(uint256(uint160(_msgSender())));
-        txState.chain2address = _chain2address;
-        txState.rtoken = bytes32(uint256(uint160(_token)));
-        txState.amount = _amount;
-        txState.state = RequestState.Sent;
-
-        emit SynthesizeRequestSolana(txID, _msgSender(), _chain2address, _amount, _token);
-    }
-    */
 
     /**
      * @dev Emergency unsynthesize request. Can be called only by bridge after initiation on a second chain
-     * @param _txID transaction ID to unsynth
+     * @param txID transaction ID to unsynth
      */
-    function emergencyUnsynthesize(bytes32 _txID) external onlyBridge {
-        TxState storage txState = requests[_txID];
+    function emergencyUnsynthesize(bytes32 txID) external onlyBridge {
+        TxState storage txState = requests[txID];
         require(txState.state == RequestState.Sent, "Portal:state not open or tx does not exist");
 
         txState.state = RequestState.Reverted; // close
-        TransferHelper.safeTransfer(
-            address(uint160(uint256(txState.rtoken))),
-            address(uint160(uint256(txState.recipient))),
-            txState.amount
-        );
+        TransferHelper.safeTransfer(castToAddress(txState.rtoken), castToAddress(txState.recipient), txState.amount);
 
         emit RevertSynthesizeCompleted(
-            _txID,
-            address(uint160(uint256(txState.recipient))),
+            txID,
+            castToAddress(txState.recipient),
             txState.amount,
-            address(uint160(uint256(txState.rtoken)))
+            castToAddress(txState.rtoken)
         );
     }
 
     /**
      * @dev Unsynthesize request. Can be called only by bridge after initiation on a second chain
-     * @param _txID transaction ID to unsynth
-     * @param _token token address to unsynth
-     * @param _amount amount to unsynth
-     * @param _to recipient address
+     * @param txID transaction ID to unsynth
+     * @param token token address to unsynth
+     * @param amount amount to unsynth
+     * @param to recipient address
      */
     function unsynthesize(
-        bytes32 _txID,
-        address _token,
-        uint256 _amount,
-        address _to
+        bytes32 txID,
+        address token,
+        uint256 amount,
+        address to
     ) external onlyTrusted {
-        require(unsynthesizeStates[_txID] == UnsynthesizeState.Default, "Portal: syntatic tokens emergencyUnburn");
+        require(unsynthesizeStates[txID] == UnsynthesizeState.Default, "Portal: syntatic tokens emergencyUnburn");
 
-        TransferHelper.safeTransfer(_token, _to, _amount);
-        balanceOf[_token] = balanceOf[_token].sub(_amount);
+        TransferHelper.safeTransfer(token, to, amount);
+        balanceOf[token] = balanceOf[token].sub(amount);
 
-        unsynthesizeStates[_txID] = UnsynthesizeState.Unsynthesized;
+        unsynthesizeStates[txID] = UnsynthesizeState.Unsynthesized;
 
-        emit BurnCompleted(_txID, _to, _amount, _token);
+        emit BurnCompleted(txID, to, amount, token);
     }
 
     /**
      * @dev Revert burnSyntheticToken() operation, can be called several times.
-     * @param _txID transaction ID to unburn
-     * @param _receiveSide receiver contract address
-     * @param _oppositeBridge opposite bridge address
-     * @param _chainId opposite chain ID
+     * @param txID transaction ID to unburn
+     * @param callDestination receiver contract address
+     * @param oppositeBridge opposite bridge address
+     * @param chainId opposite chain ID
      */
     function emergencyUnburnRequest(
-        bytes32 _txID,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainId
+        bytes32 txID,
+        address callDestination,
+        address oppositeBridge,
+        uint256 chainId
     ) external {
-        require(unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized, "Portal: Real tokens already transfered");
-        unsynthesizeStates[_txID] = UnsynthesizeState.RevertRequest;
+        require(unsynthesizeStates[txID] != UnsynthesizeState.Unsynthesized, "Portal: Real tokens already transfered");
+        unsynthesizeStates[txID] = UnsynthesizeState.RevertRequest;
 
-        bytes memory out = abi.encodeWithSelector(bytes4(keccak256(bytes("emergencyUnburn(bytes32)"))), _txID);
+        bytes memory out = abi.encodeWithSelector(bytes4(keccak256(bytes("emergencyUnburn(bytes32)"))), txID);
         // TODO add payment by token
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-        bytes32 txID = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_oppositeBridge))),
-            _chainId,
-            bytes32(uint256(uint160(_receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+        bytes32 _txID = IBridge(bridge).prepareRqId(
+            castToBytes32(oppositeBridge),
+            chainId,
+            castToBytes32(callDestination),
+            castToBytes32(_msgSender()),
             nonce
         );
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainId, txID, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2(out, callDestination, oppositeBridge, chainId, _txID, _msgSender(), nonce);
 
-        emit RevertBurnRequest(txID, _msgSender());
+        emit RevertBurnRequest(_txID, _msgSender());
     }
 
     /**
      * @dev Revert burnSyntheticToken() operation with bytes32 support for Solana. Can be called several times.
-     * @param _txID transaction ID to unburn
-     * @param _pubkeys unsynth data for Solana
-     * @param _chainId opposite chain ID
+     * @param txID transaction ID to unburn
+     * @param pubkeys unsynth data for Solana
+     * @param chainId opposite chain ID
      */
     function emergencyUnburnRequest_solana(
-        bytes32 _txID,
-        bytes32[] calldata _pubkeys,
-        uint256 _chainId
+        bytes32 txID,
+        bytes32[] calldata pubkeys,
+        uint256 chainId
     ) external {
-        require(_chainId == SOLANA_CHAIN_ID, "incorrect chainID");
-        require(unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized, "Portal: Real tokens already transfered");
+        require(chainId == SOLANA_CHAIN_ID, "incorrect chainID");
+        require(unsynthesizeStates[txID] != UnsynthesizeState.Unsynthesized, "Portal: Real tokens already transfered");
 
-        unsynthesizeStates[_txID] = UnsynthesizeState.RevertRequest;
+        unsynthesizeStates[txID] = UnsynthesizeState.RevertRequest;
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-        bytes32 txID = IBridge(bridge).prepareRqId(
-            _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
+        bytes32 _txID = IBridge(bridge).prepareRqId(
+            pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
-            _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
-            bytes32(uint256(uint160(_msgSender()))),
+            pubkeys[uint256(SynthesizePubkeys.callDestination)],
+            castToBytes32(_msgSender()),
             nonce
         );
 
         SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](7);
         accounts[0] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.receiveSideData)],
+            pubkey: pubkeys[uint256(SynthesizePubkeys.receiveSideData)],
             isSigner: false,
             isWritable: false
         });
         accounts[1] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.txState)],
+            pubkey: pubkeys[uint256(SynthesizePubkeys.txState)],
             isSigner: false,
             isWritable: true
         });
         accounts[2] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.syntToken)],
+            pubkey: pubkeys[uint256(SynthesizePubkeys.syntToken)],
             isSigner: false,
             isWritable: true
         });
         accounts[3] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.syntTokenData)],
+            pubkey: pubkeys[uint256(SynthesizePubkeys.syntTokenData)],
             isSigner: false,
             isWritable: false
         });
         accounts[4] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.chain2address)],
+            pubkey: pubkeys[uint256(SynthesizePubkeys.recipientAddress)],
             isSigner: false,
             isWritable: true
         });
         accounts[5] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
         accounts[6] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.oppositeBridgeData)],
+            pubkey: pubkeys[uint256(SynthesizePubkeys.oppositeBridgeData)],
             isSigner: true,
             isWritable: false
         });
@@ -507,22 +453,22 @@ contract Portal is RelayRecipient, SolanaSerialize {
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                     /* programId: */
-                    _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
+                    pubkeys[uint256(SynthesizePubkeys.callDestination)],
                     /* accounts: */
                     accounts,
                     /* data: */
                     abi.encodePacked(sighashEmergencyUnburn)
                 )
             ),
-            _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
-            _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
+            pubkeys[uint256(SynthesizePubkeys.callDestination)],
+            pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
-            txID,
+            _txID,
             _msgSender(),
             nonce
         );
 
-        emit RevertBurnRequest(txID, _msgSender());
+        emit RevertBurnRequest(_txID, _msgSender());
     }
 
     // should be restricted in mainnets (test only)
@@ -530,23 +476,24 @@ contract Portal is RelayRecipient, SolanaSerialize {
         bridge = _bridge;
     }
 
-    function versionRecipient() public view returns (string memory) {
+    function versionRecipient() public pure returns (string memory) {
         return "2.0.1";
     }
 
-    function createRepresentationRequest(address _rtoken) external {
-        emit RepresentationRequest(_rtoken);
+    function createRepresentationRequest(address rtoken) external {
+        emit RepresentationRequest(rtoken);
     }
 
     // implies manual verification point
-    function approveRepresentationRequest(address _rtoken) external /**onlyOwner */
-    {
-        tokenData[_rtoken] = abi.encode(IERC20(_rtoken).name(), IERC20(_rtoken).symbol());
-        emit ApprovedRepresentationRequest(_rtoken);
+    function approveRepresentationRequest(
+        address rtoken 
+    ) external onlyOwner {
+        tokenData[rtoken] = abi.encode(IERC20(rtoken).name(), IERC20(rtoken).symbol());
+        emit ApprovedRepresentationRequest(rtoken);
     }
 
     //TODO
-    function getTxId() external returns (bytes32) {
+    function getTxId() external view returns (bytes32) {
         return keccak256(abi.encodePacked(this, block.timestamp));
     }
 
@@ -555,69 +502,67 @@ contract Portal is RelayRecipient, SolanaSerialize {
     }
 
     function synthesize_transit(
-        address _token,
-        uint256 _amount,
+        address token,
+        uint256 amount,
         //////////////////////
-        address _chain2address,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID,
-        bytes memory _out
+        address recipientAddress,
+        address callDestination,
+        address oppositeBridge,
+        uint256 chainID,
+        bytes memory out
     ) external returns (bytes32 txId) {
-        // require(
-        //     tokenData[_token].length != 0,
-        //     "Portal: token must be verified"
-        // );
-        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
+        require(tokenData[token].length != 0, "Portal: token must be verified");
+        TransferHelper.safeTransferFrom(token, _msgSender(), address(this), amount);
+        balanceOf[token] = balanceOf[token].add(amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
 
         txId = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_oppositeBridge))),
-            _chainID,
-            bytes32(uint256(uint160(_receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(oppositeBridge),
+            chainID,
+            castToBytes32(callDestination),
+            castToBytes32(_msgSender()),
             nonce
         );
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(_out, _receiveSide, _oppositeBridge, _chainID, txId, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2(out, callDestination, oppositeBridge, chainID, txId, _msgSender(), nonce);
         TxState storage txState = requests[txId];
-        txState.recipient = bytes32(uint256(uint160(_msgSender()))); //change!
-        txState.chain2address = bytes32(uint256(uint160(_chain2address)));
-        txState.rtoken = bytes32(uint256(uint160(_token)));
-        txState.amount = _amount;
+        txState.sender = castToBytes32(_msgSender()); //change!
+        txState.recipientAddress = castToBytes32(recipientAddress);
+        txState.rtoken = castToBytes32(token);
+        txState.amount = amount;
         txState.state = RequestState.Sent;
 
-        emit SynthesizeRequest(txId, _msgSender(), _chain2address, _amount, _token);
+        emit SynthesizeRequest(txId, _msgSender(), recipientAddress, amount, token);
     }
 
     // portal => proxy
     function synthesize_batch_transit(
-        address[] memory _tokens,
-        uint256[] memory _amounts, // set the amount in order to initiate a synthesize request
-        SynthParams memory _synth_params,
-        bytes4 _selector,
-        bytes memory _transit_data
+        address[] memory tokens,
+        uint256[] memory amounts, // set the amount in order to initiate a synthesize request
+        SynthParams memory synth_params,
+        bytes4 selector,
+        bytes memory transit_data
     ) external {
-        bytes32[] memory txId = new bytes32[](_tokens.length);
+        bytes32[] memory txId = new bytes32[](tokens.length);
 
         //synthesize request
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            if (_amounts[i] > 0) {
-                TransferHelper.safeTransferFrom(_tokens[i], _msgSender(), address(this), _amounts[i]);
+        for (uint256 i = 0; i < tokens.length; i++) {
+            if (amounts[i] > 0) {
+                require(tokenData[tokens[i]].length != 0, "Portal: token must be verified");
+                TransferHelper.safeTransferFrom(tokens[i], _msgSender(), address(this), amounts[i]);
 
-                balanceOf[_tokens[i]] = balanceOf[_tokens[i]].add(_amounts[i]);
+                balanceOf[tokens[i]] = balanceOf[tokens[i]].add(amounts[i]);
                 uint256 nonce = IBridge(bridge).getNonce(_msgSender());
 
                 txId[i] = keccak256(
                     abi.encodePacked(
                         IBridge(bridge).prepareRqId(
-                            bytes32(uint256(uint160(_synth_params.oppositeBridge))),
-                            _synth_params.chainID,
-                            bytes32(uint256(uint160(_synth_params.receiveSide))),
-                            bytes32(uint256(uint160(_msgSender()))),
+                            castToBytes32(synth_params.oppositeBridge),
+                            synth_params.chainID,
+                            castToBytes32(synth_params.callDestination),
+                            castToBytes32(_msgSender()),
                             nonce
                         ),
                         i
@@ -626,40 +571,40 @@ contract Portal is RelayRecipient, SolanaSerialize {
 
                 // TODO add payment by token
                 TxState storage txState = requests[txId[i]];
-                txState.recipient = bytes32(uint256(uint160(_msgSender()))); //change!
-                txState.chain2address = bytes32(uint256(uint160(_synth_params.chain2address)));
-                txState.rtoken = bytes32(uint256(uint160(_tokens[i])));
-                txState.amount = _amounts[i];
+                txState.sender = castToBytes32(_msgSender()); //change!
+                txState.recipientAddress = castToBytes32(synth_params.recipientAddress);
+                txState.rtoken = castToBytes32(tokens[i]);
+                txState.amount = amounts[i];
                 txState.state = RequestState.Sent;
 
-                emit SynthesizeRequest(txId[i], _msgSender(), _synth_params.chain2address, _amounts[i], _tokens[i]);
+                emit SynthesizeRequest(txId[i], _msgSender(), synth_params.recipientAddress, amounts[i], tokens[i]);
             }
         }
 
         // encode call
         bytes memory out = abi.encodePacked(
-            _selector,
-            _transit_data,
+            selector,
+            transit_data,
             //////////////
-            _tokens,
-            _amounts,
+            tokens,
+            amounts,
             txId
         );
 
         uint256 general_nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 general_txId = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_synth_params.oppositeBridge))),
-            _synth_params.chainID,
-            bytes32(uint256(uint160(_synth_params.receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(synth_params.oppositeBridge),
+            synth_params.chainID,
+            castToBytes32(synth_params.callDestination),
+            castToBytes32(_msgSender()),
             general_nonce
         );
 
         IBridge(bridge).transmitRequestV2(
             out,
-            _synth_params.receiveSide,
-            _synth_params.oppositeBridge,
-            _synth_params.chainID,
+            synth_params.callDestination,
+            synth_params.oppositeBridge,
+            synth_params.chainID,
             general_txId,
             _msgSender(),
             general_nonce

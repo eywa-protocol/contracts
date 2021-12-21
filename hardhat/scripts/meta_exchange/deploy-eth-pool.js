@@ -29,13 +29,10 @@ async function main() {
   // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
 
-
   let ethToken = []
   let ethPoolCoins = []
   let ethPoolLp
   let ethPool
-
- 
 
   // creating local eth tokens for specified networks
   if (network.name == "network1" || network.name == "rinkeby") {

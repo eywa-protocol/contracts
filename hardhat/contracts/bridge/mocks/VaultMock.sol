@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import {IERC20} from '@openzeppelin/contracts-newone/token/ERC20/IERC20.sol';
 import {SafeERC20} from '@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol';
 

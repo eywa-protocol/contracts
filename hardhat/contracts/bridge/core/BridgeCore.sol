@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.0;
 import "@openzeppelin/contracts-newone/utils/structs/EnumerableSet.sol";
+import "../../utils/Typecast.sol";
 
-abstract contract BridgeCore {
+abstract contract BridgeCore is Typecast {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     address public _listNode;
@@ -15,7 +16,7 @@ abstract contract BridgeCore {
         string requestType,
         address bridge,
         bytes32 requestId,
-        bytes selector,
+        bytes callData,
         address receiveSide,
         address oppositeBridge,
         uint256 chainid
@@ -25,7 +26,7 @@ abstract contract BridgeCore {
         string requestType,
         bytes32 bridge,
         bytes32 requestId,
-        bytes selector,
+        bytes callData,
         bytes32 receiveSide,
         bytes32 oppositeBridge,
         uint256 chainid
@@ -70,7 +71,7 @@ abstract contract BridgeCore {
         bytes32 receiveSide,
         bytes32 from,
         uint256 nonce
-    ) public view returns (bytes32) {
+    ) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(from, nonce, chainId, receiveSide, oppositeBridge));
     }
 
