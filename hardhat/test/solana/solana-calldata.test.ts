@@ -1,5 +1,9 @@
 import { ethers } from 'hardhat';
 import { expect } from 'chai';
+import { PublicKey as SolanaPublicKey } from '@solana/web3.js';
+import { BigNumber } from '@ethersproject/bignumber';
+// import { EthSolWrapper } from '../../scripts/bridge-ts/eth-sol-wrapper';
+import { EthSolWrapper } from 'eywa-eth-sol-wrapper';
 
 import type {
   Bridge,
@@ -72,6 +76,7 @@ describe("Solana calldata", function () {
   let portal: Portal;
   let synthesisAddress32: string;
   let synthesis: Synthesis;
+  let wrapper: EthSolWrapper;
 
   before(async () => {
     const CBridge = await ethers.getContractFactory("Bridge");
@@ -99,9 +104,11 @@ describe("Solana calldata", function () {
     // require(is_in[to] == false, "TO ALREADY EXIST");
     await bridge1.addContractBind(portalAddress32, dumbOppositeBridge, dumbReceiveSide);
     await bridge2.addContractBind(synthesisAddress32, dumbOppositeBridge, dumbReceiveSide);
+
+    wrapper = new EthSolWrapper(portal, synthesis);
   });
 
-  it("Should emit OracleRequestSolana event from Portal.synthesize_32", async function () {
+  it("Should emit OracleRequestSolana event from Portal.synthesize_solana", async function () {
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve) => {
       bridge1.once("OracleRequestSolana", (...args) => {
         resolve(args[args.length - 1]);
@@ -110,7 +117,7 @@ describe("Solana calldata", function () {
 
     const amount = 3.5 * 1000 * 1000;
     const bumpTxState = '53';
-    await portal.synthesize_32(dumb, amount, dumbsSynthesize, `0x${ bumpTxState }`, SOLANA_CHAIN_ID);
+    await portal.synthesize_solana(dumb, amount, dumbsSynthesize, `0x${ bumpTxState }`, SOLANA_CHAIN_ID);
     
     const ev = await pEvent;
     expect(ev.event).equals('OracleRequestSolana');
@@ -133,15 +140,66 @@ describe("Solana calldata", function () {
       'e067350000000000', // amount
     ].join(''));
   });
+
+  it("Should emit OracleRequestSolana event from wrapped Portal.synthesize_solana", async function () {
+    let rejectEventPromise: (reason?: any) => void = () => undefined;
+
+    const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve, reject) => {
+      rejectEventPromise = reject;
+      bridge1.once("OracleRequestSolana", (...args) => {
+        resolve(args[args.length - 1]);
+      });  
+    });
+
+    const amount = 3.5 * 1000 * 1000;
+    const bumpTxState = '53';
+
+    const bufChain2address = Buffer.from(dumbChain2address.substr(2), 'hex');
+    const bufReceiveSide = Buffer.from(dumbReceiveSide.substr(2), 'hex');
+    const bufOppositeBridge = Buffer.from(dumbOppositeBridge.substr(2), 'hex');
+
+    try {
+      await wrapper.synthesize(
+        dumb,
+        BigNumber.from(amount),
+        bufChain2address,
+        bufReceiveSide,
+        bufOppositeBridge,
+      );
+    } catch (ex) {
+      rejectEventPromise(ex);
+    }
+
+    const ev = await pEvent;
+    expect(ev.event).equals('OracleRequestSolana');
+    expect(ev.args.selector.substr(2)).equals([
+      '09000000', // accounts.length
+      wrapper.getReceiveSideDataAddress(new SolanaPublicKey(bufReceiveSide)), pkWritable,
+      dumbSyntToken.substr(2), pkWritable,
+      dumbSyntTokenData.substr(2), pkReadonly,
+      dumbTxState.substr(2), pkWritable,
+      dumbChain2address.substr(2), pkWritable,
+      pidToken, pkReadonly,
+      pidSystem, pkReadonly,
+      pidRent, pkReadonly,
+      dumbOppositeBridgeData.substr(2), pkSigner,
+      dumbReceiveSide.substr(2), // pid
+      '31000000', // data.length
+      sighashMintSyntheticToken,
+      'f3a0380063eec300e6206e2a4d8d4eb33659e163790133292fa333aca65045c3', // txId
+      bumpTxState,
+      'e067350000000000', // amount
+    ].join(''));
+  });
   
-  it("Should emit OracleRequestSolana event from Portal.emergencyUnburnRequest_32", async function () {
+  it("Should emit OracleRequestSolana event from Portal.emergencyUnburnRequest_solana", async function () {
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve) => {
       bridge1.once("OracleRequestSolana", (...args) => {
         resolve(args[args.length - 1]);
       });  
     });
 
-    await portal.emergencyUnburnRequest_32(dumb32, dumbsSynthesize, SOLANA_CHAIN_ID);
+    await portal.emergencyUnburnRequest_solana(dumb32, dumbsSynthesize, SOLANA_CHAIN_ID);
 
     const ev = await pEvent;
     expect(ev.event).equals('OracleRequestSolana');
@@ -161,8 +219,53 @@ describe("Solana calldata", function () {
       sighashEmergencyUnburn,
     ].join(''));
   });
+  
+  it("Should emit OracleRequestSolana event from wrapped Portal.emergencyUnburnRequest_solana", async function () {
+    let rejectEventPromise: (reason?: any) => void = () => undefined;
 
-  it("Should emit OracleRequestSolana event from Synthesis.emergencyUnsyntesizeRequest_32", async function () {
+    const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve, reject) => {
+      rejectEventPromise = reject;
+      bridge1.once("OracleRequestSolana", (...args) => {
+        resolve(args[args.length - 1]);
+      });  
+    });
+
+    const bufTxId = Buffer.from(dumb32.substr(2), 'hex');
+    const bufChain2address = Buffer.from(dumbChain2address.substr(2), 'hex');
+    const bufReceiveSide = Buffer.from(dumbReceiveSide.substr(2), 'hex');
+    const bufOppositeBridge = Buffer.from(dumbOppositeBridge.substr(2), 'hex');
+
+    try {
+      await wrapper.emergencyUnburnRequest(
+        bufTxId,
+        bufChain2address,
+        bufReceiveSide,
+        bufOppositeBridge,
+      );
+    } catch (ex) {
+      rejectEventPromise(ex);
+    }
+    
+    const ev = await pEvent;
+    expect(ev.event).equals('OracleRequestSolana');
+    // console.log('OracleRequestSolana selector');
+    // console.log(ev.args.selector.substr(2).match(/(.|[\r\n]){1,64}/g));
+    expect(ev.args.selector.substr(2)).equals([
+      '07000000', // accounts.length
+      dumbReceiveSideData.substr(2), pkReadonly,
+      dumbTxState.substr(2), pkWritable,
+      dumbSyntToken.substr(2), pkWritable,
+      dumbSyntTokenData.substr(2), pkReadonly,
+      dumbChain2address.substr(2), pkWritable,
+      pidToken, pkReadonly,
+      dumbOppositeBridgeData.substr(2), pkSigner,
+      dumbReceiveSide.substr(2), // pid
+      '08000000', // data.length
+      sighashEmergencyUnburn,
+    ].join(''));
+  });
+
+  it("Should emit OracleRequestSolana event from Synthesis.emergencyUnsyntesizeRequest_solana", async function () {
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve) => {
       bridge2.once("OracleRequestSolana", (...args) => {
         resolve(args[args.length - 1]);
@@ -170,7 +273,7 @@ describe("Solana calldata", function () {
     });
 
     const bumpTxState = '77';
-    await synthesis.emergencyUnsyntesizeRequest_32(dumbsUnsynthesize, `0x${ bumpTxState }`, SOLANA_CHAIN_ID);
+    await synthesis.emergencyUnsyntesizeRequest_solana(dumbsUnsynthesize, `0x${ bumpTxState }`, SOLANA_CHAIN_ID);
 
     const ev = await pEvent;
     expect(ev.event).equals('OracleRequestSolana');
@@ -191,7 +294,53 @@ describe("Solana calldata", function () {
     ].join(''));
   });
 
-  it("Should emit OracleRequestSolana event from Synthesis.burnSyntheticToken_32", async function () {
+  it("Should emit OracleRequestSolana event from wrapped Synthesis.emergencyUnsyntesizeRequest_solana", async function () {
+    let rejectEventPromise: (reason?: any) => void = () => undefined;
+
+    const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve, reject) => {
+      rejectEventPromise = reject;
+      bridge2.once("OracleRequestSolana", (...args) => {
+        resolve(args[args.length - 1]);
+      });  
+    });
+
+    const bufTxId = Buffer.from(dumb32.substr(2), 'hex');
+    const bufChain2address = Buffer.from(dumbChain2address.substr(2), 'hex');
+    const bufReceiveSide = Buffer.from(dumbReceiveSide.substr(2), 'hex');
+    const bufOppositeBridge = Buffer.from(dumbOppositeBridge.substr(2), 'hex');
+
+    const bumpTxState = '77';
+    try {
+      await wrapper.emergencyUnsyntesizeRequest(
+        bufTxId,
+        bufChain2address,
+        bufReceiveSide,
+        bufOppositeBridge,
+      );
+    } catch (ex) {
+      rejectEventPromise(ex);
+    }
+
+    const ev = await pEvent;
+    expect(ev.event).equals('OracleRequestSolana');
+
+    expect(ev.args.selector.substr(2)).equals([
+      '07000000', // accounts.length
+      dumbReceiveSideData.substr(2), pkReadonly,
+      dumbTxState.substr(2), pkWritable,
+      dumbRealToken.substr(2), pkReadonly,
+      dumbSource.substr(2), pkWritable,
+      dumbDestination.substr(2), pkWritable,
+      dumbOppositeBridgeData.substr(2), pkSigner,
+      pidToken, pkReadonly,
+      dumbReceiveSide.substr(2), // pid
+      '09000000', // data.length
+      sighashEmergencyUnsynthesize,
+      bumpTxState,
+    ].join(''));
+  });
+
+  it("Should emit OracleRequestSolana event from Synthesis.burnSyntheticToken_solana", async function () {
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve) => {
       bridge2.once("OracleRequestSolana", (...args) => {
         resolve(args[args.length - 1]);
@@ -199,7 +348,55 @@ describe("Solana calldata", function () {
     });
 
     const amount = 3.5 * 1000 * 1000;
-    await synthesis.burnSyntheticToken_32(dumb, dumbsUnsynthesize, amount, SOLANA_CHAIN_ID);
+    await synthesis.burnSyntheticToken_solana(dumb, dumbsUnsynthesize, amount, SOLANA_CHAIN_ID);
+
+    const ev = await pEvent;
+    expect(ev.event).equals('OracleRequestSolana');
+
+    expect(ev.args.selector.substr(2)).equals([
+      '09000000', // accounts.length
+      dumbReceiveSideData.substr(2), pkReadonly,
+      dumbRealToken.substr(2), pkReadonly,
+      dumbTxState.substr(2), pkWritable,
+      dumbSource.substr(2), pkWritable,
+      dumbDestination.substr(2), pkWritable,
+      dumbOppositeBridgeData.substr(2), pkSigner,
+      pidToken, pkReadonly,
+      pidRent, pkReadonly,
+      pidSystem, pkReadonly,
+      dumbReceiveSide.substr(2),
+      '10000000', // data.length
+      sighashUnsynthesize,
+      'e067350000000000', // amount
+    ].join(''));
+  });
+
+  it("Should emit OracleRequestSolana event from wrapped Synthesis.burnSyntheticToken_solana", async function () {
+    let rejectEventPromise: (reason?: any) => void = () => undefined;
+
+    const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve, reject) => {
+      rejectEventPromise = reject;
+      bridge2.once("OracleRequestSolana", (...args) => {
+        resolve(args[args.length - 1]);
+      });  
+    });
+
+    const bufChain2address = Buffer.from(dumbChain2address.substr(2), 'hex');
+    const bufReceiveSide = Buffer.from(dumbReceiveSide.substr(2), 'hex');
+    const bufOppositeBridge = Buffer.from(dumbOppositeBridge.substr(2), 'hex');
+
+    const amount = 3.5 * 1000 * 1000;
+    try {
+      await wrapper.burnSyntheticToken(
+        dumb,
+        BigNumber.from(amount),
+        bufChain2address,
+        bufReceiveSide,
+        bufOppositeBridge,
+      );
+    } catch (ex) {
+      rejectEventPromise(ex);
+    }
 
     const ev = await pEvent;
     expect(ev.event).equals('OracleRequestSolana');

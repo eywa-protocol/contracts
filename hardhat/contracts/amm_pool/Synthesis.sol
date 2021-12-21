@@ -317,7 +317,8 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         // swap 4-byte long pairs
         solAmount = (solAmount >> 32) | (solAmount << 32);
 
-        ISyntERC20(_stoken).burn(_msgSender(), _amount);
+        // ISyntERC20(_stoken).burn(_msgSender(), _amount);
+        // require(false, "!!!");
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
