@@ -153,7 +153,4 @@ contract Portal is RelayRecipient {
         bridge = _bridge;
     }
 
-    function versionRecipient() public view returns (string memory) {
-        return "2.0.1";
-    }
 }
