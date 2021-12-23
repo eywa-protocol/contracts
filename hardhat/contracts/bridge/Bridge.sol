@@ -6,24 +6,24 @@ import "./core/BridgeCore.sol";
 import "./interface/INodeRegistry.sol";
 import "@openzeppelin/contracts-newone/utils/Address.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
-import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
+import "../amm_pool/RelayRecipient.sol";
 
 
-contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
+contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
     using Address for address;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    string public override versionRecipient = "2.2.3";
+    string public versionRecipient = "2.2.3";
     E2Point private epochKey;           // Aggregated public key of all paricipants of the current epoch
     address public dao;                 // Address of the DAO
     uint8 public epochParticipantsNum;  // Number of participants contributed to the epochKey
     uint32 public epochNum;             // Sequential number of the epoch
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
-    event OwnershipTransferred(address indexed previousDao, address indexed newDao);
+    // event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
     constructor(address forwarder) {
-        trustedForwarder = forwarder;
+       _setTrustedForwarder(forwarder);
     }
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
@@ -234,5 +234,9 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
             mask = mask & (mask - 1);
             cnt++;
         }
+    }
+
+    function setTrustedForwarder(address _forwarder) external onlyOwner {
+       return _setTrustedForwarder(_forwarder);
     }
 }

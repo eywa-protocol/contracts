@@ -3,6 +3,7 @@ pragma solidity 0.7.6;
 pragma abicoder v2;
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "./IStableSwapPool.sol";
 
@@ -87,7 +88,7 @@ contract CurveProxy is BaseRelayRecipient {
         address _synthesis,
         address _bridge
     ) {
-        trustedForwarder = _forwarder;
+        _setTrustedForwarder(_forwarder);
         portal = _portal;
         synthesis = _synthesis;
         bridge = _bridge;
@@ -156,6 +157,11 @@ contract CurveProxy is BaseRelayRecipient {
     modifier onlyBridge() {
         require(bridge == _msgSender());
         _;
+    }
+
+    // TODO onlyOwner
+    function setTrustedForwarder(address _forwarder) external {
+       return _setTrustedForwarder(_forwarder);
     }
 
     ///@dev Set the corresponding pool data to use proxy with
@@ -599,5 +605,5 @@ contract CurveProxy is BaseRelayRecipient {
         }
     }
 
-    string public override versionRecipient = "2.2.0";
+    string public versionRecipient = "2.2.3";
 }

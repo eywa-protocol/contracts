@@ -60,7 +60,7 @@ contract NodeRegistry is BaseRelayRecipient {
         require(_EYWA != address(0), Errors.ZERO_ADDRESS);
         require(_forwarder != address(0), Errors.ZERO_ADDRESS);
         EYWA = _EYWA;
-        trustedForwarder = _forwarder;
+       _setTrustedForwarder(_forwarder);
     }
 
     modifier isNewNode(address _owner) {
@@ -181,5 +181,5 @@ contract NodeRegistry is BaseRelayRecipient {
         snapshot.lastTouchTime = block.timestamp;
     }
 
-    string public override versionRecipient = "2.2.3";
+    string public versionRecipient = "2.2.3";
 }

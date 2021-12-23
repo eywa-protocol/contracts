@@ -19,6 +19,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     mapping(bytes32 => SynthesizeState) public synthesizeStates;
     address public bridge;
     address public proxy;
+    string public versionRecipient = "2.2.3";
 
     bytes public constant sighashUnsynthesize =
         abi.encodePacked(uint8(115), uint8(234), uint8(111), uint8(109), uint8(131), uint8(167), uint8(37), uint8(70));
@@ -61,8 +62,9 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     event RevertBurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event CreatedRepresentation(bytes32 indexed _rtoken, address indexed _stoken);
 
-    constructor(address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
+    constructor(address _bridge, address _trustedForwarder){
         bridge = _bridge;
+        _setTrustedForwarder(_trustedForwarder);
     }
 
     modifier onlyBridge() {
@@ -442,10 +444,6 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         bridge = _bridge;
     }
 
-    function versionRecipient() public view returns (string memory) {
-        return "2.0.1";
-    }
-
     // utils
     function setRepresentation(bytes32 _rtoken, address _stoken) internal {
         representationSynt[_rtoken] = _stoken;
@@ -505,5 +503,9 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         txState.state = RequestState.Sent;
 
         emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
+    }
+
+    function setTrustedForwarder(address _forwarder) external onlyOwner {
+       return _setTrustedForwarder(_forwarder);
     }
 }

@@ -13,7 +13,7 @@ contract TestForward is BaseRelayRecipient {
 
     constructor(address _forwarder) {
         require(_forwarder != address(0), "ZERO ADDRESS");
-        trustedForwarder = _forwarder;
+        _setTrustedForwarder(_forwarder);
     }
 
     function foo(uint256 _val, string memory _str) public {
@@ -25,5 +25,5 @@ contract TestForward is BaseRelayRecipient {
         emit FooCalled(sender, val);
     }
 
-    string public override versionRecipient = "Hello world!";
+    string public versionRecipient = "Hello world!";
 }
