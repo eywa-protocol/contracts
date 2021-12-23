@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.0;
+pragma solidity ^0.8.0;
 
 import "./core/BridgeCore.sol";
 import "./interface/ListNodeInterface.sol";
@@ -7,10 +7,12 @@ import "./interface/ListNodeInterface.sol";
 //TODO: onlyTrustedNode has worse filled data. I.e. In func NodeList#addNode the golang node registers himself
 // and this means every node who wants to start up can add himself in onlyTrustedNode list.
 contract Bridge is BridgeCore {
+    string public versionRecipient = "2.2.3";
 
-    constructor (address listNode) {
+    constructor (address listNode, address forwarder) {
         _listNode = listNode;
         _owner    = msg.sender;
+        _setTrustedForwarder(forwarder);
     }
 
     modifier onlyTrustedNode() {
@@ -21,6 +23,10 @@ contract Bridge is BridgeCore {
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
         require(contractBind[msg.sender][oppositeBridge] == receiveSide, "UNTRUSTED CONTRACT");
         _;
+    }
+
+    function setTrustedForwarder(address _forwarder) external onlyOwner {
+       return _setTrustedForwarder(_forwarder);
     }
 
     function transmitRequestV2(

@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.0;
 
-contract BridgeCore {
+import "../../amm_pool/RelayRecipient.sol";
+
+pragma solidity ^0.8.0;
+
+contract BridgeCore is RelayRecipient {
 
     address public _owner;
     address public _listNode;

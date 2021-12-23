@@ -13,6 +13,7 @@ contract Portal is RelayRecipient {
 
     mapping(address => uint) public balanceOf;
     address public bridge;
+    string public versionRecipient = "2.2.3";
 
     enum RequestState { Default, Sent, Reverted }
     enum UnsynthesizeState { Default, Unsynthesized, RevertRequest }
@@ -34,14 +35,20 @@ contract Portal is RelayRecipient {
     event BurnCompleted(bytes32 indexed _id, address indexed _to, uint _amount, address _token);
     event RevertSynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint _amount, address _token);
 
-    constructor(address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
+    constructor(address _bridge, address _trustedForwarder){
         bridge = _bridge;
+        _setTrustedForwarder(forwarder);
     }
 
     modifier onlyBridge {
         require(bridge == msg.sender);
         _;
     }
+
+    function setTrustedForwarder(address _forwarder) external onlyOwner {
+       return _setTrustedForwarder(_forwarder);
+    }
+
 
     // Token -> sToken on a second chain
     function synthesize(

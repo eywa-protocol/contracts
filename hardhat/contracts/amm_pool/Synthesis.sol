@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
-import '@openzeppelin/contracts-newone/utils/math/SafeMath.sol';
+import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
 import "./IBridge.sol";
 import "./ISyntERC20.sol";
 import "./SyntERC20.sol";
@@ -18,6 +18,7 @@ contract Synthesis is RelayRecipient {
     mapping (bytes32 => TxState) public requests;
     mapping (bytes32 => SynthesizeState) public synthesizeStates;
     address public bridge;
+    string public versionRecipient = "2.2.3";
     enum RequestState { Default, Sent, Reverted}
     enum SynthesizeState { Default, Synthesized, RevertRequest}
 
@@ -26,8 +27,9 @@ contract Synthesis is RelayRecipient {
     event SynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint _amount, address _token);
     event RevertBurnCompleted(bytes32 indexed _id, address indexed _to, uint _amount, address _token);
 
-    constructor (address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
+    constructor (address _bridge, address _trustedForwarder) {
         bridge = _bridge;
+        _setTrustedForwarder(_trustedForwarder);
     }
 
     modifier onlyBridge {
@@ -42,7 +44,12 @@ contract Synthesis is RelayRecipient {
         address token;
         address stoken;
         RequestState state;
+    }    
+    
+    function setTrustedForwarder(address _forwarder) external onlyOwner {
+       return _setTrustedForwarder(_forwarder);
     }
+
 
     // can called only by bridge after initiation on a second chain
     function mintSyntheticToken(bytes32 _txID, address _tokenReal, uint256 _amount, address _to) external onlyBridge {
@@ -144,10 +151,6 @@ contract Synthesis is RelayRecipient {
     // should be restricted in mainnets
     function changeBridge(address _bridge) external onlyOwner {
         bridge = _bridge;
-    }
-
-    function versionRecipient() public view returns (string memory) {
-        return "2.0.1";
     }
 
     // utils
