@@ -26,10 +26,10 @@ contract BridgeCore is RelayRecipient {
 
     event ReceiveRequest(bytes32 reqId, address receiveSide, address bridgeFrom, address senderSide);
 
-    modifier onlyOwner() {
+    /*modifier onlyOwner() {
         require(msg.sender == _owner, "Ownable: caller is not the owner");
         _;
-    }
+    }*/
 
     /**
        Mandatory for participants who wants to use a own contracts

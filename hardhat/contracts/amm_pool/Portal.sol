@@ -37,7 +37,7 @@ contract Portal is RelayRecipient {
 
     constructor(address _bridge, address _trustedForwarder){
         bridge = _bridge;
-        _setTrustedForwarder(forwarder);
+        _setTrustedForwarder(_trustedForwarder);
     }
 
     modifier onlyBridge {
