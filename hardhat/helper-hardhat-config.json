@@ -1,4 +1,43 @@
 {
+ "metistestnet": {
+    "rpcUrl": "wss://stardust-ws.metis.io/",
+    "rpcUrl2": "https://stardust.metis.io/?owner=588",
+    "n": "METISTESTNET",
+    "netwiker": "MES",
+    "env_file": [
+      "networks_env/env_connect_to_metistestnet.env",
+      "networks_env/env_test_for_metistestnet.env"
+    ],
+    "chainId": 588,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x19BCFEe83ee0D77158b0c151150aFb0f389E4721",
+    "token": [
+      {
+        "address": "0xB2e6a5a864A1004C3c828a2e767A08C173939b01",
+        "name": "EYWA",
+        "symbol": "EYWA"
+      },
+      {
+        "address": "0x351950C7C686de38383Fe0175fceC25aF8402b3d",
+        "name": "USDT",
+        "symbol": "USDT"
+      }
+    ],
+    "sourceForRepresentation": [
+      "rinkeby",
+      "bsctestnet",
+      "mumbai",
+      "hecotestnet",
+      "avalanchetestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeList": "0x5400d5af0D3159E205A69812e3814290Fafb9f55",
+    "bridge": "0x0AC422d258853100CB41e180Dd512E5848c838e7",
+    "mockDexPool": "0x3635a6cCBe5ae65059d2EA5236978D0297E2F69e",
+    "portal": "0x35EdC550Fb3c4EEA9f156eF05b3507e8468c7B87",
+    "synthesis": "0xFDeeaaE8D30185203088a5296d51A1152f2db9b7"
+  },
   "avalanchetestnet": {
     "rpcUrl": "wss://api.avax-test.network/ext/bc/C/ws",
     "rpcUrl2": "https://api.avax-test.network/ext/bc/C/rpc",
@@ -25,17 +64,18 @@
       }
     ],
     "sourceForRepresentation": [
+      "metistestnet",
       "rinkeby",
       "bsctestnet",
       "mumbai",
-      "hecotestnet"
+      "hecotestnet"      
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeList": "0xC8d5d1DAf7552D49c221b4f074b98C3993bA25fB",
-    "bridge": "0xdBC762054268828e74788eA61aA36e624BBda076",
-    "mockDexPool": "0xec7BA463B1221DEaBdD411A4dd766287A240f137",
-    "portal": "0xbED8CA3dB6FF8724CDd1D5A229da246f2ccE95B3",
-    "synthesis": "0x1Caa6a25929a4F093baB2B7836B8F20C444629Fa"
+    "nodeList": "0x2d0e14Fb45357AaB998B4166fa1D8b0c77D4E6A0",
+    "bridge": "0x32c3cCeCb13FD276454e3bc1BCFBca9ebeA13183",
+    "mockDexPool": "0xfbb1cd6cB49f708fa37B95073B56992c24a71bCE",
+    "portal": "0xE0a14cca41D404Cf641faE64f8c491774C56aB6A",
+    "synthesis": "0xe52BbdCe5C0044f21932CF8130672d1b2eeeE662"
   },
   "hecotestnet": {
     "rpcUrl": "wss://ws-testnet.hecochain.com",
@@ -62,17 +102,18 @@
       }
     ],
     "sourceForRepresentation": [
+      "metistestnet",
       "rinkeby",
       "bsctestnet",
       "mumbai",
-      "avalanchetestnet"
+      "avalanchetestnet"      
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeList": "0xA8AE855EFAC77f37b9D808f35E8F777e551A6db9",
-    "bridge": "0xEf37Bbc807Ad5FD8e13CCb33d18d787AfDde26d7",
-    "mockDexPool": "0x03E24510B83F45c508F343D58816BcF4B65Ec456",
-    "portal": "0xbe5aC3d52046c201b045B08e41bE4aB2C72EA60D",
-    "synthesis": "0xDFbc57417356F0FC48d7DAb140DE44317Ac9E91A"
+    "nodeList": "0x4cA37e1517139CD241C7Ec95fF7793AA4A2e8Af6",
+    "bridge": "0x80D4D3a399a14dE5E0Fc7C5Ed0680f5f39F1107b",
+    "mockDexPool": "0x43C5791c462128fEeDDb5b0b20CA76833296D6de",
+    "portal": "0x7Fd4C5Bb18656639a3e5Ef1633E3AfcF66D9fCef",
+    "synthesis": "0xB4c7D26390070936DBf3C6f36B3E8351abF80A42"
   },
   "mumbai": {
     "rpcUrl": "wss://matic-testnet-archive-ws.bwarelabs.com",
@@ -99,17 +140,18 @@
       }
     ],
     "sourceForRepresentation": [
+      "metistestnet",
       "rinkeby",
       "bsctestnet",
       "hecotestnet",
-      "avalanchetestnet"
+      "avalanchetestnet"      
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeList": "0xB2D6ABE1F6aEd88afC947375AdD3e1146a91053b",
-    "bridge": "0x2a6CAC2cb898aDd922bFC564f06d095EF09f09C5",
-    "mockDexPool": "0x33A53af4e65cC5f9Ce8a1595314b2efAbeDE8Ba6",
-    "portal": "0x515193FfCeE0840D2e15CC71Eeb431Cff2cd1e11",
-    "synthesis": "0x64e01c20E909D5D580daDba2C734e41eD07DB7b7"
+    "nodeList": "0x5B743517F95101AF4D17112e31F5ecAdEaE383Af",
+    "bridge": "0x6dBad270550223419191126eb64C78FFaF091201",
+    "mockDexPool": "0x12E020810c62d99a9E26735D8D4B34B29e91cd88",
+    "portal": "0x5F3907043F5f51A92a42e2Fba36723aec43df7F0",
+    "synthesis": "0xe87A98165AA536302CEF5d7b61CF0C5f2344F9C4"
   },
   "rinkeby": {
     "rpcUrl": "wss://rinkeby.infura.io/ws/v3/ab95bf9f6dd743e6a8526579b76fe358",
@@ -136,17 +178,18 @@
       }
     ],
     "sourceForRepresentation": [
+      "metistestnet",
       "bsctestnet",
       "mumbai",
       "hecotestnet",
-      "avalanchetestnet"
+      "avalanchetestnet"      
     ],
     "paymaster": "0xA6e10aA9B038c9Cddea24D2ae77eC3cE38a0c016",
-    "nodeList": "0xdbfbF4412C7DeCCfd2f7F71B558b03427f9e6982",
-    "bridge": "0x27Bb668C9489D99Eff7F3A6B14F20b74eFd260ed",
-    "mockDexPool": "0x62f50559Dd67187106F74AF973374AcB6cd97CEe",
-    "portal": "0x7971Aa0A68d11b0755634601a8c3E29805B41778",
-    "synthesis": "0x12168D6546A83644F5661EDd69B019F39cdA4909"
+    "nodeList": "0x885a692BC2B1f50c1Cdbe4c4a173926D520fbf87",
+    "bridge": "0x44632fCeb86430b31AFC32ca5fEEF5e183865868",
+    "mockDexPool": "0x7A37bD76505d8Fa5332eae2a9718339E57B83Bb4",
+    "portal": "0x74A06A6e53d7A622322962170F5172AcC3e4d760",
+    "synthesis": "0x3f300d05E9c6aD0b213f51FE5D9D9035Eb990080"
   },
   "bsctestnet": {
     "rpcUrl": "ws://185.132.176.254:8576",
@@ -174,17 +217,18 @@
       }
     ],
     "sourceForRepresentation": [
+      "metistestnet",
       "rinkeby",
       "mumbai",
       "hecotestnet",
-      "avalanchetestnet"
+      "avalanchetestnet"        
     ],
     "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeList": "0x9A18503955cb34b3fa6D63fA33c7a1B6AE39ba3d",
-    "bridge": "0x0ed15549797201B007A3A2811d6dD8D2D1eb9c6f",
-    "mockDexPool": "0x1d8032F6e6263595b1f2013c36a7c327F4E338Cc",
-    "portal": "0x7f6776fFFC8B83215679DBDA8D91136b4d7053B2",
-    "synthesis": "0x2FBC15028d6243ad17C1DD4cca47158AC579aD45"
+    "nodeList": "0x9158d7b023CEa445249264a30764C81ea0109ED3",
+    "bridge": "0x7446b2e0ba4fa1b754844fB0A8CDb0593929b122",
+    "mockDexPool": "0xdd0efd85f5D6C8bAdfC59010048487CaE993B40c",
+    "portal": "0x3cA05aDeB48C6bdf3B635980F2d87B951591fDA5",
+    "synthesis": "0x569F20c646ECC5A2094c57FaDC79d90330f23156"
   },
   "ganache": {
     "rpcUrl": "http://127.0.0.1:9999",
@@ -325,4 +369,5 @@
     "portal": "0x329DCb6edc4D6b9110d366BCc4f52624F619176A",
     "synthesis": "0xBE8a929Ac944333f054D2936ba7CdcD9A457323f"
   }
+
 }
