@@ -11,7 +11,12 @@ contract Bridge is BridgeCore {
 
     constructor (address listNode, address forwarder) {
         _listNode = listNode;
-        _owner    = msg.sender;
+
+        /* hotfix: due error go run wrappers-builder/main.go --json "hardhat/artifacts/contracts/bridge"/Bridge.sol --pkg wrappers --out wrappers
+         * FATA[0000] duplicated identifier "_owner"(normalized "Owner"), use --alias for renaming 
+         * Should delete in future
+         */
+        //_owner    = msg.sender; 
         _setTrustedForwarder(forwarder);
     }
 

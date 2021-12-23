@@ -6,7 +6,11 @@ pragma solidity ^0.8.0;
 
 contract BridgeCore is RelayRecipient {
 
-    address public _owner;
+    /* hotfix: due error go run wrappers-builder/main.go --json "hardhat/artifacts/contracts/bridge"/Bridge.sol --pkg wrappers --out wrappers
+     * FATA[0000] duplicated identifier "_owner"(normalized "Owner"), use --alias for renaming 
+     * Should delete in future
+     */
+    //address public _owner;
     address public _listNode;
 
     /* bridge => nonce */
