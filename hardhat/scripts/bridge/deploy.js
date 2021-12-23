@@ -13,7 +13,7 @@ async function main() {
     console.log("NodeList address:", nodeList.address);
 
     const _Bridge = await ethers.getContractFactory("Bridge");
-    const bridge  = await _Bridge.deploy(nodeList.address);
+    const bridge  = await _Bridge.deploy(nodeList.address, networkConfig[network.name].forwarder);
     await bridge.deployed();
     console.log("Bridge address:", bridge.address);
 
