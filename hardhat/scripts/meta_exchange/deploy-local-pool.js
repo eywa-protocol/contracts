@@ -42,11 +42,7 @@ async function main() {
   )
   await curveProxy.deployed()
 
-  // initial proxy setup 
-  const owner = await Synthesis.attach(deployInfo[network.name].synthesis).owner();
-  console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-  console.log(owner)
-  console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+  // initial proxy setup
   await Synthesis.attach(deployInfo[network.name].synthesis).setProxyCurve(curveProxy.address);
   await Portal.attach(deployInfo[network.name].portal).setProxyCurve(curveProxy.address);
 
