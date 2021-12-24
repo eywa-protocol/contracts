@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./IBridge.sol";
 import "./RelayRecipient.sol";
 import "./SolanaSerialize.sol";
@@ -63,7 +64,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         uint256 chainID;
     }
 
-    uint256 requestCount = 1;
+    uint256 requestCount;
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => UnsynthesizeState) public unsynthesizeStates;
     mapping(address => bytes) public tokenData;
@@ -88,7 +89,12 @@ contract Portal is RelayRecipient, SolanaSerialize {
     event RepresentationRequest(address indexed _rtoken);
     event ApprovedRepresentationRequest(address indexed _rtoken);
 
-    constructor(address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
+    function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
+        __Context_init_unchained();
+        __Ownable_init_unchained();
+        requestCount = 1;
+        RelayRecipient relayRecipient = new RelayRecipient();
+        relayRecipient.initialize(_trustedForwarder);
         bridge = _bridge;
     }
 

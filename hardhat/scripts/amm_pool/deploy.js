@@ -1,6 +1,7 @@
 const fs = require("fs");
 let networkConfig = require('../../helper-hardhat-config.json')
 const hre = require("hardhat");
+const { upgrades } = require("hardhat");
 
 async function main() {
 
@@ -8,12 +9,14 @@ async function main() {
     console.log("Owner:", deployer.address);
 
     const _Portal = await ethers.getContractFactory("Portal");
-    const portal  = await _Portal.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
+    //const portal  = await _Portal.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
+    const portal = await upgrades.deployProxy(_Portal, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder], { initializer: 'initializeFunc' });
     await portal.deployed();
     console.log("Portal address:", portal.address);
 
     const _Synthesis = await ethers.getContractFactory("Synthesis");
-    const synthesis  = await _Synthesis.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
+    //const synthesis  = await _Synthesis.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
+    const synthesis = await upgrades.deployProxy(_Synthesis, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder], { initializer: 'initializeFunc' });
     await synthesis.deployed();
     console.log("Synthesis address:", synthesis.address);
 

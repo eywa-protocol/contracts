@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.0;
+pragma solidity ^0.8.3;
 
 import "./bls/BlsSignatureVerification.sol";
 import "./core/BridgeCore.sol";
@@ -7,13 +7,14 @@ import "./interface/INodeRegistry.sol";
 import "@openzeppelin/contracts-newone/utils/Address.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 
-contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
-    using Address for address;
+contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification, Initializable {
+    using AddressUpgradeable for address;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    string public override versionRecipient = "2.2.3";
+    string public override versionRecipient;
     E2Point private epochKey;           // Aggregated public key of all paricipants of the current epoch
     address public dao;                 // Address of the DAO
     uint8 public epochParticipantsNum;  // Number of participants contributed to the epochKey
@@ -22,7 +23,8 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
     event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
-    constructor(address forwarder) {
+    function initialize(address forwarder) public initializer{
+        versionRecipient = "2.2.3";
         trustedForwarder = forwarder;
     }
 

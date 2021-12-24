@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-newone/access/Ownable.sol";
-import "@openzeppelin/contracts-newone/utils/Context.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
-abstract contract RelayRecipient is Context, Ownable {
+
+contract RelayRecipient is ContextUpgradeable, OwnableUpgradeable {
     address private _trustedForwarder;
 
-    constructor(address trustedForwarder) {
+    function initialize(address trustedForwarder) public initializer {
+        __Context_init_unchained();
+        __Ownable_init_unchained();
         _trustedForwarder = trustedForwarder;
     }
 

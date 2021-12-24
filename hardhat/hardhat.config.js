@@ -3,6 +3,7 @@ require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-vyper");
 require("hardhat-gas-reporter");
+require('@openzeppelin/hardhat-upgrades');
 
 require('dotenv').config();
 const networkConfig = require('./helper-hardhat-config.json');
@@ -78,7 +79,7 @@ module.exports = {
   },
   solidity: {
     compilers: [{
-      version: "0.8.0",
+      version: "0.8.3",
       settings: {
         optimizer: {
           enabled: true,
