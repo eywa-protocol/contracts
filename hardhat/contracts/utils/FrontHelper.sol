@@ -54,9 +54,7 @@ contract FrontHelper {
 
     struct PoolInfo {
         address token0;
-        bool token0Synth;
         address token1;
-        bool token1Synth;
         uint112 reserve0;
         uint112 reserve1;
     }
@@ -187,21 +185,9 @@ contract FrontHelper {
             pools[i].token0 = tokenInfo(target, IERC20(token0Address));
             pools[i].token1 = tokenInfo(target, IERC20(token1Address));
             
-            bool isSynth0;
-            bool isSynth1;
-            
-            if(ISynthesis(synthesis).getRepresentation(token0Address) != address(0)){
-                isSynth0 = true;
-            }
-            if(ISynthesis(synthesis).getRepresentation(token1Address) != address(0)){
-                isSynth1 = true;
-            }
-            
             pools[i].pool = PoolInfo({
                 token0: token0Address,
-                token0Synth: isSynth0,
                 token1: token1Address,
-                token1Synth: isSynth1 ,
                 reserve0: reserve0,
                 reserve1: reserve1
             });
@@ -232,25 +218,13 @@ function poolInfo(address target, address pairAddress,  address synthesis)
 
         address token0Address = pancakePair.token0();
         address token1Address = pancakePair.token1();
-        
-        bool isSynth0;
-        bool isSynth1;
-        
-        if(ISynthesis(synthesis).getRepresentation(token0Address) != address(0)){
-            isSynth0 = true;
-        }
-        if(ISynthesis(synthesis).getRepresentation(token1Address) != address(0)){
-            isSynth1 = true;
-        }
 
         pair = tokenInfo(target, IERC20(pairAddress));
         token0 = tokenInfo(target, IERC20(token0Address));
         token1 = tokenInfo(target, IERC20(token1Address));
         pool = PoolInfo({
             token0: token0Address,
-            token0Synth: isSynth0,
             token1: token1Address,
-            token1Synth: isSynth1,
             reserve0: reserve0,
             reserve1: reserve1
         });

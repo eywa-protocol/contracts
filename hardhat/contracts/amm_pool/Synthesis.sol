@@ -81,7 +81,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         bytes32 recipient;
         bytes32 chain2address;
         uint256 amount;
-        bytes32 token;
+        bytes32 token; //TODO
         address stoken;
         RequestState state;
     }
