@@ -43,6 +43,7 @@ async function main() {
             break;
           }
           throw Error(e.message);
+          console.log(`WARNING: Bind with ${netw} were skipped. Check out the reason! Which one of it is already binded contracts`);
       }
     }
 }
