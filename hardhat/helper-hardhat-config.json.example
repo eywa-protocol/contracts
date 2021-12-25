@@ -193,7 +193,7 @@
   },
   "bsctestnet": {
     "rpcUrl": "ws://185.132.176.254:8576",
-    "rpcUrl2": "https://bsc.testnet.eywa.fi",
+    "rpcUrl2": "https://data-seed-prebsc-1-s1.binance.org:8545/",
     "n": "BSCTESTNET",
     "netwiker": "BSC",
     "env_file": [
