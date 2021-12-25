@@ -42,7 +42,7 @@ async function main() {
             console.log(`WARNING: Can't bind with ${netw}. Check json config.`);
             break;
           }
-          throw Error(e.message);
+          //throw Error(e.message);
           console.log(`WARNING: Bind with ${netw} were skipped. Check out the reason! Which one of it is already binded contracts`);
       }
     }
