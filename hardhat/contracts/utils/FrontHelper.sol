@@ -160,7 +160,7 @@ contract FrontHelper {
     }
 
 
-    function poolsInfo(address target, address[] memory pairAddress, address synthesis)
+    function poolsInfo(address target, address[] memory pairAddress)
         public
         view
         returns (
@@ -198,7 +198,7 @@ contract FrontHelper {
     }
 
 
-function poolInfo(address target, address pairAddress,  address synthesis)
+function poolInfo(address target, address pairAddress)
         public
         view
         returns (
