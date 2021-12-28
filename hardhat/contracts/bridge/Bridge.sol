@@ -23,7 +23,8 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
     // event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
     constructor(address forwarder) {
-       _setTrustedForwarder(forwarder);
+        dao = _msgSender();
+        _setTrustedForwarder(forwarder);
     }
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
