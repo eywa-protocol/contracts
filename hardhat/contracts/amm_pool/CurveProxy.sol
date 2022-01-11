@@ -69,6 +69,15 @@ interface ISynthesis {
     function getTxId() external returns (bytes32);
 }
 
+interface IERC20Permit {
+
+    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external;
+
+    function nonces(address owner) external view returns (uint256);
+
+    function DOMAIN_SEPARATOR() external view returns (bytes32);
+}
+
 contract CurveProxy is BaseRelayRecipient {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -149,6 +158,12 @@ contract CurveProxy is BaseRelayRecipient {
         address receiveSide;
         address oppositeBridge;
         uint256 chainID;
+    }
+
+    struct PermitData {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
     }
 
     event InconsistencyCallback(address pool, address token, address to, uint256 amount);
@@ -597,6 +612,51 @@ contract CurveProxy is BaseRelayRecipient {
                 IERC20(pool[_params.remove].at(uint256(_params.x))).balanceOf(address(this))
             );
         }
+    }
+
+    function add_liquidity_3pool_transit_synthesize_with_permit(
+        address _add,
+        uint256[3] memory _amounts,
+        uint256 _min_mint_amount,
+        SynthParams memory _synth_params,
+        bytes4 _selector,
+        bytes memory _transit_data,
+        PermitData[3] memory _permit_data
+    ) external {
+        //add_liquidity_3pool
+        for (uint256 i = 0; i < _amounts.length; i++) {
+            if (_amounts[i] > 0) {
+                IERC20Permit(pool[_add].at(i)).permit(_msgSender(), address(this), _amounts[i], block.timestamp + 2000, _permit_data[i].v, _permit_data[i].r, _permit_data[i].s);
+                IERC20(pool[_add].at(i)).safeTransferFrom(_msgSender(), address(this), _amounts[i]);
+                IERC20(pool[_add].at(i)).approve(address(_add), _amounts[i]);
+            }
+        }
+        IStableSwapPool(_add).add_liquidity(_amounts, _min_mint_amount);
+
+        //approve LP for Portal
+        address lp = lp_token[_add];
+        uint256 this_balance = IERC20(lp).balanceOf(address(this));
+        IERC20(lp).approve(portal, 0);  // CurveV2 token support
+        IERC20(lp).approve(portal, this_balance);
+
+        //pack synthesize request with transit
+        bytes memory out = abi.encodePacked(
+            _selector,
+            _transit_data,
+            abi.encode(lp, this_balance, IPortal(portal).getTxId())
+        );
+
+        // transit meta request
+        IPortal(portal).synthesize_transit(
+            lp,
+            this_balance, //amount to synthesize
+            ////////////////////////////
+            _synth_params.chain2address,
+            _synth_params.receiveSide,
+            _synth_params.oppositeBridge,
+            _synth_params.chainID,
+            out
+        );
     }
 
     string public override versionRecipient = "2.2.0";

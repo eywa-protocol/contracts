@@ -14,6 +14,15 @@ interface IERC20 {
     function symbol() external returns (string memory);
 }
 
+interface IERC20Permit {
+
+    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external;
+
+    function nonces(address owner) external view returns (uint256);
+
+    function DOMAIN_SEPARATOR() external view returns (bytes32);
+}
+
 contract Portal is RelayRecipient, SolanaSerialize {
     using SafeMath for uint256;
 
@@ -61,6 +70,12 @@ contract Portal is RelayRecipient, SolanaSerialize {
         address receiveSide;
         address oppositeBridge;
         uint256 chainID;
+    }
+
+    struct PermitData {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
     }
 
     uint256 requestCount = 1;
@@ -606,6 +621,80 @@ contract Portal is RelayRecipient, SolanaSerialize {
         //synthesize request
         for (uint256 i = 0; i < _tokens.length; i++) {
             if (_amounts[i] > 0) {
+                TransferHelper.safeTransferFrom(_tokens[i], _msgSender(), address(this), _amounts[i]);
+
+                balanceOf[_tokens[i]] = balanceOf[_tokens[i]].add(_amounts[i]);
+                uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+
+                txId[i] = keccak256(
+                    abi.encodePacked(
+                        IBridge(bridge).prepareRqId(
+                            bytes32(uint256(uint160(_synth_params.oppositeBridge))),
+                            _synth_params.chainID,
+                            bytes32(uint256(uint160(_synth_params.receiveSide))),
+                            bytes32(uint256(uint160(_msgSender()))),
+                            nonce
+                        ),
+                        i
+                    )
+                );
+
+                // TODO add payment by token
+                TxState storage txState = requests[txId[i]];
+                txState.recipient = bytes32(uint256(uint160(_msgSender()))); //change!
+                txState.chain2address = bytes32(uint256(uint160(_synth_params.chain2address)));
+                txState.rtoken = bytes32(uint256(uint160(_tokens[i])));
+                txState.amount = _amounts[i];
+                txState.state = RequestState.Sent;
+
+                emit SynthesizeRequest(txId[i], _msgSender(), _synth_params.chain2address, _amounts[i], _tokens[i]);
+            }
+        }
+
+        // encode call
+        bytes memory out = abi.encodePacked(
+            _selector,
+            _transit_data,
+            //////////////
+            _tokens,
+            _amounts,
+            txId
+        );
+
+        uint256 general_nonce = IBridge(bridge).getNonce(_msgSender());
+        bytes32 general_txId = IBridge(bridge).prepareRqId(
+            bytes32(uint256(uint160(_synth_params.oppositeBridge))),
+            _synth_params.chainID,
+            bytes32(uint256(uint160(_synth_params.receiveSide))),
+            bytes32(uint256(uint160(_msgSender()))),
+            general_nonce
+        );
+
+        IBridge(bridge).transmitRequestV2(
+            out,
+            _synth_params.receiveSide,
+            _synth_params.oppositeBridge,
+            _synth_params.chainID,
+            general_txId,
+            _msgSender(),
+            general_nonce
+        );
+    }
+
+    function synthesize_batch_transit_with_permit(
+        address[] memory _tokens,
+        uint256[] memory _amounts, // set the amount in order to initiate a synthesize request
+        SynthParams memory _synth_params,
+        bytes4 _selector,
+        bytes memory _transit_data,
+        PermitData[] memory _permit_data
+    ) external {
+        bytes32[] memory txId = new bytes32[](_tokens.length);
+
+        //synthesize request
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            if (_amounts[i] > 0) {
+                IERC20Permit(_tokens[i]).permit(_msgSender(), address(this), _amounts[i], block.timestamp + 20000, _permit_data[i].v, _permit_data[i].r, _permit_data[i].s);
                 TransferHelper.safeTransferFrom(_tokens[i], _msgSender(), address(this), _amounts[i]);
 
                 balanceOf[_tokens[i]] = balanceOf[_tokens[i]].add(_amounts[i]);
