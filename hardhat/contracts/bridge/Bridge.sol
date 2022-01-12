@@ -1,28 +1,31 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.0;
+pragma solidity ^0.8.3;
 
 import "./bls/BlsSignatureVerification.sol";
 import "./core/BridgeCore.sol";
 import "./interface/INodeRegistry.sol";
 import "@openzeppelin/contracts-newone/utils/Address.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
-import "../amm_pool/RelayRecipient.sol";
+import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 
-contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
-    using Address for address;
+contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
+    using AddressUpgradeable for address;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    string public versionRecipient = "2.2.3";
+    // string public versionRecipient = "2.2.3";
+    string public versionRecipient;
     E2Point private epochKey;           // Aggregated public key of all paricipants of the current epoch
     address public dao;                 // Address of the DAO
     uint8 public epochParticipantsNum;  // Number of participants contributed to the epochKey
     uint32 public epochNum;             // Sequential number of the epoch
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
-    // event OwnershipTransferred(address indexed previousDao, address indexed newDao);
+    event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
-    constructor(address forwarder) {
+    function initialize(address forwarder) public initializer{
+        versionRecipient = "2.2.3";
         dao = _msgSender();
         _setTrustedForwarder(forwarder);
     }
@@ -235,9 +238,5 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
             mask = mask & (mask - 1);
             cnt++;
         }
-    }
-
-    function setTrustedForwarder(address _forwarder) external onlyOwner {
-       return _setTrustedForwarder(_forwarder);
     }
 }

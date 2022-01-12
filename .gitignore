@@ -13,6 +13,8 @@ truffle/build/contracts
 **/.env     
 networks_env
 
+.openzeppelin/unknown-*.json
+
 .idea
 .vscode
 hardhat/helper-hardhat-config.json

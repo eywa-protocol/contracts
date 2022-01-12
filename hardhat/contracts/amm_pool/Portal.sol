@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.3;
 
 import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
@@ -18,7 +18,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
     using SafeMath for uint256;
 
     mapping(address => uint256) public balanceOf;
-    string public versionRecipient = "2.2.3";
+    string public versionRecipient;
     address public bridge;
     address public proxy;
 
@@ -64,7 +64,6 @@ contract Portal is RelayRecipient, SolanaSerialize {
         uint256 chainID;
     }
 
-    uint256 requestCount = 1;
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => UnsynthesizeState) public unsynthesizeStates;
     mapping(address => bytes) public tokenData;
@@ -89,7 +88,10 @@ contract Portal is RelayRecipient, SolanaSerialize {
     event RepresentationRequest(address indexed _rtoken);
     event ApprovedRepresentationRequest(address indexed _rtoken);
 
-    constructor(address _bridge, address _trustedForwarder){
+    function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
+        __Context_init_unchained();
+        __Ownable_init_unchained();
+        versionRecipient = "2.2.3";
         bridge = _bridge;
         _setTrustedForwarder(_trustedForwarder);
     }

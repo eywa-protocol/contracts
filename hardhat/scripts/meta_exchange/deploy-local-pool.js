@@ -2,6 +2,7 @@ const fs = require("fs");
 const { network } = require("hardhat");
 let deployInfo = require('../../helper-hardhat-config.json')
 
+
 // local pool params
 const A = 100                 // amplification coefficient for the pool.
 const fee = 4000000           // pool swap fee
@@ -41,7 +42,7 @@ async function main() {
   )
   await curveProxy.deployed()
 
-  // initial proxy setup 
+  // initial proxy setup
   await Synthesis.attach(deployInfo[network.name].synthesis).setProxyCurve(curveProxy.address);
   await Portal.attach(deployInfo[network.name].portal).setProxyCurve(curveProxy.address);
 

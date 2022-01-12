@@ -1,6 +1,7 @@
 const fs = require("fs");
 let networkConfig = require('../../helper-hardhat-config.json')
 const hre = require("hardhat");
+const { upgrades } = require("hardhat");
 
 async function main() {
 
@@ -16,7 +17,8 @@ async function main() {
 
     // Deploy Bridge
     const _Bridge = await ethers.getContractFactory("Bridge");
-    const bridge = await _Bridge.deploy(forwarder.address);
+    //const bridge = await _Bridge.deploy(forwarder.address);
+    const bridge = await upgrades.deployProxy(_Bridge, [forwarder.address], { initializer: 'initialize' });
     await bridge.deployed();
     networkConfig[network.name].bridge = bridge.address;
     console.log("Bridge address:", bridge.address);
