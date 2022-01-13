@@ -16,5 +16,6 @@ networks_env
 
 .idea
 .vscode
+*.swp
 hardhat/helper-hardhat-config.json
 hardhat/.openzeppelin/

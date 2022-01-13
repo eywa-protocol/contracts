@@ -1,9 +1,9 @@
-//SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.7.6;
-pragma abicoder v2;
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/EnumerableSet.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.10;
+
+import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-newone/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts-newone/access/Ownable.sol";
 import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "./IStableSwapPool.sol";
 

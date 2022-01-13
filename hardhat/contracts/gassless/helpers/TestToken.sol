@@ -1,7 +1,7 @@
-// SPDX-License-Identifier:MIT
-pragma solidity ^0.7.6;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/ERC20.sol";
 
 contract TestToken is ERC20 {
     constructor(string memory n1, string memory n2) ERC20(n1, n2) {

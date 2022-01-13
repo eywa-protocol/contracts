@@ -1,9 +1,8 @@
-// SPDX-License-Identifier:MIT
-pragma solidity ^0.7.6;
-pragma abicoder v2;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/drafts/IERC20Permit.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-IERC20Permit.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
 import "./ImportArtifacts.sol";
 
 import "./interfaces/IUniswap.sol";
