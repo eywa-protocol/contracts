@@ -358,7 +358,7 @@ abstract contract Ownable is Context {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor () internal {
+    constructor () {
         address msgSender = _msgSender();
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
@@ -735,7 +735,7 @@ library RelayHubValidator {
     // size (in bytes) of the given "bytes" parameter. size include the length (32-byte word),
     // and actual data size, rounded up to full 32-byte words
     function dynamicParamSize(bytes calldata buf) internal pure returns (uint) {
-        return 32 + ((buf.length + 31) & uint(~31));
+        return 32 + ((buf.length + 31) & (type(uint256).max - 31));
     }
 }
 

@@ -146,7 +146,7 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
         address[] memory path = new address[](2);
         path[0] = address(token);
         path[1] = router.WETH();
-        token.approve(address(router), uint256(-1));
+        token.approve(address(router), type(uint256).max);
         router.swapExactTokensForETH(
             tokenActualCharge,
             ethActualCharge,
