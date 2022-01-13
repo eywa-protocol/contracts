@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
-pragma experimental ABIEncoderV2; // Remove?
 
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "@opengsn/contracts/src/forwarder/IForwarder.sol";

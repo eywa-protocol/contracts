@@ -556,7 +556,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
             if (_amounts[i] > 0) {
                 TransferHelper.safeTransferFrom(_tokens[i], _msgSender(), address(this), _amounts[i]);
 
-                balanceOf[_tokens[i]] = _amounts[i];
+                balanceOf[_tokens[i]] += _amounts[i];
                 uint256 nonce = IBridge(bridge).getNonce(_msgSender());
 
                 txId[i] = keccak256(
