@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-newone/utils/Create2.sol";
 import "./IBridge.sol";
 import "./ISyntERC20.sol";

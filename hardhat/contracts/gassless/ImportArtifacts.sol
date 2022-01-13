@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts-newone/utils/Context.sol";
+import "@openzeppelin/contracts-newone/access/Ownable.sol";
+import "@opengsn/contracts/src/forwarder/IForwarder.sol";
+
 // File: @opengsn/contracts/src/utils/MinLibBytes.sol
 
 // minimal bytes manipulation required by GSN
@@ -98,417 +102,6 @@ library MinLibBytes {
         }
         return result;
     }
-}
-
-// File: @openzeppelin/contracts/math/SafeMath.sol
-
-/**
- * @dev Wrappers over Solidity's arithmetic operations with added overflow
- * checks.
- *
- * Arithmetic operations in Solidity wrap on overflow. This can easily result
- * in bugs, because programmers usually assume that an overflow raises an
- * error, which is the standard behavior in high level programming languages.
- * `SafeMath` restores this intuition by reverting the transaction when an
- * operation overflows.
- *
- * Using this library instead of the unchecked operations eliminates an entire
- * class of bugs, so it's recommended to use it always.
- */
-library SafeMath {
-    /**
-     * @dev Returns the addition of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        uint256 c = a + b;
-        if (c < a) return (false, 0);
-        return (true, c);
-    }
-
-    /**
-     * @dev Returns the substraction of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function trySub(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        if (b > a) return (false, 0);
-        return (true, a - b);
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryMul(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
-        if (a == 0) return (true, 0);
-        uint256 c = a * b;
-        if (c / a != b) return (false, 0);
-        return (true, c);
-    }
-
-    /**
-     * @dev Returns the division of two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryDiv(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        if (b == 0) return (false, 0);
-        return (true, a / b);
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryMod(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        if (b == 0) return (false, 0);
-        return (true, a % b);
-    }
-
-    /**
-     * @dev Returns the addition of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `+` operator.
-     *
-     * Requirements:
-     *
-     * - Addition cannot overflow.
-     */
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
-        require(c >= a, "SafeMath: addition overflow");
-        return c;
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b <= a, "SafeMath: subtraction overflow");
-        return a - b;
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `*` operator.
-     *
-     * Requirements:
-     *
-     * - Multiplication cannot overflow.
-     */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        if (a == 0) return 0;
-        uint256 c = a * b;
-        require(c / a == b, "SafeMath: multiplication overflow");
-        return c;
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers, reverting on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, "SafeMath: division by zero");
-        return a / b;
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, "SafeMath: modulo by zero");
-        return a % b;
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
-     * overflow (when the result is negative).
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {trySub}.
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
-    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b <= a, errorMessage);
-        return a - b;
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers, reverting with custom message on
-     * division by zero. The result is rounded towards zero.
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {tryDiv}.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b > 0, errorMessage);
-        return a / b;
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting with custom message when dividing by zero.
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {tryMod}.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b > 0, errorMessage);
-        return a % b;
-    }
-}
-
-// File: @openzeppelin/contracts/utils/Context.sol
-
-/*
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with GSN meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- *
- * This contract is only required for intermediate, library-like contracts.
- */
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address) {
-        return msg.sender;
-    }
-
-    function _msgData() internal view virtual returns (bytes memory) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        return msg.data;
-    }
-}
-
-// File: @openzeppelin/contracts/access/Ownable.sol
-
-/**
- * @dev Contract module which provides a basic access control mechanism, where
- * there is an account (an owner) that can be granted exclusive access to
- * specific functions.
- *
- * By default, the owner account will be the one that deploys the contract. This
- * can later be changed with {transferOwnership}.
- *
- * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
- * the owner.
- */
-abstract contract Ownable is Context {
-    address private _owner;
-
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    /**
-     * @dev Initializes the contract setting the deployer as the initial owner.
-     */
-    constructor () {
-        address msgSender = _msgSender();
-        _owner = msgSender;
-        emit OwnershipTransferred(address(0), msgSender);
-    }
-
-    /**
-     * @dev Returns the address of the current owner.
-     */
-    function owner() public view virtual returns (address) {
-        return _owner;
-    }
-
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyOwner() {
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        _;
-    }
-
-    /**
-     * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions anymore. Can only be called by the current owner.
-     *
-     * NOTE: Renouncing ownership will leave the contract without an owner,
-     * thereby removing any functionality that is only available to the owner.
-     */
-    function renounceOwnership() public virtual onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
-        _owner = address(0);
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-    }
-}
-
-// File: @opengsn/contracts/src/utils/GsnUtils.sol
-
-/* solhint-disable no-inline-assembly */
-
-library GsnUtils {
-
-    /**
-     * extract method sig from encoded function call
-     */
-    function getMethodSig(bytes memory msgData) internal pure returns (bytes4) {
-        return MinLibBytes.readBytes4(msgData, 0);
-    }
-
-    /**
-     * extract parameter from encoded-function block.
-     * see: https://solidity.readthedocs.io/en/develop/abi-spec.html#formal-specification-of-the-encoding
-     * the return value should be casted to the right type (uintXXX/bytesXXX/address/bool/enum)
-     */
-    function getParam(bytes memory msgData, uint index) internal pure returns (uint) {
-        return MinLibBytes.readUint256(msgData, 4 + index * 32);
-    }
-
-    //re-throw revert with the same revert data.
-    function revertWithData(bytes memory data) internal pure {
-        assembly {
-            revert(add(data,32), mload(data))
-        }
-    }
-
-}
-
-// File: @opengsn/contracts/src/forwarder/IForwarder.sol
-
-interface IForwarder {
-
-    struct ForwardRequest {
-        address from;
-        address to;
-        uint256 value;
-        uint256 gas;
-        uint256 nonce;
-        bytes data;
-        uint256 validUntil;
-    }
-
-    event DomainRegistered(bytes32 indexed domainSeparator, bytes domainValue);
-
-    event RequestTypeRegistered(bytes32 indexed typeHash, string typeStr);
-
-    function getNonce(address from)
-    external view
-    returns(uint256);
-
-    /**
-     * verify the transaction would execute.
-     * validate the signature and the nonce of the request.
-     * revert if either signature or nonce are incorrect.
-     * also revert if domainSeparator or requestTypeHash are not registered.
-     */
-    function verify(
-        ForwardRequest calldata forwardRequest,
-        bytes32 domainSeparator,
-        bytes32 requestTypeHash,
-        bytes calldata suffixData,
-        bytes calldata signature
-    ) external view;
-
-    /**
-     * execute a transaction
-     * @param forwardRequest - all transaction parameters
-     * @param domainSeparator - domain used when signing this request
-     * @param requestTypeHash - request type used when signing this request.
-     * @param suffixData - the extension data used when signing this request.
-     * @param signature - signature to validate.
-     *
-     * the transaction is verified, and then executed.
-     * the success and ret of "call" are returned.
-     * This method would revert only verification errors. target errors
-     * are reported using the returned "success" and ret string
-     */
-    function execute(
-        ForwardRequest calldata forwardRequest,
-        bytes32 domainSeparator,
-        bytes32 requestTypeHash,
-        bytes calldata suffixData,
-        bytes calldata signature
-    )
-    external payable
-    returns (bool success, bytes memory ret);
-
-    /**
-     * Register a new Request typehash.
-     * @param typeName - the name of the request type.
-     * @param typeSuffix - any extra data after the generic params.
-     *  (must add at least one param. The generic ForwardRequest type is always registered by the constructor)
-     */
-    function registerRequestType(string calldata typeName, string calldata typeSuffix) external;
-
-    /**
-     * Register a new domain separator.
-     * The domain separator must have the following fields: name,version,chainId, verifyingContract.
-     * the chainId is the current network's chainId, and the verifyingContract is this forwarder.
-     * This method is given the domain name and version to create and register the domain separator value.
-     * @param name the domain's display name
-     * @param version the domain/protocol version
-     */
-    function registerDomainSeparator(string calldata name, string calldata version) external;
 }
 
 // File: @opengsn/contracts/src/utils/GsnTypes.sol
@@ -1181,7 +774,6 @@ interface IPaymaster {
 /* solhint-disable bracket-align */
 
 contract RelayHub is IRelayHub, Ownable {
-    using SafeMath for uint256;
 
     string public override versionHub = "2.2.0+opengsn.hub.irelayhub";
 
@@ -1272,7 +864,7 @@ contract RelayHub is IRelayHub, Ownable {
         uint256 amount = msg.value;
         require(amount <= config.maximumRecipientDeposit, "deposit too big");
 
-        balances[target] = balances[target].add(amount);
+        balances[target] += amount;
 
         emit Deposited(target, msg.sender, amount);
     }
@@ -1285,14 +877,14 @@ contract RelayHub is IRelayHub, Ownable {
         address account = msg.sender;
         require(balances[account] >= amount, "insufficient funds");
 
-        balances[account] = balances[account].sub(amount);
+        balances[account] -= amount;
         dest.transfer(amount);
 
         emit Withdrawn(account, dest, amount);
     }
 
     function calldataGasCost(uint256 length) public override view returns (uint256) {
-        return config.dataGasCostPerByte.mul(length);
+        return config.dataGasCostPerByte * length;
     }
 
     function verifyGasAndDataLimits(
@@ -1315,13 +907,12 @@ contract RelayHub is IRelayHub, Ownable {
         require(maxAcceptanceBudget >= gasAndDataLimits.acceptanceBudget, "acceptance budget too high");
         require(gasAndDataLimits.acceptanceBudget >= gasAndDataLimits.preRelayedCallGasLimit, "acceptance budget too low");
 
-        maxPossibleGas =
-        config.gasOverhead.add(
-        gasAndDataLimits.preRelayedCallGasLimit).add(
-        gasAndDataLimits.postRelayedCallGasLimit).add(
-        relayRequest.request.gas).add(
-        dataGasCost).add(
-        externalCallDataCost);
+        maxPossibleGas = config.gasOverhead
+            + gasAndDataLimits.preRelayedCallGasLimit
+            + gasAndDataLimits.postRelayedCallGasLimit
+            + relayRequest.request.gas
+            + dataGasCost
+            + externalCallDataCost;
 
         // This transaction must have enough gas to forward the call to the recipient with the requested amount, and not
         // run out of gas later in this function.
@@ -1416,31 +1007,34 @@ contract RelayHub is IRelayHub, Ownable {
         vars.dataGasCost = calldataGasCost(msg.data.length);
         if (!vars.success) {
         //Failure cases where the PM doesn't pay
-        if (vars.status == RelayCallStatus.RejectedByPreRelayed ||
-        (vars.innerGasUsed <= vars.gasAndDataLimits.acceptanceBudget.add(vars.dataGasCost)) && (
-        vars.status == RelayCallStatus.RejectedByForwarder ||
-        vars.status == RelayCallStatus.RejectedByRecipientRevert  //can only be thrown if rejectOnRecipientRevert==true
-        )) {
-        paymasterAccepted=false;
+        if (
+            vars.status == RelayCallStatus.RejectedByPreRelayed ||
+            vars.innerGasUsed <= vars.gasAndDataLimits.acceptanceBudget + vars.dataGasCost && 
+            (
+                vars.status == RelayCallStatus.RejectedByForwarder ||
+                vars.status == RelayCallStatus.RejectedByRecipientRevert  //can only be thrown if rejectOnRecipientRevert==true
+            )
+        ) {
+            paymasterAccepted=false;
 
-        emit TransactionRejectedByPaymaster(
-        vars.relayManager,
-        relayRequest.relayData.paymaster,
-        relayRequest.request.from,
-        relayRequest.request.to,
-        msg.sender,
-        vars.functionSelector,
-        vars.innerGasUsed,
-        vars.relayedCallReturnValue);
-        return (false, vars.relayedCallReturnValue);
-    }
+            emit TransactionRejectedByPaymaster(
+                vars.relayManager,
+                relayRequest.relayData.paymaster,
+                relayRequest.request.from,
+                relayRequest.request.to,
+                msg.sender,
+                vars.functionSelector,
+                vars.innerGasUsed,
+                vars.relayedCallReturnValue);
+            return (false, vars.relayedCallReturnValue);
+        }
     }
         // We now perform the actual charge calculation, based on the measured gas used
         uint256 gasUsed = (externalGasLimit - gasleft()) + config.gasOverhead;
         uint256 charge = calculateCharge(gasUsed, relayRequest.relayData);
 
-        balances[relayRequest.relayData.paymaster] = balances[relayRequest.relayData.paymaster].sub(charge);
-        balances[vars.relayManager] = balances[vars.relayManager].add(charge);
+        balances[relayRequest.relayData.paymaster] -= charge;
+        balances[vars.relayManager] += charge;
 
         emit TransactionRelayed(
             vars.relayManager,
@@ -1565,7 +1159,16 @@ contract RelayHub is IRelayHub, Ownable {
     }
 
     function calculateCharge(uint256 gasUsed, GsnTypes.RelayData calldata relayData) public override virtual view returns (uint256) {
-        return relayData.baseRelayFee.add((gasUsed.mul(relayData.gasPrice).mul(relayData.pctRelayFee.add(100))).div(100));
+        //return relayData.baseRelayFee.add((gasUsed.mul(relayData.gasPrice).mul(relayData.pctRelayFee.add(100))).div(100));
+        
+        // FIXME: Check this please!
+        return relayData.baseRelayFee 
+            + (
+                gasUsed
+                * relayData.gasPrice
+                * (relayData.pctRelayFee + 100)
+                / 100
+            );
     }
 
     function isRelayManagerStaked(address relayManager) public override view returns (bool) {

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "./IBridge.sol";
 import "./RelayRecipient.sol";
@@ -15,7 +14,6 @@ interface IERC20 {
 }
 
 contract Portal is RelayRecipient, SolanaSerialize {
-    using SafeMath for uint256;
 
     mapping(address => uint256) public balanceOf;
     string public versionRecipient;
@@ -124,7 +122,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         uint256 _chainID
     ) external returns (bytes32 txID) {
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
+        balanceOf[_token] += _amount;
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
@@ -170,7 +168,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         uint256 _chainId
     ) external returns (bytes32 txID) {
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
+        balanceOf[_token] += _amount;
 
         require(_chainId == SOLANA_CHAIN_ID, "incorrect chainID");
 
@@ -287,7 +285,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         require(_success1, "Approve call failed");
 
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
+        balanceOf[_token] += _amount;
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
@@ -356,7 +354,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         require(unsynthesizeStates[_txID] == UnsynthesizeState.Default, "Portal: syntatic tokens emergencyUnburn");
 
         TransferHelper.safeTransfer(_token, _to, _amount);
-        balanceOf[_token] = balanceOf[_token].sub(_amount);
+        balanceOf[_token] -= _amount;
 
         unsynthesizeStates[_txID] = UnsynthesizeState.Unsynthesized;
 
@@ -520,7 +518,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         //     "Portal: token must be verified"
         // );
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
+        balanceOf[_token] += _amount;
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
 
@@ -559,7 +557,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
             if (_amounts[i] > 0) {
                 TransferHelper.safeTransferFrom(_tokens[i], _msgSender(), address(this), _amounts[i]);
 
-                balanceOf[_tokens[i]] = balanceOf[_tokens[i]].add(_amounts[i]);
+                balanceOf[_tokens[i]] += _amounts[i];
                 uint256 nonce = IBridge(bridge).getNonce(_msgSender());
 
                 txId[i] = keccak256(

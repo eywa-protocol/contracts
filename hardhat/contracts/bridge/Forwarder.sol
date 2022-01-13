@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
-pragma experimental ABIEncoderV2; // Remove?
 
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
-import "./interface/IForwarder.sol";
+import "@opengsn/contracts/src/forwarder/IForwarder.sol";
 
 contract Forwarder is IForwarder {
     using ECDSA for bytes32;
@@ -140,9 +139,11 @@ contract Forwarder is IForwarder {
         emit RequestTypeRegistered(requestTypehash, string(requestType));
     }
 
-
-    event RequestTypeRegistered(bytes32 indexed typeHash, string typeStr);
-
+    function registerDomainSeparator(string calldata name, string calldata version) external override {
+        //FIXME: implementation required?
+        emit DomainRegistered(keccak256(bytes(name)), bytes(version));
+        revert("registerDomainSeparator() not implemented");
+    }
 
     function execute2(ForwardRequest memory req)
     public
