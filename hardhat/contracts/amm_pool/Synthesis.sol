@@ -62,6 +62,8 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     event CreatedRepresentation(bytes32 indexed _rtoken, address indexed _stoken);
 
     function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
+        __Context_init_unchained();
+        __Ownable_init_unchained();
         versionRecipient = "2.2.3";
         bridge = _bridge;
         _setTrustedForwarder(_trustedForwarder);
@@ -73,7 +75,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     }
 
     modifier onlyTrusted() {
-        require(bridge == msg.sender || proxy == msg.sender );
+        require(bridge == msg.sender || proxy == msg.sender);
         _;
     }
 
@@ -451,11 +453,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         keys.push(_rtoken);
     }
 
-    function getRepresentation(bytes32 _rtoken)
-        external
-        view
-        returns (address)
-    {
+    function getRepresentation(bytes32 _rtoken) external view returns (address) {
         return representationSynt[_rtoken];
     }
 
@@ -506,6 +504,6 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     }
 
     function setTrustedForwarder(address _forwarder) external onlyOwner {
-       return _setTrustedForwarder(_forwarder);
+        return _setTrustedForwarder(_forwarder);
     }
 }

@@ -89,6 +89,8 @@ contract Portal is RelayRecipient, SolanaSerialize {
     event ApprovedRepresentationRequest(address indexed _rtoken);
 
     function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
+        __Context_init_unchained();
+        __Ownable_init_unchained();
         versionRecipient = "2.2.3";
         bridge = _bridge;
         _setTrustedForwarder(_trustedForwarder);
@@ -100,7 +102,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
     }
 
     modifier onlyTrusted() {
-        require(bridge == msg.sender || proxy == msg.sender );
+        require(bridge == msg.sender || proxy == msg.sender);
         _;
     }
 
@@ -483,8 +485,9 @@ contract Portal is RelayRecipient, SolanaSerialize {
     }
 
     // implies manual verification point
-    function approveRepresentationRequest(address _rtoken) external /**onlyOwner */
-    {
+    function approveRepresentationRequest(
+        address _rtoken /**onlyOwner */
+    ) external {
         tokenData[_rtoken] = abi.encode(IERC20(_rtoken).name(), IERC20(_rtoken).symbol());
         emit ApprovedRepresentationRequest(_rtoken);
     }
@@ -499,7 +502,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
     }
 
     function setTrustedForwarder(address _forwarder) external onlyOwner {
-       return _setTrustedForwarder(_forwarder);
+        return _setTrustedForwarder(_forwarder);
     }
 
     function synthesize_transit(
@@ -613,6 +616,4 @@ contract Portal is RelayRecipient, SolanaSerialize {
             general_nonce
         );
     }
-
-    
 }
