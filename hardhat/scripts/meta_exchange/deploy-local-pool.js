@@ -32,14 +32,12 @@ async function main() {
   // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
 
-
-  // deploy curve proxy
-  const curveProxy = await CurveProxy.deploy(
+  const curveProxy = await upgrades.deployProxy(CurveProxy, [    
     deployInfo[network.name].forwarder,
     deployInfo[network.name].portal,
     deployInfo[network.name].synthesis,
     deployInfo[network.name].bridge
-  )
+  ], { initializer: 'initialize' });
   await curveProxy.deployed()
 
   // initial proxy setup

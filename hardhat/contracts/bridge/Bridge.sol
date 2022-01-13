@@ -14,7 +14,6 @@ contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVe
     using AddressUpgradeable for address;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    // string public versionRecipient = "2.2.3";
     string public versionRecipient;
     E2Point private epochKey;           // Aggregated public key of all paricipants of the current epoch
     address public dao;                 // Address of the DAO
