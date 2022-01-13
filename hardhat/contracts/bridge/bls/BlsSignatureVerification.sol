@@ -233,6 +233,7 @@ contract BlsSignatureVerification {
             }
             x += 1;
         }
+        revert("hashToCurveE1: unreachable end point");
     }
 
     /**

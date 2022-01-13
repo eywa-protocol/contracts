@@ -71,7 +71,7 @@ abstract contract BridgeCore {
         bytes32 receiveSide,
         bytes32 from,
         uint256 nonce
-    ) public view returns (bytes32) {
+    ) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(from, nonce, chainId, receiveSide, oppositeBridge));
     }
 

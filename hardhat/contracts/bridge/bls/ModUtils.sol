@@ -98,6 +98,7 @@ library ModUtils {
             b = (b * g) % p;
             r = m;
         }
+        revert("modSqrt: unreachable end point");
     }
 
     /**
@@ -117,6 +118,6 @@ library ModUtils {
             return -1;
         }
 
-        require(false, "Failed to calculate legendre.");
+        revert("Failed to calculate legendre.");
     }
 }

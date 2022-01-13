@@ -183,7 +183,7 @@ contract Forwarder is IForwarder {
     }
 
 
-    function getAbiEncodeRequest(ForwardRequest memory req, bytes memory reqAbiEncode) external view returns (bytes memory) {
+    function getAbiEncodeRequest(ForwardRequest memory req, bytes memory reqAbiEncode) external pure returns (bytes memory) {
         bytes memory qwe = abi.encode(
             req.from,
             req.to,

@@ -476,7 +476,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     }
 
     //TODO
-    function getTxId() external returns (bytes32) {
+    function getTxId() external view returns (bytes32) {
         return keccak256(abi.encodePacked(this, block.timestamp));
     }
 
