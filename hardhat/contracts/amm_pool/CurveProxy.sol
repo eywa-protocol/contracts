@@ -112,11 +112,11 @@ contract CurveProxy is BaseRelayRecipient {
         address exchange;
         address remove;
         //exchange params
-        int128 i; //index value for the coin to send
-        int128 j; //index value of the coin to receive
+        uint128 i; //index value for the coin to send
+        uint128 j; //index value of the coin to receive
         uint256 expected_min_dy;
         //withdraw one coin params
-        int128 x; // index value of the coin to withdraw
+        uint128 x; // index value of the coin to withdraw
         uint256 expected_min_amount;
         //transfer to
         address to;
@@ -136,11 +136,11 @@ contract CurveProxy is BaseRelayRecipient {
         //add liquidity params
         uint256 expected_min_mint_amount;
         //exchange params
-        int128 i; //index value for the coin to send
-        int128 j; //index value of the coin to receive
+        uint128 i; //index value for the coin to send
+        uint128 j; //index value of the coin to receive
         uint256 expected_min_dy;
         //withdraw one coin params
-        int128 x; // index value of the coin to withdraw
+        uint128 x; // index value of the coin to withdraw
         uint256 expected_min_amount;
         //transfer to
         address to;
@@ -304,15 +304,15 @@ contract CurveProxy is BaseRelayRecipient {
 
             // inconsistency check
             if (_params.expected_min_dy > min_dy) {
-                IERC20(pool[_params.exchange].at(uint256(_params.i))).safeTransfer(
+                IERC20(pool[_params.exchange].at(_params.i)).safeTransfer(
                     _params.to,
-                    IERC20(pool[_params.exchange].at(uint256(_params.i))).balanceOf(address(this))
+                    IERC20(pool[_params.exchange].at(_params.i)).balanceOf(address(this))
                 );
                 emit InconsistencyCallback(
                     _params.exchange,
-                    pool[_params.exchange].at(uint256(_params.i)),
+                    pool[_params.exchange].at(_params.i),
                     _params.to,
-                    IERC20(pool[_params.exchange].at(uint256(_params.i))).balanceOf(address(this))
+                    IERC20(pool[_params.exchange].at(_params.i)).balanceOf(address(this))
                 );
                 return;
             }
@@ -374,12 +374,12 @@ contract CurveProxy is BaseRelayRecipient {
             IStableSwapPool(_params.remove).remove_liquidity_one_coin(token_amount, _params.x, min_amount);
 
             // transfer asset to the recipient
-            IERC20(pool[_params.remove].at(uint256(_params.x))).safeTransfer(
+            IERC20(pool[_params.remove].at(_params.x)).safeTransfer(
                 _params.to,
-                IERC20(pool[_params.remove].at(uint256(_params.x))).balanceOf(address(this))
+                IERC20(pool[_params.remove].at(_params.x)).balanceOf(address(this))
             );
             /////////test
-            uint256 test = IERC20(pool[_params.remove].at(uint256(_params.x))).balanceOf(_params.to);
+            uint256 test = IERC20(pool[_params.remove].at(_params.x)).balanceOf(_params.to);
             console.log("address %s %s", _params.to, test);
         }
     }
@@ -397,7 +397,7 @@ contract CurveProxy is BaseRelayRecipient {
         address _token,
         uint256 _amount,
         address _remove,
-        int128 _x,
+        uint128 _x,
         uint256 _expected_min_amount,
         address _to,
         bytes32 _txId
@@ -421,9 +421,9 @@ contract CurveProxy is BaseRelayRecipient {
         IStableSwapPool(_remove).remove_liquidity_one_coin(token_amount, _x, min_amount);
 
         // transfer asset to the recipient
-        IERC20(pool[_remove].at(uint256(_x))).safeTransfer(
+        IERC20(pool[_remove].at(_x)).safeTransfer(
             _to,
-            IERC20(pool[_remove].at(uint256(_x))).balanceOf(address(this))
+            IERC20(pool[_remove].at(_x)).balanceOf(address(this))
         );
     }
 
@@ -528,15 +528,15 @@ contract CurveProxy is BaseRelayRecipient {
 
             // inconsistency check
             if (_params.expected_min_dy > min_dy) {
-                IERC20(pool[_params.exchange].at(uint256(_params.i))).safeTransfer(
+                IERC20(pool[_params.exchange].at(_params.i)).safeTransfer(
                     _params.to,
-                    IERC20(pool[_params.exchange].at(uint256(_params.i))).balanceOf(address(this))
+                    IERC20(pool[_params.exchange].at(_params.i)).balanceOf(address(this))
                 );
                 emit InconsistencyCallback(
                     _params.exchange,
-                    pool[_params.exchange].at(uint256(_params.i)),
+                    pool[_params.exchange].at(_params.i),
                     _params.to,
-                    IERC20(pool[_params.exchange].at(uint256(_params.i))).balanceOf(address(this))
+                    IERC20(pool[_params.exchange].at(_params.i)).balanceOf(address(this))
                 );
                 return;
             }
@@ -598,9 +598,9 @@ contract CurveProxy is BaseRelayRecipient {
             IStableSwapPool(_params.remove).remove_liquidity_one_coin(token_amount, _params.x, min_amount);
 
             // transfer asset to the recipient
-            IERC20(pool[_params.remove].at(uint256(_params.x))).safeTransfer(
+            IERC20(pool[_params.remove].at(_params.x)).safeTransfer(
                 _params.to,
-                IERC20(pool[_params.remove].at(uint256(_params.x))).balanceOf(address(this))
+                IERC20(pool[_params.remove].at(_params.x)).balanceOf(address(this))
             );
         }
     }
