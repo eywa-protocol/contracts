@@ -100,219 +100,6 @@ library MinLibBytes {
     }
 }
 
-// File: @openzeppelin/contracts/math/SafeMath.sol
-
-/**
- * @dev Wrappers over Solidity's arithmetic operations with added overflow
- * checks.
- *
- * Arithmetic operations in Solidity wrap on overflow. This can easily result
- * in bugs, because programmers usually assume that an overflow raises an
- * error, which is the standard behavior in high level programming languages.
- * `SafeMath` restores this intuition by reverting the transaction when an
- * operation overflows.
- *
- * Using this library instead of the unchecked operations eliminates an entire
- * class of bugs, so it's recommended to use it always.
- */
-library SafeMath {
-    /**
-     * @dev Returns the addition of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        uint256 c = a + b;
-        if (c < a) return (false, 0);
-        return (true, c);
-    }
-
-    /**
-     * @dev Returns the substraction of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function trySub(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        if (b > a) return (false, 0);
-        return (true, a - b);
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryMul(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
-        if (a == 0) return (true, 0);
-        uint256 c = a * b;
-        if (c / a != b) return (false, 0);
-        return (true, c);
-    }
-
-    /**
-     * @dev Returns the division of two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryDiv(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        if (b == 0) return (false, 0);
-        return (true, a / b);
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryMod(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        if (b == 0) return (false, 0);
-        return (true, a % b);
-    }
-
-    /**
-     * @dev Returns the addition of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `+` operator.
-     *
-     * Requirements:
-     *
-     * - Addition cannot overflow.
-     */
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
-        require(c >= a, "SafeMath: addition overflow");
-        return c;
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b <= a, "SafeMath: subtraction overflow");
-        return a - b;
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `*` operator.
-     *
-     * Requirements:
-     *
-     * - Multiplication cannot overflow.
-     */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        if (a == 0) return 0;
-        uint256 c = a * b;
-        require(c / a == b, "SafeMath: multiplication overflow");
-        return c;
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers, reverting on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, "SafeMath: division by zero");
-        return a / b;
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, "SafeMath: modulo by zero");
-        return a % b;
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
-     * overflow (when the result is negative).
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {trySub}.
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
-    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b <= a, errorMessage);
-        return a - b;
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers, reverting with custom message on
-     * division by zero. The result is rounded towards zero.
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {tryDiv}.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b > 0, errorMessage);
-        return a / b;
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting with custom message when dividing by zero.
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {tryMod}.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b > 0, errorMessage);
-        return a % b;
-    }
-}
-
 // File: @openzeppelin/contracts/utils/Context.sol
 
 /*
@@ -1181,7 +968,6 @@ interface IPaymaster {
 /* solhint-disable bracket-align */
 
 contract RelayHub is IRelayHub, Ownable {
-    using SafeMath for uint256;
 
     string public override versionHub = "2.2.0+opengsn.hub.irelayhub";
 
@@ -1272,7 +1058,7 @@ contract RelayHub is IRelayHub, Ownable {
         uint256 amount = msg.value;
         require(amount <= config.maximumRecipientDeposit, "deposit too big");
 
-        balances[target] = balances[target].add(amount);
+        balances[target] += amount;
 
         emit Deposited(target, msg.sender, amount);
     }
@@ -1285,14 +1071,14 @@ contract RelayHub is IRelayHub, Ownable {
         address account = msg.sender;
         require(balances[account] >= amount, "insufficient funds");
 
-        balances[account] = balances[account].sub(amount);
+        balances[account] -= amount;
         dest.transfer(amount);
 
         emit Withdrawn(account, dest, amount);
     }
 
     function calldataGasCost(uint256 length) public override view returns (uint256) {
-        return config.dataGasCostPerByte.mul(length);
+        return config.dataGasCostPerByte * length;
     }
 
     function verifyGasAndDataLimits(
@@ -1315,13 +1101,12 @@ contract RelayHub is IRelayHub, Ownable {
         require(maxAcceptanceBudget >= gasAndDataLimits.acceptanceBudget, "acceptance budget too high");
         require(gasAndDataLimits.acceptanceBudget >= gasAndDataLimits.preRelayedCallGasLimit, "acceptance budget too low");
 
-        maxPossibleGas =
-        config.gasOverhead.add(
-        gasAndDataLimits.preRelayedCallGasLimit).add(
-        gasAndDataLimits.postRelayedCallGasLimit).add(
-        relayRequest.request.gas).add(
-        dataGasCost).add(
-        externalCallDataCost);
+        maxPossibleGas = config.gasOverhead
+            + gasAndDataLimits.preRelayedCallGasLimit
+            + gasAndDataLimits.postRelayedCallGasLimit
+            + relayRequest.request.gas
+            + dataGasCost
+            + externalCallDataCost;
 
         // This transaction must have enough gas to forward the call to the recipient with the requested amount, and not
         // run out of gas later in this function.
@@ -1416,31 +1201,34 @@ contract RelayHub is IRelayHub, Ownable {
         vars.dataGasCost = calldataGasCost(msg.data.length);
         if (!vars.success) {
         //Failure cases where the PM doesn't pay
-        if (vars.status == RelayCallStatus.RejectedByPreRelayed ||
-        (vars.innerGasUsed <= vars.gasAndDataLimits.acceptanceBudget.add(vars.dataGasCost)) && (
-        vars.status == RelayCallStatus.RejectedByForwarder ||
-        vars.status == RelayCallStatus.RejectedByRecipientRevert  //can only be thrown if rejectOnRecipientRevert==true
-        )) {
-        paymasterAccepted=false;
+        if (
+            vars.status == RelayCallStatus.RejectedByPreRelayed ||
+            vars.innerGasUsed <= vars.gasAndDataLimits.acceptanceBudget + vars.dataGasCost && 
+            (
+                vars.status == RelayCallStatus.RejectedByForwarder ||
+                vars.status == RelayCallStatus.RejectedByRecipientRevert  //can only be thrown if rejectOnRecipientRevert==true
+            )
+        ) {
+            paymasterAccepted=false;
 
-        emit TransactionRejectedByPaymaster(
-        vars.relayManager,
-        relayRequest.relayData.paymaster,
-        relayRequest.request.from,
-        relayRequest.request.to,
-        msg.sender,
-        vars.functionSelector,
-        vars.innerGasUsed,
-        vars.relayedCallReturnValue);
-        return (false, vars.relayedCallReturnValue);
-    }
+            emit TransactionRejectedByPaymaster(
+                vars.relayManager,
+                relayRequest.relayData.paymaster,
+                relayRequest.request.from,
+                relayRequest.request.to,
+                msg.sender,
+                vars.functionSelector,
+                vars.innerGasUsed,
+                vars.relayedCallReturnValue);
+            return (false, vars.relayedCallReturnValue);
+        }
     }
         // We now perform the actual charge calculation, based on the measured gas used
         uint256 gasUsed = (externalGasLimit - gasleft()) + config.gasOverhead;
         uint256 charge = calculateCharge(gasUsed, relayRequest.relayData);
 
-        balances[relayRequest.relayData.paymaster] = balances[relayRequest.relayData.paymaster].sub(charge);
-        balances[vars.relayManager] = balances[vars.relayManager].add(charge);
+        balances[relayRequest.relayData.paymaster] -= charge;
+        balances[vars.relayManager] += charge;
 
         emit TransactionRelayed(
             vars.relayManager,
@@ -1565,7 +1353,16 @@ contract RelayHub is IRelayHub, Ownable {
     }
 
     function calculateCharge(uint256 gasUsed, GsnTypes.RelayData calldata relayData) public override virtual view returns (uint256) {
-        return relayData.baseRelayFee.add((gasUsed.mul(relayData.gasPrice).mul(relayData.pctRelayFee.add(100))).div(100));
+        //return relayData.baseRelayFee.add((gasUsed.mul(relayData.gasPrice).mul(relayData.pctRelayFee.add(100))).div(100));
+        
+        // FIXME: Check this please!
+        return relayData.baseRelayFee 
+            + (
+                gasUsed
+                * relayData.gasPrice
+                * (relayData.pctRelayFee + 100)
+                / 100
+            );
     }
 
     function isRelayManagerStaked(address relayManager) public override view returns (bool) {
