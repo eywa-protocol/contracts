@@ -326,7 +326,7 @@ library SafeMath {
  * This contract is only required for intermediate, library-like contracts.
  */
 abstract contract Context {
-    function _msgSender() internal view virtual returns (address payable) {
+    function _msgSender() internal view virtual returns (address) {
         return msg.sender;
     }
 
@@ -663,7 +663,7 @@ library GsnEip712Library {
         MinLibBytes.truncateInPlace(data, MAX_RETURN_SIZE);
     }
 
-    function domainSeparator(address forwarder) internal pure returns (bytes32) {
+    function domainSeparator(address forwarder) internal view returns (bytes32) {
         return hashDomain(EIP712Domain({
             name : "GSN Relayed Transaction",
             version : "2",
@@ -672,7 +672,7 @@ library GsnEip712Library {
             }));
     }
 
-    function getChainID() internal pure returns (uint256 id) {
+    function getChainID() internal view returns (uint256 id) {
         /* solhint-disable no-inline-assembly */
         assembly {
             id := chainid()
@@ -1282,7 +1282,7 @@ contract RelayHub is IRelayHub, Ownable {
     }
 
     function withdraw(uint256 amount, address payable dest) public override {
-        address payable account = msg.sender;
+        address account = msg.sender;
         require(balances[account] >= amount, "insufficient funds");
 
         balances[account] = balances[account].sub(amount);

@@ -48,7 +48,7 @@ contract TestUniswap is IUniswap {
         require(address(this).balance > ethBought, "not enough liquidity");
 
         _token.transferFrom(msg.sender, address(this), tokensToSell);
-        msg.sender.transfer(ethBought);
+        payable(msg.sender).transfer(ethBought);
 
         return tokensToSell;
     }
@@ -94,7 +94,7 @@ contract TestUniswap is IUniswap {
         require(address(this).balance > amountOutMin, "not enough liquidity");
 
         IERC20(path[0]).transferFrom(msg.sender, address(this), tokensToSell);
-        msg.sender.transfer(amountOutMin);
+        payable(msg.sender).transfer(amountOutMin);
     }
 
     /** Useful for calculating optimal token amounts before calling swap. */
