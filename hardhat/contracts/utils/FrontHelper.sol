@@ -95,13 +95,13 @@ contract FrontHelper {
         returns (uint256[] memory)
     {
         uint256 numberOfTokens = tokens.length;
-        uint256[] memory balances = new uint256[](numberOfTokens);
+        uint256[] memory _balances = new uint256[](numberOfTokens);
 
         for (uint256 i = 0; i < numberOfTokens; i++) {
-            balances[i] = IERC20(tokens[i]).balanceOf(target);
+            _balances[i] = IERC20(tokens[i]).balanceOf(target);
         }
 
-        return balances;
+        return _balances;
     }
 
 
@@ -127,13 +127,13 @@ contract FrontHelper {
         returns (TokenInfo[] memory)
     {
         uint256 numberOfTokens = tokens.length;
-        TokenInfo[] memory tokensInfo = new TokenInfo[](numberOfTokens);
+        TokenInfo[] memory _tokensInfo = new TokenInfo[](numberOfTokens);
 
         for (uint256 i = 0; i < numberOfTokens; i++) {
-            tokensInfo[i] = tokenInfo(target, IERC20(tokens[i]));
+            _tokensInfo[i] = tokenInfo(target, IERC20(tokens[i]));
         }
 
-        return tokensInfo;
+        return _tokensInfo;
     }
 
 
