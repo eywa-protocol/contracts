@@ -353,9 +353,7 @@
         "symbol": "TSL"
       }
     ],
-    "ethPool": "",
-    "ethPoolLp": "",
-    "ethPoolCoins": [],
+    "ethPool": [],
     "localToken": [],
     "localPool": "",
     "localPoolLp": "",
@@ -401,6 +399,7 @@
         "symbol": "TSL"
       }
     ],
+    "ethToken": [],
     "localToken": [],
     "localPool": "",
     "localPoolLp": "",

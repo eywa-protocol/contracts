@@ -91,10 +91,18 @@ for net in ${nets//\,/ }
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-local-pool.js --network ${net}
 done
 
-for net in ${nets//\,/ }
-  do
-  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network ${net}
-done
+# for net in ${nets//\,/ }
+#   do
+#   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network ${net}
+# done
+
+# npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network avalanchetestnet
+# npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network network3
+# npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network network2
+
+npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network network1
+npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network network3
+npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network network2
 
 for net in ${nets//\,/ }
   do

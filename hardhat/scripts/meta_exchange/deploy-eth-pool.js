@@ -35,10 +35,10 @@ async function main() {
   let ethPoolLp
   let ethPool
 
- 
+
 
   // creating local eth tokens for specified networks
-  if (network.name == "network1" || network.name == "rinkeby") {
+  if (network.name != "network2" || network.name != "mumbai") {
     //empty the array
     deployInfo[network.name].ethToken = []
 
@@ -47,50 +47,54 @@ async function main() {
       await ethToken[i].deployed()
       // ethToken[i] = ethToken[i].address
       deployInfo[network.name].ethToken.push({ address: ethToken[i].address, name: await ethToken[i].name(), symbol: await ethToken[i].symbol() });
-      if(network.name == "network1")
-      ethPoolCoins.push(await getRepresentation(deployInfo[network.name].ethToken[i], deployInfo["network2"].synthesis))
-      if(network.name == "rinkeby")
-      ethPoolCoins.push(await getRepresentation(deployInfo[network.name].ethToken[i], deployInfo["mumbai"].synthesis))
+      if (network.name == "network1" || network.name == "network3")
+        ethPoolCoins.push(await getRepresentation(deployInfo[network.name].ethToken[i], deployInfo["network2"].synthesis))
+      if (network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
+        ethPoolCoins.push(await getRepresentation(deployInfo[network.name].ethToken[i], deployInfo["mumbai"].synthesis))
     }
-    if(network.name == "network1")
-      deployInfo["network2"].ethPoolCoins = ethPoolCoins
-    if(network.name == "rinkeby")
-      deployInfo["mumbai"].ethPoolCoins = ethPoolCoins
+    if (network.name == "network1" || network.name == "network3")
+      deployInfo["network2"].ethPool.push({ network: network.name, address: "", coins: ethPoolCoins, lp: [] });
+    if (network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
+      deployInfo["mumbai"].ethPool.push({ network: network.name, address: "", coins: ethPoolCoins, lp: [] });
 
   }
 
   // creating the ETH pool for specified networks
   if (network.name == "network2" || network.name == "mumbai") {
     // deploy LP token
-    ethPoolLp = await CurveTokenV2.deploy(network.name + "LpPoolETH", "LPETH", "18", 0)
-    await ethPoolLp.deployed()
-    deployInfo[network.name].ethPoolLp = { address: ethPoolLp.address, name: await ethPoolLp.name(), symbol: await ethPoolLp.symbol() }
-                                        
-    // deploy an eth pool
-    switch (poolSize) {
-      case 2:
-        ethPool = await StableSwap2Pool.deploy(deployer.address, deployInfo[network.name].ethPoolCoins, ethPoolLp.address, A, fee, admin_fee)
-        break;
-      case 3:
-        ethPool = await StableSwap3Pool.deploy(deployer.address, deployInfo[network.name].ethPoolCoins, ethPoolLp.address, A, fee, admin_fee)
-        break;
-      case 4:
-        ethPool = await StableSwap4Pool.deploy(deployer.address, deployInfo[network.name].ethPoolCoins, ethPoolLp.address, A, fee, admin_fee)
-        break;
-      case 5:
-        ethPool = await StableSwap5Pool.deploy(deployer.address, deployInfo[network.name].ethPoolCoins, ethPoolLp.address, A, fee, admin_fee)
-        break;
-      case 6:
-        ethPool = await StableSwap6Pool.deploy(deployer.address, deployInfo[network.name].ethPoolCoins, ethPoolLp.address, A, fee, admin_fee)
-        break;
+    for (let i = 0; i < deployInfo[network.name].ethPool.length; i++) {
+      let net = deployInfo[network.name].ethPool[i].network
+
+      ethPoolLp = await CurveTokenV2.deploy(net + "LpPoolETH", "LPETH", "18", 0)
+      await ethPoolLp.deployed()
+      deployInfo[network.name].ethPool[i].lp.push({address: ethPoolLp.address, name: await ethPoolLp.name(), symbol: await ethPoolLp.symbol()});
+
+      // deploy an eth pool
+      switch (poolSize) {
+        case 2:
+          ethPool = await StableSwap2Pool.deploy(deployer.address, deployInfo[network.name].ethPool[i].coins, ethPoolLp.address, A, fee, admin_fee)
+          break;
+        case 3:
+          ethPool = await StableSwap3Pool.deploy(deployer.address, deployInfo[network.name].ethPool[i].coins, ethPoolLp.address, A, fee, admin_fee)
+          break;
+        case 4:
+          ethPool = await StableSwap4Pool.deploy(deployer.address, deployInfo[network.name].ethPool[i].coins, ethPoolLp.address, A, fee, admin_fee)
+          break;
+        case 5:
+          ethPool = await StableSwap5Pool.deploy(deployer.address, deployInfo[network.name].ethPool[i].coins, ethPoolLp.address, A, fee, admin_fee)
+          break;
+        case 6:
+          ethPool = await StableSwap6Pool.deploy(deployer.address, deployInfo[network.name].ethPool[i].coins, ethPoolLp.address, A, fee, admin_fee)
+          break;
+      }
+      await ethPool.deployed()
+      await ethPoolLp.set_minter(ethPool.address)
+
+      // setting the eth pool in proxy contract
+      await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(ethPool.address, ethPoolLp.address, deployInfo[network.name].ethPool[i].coins);
+
+      deployInfo[network.name].ethPool[i].address = ethPool.address
     }
-    await ethPool.deployed()
-    await ethPoolLp.set_minter(ethPool.address)
-                                       
-    // setting the eth pool in proxy contract
-    await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(ethPool.address, ethPoolLp.address, deployInfo[network.name].ethPoolCoins);
-                    
-    deployInfo[network.name].ethPool = ethPool.address
   }
 
   // write out the deploy configuration 
