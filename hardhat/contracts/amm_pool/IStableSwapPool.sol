@@ -59,24 +59,24 @@ interface IStableSwapPool {
 
     function remove_liquidity_one_coin(
         uint256 token_amount,
-        uint128 i,
+        int128 i,
         uint256 min_amount
     ) external;
 
     function exchange(
-        uint128 i,
-        uint128 j,
+        int128 i,
+        int128 j,
         uint256 dx,
         uint256 min_dy
     ) external;
 
     function get_dy(
-        uint128 i,
-        uint128 j,
+        int128 i,
+        int128 j,
         uint256 dx
     ) external view returns (uint256);
 
-    function calc_withdraw_one_coin(uint256 token_amount, uint128 i)
+    function calc_withdraw_one_coin(uint256 token_amount, int128 i)
         external
         view
         returns (uint256);

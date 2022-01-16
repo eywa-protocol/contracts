@@ -14,6 +14,7 @@ async function main() {
 
   const ERC20 = await ethers.getContractFactory('ERC20Mock')
   const Portal = await ethers.getContractFactory('Portal')
+  const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
 
   const totalSupply = ethers.utils.parseEther("100000000000.0")
 
@@ -25,9 +26,10 @@ async function main() {
     'transit_synth_batch_add_liquidity_3pool((address,address,uint256),address[3],uint256[3],bytes32[3])'
   )
 
+  if (network.name == "network1" || network.name == "rinkeby") {
   // initial approval for portal
   if (network.name == "network1" || network.name == "rinkeby") {
-    for (let i = 0; i < deployInfo[network.name].localPoolCoins.length; i++) {
+    for (let i = 0; i < deployInfo[network.name].ethToken.length; i++) {
       await ERC20.attach(deployInfo[network.name].ethToken[i].address).mint(owner.address, totalSupply)
       await (await ERC20.attach(deployInfo[network.name].ethToken[i].address).approve(deployInfo[network.name].portal, totalSupply)).wait()
       coinsToSynth.push(deployInfo[network.name].ethToken[i].address)
@@ -48,7 +50,7 @@ async function main() {
         chainID: deployInfo["network2"].chainId
       }
       addLiquidityParams = {
-        add: deployInfo["network2"].ethPool,
+        add: deployInfo["network2"].ethPool[0].address,
         to: owner.address,
         expected_min_mint_amount: expected_min_mint_amount
       }
@@ -89,6 +91,17 @@ async function main() {
   await tx.wait()
   console.log("synthesize_batch_transit", tx.hash)
   //=================================================================================
+  }
+
+  
+
+  // test 
+  if (network.name == "network2"){
+    let lp = ERC20.attach(deployInfo["network2"].ethPool[0].lp[0].address)
+    let pool = StableSwap3Pool.attach(deployInfo["network2"].ethPool[0].address)
+    console.log("pool coin balance:",await pool.balances(0))
+    console.log("user balance:", await lp.balanceOf(owner.address))
+  }
 
 }
 

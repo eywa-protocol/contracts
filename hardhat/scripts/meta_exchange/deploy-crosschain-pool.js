@@ -35,24 +35,18 @@ async function main() {
   let crosschainCoins = []
   let crosschainCoinsTestnet = []
 
-  if (network.name == "network2" || network.name == "mumbai" ) {
-
+  if (network.name == "network2" || network.name == "mumbai") {
+    // set crosschain coins
     if (network.name == "network2") {
 
       for (let i = 0; i < deployInfo[network.name].ethPool.length; i++) {
-
         crosschainCoins.push(deployInfo[network.name].ethPool[i].lp[0].address)
-
-        // if (netw === "avalanchetestnet" || netw === "rinkeby" || netw === "hecotestnet" || netw === "mumbai" || netw === "bsctestnet") {
       }
     }
     if (network.name == "mumbai") {
 
       for (let i = 0; i < deployInfo[network.name].ethPool.length; i++) {
-
         crosschainCoins.push(deployInfo[network.name].ethPool[i].lp[0].address)
-
-        // if (netw === "avalanchetestnet" || netw === "rinkeby" || netw === "hecotestnet" || netw === "mumbai" || netw === "bsctestnet") {
       }
     }
 
@@ -63,14 +57,10 @@ async function main() {
     // deploy crosschain pool
 
     if (network.name == "network2") {
-
-      console.log(crosschainCoins)
       crosschainPool = await StableSwap2Pool.deploy(deployer.address, crosschainCoins, crosschainLp.address, A, fee, admin_fee)
       await crosschainPool.deployed()
       await crosschainLp.set_minter(crosschainPool.address)
     }
-
-
 
     if (network.name == "mumbai") {
       crosschainPool = await StableSwap5Pool.deploy(deployer.address, crosschainCoinsTestnet, crosschainLp.address, A, fee, admin_fee)

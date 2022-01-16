@@ -13,6 +13,7 @@ async function main() {
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
   const ERC20 = await ethers.getContractFactory('ERC20Mock')
+  const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
   const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
   // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
@@ -24,7 +25,7 @@ async function main() {
   let crosschainPool = StableSwap3Pool.attach(deployInfo[network.name].crosschainPool);
   switch (network.name) {
     case "network2":
-      crosschainPool = StableSwap4Pool.attach(deployInfo[network.name].crosschainPool);
+      crosschainPool = StableSwap2Pool.attach(deployInfo[network.name].crosschainPool);
       break;
     // case "mumbai":
     //   crosschainPool = StableSwap5Pool.attach(deployInfo[network.name].crosschainPool);
@@ -35,23 +36,25 @@ async function main() {
   let amounts = []
   let min_mint_amount = 0
 
-  for (let crosschainLp of this.crosschainPoolCoins) {
-    const lp = ERC20.attach(crosschainLp);
-    const localLpBalance = await lp.balanceOf(owner.address)
-    amounts.push(localLpBalance)
-    await (await lp.approve(crosschainPool.address, 0)).wait()
-    await (await lp.approve(crosschainPool.address, totalSupply)).wait()
-  }
-
-  this.tx = await crosschainPool.add_liquidity(
-    amounts,
-    min_mint_amount,
-    {
-      gasLimit: '5000000'
+  if (network.name == "network2" || network.name == "mumbai"  ) {
+    for (let crosschainLp of this.crosschainPoolCoins) {
+      const lp = ERC20.attach(crosschainLp);
+      const localLpBalance = await lp.balanceOf(owner.address)
+      amounts.push(localLpBalance)
+      await (await lp.approve(crosschainPool.address, 0)).wait()
+      await (await lp.approve(crosschainPool.address, totalSupply)).wait()
     }
-  )
-  await this.tx.wait()
-  console.log(`add liquidity to crosschain pool on ${network.name}: ${this.tx.hash}`);
+
+    this.tx = await crosschainPool.add_liquidity(
+      amounts,
+      min_mint_amount,
+      {
+        gasLimit: '5000000'
+      }
+    )
+    await this.tx.wait()
+    console.log(`add liquidity to crosschain pool on ${network.name}: ${this.tx.hash}`);
+  } else {console.log("NO ACTIVITY")}
   //=================================================================================
 }
 

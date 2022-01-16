@@ -38,15 +38,15 @@ async function main() {
     }
   }
 
-  // create representation for lp tokens
-  for (let netw of this.sourceForRepresentation) {
-      let tokens = networkConfig[netw].localPoolLp;
-        let tokenAddressBytes32 = addressToBytes32(tokens.address);
-        if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
-          this.tx = await synthesis.createRepresentation(tokenAddressBytes32, tokens.name, tokens.symbol)
-          console.log(`createRepresentation for LP token on ${network.name} source from ${netw}: ${this.tx.hash}`);
-      }
-  }
+  // // create representation for lp tokens
+  // for (let netw of this.sourceForRepresentation) {
+  //     let tokens = networkConfig[netw].localPoolLp;
+  //       let tokenAddressBytes32 = addressToBytes32(tokens.address);
+  //       if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
+  //         this.tx = await synthesis.createRepresentation(tokenAddressBytes32, tokens.name, tokens.symbol)
+  //         console.log(`createRepresentation for LP token on ${network.name} source from ${netw}: ${this.tx.hash}`);
+  //     }
+  // }
 
 }
 

@@ -85,12 +85,6 @@ fi
 && echo $(getField ${net}.env_file[1])
 done
 
-
-for net in ${nets//\,/ }
-  do
-  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-local-pool.js --network ${net}
-done
-
 # for net in ${nets//\,/ }
 #   do
 #   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network ${net}

@@ -25,7 +25,7 @@ async function main() {
 
   //===================================ETH-POOL=======================================
   // synthesize ETH tokens net1 => net2
-  if (network.name == "network1" /*|| network.name == "rinkeby"*/) {
+  if (network.name != "network2" && network.name != "mumbai") {
     for (let i = 0; i < deployInfo[network.name].ethToken.length; i++) {
       await ERC20.attach(deployInfo[network.name].ethToken[i].address).mint(owner.address, totalSupply)
       await (await ERC20.attach(deployInfo[network.name].ethToken[i].address).approve(deployInfo[network.name].portal, totalSupply)).wait()
@@ -55,24 +55,28 @@ async function main() {
   }
 
   // add_liquidity to ethPool
-  if (network.name == "network2" /*|| network.name == "mumbai"*/) {
+  if (network.name == "network2" || network.name == "mumbai") {
 
     // approve for ethPool
-    for (let i = 0; i < deployInfo[network.name].ethPoolCoins.length; i++) {
-      await (await ERC20.attach(deployInfo[network.name].ethPoolCoins[i]).approve(deployInfo[network.name].ethPool, totalSupply)).wait()
+    for (let x = 0; x < deployInfo[network.name].ethPool.length; x++) {
+      for (let i = 0; i < deployInfo[network.name].ethPool[x].coins.length; i++) {
+        await (await ERC20.attach(deployInfo[network.name].ethPool[x].coins[i]).approve(deployInfo[network.name].ethPool[x].address, totalSupply)).wait()
+      }
     }
 
-    const amountEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"))
-    const min_mint_amount = 0
-    tx = await StableSwap3Pool.attach(deployInfo[network.name].ethPool).add_liquidity(
-      amountEth,
-      min_mint_amount,
-      {
-        gasLimit: '5000000'
-      }
-    )
-    await tx.wait()
-    console.log("add_liquidity ETH pool", tx.hash)
+    for (let i = 0; i < deployInfo[network.name].ethPool.length; i++) {
+      const amountEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"))
+      const min_mint_amount = 0
+      tx = await StableSwap3Pool.attach(deployInfo[network.name].ethPool[i].address).add_liquidity(
+        amountEth,
+        min_mint_amount,
+        {
+          gasLimit: '5000000'
+        }
+      )
+      await tx.wait()
+      console.log("add_liquidity ETH pool", tx.hash)
+    }
     await h.timeout(5_000);
   }
   //=================================================================================

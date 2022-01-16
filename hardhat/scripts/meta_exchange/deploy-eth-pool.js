@@ -21,6 +21,8 @@ async function main() {
   console.log("Deployment in progress...");
 
   const ERC20 = await ethers.getContractFactory('SyntERC20')
+  const Portal = await ethers.getContractFactory('Portal')
+  const Synthesis = await ethers.getContractFactory('Synthesis')
   const CurveProxy = await ethers.getContractFactory('CurveProxy');
   const CurveTokenV2 = await ethers.getContractFactory('CurveTokenV2')
   // const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
@@ -30,12 +32,27 @@ async function main() {
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
 
 
+  // deploy Curve Proxy
+  const curveProxy = await upgrades.deployProxy(CurveProxy, [
+    deployInfo[network.name].forwarder,
+    deployInfo[network.name].portal,
+    deployInfo[network.name].synthesis,
+    deployInfo[network.name].bridge
+  ], { initializer: 'initialize' });
+  await curveProxy.deployed()
+
+  // initial proxy setup
+  await Synthesis.attach(deployInfo[network.name].synthesis).setProxyCurve(curveProxy.address);
+  await Portal.attach(deployInfo[network.name].portal).setProxyCurve(curveProxy.address);
+
+  deployInfo[network.name].curveProxy = curveProxy.address
+
+
+
   let ethToken = []
   let ethPoolCoins = []
   let ethPoolLp
   let ethPool
-
-
 
   // creating local eth tokens for specified networks
   if (network.name != "network2" || network.name != "mumbai") {
@@ -67,7 +84,7 @@ async function main() {
 
       ethPoolLp = await CurveTokenV2.deploy(net + "LpPoolETH", "LPETH", "18", 0)
       await ethPoolLp.deployed()
-      deployInfo[network.name].ethPool[i].lp.push({address: ethPoolLp.address, name: await ethPoolLp.name(), symbol: await ethPoolLp.symbol()});
+      deployInfo[network.name].ethPool[i].lp.push({ address: ethPoolLp.address, name: await ethPoolLp.name(), symbol: await ethPoolLp.symbol() });
 
       // deploy an eth pool
       switch (poolSize) {
