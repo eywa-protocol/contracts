@@ -18,8 +18,9 @@ contract MockDexPool is SolanaSerialize {
     mapping(bytes32 => uint256) public requests;
     uint256 public doubleRequestError = 0;
 
-    event RequestSent(bytes32 reqId, bool success);
-    event RequestReceived(bytes32 reqId, uint256 data);
+    event RequestSent(bytes32 reqId);
+    event RequestReceived(uint256 data);
+    event RequestReceivedV2(bytes32 reqId, uint256 data);
 
     constructor(address _bridge) {
         bridge = _bridge;
@@ -44,15 +45,17 @@ contract MockDexPool is SolanaSerialize {
             chainId,
             bytes32(uint256(uint160(secondPartPool))),
             bytes32(uint256(uint160(msg.sender))),
-            nonce);
+            nonce
+        );
         bytes memory output = abi.encodeWithSelector(
             bytes4(keccak256(bytes('receiveRequestTest(uint256,bytes32)'))),
             testData_,
-            requestId);
-        bool success = Bridge(bridge).transmitRequestV2(
+            requestId
+        );
+        Bridge(bridge).transmitRequestV2(
             output, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
 
-        emit RequestSent(requestId, success);
+        emit RequestSent(requestId);
     }
 
     /**
@@ -71,7 +74,8 @@ contract MockDexPool is SolanaSerialize {
         requests[_reqId]++;
 
         testData = _testData;
-        emit RequestReceived(_reqId, _testData);
+        emit RequestReceived(_testData);
+        emit RequestReceivedV2(_reqId, _testData);
     }
 
     function sendTestRequestToSolana(bytes32 programId_, uint256 testData_, bytes32 secondPartPool, bytes32 oppBridge, uint chainId) external {
@@ -114,5 +118,4 @@ contract MockDexPool is SolanaSerialize {
 
         emit RequestSent(requestId);
     }
-
 }
