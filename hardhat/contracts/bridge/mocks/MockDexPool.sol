@@ -2,6 +2,7 @@
 pragma solidity 0.8.10;
 
 import "../Bridge.sol";
+import "../../amm_pool/SolanaSerialize.sol";
 
 /**
  * @notice This is for test purpose.
@@ -9,7 +10,7 @@ import "../Bridge.sol";
  * @dev Short life cycle
  * @dev POOL_1#sendRequestTest --> {logic bridge} --> POOL_2#setPendingRequestsDone
  */
-contract MockDexPool {
+contract MockDexPool is SolanaSerialize {
 
     string constant private SET_REQUEST_TYPE = "setRequest";
     uint256 public testData = 0;
@@ -57,4 +58,46 @@ contract MockDexPool {
         testData = _testData;
         emit RequestReceived(_testData);
     }
+
+    function sendTestRequestToSolana(bytes32 programId_, uint256 testData_, bytes32 secondPartPool, bytes32 oppBridge, uint chainId) external {
+        uint256 nonce = Bridge(bridge).getNonce(msg.sender);
+        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('receiveRequestTest(uint256)'))), testData_);
+        bytes32 requestId = Bridge(bridge).prepareRqId( oppBridge, chainId, secondPartPool, bytes32(uint256(uint160(msg.sender))) , nonce);
+        //                bool success = Bridge(bridge).transmitSolanaRequest(out, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
+        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](2);
+
+        accounts[0] = SolanaAccountMeta({
+        pubkey: secondPartPool,
+        isSigner: false,
+        isWritable: true
+        });
+
+        accounts[1] = SolanaAccountMeta({
+        pubkey: oppBridge,
+        isSigner: false,
+        isWritable: true
+        });
+
+        Bridge(bridge).transmitRequestV2_solana(
+            serializeSolanaStandaloneInstruction(
+                SolanaStandaloneInstruction(
+                /* programId: */
+                    programId_,
+                /* accounts: */
+                    accounts,
+                /* data: */
+                    abi.encodePacked(out)
+                )
+            ),
+            secondPartPool,
+            oppBridge,
+            SOLANA_CHAIN_ID,
+            requestId,
+            msg.sender,
+            nonce
+        );
+
+        emit RequestSent(requestId);
+    }
+
 }
