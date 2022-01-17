@@ -15,9 +15,12 @@ contract MockDexPool is SolanaSerialize {
     string constant private SET_REQUEST_TYPE = "setRequest";
     uint256 public testData = 0;
     address public bridge;
+    mapping(bytes32 => uint256) public requests;
+    uint256 public doubleRequestError = 0;
 
     event RequestSent(bytes32 reqId);
     event RequestReceived(uint256 data);
+    event RequestReceivedV2(bytes32 reqId, uint256 data);
 
     constructor(address _bridge) {
         bridge = _bridge;
@@ -37,10 +40,20 @@ contract MockDexPool is SolanaSerialize {
         // ...
 
         uint256 nonce = Bridge(bridge).getNonce(msg.sender);
-        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('receiveRequestTest(uint256)'))), testData_);
-        bytes32 requestId = Bridge(bridge).prepareRqId( bytes32(uint256(uint160(oppBridge))), chainId,   bytes32(uint256(uint160(secondPartPool))), bytes32(uint256(uint160(msg.sender))) , nonce);
-        //bool success = Bridge(bridge).transmitRequestV2(out, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
-        Bridge(bridge).transmitRequestV2(out, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
+        bytes32 requestId = Bridge(bridge).prepareRqId(
+            bytes32(uint256(uint160(oppBridge))),
+            chainId,
+            bytes32(uint256(uint160(secondPartPool))),
+            bytes32(uint256(uint160(msg.sender))),
+            nonce
+        );
+        bytes memory output = abi.encodeWithSelector(
+            bytes4(keccak256(bytes('receiveRequestTest(uint256,bytes32)'))),
+            testData_,
+            requestId
+        );
+        Bridge(bridge).transmitRequestV2(
+            output, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
 
         emit RequestSent(requestId);
     }
@@ -52,11 +65,17 @@ contract MockDexPool is SolanaSerialize {
      * @dev POOL_1 -> ${this pool}
      * @dev mockDexPool_1#sendRequestTest -> bridge#transmitRequest -> node -> adpater#receiveRequest -> ${this func} -> bridge#transmitResponse(reqId) -> node -> adpater#receiveResponse -> mockDexPool_1#setPendingRequestsDone
      */
-    function receiveRequestTest(uint256 _testData) public {
+    function receiveRequestTest(uint256 _testData, bytes32 _reqId) public {
         require(msg.sender == bridge, "ONLY CERTAIN BRIDGE");
+
+        if (requests[_reqId] != 0) {
+            doubleRequestError++;
+        }
+        requests[_reqId]++;
 
         testData = _testData;
         emit RequestReceived(_testData);
+        emit RequestReceivedV2(_reqId, _testData);
     }
 
     function sendTestRequestToSolana(bytes32 programId_, uint256 testData_, bytes32 secondPartPool, bytes32 oppBridge, uint chainId) external {
@@ -99,5 +118,4 @@ contract MockDexPool is SolanaSerialize {
 
         emit RequestSent(requestId);
     }
-
 }
