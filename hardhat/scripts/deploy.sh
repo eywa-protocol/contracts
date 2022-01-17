@@ -49,6 +49,7 @@ echo '==========================================='
 echo ''
 ## NOTE !!!!! : gsn-node where owner is opengsn. Uncomment for our ralyer gsn.
 #npx hardhat run --no-compile ./scripts/gassless/deploy.js --network ${net}
+npx hardhat balanceDeployer --network ${net}
 npx hardhat run --no-compile ./scripts/bridge/deploy.js   --network ${net}
 npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
 
@@ -105,6 +106,7 @@ done
 for net in ${nets//\,/ }
   do
   echo 'init into:' ${net}
+  npx hardhat balanceDeployer --network ${net}
   npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
 done
 
@@ -112,5 +114,6 @@ done
 for net in ${nets//\,/ }
   do
   echo 'init into:' ${net}
+  npx hardhat balanceDeployer --network ${net}
   npx hardhat run --no-compile ./scripts/bridge/updateDexBind.js  --network ${net}
 done

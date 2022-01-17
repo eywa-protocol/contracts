@@ -16,6 +16,15 @@ const BINANCESCAN_API_KEY  = process.env.BINANCESCAN_API_KEY  || "0x000000000000
 const POLYGONSCAN_API_KEY  = process.env.POLYGONSCAN_API_KEY  || "0x0000000000000000000000000000000000000000";
 const HECOINFOSCAN_API_KEY = process.env.HECOINFOSCAN_API_KEY || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_HECO     = process.env.PRIVATE_KEY_HECO     || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_AVALANCHETESTNET = process.env.PRIVATE_KEY_AVALANCHETESTNET     || "0x0000000000000000000000000000000000000000";
+
+task("balanceDeployer", "Print info about balance deployer", async () => {
+  const [deployer] = await ethers.getSigners();
+  const balance    = await deployer.getBalance();
+  console.log("Deployer balance: ",ethers.utils.formatEther(balance));
+  
+});
+
 
 //TODO: Need to resolve dynamic initialization for apiKey. Now it is not working.
 async function getKey(network) {
@@ -35,6 +44,10 @@ module.exports = {
     localhost: { 
         //
     },
+    avalanchetestnet:{
+      url: networkConfig.avalanchetestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_AVALANCHETESTNET]
+    },
     rinkeby: {
       url: networkConfig.rinkeby.rpcUrl.replace('ws','http').replace('ws/',''),
       accounts: [PRIVATE_KEY_RINKEBY]
@@ -45,7 +58,9 @@ module.exports = {
     },
     mumbai:{
         url: networkConfig.mumbai.rpcUrl.replace('ws','http').replace('-ws','-rpc'),
-        accounts: [PRIVATE_KEY_MUMBAI]
+        accounts: [PRIVATE_KEY_MUMBAI],
+        gasPrice: 2_000_000_000
+
     },
     network1: {
        url: networkConfig.network1.rpcUrl.replace('ws','http'),
