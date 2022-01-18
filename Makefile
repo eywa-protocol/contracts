@@ -2,6 +2,7 @@
 
 .PHONY: wrappers
 
+ARTBASE="hardhat/artifacts/contracts"
 ARTIFACTS="hardhat/artifacts/contracts/bridge"
 
 all: wrappers
@@ -24,13 +25,15 @@ wrappers: npm compile copy_configs
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/test/TestForward.sol --pkg wrappers --out ../wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/test/TestERC20Permit.sol --pkg wrappers --out ../wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/merkle/MerkleTest.sol --pkg wrappers --out ../wrappers
+	go run wrappers-builder/main.go --json ${ARTBASE}/amm_pool/Portal.sol --pkg portal --out ../wrappers/portal
+	go run wrappers-builder/main.go --json ${ARTBASE}/amm_pool/Synthesis.sol --pkg synthesis --out ../wrappers/synthesis
 deps:
 	go mod tidy
 	go mod download
 
 wrappers-gsn: npm compile copy_configs
 	cd wrappers-builder-gsn && go build && cd ..
-	./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/Bridge.sol --pkg gsn --out ../wrappers/gsn
+	./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/Bridge.sol --pkg bridge --out ../wrappers/gsn/bridge
 
 clean:
 	rm -f ./wrappers/*.go

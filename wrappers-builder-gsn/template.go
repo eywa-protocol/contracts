@@ -97,6 +97,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/eywa-protocol/wrappers"
+	"github.com/eywa-protocol/wrappers/gsn"
 	"github.com/sirupsen/logrus"
 )
 
@@ -104,7 +105,7 @@ import (
 {{range $contract := .Contracts}}
 	{{range .Transacts}}
 		func GsnBridge{{.Normalized.Name}}(
-			__gsnCaller GsnCaller,
+			__gsnCaller gsn.GsnCaller,
 			__chainId *big.Int,
 			__signer *ecdsa.PrivateKey,
 			__contractAddress common.Address {{range .Normalized.Inputs}}, {{.Name}} {{bindtype .Type $structs}} {{end}})	(txHash common.Hash, err error) {
@@ -151,7 +152,7 @@ import (
 				Data:  __fRequest,
 			}
 		
-			__typedData, err := NewForwardRequestTypedData(
+			__typedData, err := gsn.NewForwardRequestTypedData(
 				__req,
 				__forwarderAddress.String(),
 				wrappers.BridgeABI,
@@ -160,13 +161,13 @@ import (
 				return
 			}
 		
-			__typedDataSignature, _, err := NewSignature(__typedData, __signer)
+			__typedDataSignature, _, err := gsn.NewSignature(__typedData, __signer)
 			if err != nil {
 		
 				return
 			}
 		
-			__domainSeparatorHash, err := NewDomainSeparatorHash(__typedData)
+			__domainSeparatorHash, err := gsn.NewDomainSeparatorHash(__typedData)
 			if err != nil {
 		
 				return
@@ -178,7 +179,7 @@ import (
 				return
 			}
 		
-			__reqTypeHash, err := NewRequestTypeHash(__genericParams)
+			__reqTypeHash, err := gsn.NewRequestTypeHash(__genericParams)
 			if err != nil {
 		
 				return
