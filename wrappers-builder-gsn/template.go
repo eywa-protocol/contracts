@@ -102,6 +102,14 @@ import (
 )
 
 {{$structs := .Structs}}
+{{range $structs}}
+	// {{.Name}} is an auto generated low-level Go binding around an user-defined struct.
+	type {{.Name}} struct {
+	{{range $field := .Fields}}
+	{{$field.Name}} {{$field.Type}}{{end}}
+	}
+{{end}}
+
 {{range $contract := .Contracts}}
 	{{range .Transacts}}
 		func GsnBridge{{.Normalized.Name}}(
@@ -163,25 +171,21 @@ import (
 		
 			__typedDataSignature, _, err := gsn.NewSignature(__typedData, __signer)
 			if err != nil {
-		
 				return
 			}
 		
 			__domainSeparatorHash, err := gsn.NewDomainSeparatorHash(__typedData)
 			if err != nil {
-		
 				return
 			}
 		
 			__genericParams, err := __forwarder.GENERICPARAMS(&bind.CallOpts{})
 			if err != nil {
-		
 				return
 			}
 		
 			__reqTypeHash, err := gsn.NewRequestTypeHash(__genericParams)
 			if err != nil {
-		
 				return
 			}
 		

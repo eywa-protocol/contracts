@@ -34,6 +34,7 @@ deps:
 wrappers-gsn: npm compile copy_configs
 	cd wrappers-builder-gsn && go build && cd ..
 	./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/Bridge.sol --pkg bridge --out ../wrappers/gsn/bridge
+	./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/NodeRegistry.sol --pkg registry --out ../wrappers/gsn/registry
 
 clean:
 	rm -f ./wrappers/*.go
