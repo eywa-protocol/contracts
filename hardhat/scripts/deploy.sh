@@ -22,6 +22,7 @@ if [[ ${1} =~ ^('')$ ]]
       SYNTHESIS_ADDRESS=$(getField ${net}.synthesis) \
       PAYMASTER_ADDRESS=$(getField ${net}.paymaster) \
       EYWA_TOKEN_ADDRESS=$(getField ${net}.eywa) \
+      TEST_TOKEN_ADDRESS=$(getField ${net}.token[0].address) \
       NODEREGISTRY_ADDRESS=$(getField ${net}.nodeRegistry) \
       FORWARDER_ADDRESS=$(getField ${net}.forwarder) \
     && echo $(getField ${net}.env_file[0])
@@ -71,6 +72,7 @@ fi
   SYNTHESIS_ADDRESS=$(getField ${net}.synthesis) \
   PAYMASTER_ADDRESS=$(getField ${net}.paymaster) \
   EYWA_TOKEN_ADDRESS=$(getField ${net}.eywa) \
+  TEST_TOKEN_ADDRESS=$(getField ${net}.token[0].address) \
   FORWARDER_ADDRESS=$(getField ${net}.forwarder) \
 && echo $(getField ${net}.env_file[0])
 
