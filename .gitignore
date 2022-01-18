@@ -10,9 +10,9 @@ truffle/build/contracts
 **/factories
 /hardhat/yarn.lock
 /hardhat/yarn-error.log
-**/.env     
+**/.env
 networks_env
-
+wrappers-builder-gsn/wrappers-builder-gsn
 
 .idea
 .vscode

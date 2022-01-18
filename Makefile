@@ -28,6 +28,10 @@ deps:
 	go mod tidy
 	go mod download
 
+wrappers-gsn: npm compile copy_configs
+	cd wrappers-builder-gsn && go build && cd ..
+	./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/Bridge.sol --pkg gsn --out ../wrappers/gsn
+
 clean:
 	rm -f ./wrappers/*.go
 	cd hardhat;npx hardhat clean;
