@@ -6,7 +6,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "./RelayRecipient.sol";
 import "./IStableSwapPool.sol";
-// import "hardhat/console.sol";
 
 interface IPortal {
     struct SynthParams {

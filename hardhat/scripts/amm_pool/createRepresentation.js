@@ -12,7 +12,7 @@ async function main() {
 
   const Synthesis = await ethers.getContractFactory("Synthesis");
   const synthesis = Synthesis.attach(this.s);
-  // origin tokon should be from another place
+  // origin token should be from another place
   for (let netw of this.sourceForRepresentation) {
     let tokens = networkConfig[netw].token;
     for (let t of tokens) {
@@ -33,24 +33,12 @@ async function main() {
         let tokenAddressBytes32 = addressToBytes32(t.address);
         if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
           this.tx = await synthesis.createRepresentation(tokenAddressBytes32, t.name, t.symbol)
-          console.log(`createRepresentation for ETH token on ${network.name} source from ${netw}: ${this.tx.hash}`);
+          console.log(`createRepresentation for ${t.name} token on ${network.name} source from ${netw}: ${this.tx.hash}`);
           await this.tx.wait();
         }
       }
     }
   }
-
-
-  // create representation for lp tokens
-  // for (let netw of this.sourceForRepresentation) {
-  //     let tokens = networkConfig[netw].localPoolLp;
-  //       let tokenAddressBytes32 = addressToBytes32(tokens.address);
-  //       if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
-  //         this.tx = await synthesis.createRepresentation(tokenAddressBytes32, tokens.name, tokens.symbol)
-  //         console.log(`createRepresentation for LP token on ${network.name} source from ${netw}: ${this.tx.hash}`);
-  //         await timeout(5_000);
-  //     }
-  // }
 
 }
 
