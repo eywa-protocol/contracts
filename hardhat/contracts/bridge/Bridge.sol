@@ -145,7 +145,6 @@ contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVe
             bytes32(uint256(uint160(address(this)))),
             requestId,
             _selector,
-            receiveSide,
             oppositeBridge,
             chainId
         );

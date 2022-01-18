@@ -29,10 +29,10 @@ async function main() {
   if (network.name == "network1" || network.name == "rinkeby") {
   // initial approval for portal
   if (network.name == "network1" || network.name == "rinkeby") {
-    for (let i = 0; i < deployInfo[network.name].ethToken.length; i++) {
-      await ERC20.attach(deployInfo[network.name].ethToken[i].address).mint(owner.address, totalSupply)
-      await (await ERC20.attach(deployInfo[network.name].ethToken[i].address).approve(deployInfo[network.name].portal, totalSupply)).wait()
-      coinsToSynth.push(deployInfo[network.name].ethToken[i].address)
+    for (let i = 0; i < deployInfo[network.name].localToken.length; i++) {
+      await ERC20.attach(deployInfo[network.name].localToken[i].address).mint(owner.address, totalSupply)
+      await (await ERC20.attach(deployInfo[network.name].localToken[i].address).approve(deployInfo[network.name].portal, totalSupply)).wait()
+      coinsToSynth.push(deployInfo[network.name].localToken[i].address)
     }
   }
 
@@ -50,7 +50,7 @@ async function main() {
         chainID: deployInfo["network2"].chainId
       }
       addLiquidityParams = {
-        add: deployInfo["network2"].ethPool[0].address,
+        add: deployInfo["network2"].crosschainPool[0].address,
         to: owner.address,
         expected_min_mint_amount: expected_min_mint_amount
       }
@@ -63,7 +63,7 @@ async function main() {
         chainID: deployInfo["mumbai"].chainId
       }
       addLiquidityParams = {
-        add: deployInfo["mumbai"].ethPool,
+        add: deployInfo["mumbai"].crosschainPool,
         to: owner.address,
         expected_min_mint_amount: expected_min_mint_amount
       }
@@ -97,8 +97,8 @@ async function main() {
 
   // test 
   if (network.name == "network2"){
-    let lp = ERC20.attach(deployInfo["network2"].ethPool[0].lp[0].address)
-    let pool = StableSwap3Pool.attach(deployInfo["network2"].ethPool[0].address)
+    let lp = ERC20.attach(deployInfo["network2"].crosschainPool[0].lp[0].address)
+    let pool = StableSwap3Pool.attach(deployInfo["network2"].crosschainPool[0].address)
     console.log("pool coin balance:",await pool.balances(0))
     console.log("user balance:", await lp.balanceOf(owner.address))
   }

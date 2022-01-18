@@ -1,10 +1,11 @@
 const { network } = require("hardhat");
 let deployInfo = require('../../helper-hardhat-config.json')
+const h = require("../../utils/helper");
 require('dotenv').config();
 
 
 async function main() {
-  console.log("\n ADD LIQUIDITY TO CROSSCHAIN POOL")
+  console.log("\n ADD LIQUIDITY TO ETH POOL")
   const [owner] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
@@ -13,50 +14,75 @@ async function main() {
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
   const ERC20 = await ethers.getContractFactory('ERC20Mock')
-  const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
+  const Portal = await ethers.getContractFactory('Portal')
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
-  const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
+  // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
   // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
 
   const totalSupply = ethers.utils.parseEther("100000000000.0")
-  this.crosschainPoolCoins = deployInfo[network.name].crosschainPoolCoins;
 
-  let crosschainPool = StableSwap3Pool.attach(deployInfo[network.name].crosschainPool);
-  switch (network.name) {
-    case "network2":
-      crosschainPool = StableSwap2Pool.attach(deployInfo[network.name].crosschainPool);
-      break;
-    // case "mumbai":
-    //   crosschainPool = StableSwap5Pool.attach(deployInfo[network.name].crosschainPool);
-    //   break;
+
+  //===================================ETH-POOL=======================================
+  // synthesize ETH tokens net1 => net2
+  if (network.name != "network2" && network.name != "mumbai") {
+    for (let i = 0; i < deployInfo[network.name].localToken.length; i++) {
+      await ERC20.attach(deployInfo[network.name].localToken[i].address).mint(owner.address, totalSupply)
+      await (await ERC20.attach(deployInfo[network.name].localToken[i].address).approve(deployInfo[network.name].portal, totalSupply)).wait()
+
+      let coinToSynth = deployInfo[network.name].localToken[i].address;
+      let amount = ethers.utils.parseEther("100000000.0")
+      let chain2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK2)
+      let chain2address = chain2.address
+      let receiveSide = deployInfo["network2"].synthesis
+      let oppositeBridge = deployInfo["network2"].bridge
+      let chainID = deployInfo["network2"].chainId
+      tx = await Portal.attach(deployInfo[network.name].portal).synthesize(
+        coinToSynth,
+        amount,
+        chain2address,
+        receiveSide,
+        oppositeBridge,
+        chainID,
+        {
+          gasLimit: '5000000'
+        }
+      )
+      await tx.wait()
+      console.log("synthesize ETH token", tx.hash)
+      await h.timeout(8_000);
+    }
   }
 
-  //==========================CROSSCHAIN-POOL-CROSSCHAIN=============================
-  let amounts = []
-  let min_mint_amount = 0
+  // add_liquidity to crosschainPool
+  if (network.name == "network2" || network.name == "mumbai") {
 
-  if (network.name == "network2" || network.name == "mumbai"  ) {
-    for (let crosschainLp of this.crosschainPoolCoins) {
-      const lp = ERC20.attach(crosschainLp);
-      const localLpBalance = await lp.balanceOf(owner.address)
-      amounts.push(localLpBalance)
-      await (await lp.approve(crosschainPool.address, 0)).wait()
-      await (await lp.approve(crosschainPool.address, totalSupply)).wait()
+    // approve for crosschainPool
+    for (let x = 0; x < deployInfo[network.name].crosschainPool.length; x++) {
+      for (let i = 0; i < deployInfo[network.name].crosschainPool[x].coins.length; i++) {
+        await (await ERC20.attach(deployInfo[network.name].crosschainPool[x].coins[i]).approve(deployInfo[network.name].crosschainPool[x].address, totalSupply)).wait()
+      }
     }
 
-    this.tx = await crosschainPool.add_liquidity(
-      amounts,
-      min_mint_amount,
-      {
-        gasLimit: '5000000'
-      }
-    )
-    await this.tx.wait()
-    console.log(`add liquidity to crosschain pool on ${network.name}: ${this.tx.hash}`);
-  } else {console.log("NO ACTIVITY")}
+    // add liquidity
+    for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
+      const amountEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"))
+      const min_mint_amount = 0
+      tx = await StableSwap3Pool.attach(deployInfo[network.name].crosschainPool[i].address).add_liquidity(
+        amountEth,
+        min_mint_amount,
+        {
+          gasLimit: '5000000'
+        }
+      )
+      await tx.wait()
+      console.log("add_liquidity ETH pool", tx.hash)
+    }
+    await h.timeout(5_000);
+  }
   //=================================================================================
 }
+
 
 
 main()

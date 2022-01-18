@@ -7,7 +7,7 @@ const { network } = require("hardhat");
 
 
 async function main() {
-  console.log("\n CROSSCHAIN POOL DEPLOYMENT");
+  console.log("\n hub POOL DEPLOYMENT");
   const [owner] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
@@ -34,18 +34,18 @@ async function main() {
   )
 
   const curveProxyA = CurveProxy.attach(deployInfo["network1"].curveProxy)
-  const tokenA1 = ERC20.attach(deployInfo["network1"].ethToken[0].address)
-  const tokenA2 = ERC20.attach(deployInfo["network1"].ethToken[1].address)
-  const tokenA3 = ERC20.attach(deployInfo["network1"].ethToken[2].address)
+  const tokenA1 = ERC20.attach(deployInfo["network1"].localToken[0].address)
+  const tokenA2 = ERC20.attach(deployInfo["network1"].localToken[1].address)
+  const tokenA3 = ERC20.attach(deployInfo["network1"].localToken[2].address)
   const portal = Portal.attach(deployInfo["network1"].portal)
-  const tokenC1 = ERC20.attach(deployInfo["network3"].ethToken[0].address)
-  const tokenC2 = ERC20.attach(deployInfo["network3"].ethToken[1].address)
-  const tokenC3 = ERC20.attach(deployInfo["network3"].ethToken[2].address)
-  // const tokenLpLocalA = ERC20.attach(deployInfo["network1"].ethPool.address)
+  const tokenC1 = ERC20.attach(deployInfo["network3"].localToken[0].address)
+  const tokenC2 = ERC20.attach(deployInfo["network3"].localToken[1].address)
+  const tokenC3 = ERC20.attach(deployInfo["network3"].localToken[2].address)
+  // const tokenLpLocalA = ERC20.attach(deployInfo["network1"].crosschainPool.address)
   // const tokenLpLocalB = ERC20.attach(deployInfo["network2"].localPoolLp.address)
-  const crosschainPoolB = StableSwap2Pool.attach(deployInfo["network2"].crosschainPool)
-  // const localPoolA = StableSwap3Pool.attach(deployInfo["network1"].ethPool[0].address)
-  // const localPoolB = StableSwap3Pool.attach(deployInfo["network3"].ethPool[1].address)
+  const hubPoolB = StableSwap2Pool.attach(deployInfo["network2"].hubPool)
+  // const localPoolA = StableSwap3Pool.attach(deployInfo["network1"].crosschainPool[0].address)
+  // const localPoolB = StableSwap3Pool.attach(deployInfo["network3"].crosschainPool[1].address)
 
   // console.log(await tokenA1.balanceOf(owner.address))
 
@@ -66,7 +66,7 @@ async function main() {
     const i = 0; //Index value for the coin to send
     const j = 1; //Index value of the coin to receive (lp)
     const dx = ethers.utils.parseEther("10.0") //await lpLocalA.balanceOf(accounts[0].address)
-    const expected_dy = ethers.utils.parseEther("10.0") //await crosschainPoolB.get_dy(i, j, dx)
+    const expected_dy = ethers.utils.parseEther("10.0") //await hubPoolB.get_dy(i, j, dx)
 
     //withdraw one coin params
     const x = 1; //Index value of the coin to receive
@@ -75,9 +75,9 @@ async function main() {
     let chain2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK3)
 
     const metaExchangeParams = {
-      add: deployInfo["network2"].ethPool[0].address,
-      exchange: deployInfo["network2"].crosschainPool,  //exchange pool address
-      remove: deployInfo["network2"].ethPool[1].address,         //remove pool address
+      add: deployInfo["network2"].crosschainPool[0].address,
+      exchange: deployInfo["network2"].hubPool,  //exchange pool address
+      remove: deployInfo["network2"].crosschainPool[1].address,         //remove pool address
       //add liquidity params
       expected_min_mint_amount: 0,
       //exchange params
@@ -146,16 +146,16 @@ async function main() {
   }
 
   if (network.name == "network2") {
-    // console.log(await crosschainPoolB.get_dy(0, 1, ethers.utils.parseEther("10.0")))
+    // console.log(await hubPoolB.get_dy(0, 1, ethers.utils.parseEther("10.0")))
   //   console.log(await tokenB1.balanceOf(owner.address))
   //   console.log(await tokenLpLocalB.balanceOf(owner.address))
 
-  //   //for (lp of deployInfo["network2"].crosschainPoolCoins){
-  //     let tokenBLP = ERC20.attach(deployInfo["network2"].crosschainPoolCoins[0])
+  //   //for (lp of deployInfo["network2"].hubPoolCoins){
+  //     let tokenBLP = ERC20.attach(deployInfo["network2"].hubPoolCoins[0])
   //     console.log(await tokenBLP.balanceOf(owner.address))
   //  // }
 
-  //   // console.log(await crosschainPoolB.coins(1))
+  //   // console.log(await hubPoolB.coins(1))
 
   //   // console.log(tokenLpLocalA.address)
   //   // console.log(await getRepresentation({ address: tokenLpLocalA.address, name: await tokenLpLocalA.name(), symbol:await tokenLpLocalA.symbol() }, deployInfo["network2"].synthesis))

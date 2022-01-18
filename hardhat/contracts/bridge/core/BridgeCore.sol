@@ -25,7 +25,6 @@ abstract contract BridgeCore {
         bytes32 bridge,
         bytes32 requestId,
         bytes selector,
-        bytes32 receiveSide,
         bytes32 oppositeBridge,
         uint256 chainid
     );
