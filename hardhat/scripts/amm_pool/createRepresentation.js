@@ -20,7 +20,7 @@ async function main() {
       if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
         this.tx = await synthesis.createRepresentation(tokenAddressBytes32, t.name, t.symbol)
         console.log(`createRepresentation for synthesis on ${network.name} source from ${netw}: ${this.tx.hash}`);
-        await timeout(5_000);
+        await this.tx.wait();
       }
     }
   }
@@ -34,7 +34,7 @@ async function main() {
         if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
           this.tx = await synthesis.createRepresentation(tokenAddressBytes32, t.name, t.symbol)
           console.log(`createRepresentation for ETH token on ${network.name} source from ${netw}: ${this.tx.hash}`);
-          await timeout(5_000);
+          await this.tx.wait();
         }
       }
     }
