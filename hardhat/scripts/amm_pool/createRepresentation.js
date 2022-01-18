@@ -27,8 +27,8 @@ async function main() {
 
   // create representation for eth tokens
   for (let netw of this.sourceForRepresentation) {
-    if (networkConfig[netw].ethToken) {
-      let tokens = networkConfig[netw].ethToken;
+    if (networkConfig[netw].localToken) {
+      let tokens = networkConfig[netw].localToken;
       for (let t of tokens) {
         let tokenAddressBytes32 = addressToBytes32(t.address);
         if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
