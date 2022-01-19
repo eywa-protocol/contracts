@@ -2,13 +2,20 @@
 pragma solidity 0.8.10;
 
 import "../../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
-import "../interface/IForwarder.sol";
 
 contract TestForward is BaseRelayRecipient {
     uint256 public val = 1;
     address public sender = address(0);
     string public str;
 
+    struct ForwardRequest {
+        address from;
+        address to;
+        uint256 value;
+        uint256 gas;
+        uint256 nonce;
+        bytes data;
+    }
 
     event FooCalled(address indexed caller, uint256 val);
 
@@ -33,8 +40,8 @@ contract TestForward is BaseRelayRecipient {
         bytes memory suffixData,
         bytes calldata sig
     ) external payable
-    override
     returns (bool success, string memory ret) {
+        require(req.data.length > 0, "req.data absent");
         return (true, "returned test value");
     }
 
