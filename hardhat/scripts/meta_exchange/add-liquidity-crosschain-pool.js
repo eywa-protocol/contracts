@@ -5,7 +5,7 @@ require('dotenv').config();
 
 
 async function main() {
-  console.log("\n ADD LIQUIDITY TO ETH POOL")
+  console.log("\n ADD LIQUIDITY TO CROSSCHAIN POOL")
   const [owner] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
@@ -19,12 +19,10 @@ async function main() {
   // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
   // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
-
+  
   const totalSupply = ethers.utils.parseEther("100000000000.0")
 
 
-  //===================================ETH-POOL=======================================
-  // synthesize ETH tokens net1 => net2
   if (network.name != "network2" && network.name != "mumbai") {
     for (let i = 0; i < deployInfo[network.name].localToken.length; i++) {
       await ERC20.attach(deployInfo[network.name].localToken[i].address).mint(owner.address, totalSupply)

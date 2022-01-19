@@ -145,20 +145,22 @@ async function main() {
 
   }
 
+
+  // test proxy
   if (network.name == "network2") {
     // console.log(await hubPoolB.get_dy(0, 1, ethers.utils.parseEther("10.0")))
-  //   console.log(await tokenB1.balanceOf(owner.address))
-  //   console.log(await tokenLpLocalB.balanceOf(owner.address))
+    //   console.log(await tokenB1.balanceOf(owner.address))
+    //   console.log(await tokenLpLocalB.balanceOf(owner.address))
 
-  //   //for (lp of deployInfo["network2"].hubPoolCoins){
-  //     let tokenBLP = ERC20.attach(deployInfo["network2"].hubPoolCoins[0])
-  //     console.log(await tokenBLP.balanceOf(owner.address))
-  //  // }
+    //   //for (lp of deployInfo["network2"].hubPoolCoins){
+    //     let tokenBLP = ERC20.attach(deployInfo["network2"].hubPoolCoins[0])
+    //     console.log(await tokenBLP.balanceOf(owner.address))
+    //  // }
 
-  //   // console.log(await hubPoolB.coins(1))
+    //   // console.log(await hubPoolB.coins(1))
 
-  //   // console.log(tokenLpLocalA.address)
-  //   // console.log(await getRepresentation({ address: tokenLpLocalA.address, name: await tokenLpLocalA.name(), symbol:await tokenLpLocalA.symbol() }, deployInfo["network2"].synthesis))
+    //   // console.log(tokenLpLocalA.address)
+    //   // console.log(await getRepresentation({ address: tokenLpLocalA.address, name: await tokenLpLocalA.name(), symbol:await tokenLpLocalA.symbol() }, deployInfo["network2"].synthesis))
 
   }
 
@@ -166,7 +168,7 @@ async function main() {
     console.log(await tokenC1.balanceOf(owner.address))
     console.log(await tokenC2.balanceOf(owner.address))
     console.log(await tokenC3.balanceOf(owner.address))
-    
+
   }
 
 }

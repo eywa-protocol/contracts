@@ -4,7 +4,7 @@ require('dotenv').config();
 
 
 async function main() {
-  console.log("\n ADD LIQUIDITY TO hub POOL")
+  console.log("\n ADD LIQUIDITY TO HUB POOL")
   const [owner] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
@@ -15,7 +15,7 @@ async function main() {
   const ERC20 = await ethers.getContractFactory('ERC20Mock')
   const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
-  const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
+  // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
   // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
 
@@ -24,11 +24,11 @@ async function main() {
 
 
 
-  //==========================hub-POOL-hub=============================
+  //==========================HUB-POOL=============================
   let amounts = []
   let min_mint_amount = 0
 
-  if (network.name == "network2" || network.name == "mumbai"  ) {
+  if (network.name == "network2" || network.name == "mumbai") {
 
     let hubPool = StableSwap3Pool.attach(deployInfo[network.name].hubPool);
     switch (network.name) {
@@ -58,7 +58,7 @@ async function main() {
     )
     await this.tx.wait()
     console.log(`add liquidity to hub pool on ${network.name}: ${this.tx.hash}`);
-  } else {console.log("NO ACTIVITY")}
+  } else { console.log("NO ACTIVITY") }
   //=================================================================================
 }
 

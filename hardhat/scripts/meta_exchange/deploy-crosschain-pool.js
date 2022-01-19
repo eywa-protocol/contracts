@@ -10,7 +10,7 @@ const admin_fee = 5000000000
 const poolSize = 3
 
 async function main() {
-  console.log("\n ETH POOL DEPLOYMENT");
+  console.log("\n CROSSCHAIN POOL DEPLOYMENT");
   const [deployer] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
@@ -54,13 +54,13 @@ async function main() {
   let crosschainPoolLp
   let crosschainPool
 
-  // creating local eth tokens for specified networks
+  // creating local stable tokens for specified networks
   if (network.name != "network2" && network.name != "mumbai") {
     //empty the array
     deployInfo[network.name].localToken = []
 
     for (let i = 0; i < poolSize; i++) {
-      localToken[i] = await ERC20.deploy(network.name + "TokenETH" + i, "TKETH" + i)
+      localToken[i] = await ERC20.deploy(network.name + "TokenStable" + i, "TKS" + i)
       await localToken[i].deployed()
       // localToken[i] = localToken[i].address
       deployInfo[network.name].localToken.push({ address: localToken[i].address, name: await localToken[i].name(), symbol: await localToken[i].symbol() });
@@ -76,13 +76,13 @@ async function main() {
 
   }
 
-  // creating the ETH pool for specified networks
+  // creating crosschain pool for specified networks
   if (network.name == "network2" || network.name == "mumbai") {
     // deploy LP token
     for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
       let net = deployInfo[network.name].crosschainPool[i].network
 
-      crosschainPoolLp = await CurveTokenV2.deploy(net + "LpPoolETH", "LPETH", "18", 0)
+      crosschainPoolLp = await CurveTokenV2.deploy(net + "LpPoolCrosschain", "LPC", "18", 0)
       await crosschainPoolLp.deployed()
       deployInfo[network.name].crosschainPool[i].lp.push({ address: crosschainPoolLp.address, name: await crosschainPoolLp.name(), symbol: await crosschainPoolLp.symbol() });
 
@@ -107,7 +107,7 @@ async function main() {
       await crosschainPool.deployed()
       await crosschainPoolLp.set_minter(crosschainPool.address)
 
-      // setting the eth pool in proxy contract
+      // setting the crosschain pool in proxy contract
       await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(crosschainPool.address, crosschainPoolLp.address, deployInfo[network.name].crosschainPool[i].coins);
 
       deployInfo[network.name].crosschainPool[i].address = crosschainPool.address
@@ -117,7 +117,7 @@ async function main() {
   // write out the deploy configuration 
   console.log("_______________________________________");
   fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
-  console.log("ETH Pool Deployed! (saved)\n");
+  console.log("Crosschain pool deployed!\n");
 
 
 

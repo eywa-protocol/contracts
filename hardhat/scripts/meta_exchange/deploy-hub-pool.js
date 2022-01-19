@@ -1,13 +1,10 @@
 const fs = require("fs");
-// const hre = require("hardhat");
-const { getRepresentation } = require("../../utils/helper");
 let deployInfo = require('../../helper-hardhat-config.json');
 const { network } = require("hardhat");
 
 
-
 async function main() {
-  console.log("\n hub POOL DEPLOYMENT");
+  console.log("\n HUB POOL DEPLOYMENT");
   const [deployer] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
@@ -15,17 +12,13 @@ async function main() {
   const balance = await deployer.getBalance();
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
-  const ERC20 = await ethers.getContractFactory('ERC20Mock')
-  const Bridge = await ethers.getContractFactory('Bridge')
-  const Portal = await ethers.getContractFactory('Portal')
-  const Synthesis = await ethers.getContractFactory('Synthesis')
   const CurveProxy = await ethers.getContractFactory('CurveProxy');
   const CurveTokenV2 = await ethers.getContractFactory('CurveTokenV2')
   const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
-  const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
-  const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
+  // const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
+  // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
   const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
-  const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
+  // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
 
   // hub pool params
   const A = 100         // amplification coefficient for the pool.
@@ -68,7 +61,6 @@ async function main() {
       await hubPoolLp.set_minter(hubPool.address)
     }
 
-
     // setting the hub pool in proxy contract
     await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(hubPool.address, hubPoolLp.address, hubPoolCoins);
 
@@ -79,7 +71,7 @@ async function main() {
     // write out the deploy configuration 
     console.log("_______________________________________");
     fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
-    console.log("hub pool deployed!");
+    console.log("Hub pool deployed!");
   }
 
 }
