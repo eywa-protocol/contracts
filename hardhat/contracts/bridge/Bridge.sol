@@ -9,21 +9,19 @@ import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-
 contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
     using AddressUpgradeable for address;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
 
     string public versionRecipient;
-    E2Point private epochKey;           // Aggregated public key of all paricipants of the current epoch
-    address public dao;                 // Address of the DAO
-    uint8 public epochParticipantsNum;  // Number of participants contributed to the epochKey
-    uint32 public epochNum;             // Sequential number of the epoch
+    E2Point private epochKey; // Aggregated public key of all paricipants of the current epoch
+    address public dao; // Address of the DAO
+    uint8 public epochParticipantsNum; // Number of participants contributed to the epochKey
+    uint32 public epochNum; // Sequential number of the epoch
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
     event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
-    function initialize(address forwarder) public initializer{
+    function initialize(address forwarder) public initializer {
         versionRecipient = "2.2.3";
         dao = _msgSender();
         _setTrustedForwarder(forwarder);
@@ -31,8 +29,8 @@ contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVe
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
         require(
-            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][bytes32(uint256(uint160(oppositeBridge)))].contains(
-                bytes32(uint256(uint160(receiveSide)))),
+            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][bytes32(uint256(uint160(oppositeBridge)))][
+                bytes32(uint256(uint160(receiveSide)))] == true,
             "UNTRUSTED CONTRACT"
         );
         _;
@@ -40,7 +38,7 @@ contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVe
 
     modifier onlyTrustedContractBytes32(bytes32 receiveSide, bytes32 oppositeBridge) {
         require(
-            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][oppositeBridge].contains(receiveSide),
+            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][oppositeBridge][receiveSide] == true,
             "UNTRUSTED CONTRACT"
         );
         _;
@@ -51,7 +49,15 @@ contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVe
         _;
     }
 
-    function getEpoch() public view returns(bytes memory, uint8, uint32) {
+    function getEpoch()
+        public
+        view
+        returns (
+            bytes memory,
+            uint8,
+            uint32
+        )
+    {
         return (abi.encode(epochKey), epochParticipantsNum, epochNum);
     }
 
@@ -139,7 +145,6 @@ contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVe
             bytes32(uint256(uint160(address(this)))),
             requestId,
             _selector,
-            receiveSide,
             oppositeBridge,
             chainId
         );

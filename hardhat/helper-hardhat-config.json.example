@@ -52,9 +52,9 @@
       "0x46f9416BaCA341646680a5b1e177B2Cf59Ec6493",
       "0xabe2a0240b333047fe5e60437ED3c276EB30d1A8"
     ],
-    "crosschainPool": "0xc145D9b37355e9cF1d0e052289Ce8f76e27f1AbF",
-    "crosschainPoolLp": "0xE99B566263C79deA565dabD42A01a2c574fb1cfC",
-    "crosschainPoolCoins": [
+    "hubPool": "0xc145D9b37355e9cF1d0e052289Ce8f76e27f1AbF",
+    "hubPoolLp": "0xE99B566263C79deA565dabD42A01a2c574fb1cfC",
+    "hubPoolCoins": [
       "0x85108649418Db6432A45Be38c49cEDf5C8C5A03C"
     ],
     "sourceForRepresentation": [
@@ -126,9 +126,9 @@
       "0xeBA2fF41CAe922C27fc8DF7bB5E7c34F09Af34C9",
       "0x6C117FE5d3e38C403F0561Fc8267412a14a02052"
     ],
-    "crosschainPool": "0xb3802962c1461a70d46ff17c1Eb973d372fFeFa2",
-    "crosschainPoolLp": "0xEA2FBc37FAE82eEa6586B6d03caBf50cBB6B0437",
-    "crosschainPoolCoins": [
+    "hubPool": "0xb3802962c1461a70d46ff17c1Eb973d372fFeFa2",
+    "hubPoolLp": "0xEA2FBc37FAE82eEa6586B6d03caBf50cBB6B0437",
+    "hubPoolCoins": [
       "0x9147575f3C5D2192Eb5D9AF3f5Be08dc78b5F407"
     ],
     "sourceForRepresentation": [
@@ -171,7 +171,7 @@
         "symbol": "USDT"
       }
     ],
-    "ethToken": [
+    "localToken": [
       {
         "address": "0x8f7Ed7efE31F64944c83417B779D2E4ADd951F9b",
         "name": "rinkebyTokenETH0",
@@ -216,9 +216,9 @@
       "0xf813Ef8BB1ffb11bA3701A4D8A0e2758cdBDd8E3",
       "0x96514702C863c71D2aB75378c22C0d5974c26Fb4"
     ],
-    "crosschainPool": "0x0104eF0070e53AaBC7768C4c0Cd740BF43230C6A",
-    "crosschainPoolLp": "0x63F1d773524f8bD6E93280e3915c6ac9bBB40EF7",
-    "crosschainPoolCoins": [
+    "hubPool": "0x0104eF0070e53AaBC7768C4c0Cd740BF43230C6A",
+    "hubPoolLp": "0x63F1d773524f8bD6E93280e3915c6ac9bBB40EF7",
+    "hubPoolCoins": [
       "0xAf35B62dECEC8f406B3b0e5A368B14A5303A23b1"
     ],
     "sourceForRepresentation": [
@@ -289,9 +289,9 @@
       "0x6055b3f184ED45F3D1c67659972d3a7D9B250a57",
       "0x4d9b9679d5b7aE9D1f20A63dbD0B9bc85Ab3A955"
     ],
-    "crosschainPool": "0x1aDf872E2558a549FAe21CDFad962028CDb46896",
-    "crosschainPoolLp": "0x858fb02F47c6085Aac6b284f04D9A1381fA4E8ff",
-    "crosschainPoolCoins": [
+    "hubPool": "0x1aDf872E2558a549FAe21CDFad962028CDb46896",
+    "hubPoolLp": "0x858fb02F47c6085Aac6b284f04D9A1381fA4E8ff",
+    "hubPoolCoins": [
       "0x1DDC7E06153907b37db6e31Cc2768C74b89Ed7cd"
     ],
     "sourceForRepresentation": [
@@ -334,13 +334,13 @@
         "symbol": "USDT"
       }
     ],
-    "ethPool": "0xE5ef1B343E6015dcA1bdaD58CFa256C2b305758D",
-    "ethPoolLp": {
+    "crosschainPool": "0xE5ef1B343E6015dcA1bdaD58CFa256C2b305758D",
+    "crosschainPoolLp": {
       "address": "0x0fb887Eb5fB2C346E40f79140a06399413E31fbb",
       "name": "mumbaiLpPoolETH",
       "symbol": "LPETH"
     },
-    "ethPoolCoins": [
+    "crosschainPoolCoins": [
       "0xA0c4268a0Ec6D4836aE6D91c40Ff14F91b10BE60",
       "0xfe6a20FbC026C9830431F774E9e10949145Eefe0",
       "0x03da7Cc62088389FF4F227b01d2106DdEd805bA7"
@@ -373,9 +373,9 @@
       "0xF690377749c08FF7Ac67CC592817f8D3848Cf077",
       "0x541CBfec41DBf3b871a0cd8cf423211eF1F79FeC"
     ],
-    "crosschainPool": "0x70afc131b46390b5713e4FEec450Bbf850167724",
-    "crosschainPoolLp": "0xAC039f5B884f1A91C6BAfF68d34DC030E0112204",
-    "crosschainPoolCoins": [
+    "hubPool": "0x70afc131b46390b5713e4FEec450Bbf850167724",
+    "hubPoolLp": "0xAC039f5B884f1A91C6BAfF68d34DC030E0112204",
+    "hubPoolCoins": [
       "0x6342D1967448f17088CD99C4f926805d526ecF86"
     ],
     "sourceForRepresentation": [
@@ -418,13 +418,6 @@
         "symbol": "TSL"
       }
     ],
-    "localToken": [],
-    "localPool": "",
-    "localPoolLp": "",
-    "localPoolCoins": [],
-    "crosschainPool": "",
-    "crosschainPoolLp": "",
-    "crosschainPoolCoins": [],
     "sourceForRepresentation": [
       "rinkeby"
     ],
@@ -447,65 +440,34 @@
       "networks_env/env_test_for_network1.env"
     ],
     "chainId": 1111,
-    "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
-    "forwarder": "0x48a031c6ad7F74923Dd4450d4b70d9D21c52215b",
-    "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
+    "relayHub": "",
+    "forwarder": "",
+    "amm_pool": "",
     "token": [
       {
-        "address": "0x1bBB6FC8e87A3622Fbd5300f13bf21A3e66cdB7d",
-        "name": "Pandora",
-        "symbol": "PAR"
+        "address": "",
+        "name": "",
+        "symbol": ""
       },
       {
-        "address": "0x74142B3bE036AF872deF48A00482c5BeC90386bF",
-        "name": "Tsakheila",
-        "symbol": "TSL"
+        "address": "",
+        "name": "",
+        "symbol": ""
       }
     ],
-    "ethToken": [],
-    "localToken": [
-      {
-        "address": "0x0633a3A22c1d704B4D567bBF16D1182cb3303309",
-        "name": "network1Token0",
-        "symbol": "TK0"
-      },
-      {
-        "address": "0x983a0dBc905f54A2c08A80670C39e6aa40Da9820",
-        "name": "network1Token1",
-        "symbol": "TK1"
-      },
-      {
-        "address": "0x7d19533e4199F63598eC491cc5D7Db9090e0f1cC",
-        "name": "network1Token2",
-        "symbol": "TK2"
-      }
-    ],
-    "localPool": "0x4BC7C18016FA3BB7EEca1346d358a4E89F97339d",
-    "localPoolLp": {
-      "address": "0x1731C4e8e4A67497089CB6ED13b55E5c8042506d",
-      "name": "network1LpLocal",
-      "symbol": "LP"
-    },
-    "localPoolCoins": [
-      "0x0633a3A22c1d704B4D567bBF16D1182cb3303309",
-      "0x983a0dBc905f54A2c08A80670C39e6aa40Da9820",
-      "0x7d19533e4199F63598eC491cc5D7Db9090e0f1cC"
-    ],
-    "crosschainPool": "",
-    "crosschainPoolLp": "",
-    "crosschainPoolCoins": [],
+    "localToken": [],
     "sourceForRepresentation": [
       "network2",
       "network3"
     ],
-    "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x4bb819FA7AfC1b3F65fc47198bF3e9A4c959CbEc",
-    "mockDexPool": "0xDDF1108f02C97B6594455e556aE0174381C217Bc",
-    "portal": "0x53C0A09e4954dD2D0edc6bF44F2C53B9c1fED667",
-    "synthesis": "0xD846DE1386bac441fdA49D05563bFD874F52CAb4",
-    "curveProxy": "0xD110733A983A255C692c9547c66266EDE8EAb9d3",
-    "frontHelper": "0x204F815995eb66B8a13b2308d56CB98d7566F48a"
+    "paymaster": "",
+    "nodeRegistry": "",
+    "bridge": "",
+    "mockDexPool": "",
+    "portal": "",
+    "synthesis": "",
+    "curveProxy": "",
+    "frontHelper": ""
   },
   "network2": {
     "rpcUrl": "ws://172.20.128.12:8545",
@@ -517,41 +479,37 @@
       "networks_env/env_test_for_network2.env"
     ],
     "chainId": 1112,
-    "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
-    "forwarder": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
-    "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
+    "relayHub": "",
+    "forwarder": "",
+    "amm_pool": "",
     "token": [
       {
-        "address": "0x1bBB6FC8e87A3622Fbd5300f13bf21A3e66cdB7d",
-        "name": "Pandora",
-        "symbol": "PAR"
+        "address": "",
+        "name": "",
+        "symbol": ""
       },
       {
-        "address": "0x74142B3bE036AF872deF48A00482c5BeC90386bF",
-        "name": "Tsakheila",
-        "symbol": "TSL"
+        "address": "",
+        "name": "",
+        "symbol": ""
       }
     ],
-    "ethPool": [],
-    "localToken": [],
-    "localPool": "",
-    "localPoolLp": "",
-    "localPoolCoins": [],
-    "crosschainPool": "",
-    "crosschainPoolLp": "",
-    "crosschainPoolCoins": [],
+    "crosschainPool": [],
+    "hubPool": "",
+    "hubPoolLp": "",
+    "hubPoolCoins": [],
     "sourceForRepresentation": [
       "network1",
       "network3"
     ],
-    "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x756b147e4Fac1E185B07bFdBb95c42eF5eCEAa4c",
-    "mockDexPool": "0x59da540FeACf4DAa3c9D00DEd796EBb53Fd5342e",
-    "portal": "0x0c760E9A85d2E957Dd1E189516b6658CfEcD3985",
-    "synthesis": "0x329DCb6edc4D6b9110d366BCc4f52624F619176A",
+    "paymaster": "",
+    "nodeRegistry": "",
+    "bridge": "",
+    "mockDexPool": "",
+    "portal": "",
+    "synthesis": "",
     "curveProxy": "",
-    "frontHelper": "0xBE8a929Ac944333f054D2936ba7CdcD9A457323f"
+    "frontHelper": ""
   },
   "network3": {
     "rpcUrl": "ws://172.20.128.13:9545",
@@ -563,40 +521,33 @@
       "networks_env/env_test_for_network3.env"
     ],
     "chainId": 1113,
-    "relayHub": "0xAa3E82b4c4093b4bA13Cb5714382C99ADBf750cA",
-    "forwarder": "0x1AA57a168eBa12F6D270c80F9B8cEcEeFAE41d0f",
-    "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
+    "relayHub": "",
+    "forwarder": "",
+    "amm_pool": "",
     "token": [
       {
-        "address": "0x1bBB6FC8e87A3622Fbd5300f13bf21A3e66cdB7d",
-        "name": "Pandora",
-        "symbol": "PAR"
+        "address": "",
+        "name": "",
+        "symbol": ""
       },
       {
-        "address": "0x74142B3bE036AF872deF48A00482c5BeC90386bF",
-        "name": "Tsakheila",
-        "symbol": "TSL"
+        "address": "",
+        "name": "",
+        "symbol": ""
       }
     ],
-    "ethToken": [],
     "localToken": [],
-    "localPool": "",
-    "localPoolLp": "",
-    "localPoolCoins": [],
-    "crosschainPool": "",
-    "crosschainPoolLp": "",
-    "crosschainPoolCoins": [],
     "sourceForRepresentation": [
       "network1",
       "network2"
     ],
-    "paymaster": "0xF6A74A437F0633991c007A59508287a426e5c455",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0xE9F2CA40d4be0B21c7E5C970805f194BAfAA7C27",
-    "mockDexPool": "0x4b43BAb7694d2d3c5c355A6568244101724639c3",
-    "portal": "0x99A0cc91fb7fbD7b5514D68E9280AFd72576A267",
-    "synthesis": "0x222D25c3D561FE8DaDeF22Ba9010C4454FA6e02B",
+    "paymaster": "",
+    "nodeRegistry": "",
+    "bridge": "",
+    "mockDexPool": "",
+    "portal": "",
+    "synthesis": "",
     "curveProxy": "",
-    "frontHelper": "0xF5d39537E69D48bfB63A9ecB3fb9D2Ce833cE305"
+    "frontHelper": ""
   }
 }

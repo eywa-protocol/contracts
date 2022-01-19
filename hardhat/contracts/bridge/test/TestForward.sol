@@ -2,6 +2,7 @@
 pragma solidity 0.8.10;
 
 import "../../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
+import "../interface/IForwarder.sol";
 
 contract TestForward is BaseRelayRecipient {
     uint256 public val = 1;
@@ -23,6 +24,18 @@ contract TestForward is BaseRelayRecipient {
         sender = _msgSender();
 
         emit FooCalled(sender, val);
+    }
+
+    function testExecute(
+        ForwardRequest memory req,
+        bytes32 domainSeparator,
+        bytes32 requestTypeHash,
+        bytes memory suffixData,
+        bytes calldata sig
+    ) external payable
+    override
+    returns (bool success, string memory ret) {
+        return (true, "returned test value");
     }
 
     string public versionRecipient = "Hello world!";

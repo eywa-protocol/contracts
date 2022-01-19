@@ -33,13 +33,14 @@ async function main() {
         addressToBytes32(portal)
         );
        console.log(`addContractBind for synthesis on ${network.name} with ${netw}: ${this.tx.hash}`); 
+       await this.tx.wait();
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.p),
         addressToBytes32(bridgeB),
         addressToBytes32(synth)
         );
        console.log(`addContractBind for portal on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await timeout(5_000);
+       await this.tx.wait();
 
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(mDP),
@@ -47,7 +48,7 @@ async function main() {
         addressToBytes32(mockDexPool)
         );
        console.log(`addContractBind for mockDexPool on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await timeout(5_000);
+       await this.tx.wait();
 //-----
       this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.p),
@@ -55,7 +56,7 @@ async function main() {
         addressToBytes32(curveProxy)
         );
       console.log(`addContractBind for Curve proxy > Portal on ${network.name} with ${netw}: ${this.tx.hash}`);
-      await timeout(5_000);
+      await this.tx.wait();
 
       this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.s),
@@ -63,7 +64,7 @@ async function main() {
         addressToBytes32(curveProxy)
         );
       console.log(`addContractBind for Curve proxy > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
-      await timeout(5_000);
+      await this.tx.wait();
       
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.cp),
@@ -71,7 +72,7 @@ async function main() {
         addressToBytes32(portal)
         );
        console.log(`addContractBind for Curve proxy > Portal on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await timeout(5_000);
+       await this.tx.wait();
 
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.cp),
@@ -79,7 +80,7 @@ async function main() {
         addressToBytes32(synth)
         );
        console.log(`addContractBind for Curve proxy > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await timeout(5_000);
+       await this.tx.wait();
 
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.cp),
@@ -87,7 +88,7 @@ async function main() {
         addressToBytes32(curveProxy)
         );
        console.log(`addContractBind for Curve proxy > Curve proxy on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await timeout(5_000);
+       await this.tx.wait();
 
      }catch(e){
           const nuLL = '0x0000000000000000000000000000000000000000';
