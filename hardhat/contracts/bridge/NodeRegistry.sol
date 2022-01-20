@@ -149,35 +149,34 @@ contract NodeRegistry is Bridge {
     }
 
     function daoUpdateEpochRequest(bool resetEpoch) public override {
-        touchSnapshot();
         Bridge.daoUpdateEpochRequest(resetEpoch);
+        if (snapshot.snapNum < Bridge.epochNum) {
+            newSnapshot();
+        }
     }
 
-    function touchSnapshot() internal {
-        require(ownedNodes[_msgSender()].owner == _msgSender(), "Only nodes");
-        if (snapshot.snapNum < Bridge.epochNum) {
-            delete snapshot;
+    function newSnapshot() internal {
+        delete snapshot;
 
-            uint256[] memory indexes = new uint256[](nodes.length());
-            for (uint256 i = 0; i < nodes.length(); i++) {
-                indexes[i] = i;
-            }
-
-            uint256 rand = uint256(blockhash(block.number-1));  // TODO unsafe
-            uint256 len = nodes.length();
-            if (len > SnapshotMaxSize) len = SnapshotMaxSize;
-            for (uint256 i = 0; i < len; i++) {
-                // https://en.wikipedia.org/wiki/Linear_congruential_generator
-                unchecked { rand = rand*6364136223846793005 + 1442695040888963407; }   // TODO unsafe
-                uint256 j = i + (rand % (nodes.length() - i));
-                Node storage n = ownedNodes[nodes.at(indexes[j])];
-                snapshot.blsPubKeys.push(n.blsPubKey);
-                snapshot.hostIds.push(n.hostId);
-                indexes[j] = indexes[i];
-            }
-
-            snapshot.snapNum = Bridge.epochNum + 1;
-            emit NewSnapshot(snapshot.snapNum);
+        uint256[] memory indexes = new uint256[](nodes.length());
+        for (uint256 i = 0; i < nodes.length(); i++) {
+            indexes[i] = i;
         }
+
+        uint256 rand = uint256(blockhash(block.number-1));  // TODO unsafe
+        uint256 len = nodes.length();
+        if (len > SnapshotMaxSize) len = SnapshotMaxSize;
+        for (uint256 i = 0; i < len; i++) {
+            // https://en.wikipedia.org/wiki/Linear_congruential_generator
+            unchecked { rand = rand*6364136223846793005 + 1442695040888963407; }   // TODO unsafe
+            uint256 j = i + (rand % (nodes.length() - i));
+            Node storage n = ownedNodes[nodes.at(indexes[j])];
+            snapshot.blsPubKeys.push(n.blsPubKey);
+            snapshot.hostIds.push(n.hostId);
+            indexes[j] = indexes[i];
+        }
+
+        snapshot.snapNum = Bridge.epochNum + 1;
+        emit NewSnapshot(snapshot.snapNum);
     }
 }
