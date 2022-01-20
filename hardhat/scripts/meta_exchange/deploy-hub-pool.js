@@ -64,12 +64,11 @@ async function main() {
     // setting the hub pool in proxy contract
     await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(hubPool.address, hubPoolLp.address, hubPoolCoins);
 
-    deployInfo[network.name].hubPool = hubPool.address
-    deployInfo[network.name].hubPoolLp = hubPoolLp.address
-    deployInfo[network.name].hubPoolCoins = hubPoolCoins
+    deployInfo[network.name].hubPool.address = hubPool.address
+    deployInfo[network.name].hubPool.lp = hubPoolLp.address
+    deployInfo[network.name].hubPool.coins = hubPoolCoins
 
     // write out the deploy configuration 
-    console.log("_______________________________________");
     fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
     console.log("Hub pool deployed!");
   }

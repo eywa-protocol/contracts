@@ -495,9 +495,17 @@
       }
     ],
     "crosschainPool": [],
-    "hubPool": "",
-    "hubPoolLp": "",
-    "hubPoolCoins": [],
+    "hubPool": { 
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":""
+    },
     "sourceForRepresentation": [
       "network1",
       "network3"

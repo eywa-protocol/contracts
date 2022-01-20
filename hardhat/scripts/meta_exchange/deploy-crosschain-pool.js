@@ -115,7 +115,6 @@ async function main() {
   }
 
   // write out the deploy configuration 
-  console.log("_______________________________________");
   fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
   console.log("Crosschain pool deployed!\n");
 

@@ -112,3 +112,6 @@ for net in ${nets//\,/ }
   npx hardhat balanceDeployer --network ${net}
   npx hardhat run --no-compile ./scripts/bridge/updateDexBind.js  --network ${net}
 done
+
+
+npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network network2
