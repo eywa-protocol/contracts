@@ -111,6 +111,7 @@ import (
 {{end}}
 
 {{range $contract := .Contracts}}
+	var __contractSourceABI = "{{.InputABI}}"
 	{{range .Transacts}}
 		func GsnBridge{{.Normalized.Name}}(
 			__gsnCaller gsn.GsnCaller,
@@ -118,7 +119,7 @@ import (
 			__signer *ecdsa.PrivateKey,
 			__contractAddress common.Address {{range .Normalized.Inputs}}, {{.Name}} {{bindtype .Type $structs}} {{end}})	(txHash common.Hash, err error) {
 
-			__contractABI, err := abi.JSON(strings.NewReader(wrappers.BridgeABI))
+			__contractABI, err := abi.JSON(strings.NewReader(__contractSourceABI))
 			if err != nil {
 				return common.Hash{}, fmt.Errorf("could not parse ABI: %w", err)
 			}
@@ -163,7 +164,7 @@ import (
 			__typedData, err := gsn.NewForwardRequestTypedData(
 				__req,
 				__forwarderAddress.String(),
-				wrappers.BridgeABI,
+				__contractSourceABI,
 				"{{.Original.Name}}" {{range .Normalized.Inputs}}, {{.Name}} {{end}})
 			if err != nil {
 				return

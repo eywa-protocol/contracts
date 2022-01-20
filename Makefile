@@ -26,7 +26,7 @@ wrappers: npm compile copy_configs
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/bridge/merkle/MerkleTest.sol --pkg wrappers --out ../wrappers
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/amm_pool/Portal.sol --pkg portal --out ../wrappers/portal
 	go run wrappers-builder/main.go --json ${ARTIFACTS}/amm_pool/Synthesis.sol --pkg synthesis --out ../wrappers/synthesis
-	go run wrappers-builder/main.go --json ${ARTIFACTS}/gassless/ImportArtifacts.sol --pkg gassless --out ../wrappers/gassless
+	# go run wrappers-builder/main.go --json ${ARTIFACTS}/gassless/ImportArtifacts.sol --pkg gassless --out ../wrappers/gassless
 	cd wrappers-builder-gsn && go build && cd ..
 	./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/Bridge.sol --pkg bridge --out ../wrappers/gsn/bridge
 	./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/NodeRegistry.sol --pkg registry --out ../wrappers/gsn/registry
