@@ -22,10 +22,24 @@ async function main() {
     networkConfig[network.name].forwarder = forwarder.address;
     console.log("Forwarder address:", forwarder.address);
 
+    // Deploy RelayerPoolFactory library
+    const _RelayerPoolFactory = await ethers.getContractFactory("RelayerPoolFactory");
+    const relayerPoolFactory = await _RelayerPoolFactory.deploy();
+    await relayerPoolFactory.deployed();
+    console.log("RelayerPoolFactory address:", relayerPoolFactory.address);
+
     // Deploy NodeRegistry (contains Bridge)
-    const _NodeRegistry = await ethers.getContractFactory("NodeRegistry");
-    //const bridge = await _NodeRegistry.deploy({gasLimit: 3_000_000});
-    const bridge = await upgrades.deployProxy(_NodeRegistry, [EYWA.address, forwarder.address], { initializer: 'initialize2' });
+    const _NodeRegistry = await ethers.getContractFactory("NodeRegistry", {
+      libraries: {
+        RelayerPoolFactory: relayerPoolFactory.address,
+      },
+    });
+    // const bridge = await _NodeRegistry.deploy({gasLimit: 5_000_000});
+    const bridge = await upgrades.deployProxy(
+      _NodeRegistry,
+      [EYWA.address, forwarder.address],
+      { initializer: 'initialize2', unsafeAllow: ['external-library-linking'] }
+    );
     await bridge.deployed();
     networkConfig[network.name].nodeRegistry = bridge.address;
     networkConfig[network.name].bridge = bridge.address;

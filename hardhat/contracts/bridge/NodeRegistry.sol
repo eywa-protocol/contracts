@@ -6,7 +6,7 @@ import {SafeERC20Upgradeable, IERC20Upgradeable} from '@openzeppelin/contracts-u
 import {ERC20Permit, IERC20Permit} from "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {IERC20} from '@openzeppelin/contracts-newone/token/ERC20/IERC20.sol';
 import "./Bridge.sol";
-import "./RelayerPool.sol";
+import "./RelayerPoolFactory.sol";
 
 
 contract NodeRegistry is Bridge {
@@ -128,19 +128,19 @@ contract NodeRegistry is Bridge {
         bytes32 _r,
         bytes32 _s
     ) external {
-        /* RelayerPool relayerPool = new RelayerPool( */
-        /*     _node.owner,   // node owner */
-        /*     address(EYWA), // depositToken */
-        /*     address(EYWA), // rewardToken            (test only) */
-        /*     100,           // relayerFeeNumerator    (test only) */
-        /*     4000,          // emissionRateNumerator  (test only) */
-        /*     _node.owner    // vault                  (test only) */
-        /* ); */
+        RelayerPool relayerPool = RelayerPoolFactory.create(
+            _node.owner,   // node owner
+            address(EYWA), // depositToken
+            address(EYWA), // rewardToken            (test only)
+            100,           // relayerFeeNumerator    (test only)
+            4000,          // emissionRateNumerator  (test only)
+            _node.owner    // vault                  (test only)
+        );
         uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
         require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");
         IERC20Permit(EYWA).permit(_msgSender(), address(this), nodeBalance, _deadline, _v, _r, _s);
-        /* IERC20Upgradeable(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance); */
-        /* _node.pool = address(relayerPool); */
+        IERC20Upgradeable(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
+        _node.pool = address(relayerPool);
         addNode(_node);
     }
 
