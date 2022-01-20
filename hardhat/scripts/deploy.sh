@@ -51,14 +51,13 @@ echo ''
 ## NOTE !!!!! : gsn-node where owner is opengsn. Uncomment for our ralyer gsn.
 #npx hardhat run --no-compile ./scripts/gassless/deploy.js --network ${net}
 npx hardhat balanceDeployer --network ${net}
-npx hardhat run --no-compile ./scripts/bridge/deploy.js   --network ${net}
 npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
 
 if [ ${net} == ${regnet} ]
 then
-    echo 'deploying registry stuff to' ${regnet}
-    echo '=========================================='
-    npx hardhat run --no-compile ./scripts/bridge/deployNodeRegistry.js --network ${regnet}
+    npx hardhat run --no-compile ./scripts/bridge/deployToService.js --network ${regnet}
+else
+    npx hardhat run --no-compile ./scripts/bridge/deploy.js --network ${net}
 fi
 
 ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \

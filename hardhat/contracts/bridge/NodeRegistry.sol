@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol";
-import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
+import {EnumerableSet} from '@openzeppelin/contracts-newone/utils/structs/EnumerableSet.sol';
+import {SafeERC20Upgradeable, IERC20Upgradeable} from '@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol';
+import {ERC20Permit, IERC20Permit} from "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol";
+import {IERC20} from '@openzeppelin/contracts-newone/token/ERC20/IERC20.sol';
+import "./Bridge.sol";
 import "./RelayerPool.sol";
 
 
-contract NodeRegistry is BaseRelayRecipient {
+contract NodeRegistry is Bridge {
     using EnumerableSet for EnumerableSet.AddressSet;
-    using SafeERC20 for IERC20;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     struct Node {
         address owner;     // address of node signer key
@@ -27,15 +30,11 @@ contract NodeRegistry is BaseRelayRecipient {
 
     struct Snapshot {
         uint256 snapNum;
-        uint256 lastTouchTime;
         string[] blsPubKeys;
         string[] hostIds;
     }
 
-
-    uint256 constant SnapshotTtl = 10 seconds;
-    uint256 constant SnapshotMinTouchTime = 5 seconds;
-    uint256 constant SnapshotMaxSize = 50;
+    uint256 constant SnapshotMaxSize = 50;  // maximum epoch participants num
     uint256 public constant MIN_COLLATERAL = 1 ether; // TODO discuss
 
     address public EYWA;
@@ -53,14 +52,13 @@ contract NodeRegistry is BaseRelayRecipient {
         uint256 nodeId
     );
 
-    constructor(
+    function initialize2(
         address _EYWA,
         address _forwarder
-    ) {
+    ) public initializer {
         require(_EYWA != address(0), Errors.ZERO_ADDRESS);
-        require(_forwarder != address(0), Errors.ZERO_ADDRESS);
         EYWA = _EYWA;
-       _setTrustedForwarder(_forwarder);
+        Bridge.initialize(_forwarder);
     }
 
     modifier isNewNode(address _owner) {
@@ -130,19 +128,19 @@ contract NodeRegistry is BaseRelayRecipient {
         bytes32 _r,
         bytes32 _s
     ) external {
-        RelayerPool relayerPool = new RelayerPool(
-            _node.owner,   // node owner
-            address(EYWA), // depositToken
-            address(EYWA), // rewardToken            (test only)
-            100,           // relayerFeeNumerator    (test only)
-            4000,          // emissionRateNumerator  (test only)
-            _node.owner    // vault                  (test only)
-        );
+        /* RelayerPool relayerPool = new RelayerPool( */
+        /*     _node.owner,   // node owner */
+        /*     address(EYWA), // depositToken */
+        /*     address(EYWA), // rewardToken            (test only) */
+        /*     100,           // relayerFeeNumerator    (test only) */
+        /*     4000,          // emissionRateNumerator  (test only) */
+        /*     _node.owner    // vault                  (test only) */
+        /* ); */
         uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
         require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");
         IERC20Permit(EYWA).permit(_msgSender(), address(this), nodeBalance, _deadline, _v, _r, _s);
-        IERC20(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
-        _node.pool = address(relayerPool);
+        /* IERC20Upgradeable(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance); */
+        /* _node.pool = address(relayerPool); */
         addNode(_node);
     }
 
@@ -150,11 +148,14 @@ contract NodeRegistry is BaseRelayRecipient {
         return (snapshot.blsPubKeys, snapshot.hostIds, snapshot.snapNum);
     }
 
-    function touchSnapshot() external {
-        require(block.timestamp - snapshot.lastTouchTime > SnapshotMinTouchTime, "Just touched");
+    function daoUpdateEpochRequest(bool resetEpoch) public override {
+        touchSnapshot();
+        Bridge.daoUpdateEpochRequest(resetEpoch);
+    }
+
+    function touchSnapshot() internal {
         require(ownedNodes[_msgSender()].owner == _msgSender(), "Only nodes");
-        if (block.timestamp - snapshot.lastTouchTime > SnapshotTtl) {
-            uint256 snapNum = snapshot.snapNum + 1;
+        if (snapshot.snapNum < Bridge.epochNum) {
             delete snapshot;
 
             uint256[] memory indexes = new uint256[](nodes.length());
@@ -175,11 +176,8 @@ contract NodeRegistry is BaseRelayRecipient {
                 indexes[j] = indexes[i];
             }
 
-            snapshot.snapNum = snapNum;
-            emit NewSnapshot(snapNum);
+            snapshot.snapNum = Bridge.epochNum + 1;
+            emit NewSnapshot(snapshot.snapNum);
         }
-        snapshot.lastTouchTime = block.timestamp;
     }
-
-    string public versionRecipient = "2.2.3";
 }
