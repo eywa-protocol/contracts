@@ -225,7 +225,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_solana(
+        IBridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                     /* programId: */
@@ -367,7 +367,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         accounts[8] = SolanaAccountMeta({ pubkey: SOLANA_SYSTEM_PROGRAM, isSigner: false, isWritable: false });
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_solana(
+        IBridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                     /* programId: */

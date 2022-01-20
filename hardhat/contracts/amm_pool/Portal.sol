@@ -243,7 +243,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         });
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_solana(
+        IBridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                     /* programId: */
@@ -467,7 +467,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         });
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_solana(
+        IBridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                     /* programId: */

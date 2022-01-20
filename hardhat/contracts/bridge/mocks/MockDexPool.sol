@@ -79,10 +79,10 @@ contract MockDexPool is SolanaSerialize {
     }
 
     function sendTestRequestToSolana(bytes32 programId_, uint256 testData_, bytes32 secondPartPool, bytes32 oppBridge, uint chainId) external {
+        require(chainId == SOLANA_CHAIN_ID, "incorrect chainID");
         uint256 nonce = Bridge(bridge).getNonce(msg.sender);
-        bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('receiveRequestTest(uint256)'))), testData_);
         bytes32 requestId = Bridge(bridge).prepareRqId( oppBridge, chainId, secondPartPool, bytes32(uint256(uint160(msg.sender))) , nonce);
-        //                bool success = Bridge(bridge).transmitSolanaRequest(out, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
+//                        bool success = Bridge(bridge).transmitSolanaRequest(out, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
         SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](2);
 
         accounts[0] = SolanaAccountMeta({
@@ -97,7 +97,7 @@ contract MockDexPool is SolanaSerialize {
         isWritable: true
         });
 
-        Bridge(bridge).transmitRequestV2_solana(
+        Bridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                 /* programId: */
@@ -105,7 +105,7 @@ contract MockDexPool is SolanaSerialize {
                 /* accounts: */
                     accounts,
                 /* data: */
-                    abi.encodePacked(out)
+                    abi.encodePacked(requestId)
                 )
             ),
             secondPartPool,
