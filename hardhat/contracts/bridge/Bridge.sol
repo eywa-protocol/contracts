@@ -22,6 +22,8 @@ contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVe
     event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
     function initialize(address forwarder) public initializer {
+        __Context_init_unchained();
+        __Ownable_init_unchained();
         versionRecipient = "2.2.3";
         dao = _msgSender();
         _setTrustedForwarder(forwarder);
@@ -242,5 +244,9 @@ contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVe
             mask = mask & (mask - 1);
             cnt++;
         }
+    }
+
+    function setTrustedForwarder(address _forwarder) external onlyOwner {
+        return _setTrustedForwarder(_forwarder);
     }
 }
