@@ -1,4 +1,4 @@
-import { ethers } from 'hardhat';
+import { ethers, upgrades, artifacts } from 'hardhat';
 import { expect } from 'chai';
 
 import type {
@@ -66,29 +66,33 @@ const dumbsSynthesize = [
 
 
 describe("Solana calldata", function () {
-  let bridge1: Bridge;
-  let bridge2: Bridge;
+  let bridge: Bridge;
   let portalAddress32: string;
   let portal: Portal;
   let synthesisAddress32: string;
   let synthesis: Synthesis;
 
   before(async () => {
-    const CBridge = await ethers.getContractFactory("Bridge");
-    const CPortal = await ethers.getContractFactory("Portal");
-    const CSynthesis = await ethers.getContractFactory("Synthesis");
+    const _Forwarder = await ethers.getContractFactory("Forwarder");
+    const forwarder = await _Forwarder.deploy();
+    await forwarder.deployed();
+    console.log("Forwarder address:", forwarder.address);
 
-    bridge1 = await CBridge.deploy(/* listNode.address */ dumb, /* forwarder */ dumb);
-    await bridge1.deployed();
+    // Deploy Bridge
+    const _Bridge = await ethers.getContractFactory("Bridge");
+    /* const */ bridge = (await upgrades.deployProxy(_Bridge, [forwarder.address], { initializer: 'initialize' })) as Bridge;
+    await bridge.deployed();
+    console.log("Bridge address:", bridge.address);
 
-    portal = await CPortal.deploy(bridge1.address, dumb);
+    const _Portal = await ethers.getContractFactory("Portal");
+    /* const */ portal = (await upgrades.deployProxy(_Portal, [bridge.address, forwarder.address], { initializer: 'initializeFunc' })) as Portal;
     await portal.deployed();
+    console.log("Portal address:", portal.address);
 
-    bridge2 = await CBridge.deploy(/* listNode.address */ dumb, /* forwarder */ dumb);
-    await bridge2.deployed();
-
-    synthesis = await CSynthesis.deploy(bridge2.address, dumb);
+    const _Synthesis = await ethers.getContractFactory("Synthesis");
+    /* const */ synthesis = (await upgrades.deployProxy(_Synthesis, [bridge.address, forwarder.address], { initializer: 'initializeFunc' })) as Synthesis;
     await synthesis.deployed();
+    console.log("Synthesis address:", synthesis.address);
 
     portalAddress32 = `0x000000000000000000000000${ portal.address.substr(2) }`;
     expect(portalAddress32.length).equal(dumb32.length);
@@ -96,14 +100,13 @@ describe("Solana calldata", function () {
     synthesisAddress32 = `0x000000000000000000000000${ synthesis.address.substr(2) }`;
     expect(synthesisAddress32.length).equal(dumb32.length);
 
-    // require(is_in[to] == false, "TO ALREADY EXIST");
-    await bridge1.addContractBind(portalAddress32, dumbOppositeBridge, dumbReceiveSide);
-    await bridge2.addContractBind(synthesisAddress32, dumbOppositeBridge, dumbReceiveSide);
+    await bridge.addContractBind(portalAddress32, dumbOppositeBridge, dumbReceiveSide);
+    await bridge.addContractBind(synthesisAddress32, dumbOppositeBridge, dumbReceiveSide);
   });
 
   it("Should emit OracleRequestSolana event from Portal.synthesizeToSolana", async function () {
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve) => {
-      bridge1.once("OracleRequestSolana", (...args) => {
+      bridge.once("OracleRequestSolana", (...args) => {
         resolve(args[args.length - 1]);
       });  
     });
@@ -111,7 +114,7 @@ describe("Solana calldata", function () {
     const amount = 3.5 * 1000 * 1000;
     const bumpTxState = '53';
     await portal.synthesizeToSolana(dumb, amount, dumbsSynthesize, `0x${ bumpTxState }`, SOLANA_CHAIN_ID);
-    
+
     const ev = await pEvent;
     expect(ev.event).equals('OracleRequestSolana');
     expect(ev.args.selector.substr(2)).equals([
@@ -128,7 +131,7 @@ describe("Solana calldata", function () {
       dumbReceiveSide.substr(2), // pid
       '31000000', // data.length
       sighashMintSyntheticToken,
-      'f3a0380063eec300e6206e2a4d8d4eb33659e163790133292fa333aca65045c3', // txId
+      'e49bdfeca8623673f46d3742d075918c2c0ef558beab0918c344db0aac0a900b', // txId
       bumpTxState,
       'e067350000000000', // amount
     ].join(''));
@@ -136,7 +139,7 @@ describe("Solana calldata", function () {
   
   it("Should emit OracleRequestSolana event from Portal.emergencyUnburnRequestToSolana", async function () {
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve) => {
-      bridge1.once("OracleRequestSolana", (...args) => {
+      bridge.once("OracleRequestSolana", (...args) => {
         resolve(args[args.length - 1]);
       });  
     });
@@ -164,7 +167,7 @@ describe("Solana calldata", function () {
 
   it("Should emit OracleRequestSolana event from Synthesis.emergencyUnsyntesizeRequestToSolana", async function () {
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve) => {
-      bridge2.once("OracleRequestSolana", (...args) => {
+      bridge.once("OracleRequestSolana", (...args) => {
         resolve(args[args.length - 1]);
       });  
     });
@@ -193,13 +196,37 @@ describe("Solana calldata", function () {
 
   it("Should emit OracleRequestSolana event from Synthesis.burnSyntheticTokenToSolana", async function () {
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve) => {
-      bridge2.once("OracleRequestSolana", (...args) => {
+      bridge.once("OracleRequestSolana", (...args) => {
         resolve(args[args.length - 1]);
       });  
     });
 
+    const tx = await synthesis.createRepresentation(dumb32, 'TestToken', 'TT');
+    const rec = await tx.wait();
+    // console.log(rec);
+    const evCreatedRepresentation = rec.events?.find(ev => ev.event == 'CreatedRepresentation');
+    // console.log(evCreatedRepresentation?.args);
+    if( !evCreatedRepresentation ) {
+      return;
+    }
+    const addrSynt = evCreatedRepresentation.args?._stoken;
+    // console.log(addrSynt);
+    if( !addrSynt ) {
+      return;
+    }
+    // const ERC20 = await ethers.getContractFactory('SyntERC20')
+    const SyntERC20  = artifacts.require('SyntERC20');
+    const token  = await SyntERC20.at(addrSynt);
+
+    const signer = (await ethers.getSigners())[0].address;
+    // console.log(signer);
+
+    await synthesis.setProxyCurve(signer);
+    
     const amount = 3.5 * 1000 * 1000;
-    await synthesis.burnSyntheticTokenToSolana(dumb, dumbsUnsynthesize, amount, SOLANA_CHAIN_ID);
+    await synthesis.mintSyntheticToken(dumb32, dumb, 2*amount, signer);
+    // console.log(await token.balanceOf(signer));
+    await synthesis.burnSyntheticTokenToSolana(addrSynt, dumbsUnsynthesize, amount, SOLANA_CHAIN_ID);
 
     const ev = await pEvent;
     expect(ev.event).equals('OracleRequestSolana');
