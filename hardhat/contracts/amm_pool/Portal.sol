@@ -176,7 +176,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
      * @param _txStateBump transaction state bump
      * @param _chainId opposite chain ID
      */
-    function synthesize_solana(
+    function synthesizeToSolana(
         address _token,
         uint256 _amount,
         bytes32[] calldata _pubkeys,
@@ -414,7 +414,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
      * @param _pubkeys unsynth data for Solana
      * @param _chainId opposite chain ID
      */
-    function emergencyUnburnRequest_solana(
+    function emergencyUnburnRequestToSolana(
         bytes32 _txID,
         bytes32[] calldata _pubkeys,
         uint256 _chainId

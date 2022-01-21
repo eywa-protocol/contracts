@@ -101,7 +101,7 @@ describe("Solana calldata", function () {
     await bridge2.addContractBind(synthesisAddress32, dumbOppositeBridge, dumbReceiveSide);
   });
 
-  it("Should emit OracleRequestSolana event from Portal.synthesize_32", async function () {
+  it("Should emit OracleRequestSolana event from Portal.synthesizeToSolana", async function () {
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve) => {
       bridge1.once("OracleRequestSolana", (...args) => {
         resolve(args[args.length - 1]);
@@ -110,7 +110,7 @@ describe("Solana calldata", function () {
 
     const amount = 3.5 * 1000 * 1000;
     const bumpTxState = '53';
-    await portal.synthesize_32(dumb, amount, dumbsSynthesize, `0x${ bumpTxState }`, SOLANA_CHAIN_ID);
+    await portal.synthesizeToSolana(dumb, amount, dumbsSynthesize, `0x${ bumpTxState }`, SOLANA_CHAIN_ID);
     
     const ev = await pEvent;
     expect(ev.event).equals('OracleRequestSolana');
@@ -134,14 +134,14 @@ describe("Solana calldata", function () {
     ].join(''));
   });
   
-  it("Should emit OracleRequestSolana event from Portal.emergencyUnburnRequest_32", async function () {
+  it("Should emit OracleRequestSolana event from Portal.emergencyUnburnRequestToSolana", async function () {
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve) => {
       bridge1.once("OracleRequestSolana", (...args) => {
         resolve(args[args.length - 1]);
       });  
     });
 
-    await portal.emergencyUnburnRequest_32(dumb32, dumbsSynthesize, SOLANA_CHAIN_ID);
+    await portal.emergencyUnburnRequestToSolana(dumb32, dumbsSynthesize, SOLANA_CHAIN_ID);
 
     const ev = await pEvent;
     expect(ev.event).equals('OracleRequestSolana');
@@ -162,7 +162,7 @@ describe("Solana calldata", function () {
     ].join(''));
   });
 
-  it("Should emit OracleRequestSolana event from Synthesis.emergencyUnsyntesizeRequest_32", async function () {
+  it("Should emit OracleRequestSolana event from Synthesis.emergencyUnsyntesizeRequestToSolana", async function () {
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve) => {
       bridge2.once("OracleRequestSolana", (...args) => {
         resolve(args[args.length - 1]);
@@ -170,7 +170,7 @@ describe("Solana calldata", function () {
     });
 
     const bumpTxState = '77';
-    await synthesis.emergencyUnsyntesizeRequest_32(dumbsUnsynthesize, `0x${ bumpTxState }`, SOLANA_CHAIN_ID);
+    await synthesis.emergencyUnsyntesizeRequestToSolana(dumbsUnsynthesize, `0x${ bumpTxState }`, SOLANA_CHAIN_ID);
 
     const ev = await pEvent;
     expect(ev.event).equals('OracleRequestSolana');
@@ -191,7 +191,7 @@ describe("Solana calldata", function () {
     ].join(''));
   });
 
-  it("Should emit OracleRequestSolana event from Synthesis.burnSyntheticToken_32", async function () {
+  it("Should emit OracleRequestSolana event from Synthesis.burnSyntheticTokenToSolana", async function () {
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve) => {
       bridge2.once("OracleRequestSolana", (...args) => {
         resolve(args[args.length - 1]);
@@ -199,7 +199,7 @@ describe("Solana calldata", function () {
     });
 
     const amount = 3.5 * 1000 * 1000;
-    await synthesis.burnSyntheticToken_32(dumb, dumbsUnsynthesize, amount, SOLANA_CHAIN_ID);
+    await synthesis.burnSyntheticTokenToSolana(dumb, dumbsUnsynthesize, amount, SOLANA_CHAIN_ID);
 
     const ev = await pEvent;
     expect(ev.event).equals('OracleRequestSolana');
