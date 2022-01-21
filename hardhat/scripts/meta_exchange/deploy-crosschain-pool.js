@@ -53,10 +53,12 @@ async function main() {
   let crosschainPoolCoins = []
   let crosschainPoolLp
   let crosschainPool
-
+  let bulevo = false;
   // creating local stable tokens for specified networks
-  //if (network.name != "network2" && network.name != "mumbai") {
-  if (network.name == "rinkeby" || network.name == "bsctestnet") {    
+  if (network.name == "rinkeby" || network.name == "bsctestnet") bulevo = true;
+  if (network.name != "network2" && network.name != "mumbai") bulevo = true;
+  
+  if (bulevo) {    
     //empty the array
     deployInfo[network.name].localToken = []
 
