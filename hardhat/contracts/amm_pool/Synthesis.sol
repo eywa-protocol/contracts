@@ -118,7 +118,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
      * @param _amount amount to mint
      * @param _to recipient address
      */
-    function mintSyntheticToken_solana(
+    function mintSyntheticTokenToSolana(
         bytes32 _txID,
         bytes32 _tokenReal,
         uint256 _amount,
@@ -172,7 +172,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
      * @param _bumpSynthesizeRequest synthesize request bump
      * @param _chainId opposite chain ID
      */
-    function emergencyUnsyntesizeRequest_solana(
+    function emergencyUnsyntesizeRequestToSolana(
         bytes32[] calldata _pubkeys,
         bytes1 _bumpSynthesizeRequest,
         uint256 _chainId
@@ -225,7 +225,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_solana(
+        IBridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                     /* programId: */
@@ -302,7 +302,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
      * @param _oppositeBridge opposite bridge address
      * @param _chainId opposite chain ID
      */
-    function burnSyntheticToken_solana(
+    function burnSyntheticTokenToSolana(
         address _stoken,
         bytes32[] calldata _pubkeys,
         uint256 _amount,
@@ -367,7 +367,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         accounts[8] = SolanaAccountMeta({ pubkey: SOLANA_SYSTEM_PROGRAM, isSigner: false, isWritable: false });
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_solana(
+        IBridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                     /* programId: */

@@ -130,7 +130,7 @@ contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVe
      * @param sender sender's address
      * @param nonce sender's nonce
      */
-    function transmitRequestV2_solana(
+    function transmitRequestV2ToSolana(
         bytes memory _selector,
         bytes32 receiveSide,
         bytes32 oppositeBridge,

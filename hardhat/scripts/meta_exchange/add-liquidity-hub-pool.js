@@ -20,7 +20,6 @@ async function main() {
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
 
   const totalSupply = ethers.utils.parseEther("100000000000.0")
-  this.hubPoolCoins = deployInfo[network.name].hubPoolCoins;
 
 
 
@@ -30,16 +29,17 @@ async function main() {
 
   if (network.name == "network2" || network.name == "mumbai") {
 
-    let hubPool = StableSwap3Pool.attach(deployInfo[network.name].hubPool);
+    let hubPool = StableSwap3Pool.attach(deployInfo[network.name].hubPool.address);
     switch (network.name) {
       case "network2":
-        hubPool = StableSwap2Pool.attach(deployInfo[network.name].hubPool);
+        hubPool = StableSwap3Pool.attach(deployInfo[network.name].hubPool.address);
         break;
       // case "mumbai":
-      //   hubPool = StableSwap5Pool.attach(deployInfo[network.name].hubPool);
+      //   hubPool = StableSwap5Pool.attach(deployInfo[network.name].hubPool.address);
       //   break;
     }
 
+    this.hubPoolCoins = deployInfo[network.name].hubPool.coins;
 
     for (let hubLp of this.hubPoolCoins) {
       const lp = ERC20.attach(hubLp);

@@ -55,7 +55,7 @@ async function main() {
   let crosschainPool
 
   // creating local stable tokens for specified networks
-  if (network.name != "network2" && network.name != "mumbai") {
+  //if (network.name != "network2" && network.name != "mumbai") {
     //empty the array
     deployInfo[network.name].localToken = []
 
@@ -74,7 +74,7 @@ async function main() {
     if (network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
       deployInfo["mumbai"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });
 
-  }
+ // }
 
   // creating crosschain pool for specified networks
   if (network.name == "network2" || network.name == "mumbai") {
@@ -115,7 +115,6 @@ async function main() {
   }
 
   // write out the deploy configuration 
-  console.log("_______________________________________");
   fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
   console.log("Crosschain pool deployed!\n");
 

@@ -14,8 +14,8 @@ async function main() {
 
   const CurveProxy = await ethers.getContractFactory('CurveProxy');
   const CurveTokenV2 = await ethers.getContractFactory('CurveTokenV2')
-  const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
-  // const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
+  // const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
+  const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
   // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
   const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
@@ -35,12 +35,14 @@ async function main() {
       for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
         hubPoolCoins.push(deployInfo[network.name].crosschainPool[i].lp[0].address)
       }
+      hubPoolCoins.push(deployInfo[network.name].localPool.lp.address)
     }
     if (network.name == "mumbai") {
 
       for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
         hubPoolCoins.push(deployInfo[network.name].crosschainPool[i].lp[0].address)
       }
+      hubPoolCoins.push(deployInfo[network.name].localPool.lp.address)
     }
 
     // deploy LP token
@@ -50,7 +52,7 @@ async function main() {
     // deploy hub pool
 
     if (network.name == "network2") {
-      hubPool = await StableSwap2Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee)
+      hubPool = await StableSwap3Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee)
       await hubPool.deployed()
       await hubPoolLp.set_minter(hubPool.address)
     }
@@ -64,12 +66,11 @@ async function main() {
     // setting the hub pool in proxy contract
     await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(hubPool.address, hubPoolLp.address, hubPoolCoins);
 
-    deployInfo[network.name].hubPool = hubPool.address
-    deployInfo[network.name].hubPoolLp = hubPoolLp.address
-    deployInfo[network.name].hubPoolCoins = hubPoolCoins
+    deployInfo[network.name].hubPool.address = hubPool.address
+    deployInfo[network.name].hubPool.lp = hubPoolLp.address
+    deployInfo[network.name].hubPool.coins = hubPoolCoins
 
     // write out the deploy configuration 
-    console.log("_______________________________________");
     fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
     console.log("Hub pool deployed!");
   }
