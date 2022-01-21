@@ -32,6 +32,12 @@ wrappers: npm compile copy_configs
 	./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/NodeRegistry.sol --pkg registry --out ../wrappers/gsn/registry
 	./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/test/TestForward.sol --pkg test --out ../wrappers/gsn/test
 
+wrappers-gsn:
+	cd wrappers-builder-gsn && go build && cd ..
+	./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/Bridge.sol --pkg bridge --out ../wrappers/gsn/bridge
+	./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/NodeRegistry.sol --pkg registry --out ../wrappers/gsn/registry
+	./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/test/TestForward.sol --pkg test --out ../wrappers/gsn/test
+
 deps:
 	go mod tidy
 	go mod download
