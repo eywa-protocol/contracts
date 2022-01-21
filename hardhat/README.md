@@ -29,7 +29,7 @@ cd hardhat
 ```bash
 cp helper-hardhat-config.json.example helper-hardhat-config.json
 cp .env.example .env
-npm hardhat test
+npx hardhat test
 ```
 
 ## Code Style
