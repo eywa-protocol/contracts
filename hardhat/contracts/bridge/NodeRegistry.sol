@@ -17,7 +17,7 @@ contract NodeRegistry is Bridge {
         address owner;     // address of node signer key
         address pool;      // RelayerPool for this node
         string  hostId;    // libp2p host ID
-        string  blsPubKey; // BLS public key
+        bytes   blsPubKey; // BLS public key
         uint256 nodeId;    // absolute sequential number
     }
 
@@ -30,7 +30,7 @@ contract NodeRegistry is Bridge {
 
     struct Snapshot {
         uint256 snapNum;
-        string[] blsPubKeys;
+        bytes[] blsPubKeys;
         string[] hostIds;
     }
 
@@ -48,7 +48,7 @@ contract NodeRegistry is Bridge {
         address indexed owner,
         address relayerPool,
         string hostId,
-        string blsPubKey,
+        bytes blsPubKey,
         uint256 nodeId
     );
 
@@ -102,8 +102,8 @@ contract NodeRegistry is Bridge {
         return allNodes;
     }
 
-    function getBLSPubKeys() external view returns (string[] memory) {
-        string[] memory pubKeys = new string[](nodes.length());
+    function getBLSPubKeys() external view returns (bytes[] memory) {
+        bytes[] memory pubKeys = new bytes[](nodes.length());
         for (uint256 i = 0; i < nodes.length(); i++) {
             pubKeys[i] = ownedNodes[nodes.at(i)].blsPubKey;
         }
@@ -144,7 +144,7 @@ contract NodeRegistry is Bridge {
         addNode(_node);
     }
 
-    function getSnapshot() external view returns (string[] memory, string[] memory, uint256) {
+    function getSnapshot() external view returns (bytes[] memory, string[] memory, uint256) {
         return (snapshot.blsPubKeys, snapshot.hostIds, snapshot.snapNum);
     }
 
