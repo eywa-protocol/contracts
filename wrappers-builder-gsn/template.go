@@ -96,9 +96,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	
 	"github.com/eywa-protocol/wrappers"
 	"github.com/eywa-protocol/wrappers/gsn"
-	"github.com/sirupsen/logrus"
 )
 
 {{$structs := .Structs}}
@@ -139,12 +139,7 @@ import (
 				return
 			}
 		
-			logrus.Infof("forwarderAddress: %s", __forwarderAddress.String())
-			logrus.Infof("nodeRegistryAddress: %s", __contractAddress.String())
-		
 			__signerAddress := crypto.PubkeyToAddress(__signer.PublicKey)
-		
-			logrus.Infof("ownerAddress: %s", __signerAddress.String())
 		
 			__nonce, err := __forwarder.GetNonce(&bind.CallOpts{}, __signerAddress)
 			if err != nil {
