@@ -32,7 +32,7 @@ async function main() {
     let hubPool = StableSwap3Pool.attach(deployInfo[network.name].hubPool.address);
     switch (network.name) {
       case "network2":
-        hubPool = StableSwap2Pool.attach(deployInfo[network.name].hubPool.address);
+        hubPool = StableSwap3Pool.attach(deployInfo[network.name].hubPool.address);
         break;
       // case "mumbai":
       //   hubPool = StableSwap5Pool.attach(deployInfo[network.name].hubPool.address);
@@ -40,7 +40,7 @@ async function main() {
     }
 
     this.hubPoolCoins = deployInfo[network.name].hubPool.coins;
-    
+
     for (let hubLp of this.hubPoolCoins) {
       const lp = ERC20.attach(hubLp);
       const localLpBalance = await lp.balanceOf(owner.address)

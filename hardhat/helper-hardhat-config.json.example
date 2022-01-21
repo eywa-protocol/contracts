@@ -506,6 +506,12 @@
       "gaugeController":"",
       "minter":""
     },
+    "localToken": [],
+    "localPool": { 
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
     "sourceForRepresentation": [
       "network1",
       "network3"
