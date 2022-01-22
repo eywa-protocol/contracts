@@ -55,8 +55,8 @@ async function main() {
   let crosschainPool
   let bulevo = false;
   // creating local stable tokens for specified networks
-  if (network.name == "rinkeby" || network.name == "bsctestnet") bulevo = true;
-  if (network.name != "network2" && network.name != "mumbai") bulevo = true;
+  if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "mumbai") bulevo = true;
+  if (network.name.includes("network")) bulevo = true;
   
   if (bulevo) {    
     //empty the array
@@ -77,7 +77,7 @@ async function main() {
     if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
       deployInfo["mumbai"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });
 
- // }
+ }
 
   // creating crosschain pool for specified networks
   if (network.name == "network2" || network.name == "mumbai") {

@@ -58,7 +58,7 @@ async function main() {
     }
 
     if (network.name == "mumbai") {
-      hubPool = await StableSwap2Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee)
+      hubPool = await StableSwap3Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee)
       await hubPool.deployed()
       await hubPoolLp.set_minter(hubPool.address)
     }
