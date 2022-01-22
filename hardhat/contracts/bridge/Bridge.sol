@@ -6,10 +6,10 @@ import "./core/BridgeCore.sol";
 import "./interface/INodeRegistry.sol";
 import "@openzeppelin/contracts-newone/utils/Address.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
-import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "../amm_pool/RelayRecipient.sol";
 
-contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
+
+contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
     using AddressUpgradeable for address;
 
     string public versionRecipient;
@@ -19,9 +19,11 @@ contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVe
     uint32 public epochNum; // Sequential number of the epoch
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
-    event OwnershipTransferred(address indexed previousDao, address indexed newDao);
+    //event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
     function initialize(address forwarder) public initializer {
+        __Context_init_unchained();
+        __Ownable_init_unchained();
         versionRecipient = "2.2.3";
         dao = _msgSender();
         _setTrustedForwarder(forwarder);
@@ -242,5 +244,9 @@ contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVe
             mask = mask & (mask - 1);
             cnt++;
         }
+    }
+
+    function setTrustedForwarder(address _forwarder) external onlyOwner {
+        return _setTrustedForwarder(_forwarder);
     }
 }

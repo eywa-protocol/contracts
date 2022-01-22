@@ -53,9 +53,12 @@ async function main() {
   let crosschainPoolCoins = []
   let crosschainPoolLp
   let crosschainPool
-
+  let bulevo = false;
   // creating local stable tokens for specified networks
-  //if (network.name != "network2" && network.name != "mumbai") {
+  if (network.name == "rinkeby" || network.name == "bsctestnet") bulevo = true;
+  if (network.name != "network2" && network.name != "mumbai") bulevo = true;
+  
+  if (bulevo) {    
     //empty the array
     deployInfo[network.name].localToken = []
 
@@ -66,12 +69,12 @@ async function main() {
       deployInfo[network.name].localToken.push({ address: localToken[i].address, name: await localToken[i].name(), symbol: await localToken[i].symbol() });
       if (network.name == "network1" || network.name == "network3")
         crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], deployInfo["network2"].synthesis))
-      if (network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
+      if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
         crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], deployInfo["mumbai"].synthesis))
     }
     if (network.name == "network1" || network.name == "network3")
       deployInfo["network2"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });
-    if (network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
+    if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
       deployInfo["mumbai"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });
 
  // }

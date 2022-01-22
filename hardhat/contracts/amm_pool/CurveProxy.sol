@@ -96,6 +96,8 @@ contract CurveProxy is Initializable, RelayRecipient {
         address _synthesis,
         address _bridge
     ) public initializer {
+        __Context_init_unchained();
+        __Ownable_init_unchained();
         _setTrustedForwarder(_forwarder);
         portal = _portal;
         synthesis = _synthesis;
