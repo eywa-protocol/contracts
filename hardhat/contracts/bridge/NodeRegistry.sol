@@ -150,7 +150,7 @@ contract NodeRegistry is Bridge {
 
     function daoUpdateEpochRequest(bool resetEpoch) public override {
         Bridge.daoUpdateEpochRequest(resetEpoch);
-        if (snapshot.snapNum < Bridge.epochNum) {
+        if (snapshot.snapNum <= Bridge.epochNum) {
             newSnapshot();
         }
     }
