@@ -1,4 +1,5 @@
-pragma solidity 0.8.0;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.10;
 
 interface IERC20 {
     function name() external view returns (string memory);
@@ -54,9 +55,7 @@ contract FrontHelper {
 
     struct PoolInfo {
         address token0;
-        bool token0Synth;
         address token1;
-        bool token1Synth;
         uint112 reserve0;
         uint112 reserve1;
     }
@@ -96,13 +95,13 @@ contract FrontHelper {
         returns (uint256[] memory)
     {
         uint256 numberOfTokens = tokens.length;
-        uint256[] memory balances = new uint256[](numberOfTokens);
+        uint256[] memory _balances = new uint256[](numberOfTokens);
 
         for (uint256 i = 0; i < numberOfTokens; i++) {
-            balances[i] = IERC20(tokens[i]).balanceOf(target);
+            _balances[i] = IERC20(tokens[i]).balanceOf(target);
         }
 
-        return balances;
+        return _balances;
     }
 
 
@@ -128,13 +127,13 @@ contract FrontHelper {
         returns (TokenInfo[] memory)
     {
         uint256 numberOfTokens = tokens.length;
-        TokenInfo[] memory tokensInfo = new TokenInfo[](numberOfTokens);
+        TokenInfo[] memory _tokensInfo = new TokenInfo[](numberOfTokens);
 
         for (uint256 i = 0; i < numberOfTokens; i++) {
-            tokensInfo[i] = tokenInfo(target, IERC20(tokens[i]));
+            _tokensInfo[i] = tokenInfo(target, IERC20(tokens[i]));
         }
 
-        return tokensInfo;
+        return _tokensInfo;
     }
 
 
@@ -162,7 +161,7 @@ contract FrontHelper {
     }
 
 
-    function poolsInfo(address target, address[] memory pairAddress, address synthesis)
+    function poolsInfo(address target, address[] memory pairAddress)
         public
         view
         returns (
@@ -187,21 +186,9 @@ contract FrontHelper {
             pools[i].token0 = tokenInfo(target, IERC20(token0Address));
             pools[i].token1 = tokenInfo(target, IERC20(token1Address));
             
-            bool isSynth0;
-            bool isSynth1;
-            
-            if(ISynthesis(synthesis).getRepresentation(token0Address) != address(0)){
-                isSynth0 = true;
-            }
-            if(ISynthesis(synthesis).getRepresentation(token1Address) != address(0)){
-                isSynth1 = true;
-            }
-            
             pools[i].pool = PoolInfo({
                 token0: token0Address,
-                token0Synth: isSynth0,
                 token1: token1Address,
-                token1Synth: isSynth1 ,
                 reserve0: reserve0,
                 reserve1: reserve1
             });
@@ -212,7 +199,7 @@ contract FrontHelper {
     }
 
 
-function poolInfo(address target, address pairAddress,  address synthesis)
+function poolInfo(address target, address pairAddress)
         public
         view
         returns (
@@ -232,25 +219,13 @@ function poolInfo(address target, address pairAddress,  address synthesis)
 
         address token0Address = pancakePair.token0();
         address token1Address = pancakePair.token1();
-        
-        bool isSynth0;
-        bool isSynth1;
-        
-        if(ISynthesis(synthesis).getRepresentation(token0Address) != address(0)){
-            isSynth0 = true;
-        }
-        if(ISynthesis(synthesis).getRepresentation(token1Address) != address(0)){
-            isSynth1 = true;
-        }
 
         pair = tokenInfo(target, IERC20(pairAddress));
         token0 = tokenInfo(target, IERC20(token0Address));
         token1 = tokenInfo(target, IERC20(token1Address));
         pool = PoolInfo({
             token0: token0Address,
-            token0Synth: isSynth0,
             token1: token1Address,
-            token1Synth: isSynth1,
             reserve0: reserve0,
             reserve1: reserve1
         });

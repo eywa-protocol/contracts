@@ -15,12 +15,14 @@ if [[ ${1} =~ ^('')$ ]]
     ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
       RPC_URL=$(getField ${net}.rpcUrl) \
       NETWORK_ID=$(getField ${net}.chainId) \
+      NETWORK_NAME=${net} \
       BRIDGE_ADDRESS=$(getField ${net}.bridge) \
       DEXPOOL_ADDRESS=$(getField ${net}.mockDexPool) \
       PORTAL_ADDRESS=$(getField ${net}.portal) \
       SYNTHESIS_ADDRESS=$(getField ${net}.synthesis) \
       PAYMASTER_ADDRESS=$(getField ${net}.paymaster) \
       EYWA_TOKEN_ADDRESS=$(getField ${net}.eywa) \
+      TEST_TOKEN_ADDRESS=$(getField ${net}.token[0].address) \
       NODEREGISTRY_ADDRESS=$(getField ${net}.nodeRegistry) \
       FORWARDER_ADDRESS=$(getField ${net}.forwarder) \
     && echo $(getField ${net}.env_file[0])
@@ -39,6 +41,8 @@ if [[ ${1} =~ ^('')$ ]]
   exit 0
  fi
 
+
+regnet=$(cut -d "," -f1 <<<$nets)
 for net in ${nets//\,/ }
 do
 echo 'bash script for network:' ${net}
@@ -46,12 +50,21 @@ echo '==========================================='
 echo ''
 ## NOTE !!!!! : gsn-node where owner is opengsn. Uncomment for our ralyer gsn.
 #npx hardhat run --no-compile ./scripts/gassless/deploy.js --network ${net}
-npx hardhat run --no-compile ./scripts/bridge/deploy.js   --network ${net}
+npx hardhat balanceDeployer --network ${net}
+
+if [ ${net} == ${regnet} ]
+then
+    npx hardhat run --no-compile ./scripts/bridge/deployToService.js --network ${regnet}
+else
+    npx hardhat run --no-compile ./scripts/bridge/deploy.js --network ${net}
+fi
+
 npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
 
 ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
   RPC_URL=$(getField ${net}.rpcUrl) \
   NETWORK_ID=$(getField ${net}.chainId) \
+  NETWORK_NAME=${net} \
   BRIDGE_ADDRESS=$(getField ${net}.bridge) \
   NODEREGISTRY_ADDRESS=$(getField ${net}.nodeRegistry) \
   DEXPOOL_ADDRESS=$(getField ${net}.mockDexPool) \
@@ -59,6 +72,7 @@ npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
   SYNTHESIS_ADDRESS=$(getField ${net}.synthesis) \
   PAYMASTER_ADDRESS=$(getField ${net}.paymaster) \
   EYWA_TOKEN_ADDRESS=$(getField ${net}.eywa) \
+  TEST_TOKEN_ADDRESS=$(getField ${net}.token[0].address) \
   FORWARDER_ADDRESS=$(getField ${net}.forwarder) \
 && echo $(getField ${net}.env_file[0])
 
@@ -74,6 +88,10 @@ npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
 && echo $(getField ${net}.env_file[1])
 done
 
+npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network1
+npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network3
+npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network2
+
 
 for net in ${nets//\,/ }
   do
@@ -82,18 +100,14 @@ done
 
 for net in ${nets//\,/ }
   do
-  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-eth-pool.js --network ${net}
-done
- 
-for net in ${nets//\,/ }
-  do
-  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network ${net}
+  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-hub-pool.js --network ${net}
 done
 
 
 for net in ${nets//\,/ }
   do
   echo 'init into:' ${net}
+  npx hardhat balanceDeployer --network ${net}
   npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
 done
 
@@ -101,6 +115,9 @@ done
 for net in ${nets//\,/ }
   do
   echo 'init into:' ${net}
+  npx hardhat balanceDeployer --network ${net}
   npx hardhat run --no-compile ./scripts/bridge/updateDexBind.js  --network ${net}
 done
 
+
+npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network network2

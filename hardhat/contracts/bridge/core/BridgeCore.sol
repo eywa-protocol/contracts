@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.0;
-import "@openzeppelin/contracts-newone/utils/structs/EnumerableSet.sol";
+pragma solidity 0.8.10;
+
 
 abstract contract BridgeCore {
-    using EnumerableSet for EnumerableSet.Bytes32Set;
 
     address public _listNode;
 
     mapping(address => uint256) internal nonces;
-    mapping(bytes32 => mapping(bytes32 =>  EnumerableSet.Bytes32Set)) internal contractBind;
+    mapping(bytes32 => mapping(bytes32 =>  mapping(bytes32 => bool))) internal contractBind;
     mapping(bytes32 => bool) private is_in;
 
     event OracleRequest(
@@ -26,7 +25,6 @@ abstract contract BridgeCore {
         bytes32 bridge,
         bytes32 requestId,
         bytes selector,
-        bytes32 receiveSide,
         bytes32 oppositeBridge,
         uint256 chainid
     );
@@ -53,7 +51,7 @@ abstract contract BridgeCore {
         require(from != "", "NULL ADDRESS FROM");
         // TODO
         // to prevent malicious behaviour like switching between older and newer contracts (need to use DAO/Owner for this!)
-        contractBind[from][oppositeBridge].add(to);
+        contractBind[from][oppositeBridge][to] = true;
     }
 
     /**
@@ -71,7 +69,7 @@ abstract contract BridgeCore {
         bytes32 from,
         uint256 nonce
     ) public view returns (bytes32) {
-        return keccak256(abi.encodePacked(from, nonce, chainId, receiveSide, oppositeBridge));
+        return keccak256(abi.encodePacked(from, nonce, chainId, block.chainid, receiveSide, oppositeBridge));
     }
 
     /**

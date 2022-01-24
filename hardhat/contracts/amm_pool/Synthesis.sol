@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-newone/access/Ownable.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-newone/utils/Create2.sol";
 import "./IBridge.sol";
 import "./ISyntERC20.sol";
@@ -19,6 +17,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     mapping(bytes32 => SynthesizeState) public synthesizeStates;
     address public bridge;
     address public proxy;
+    string public versionRecipient;
 
     bytes public constant sighashUnsynthesize =
         abi.encodePacked(uint8(115), uint8(234), uint8(111), uint8(109), uint8(131), uint8(167), uint8(37), uint8(70));
@@ -61,8 +60,12 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     event RevertBurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event CreatedRepresentation(bytes32 indexed _rtoken, address indexed _stoken);
 
-    constructor(address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
+    function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
+        __Context_init_unchained();
+        __Ownable_init_unchained();
+        versionRecipient = "2.2.3";
         bridge = _bridge;
+        _setTrustedForwarder(_trustedForwarder);
     }
 
     modifier onlyBridge() {
@@ -71,7 +74,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     }
 
     modifier onlyTrusted() {
-        require(bridge == msg.sender || proxy == msg.sender );
+        require(bridge == msg.sender || proxy == msg.sender);
         _;
     }
 
@@ -79,7 +82,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         bytes32 recipient;
         bytes32 chain2address;
         uint256 amount;
-        bytes32 token;
+        bytes32 token; //TODO
         address stoken;
         RequestState state;
     }
@@ -115,7 +118,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
      * @param _amount amount to mint
      * @param _to recipient address
      */
-    function mintSyntheticToken_solana(
+    function mintSyntheticTokenToSolana(
         bytes32 _txID,
         bytes32 _tokenReal,
         uint256 _amount,
@@ -169,7 +172,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
      * @param _bumpSynthesizeRequest synthesize request bump
      * @param _chainId opposite chain ID
      */
-    function emergencyUnsyntesizeRequest_solana(
+    function emergencyUnsyntesizeRequestToSolana(
         bytes32[] calldata _pubkeys,
         bytes1 _bumpSynthesizeRequest,
         uint256 _chainId
@@ -222,7 +225,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_solana(
+        IBridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                     /* programId: */
@@ -299,7 +302,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
      * @param _oppositeBridge opposite bridge address
      * @param _chainId opposite chain ID
      */
-    function burnSyntheticToken_solana(
+    function burnSyntheticTokenToSolana(
         address _stoken,
         bytes32[] calldata _pubkeys,
         uint256 _amount,
@@ -365,7 +368,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         accounts[8] = SolanaAccountMeta({ pubkey: SOLANA_SYSTEM_PROGRAM, isSigner: false, isWritable: false });
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_solana(
+        IBridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                     /* programId: */
@@ -443,10 +446,6 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         bridge = _bridge;
     }
 
-    function versionRecipient() public view returns (string memory) {
-        return "2.0.1";
-    }
-
     // utils
     function setRepresentation(bytes32 _rtoken, address _stoken) internal {
         representationSynt[_rtoken] = _stoken;
@@ -454,11 +453,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         keys.push(_rtoken);
     }
 
-    function getRepresentation(bytes32 _rtoken)
-        external
-        view
-        returns (address)
-    {
+    function getRepresentation(bytes32 _rtoken) external view returns (address) {
         return representationSynt[_rtoken];
     }
 
@@ -476,7 +471,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     }
 
     //TODO
-    function getTxId() external returns (bytes32) {
+    function getTxId() external view returns (bytes32) {
         return keccak256(abi.encodePacked(this, block.timestamp));
     }
 
@@ -506,5 +501,9 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         txState.state = RequestState.Sent;
 
         emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
+    }
+
+    function setTrustedForwarder(address _forwarder) external onlyOwner {
+        return _setTrustedForwarder(_forwarder);
     }
 }

@@ -1,44 +1,34 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.0;
+pragma solidity 0.8.10;
 
 import "./bls/BlsSignatureVerification.sol";
 import "./core/BridgeCore.sol";
 import "./interface/INodeRegistry.sol";
-import "@openzeppelin/contracts-newone/utils/Address.sol";
-import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
+contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
+    using AddressUpgradeable for address;
 
-contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
-    using Address for address;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    string public override versionRecipient = "2.2.3";
-    E2Point private epochKey;           // Aggregated public key of all paricipants of the current epoch
-    address public dao;                 // Address of the DAO
-    uint8 public epochParticipantsNum;  // Number of participants contributed to the epochKey
-    uint32 public epochNum;             // Sequential number of the epoch
+    string public versionRecipient;
+    E2Point private epochKey; // Aggregated public key of all paricipants of the current epoch
+    address public dao; // Address of the DAO
+    uint8 public epochParticipantsNum; // Number of participants contributed to the epochKey
+    uint32 public epochNum; // Sequential number of the epoch
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
     event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
-    constructor(address listNode, address forwarder) {
-        _listNode = listNode;
-        trustedForwarder = forwarder;
-    }
-
-    modifier onlyTrustedNode() {
-        require(
-            INodeRegistry(_listNode).checkPermissionTrustList(_msgSender()) == true,
-            "Only trusted node can invoke"
-        );
-        _;
+    function initialize(address forwarder) public initializer {
+        versionRecipient = "2.2.3";
+        dao = _msgSender();
+        _setTrustedForwarder(forwarder);
     }
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
         require(
-            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][bytes32(uint256(uint160(oppositeBridge)))].contains(
-                bytes32(uint256(uint160(receiveSide)))),
+            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][bytes32(uint256(uint160(oppositeBridge)))][
+                bytes32(uint256(uint160(receiveSide)))] == true,
             "UNTRUSTED CONTRACT"
         );
         _;
@@ -46,7 +36,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
 
     modifier onlyTrustedContractBytes32(bytes32 receiveSide, bytes32 oppositeBridge) {
         require(
-            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][oppositeBridge].contains(receiveSide),
+            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][oppositeBridge][receiveSide] == true,
             "UNTRUSTED CONTRACT"
         );
         _;
@@ -57,7 +47,15 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
         _;
     }
 
-    function getEpoch() public view returns(bytes memory, uint8, uint32) {
+    function getEpoch()
+        public
+        view
+        returns (
+            bytes memory,
+            uint8,
+            uint32
+        )
+    {
         return (abi.encode(epochKey), epochParticipantsNum, epochNum);
     }
 
@@ -130,7 +128,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
      * @param sender sender's address
      * @param nonce sender's nonce
      */
-    function transmitRequestV2_solana(
+    function transmitRequestV2ToSolana(
         bytes memory _selector,
         bytes32 receiveSide,
         bytes32 oppositeBridge,
@@ -145,7 +143,6 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
             bytes32(uint256(uint160(address(this)))),
             requestId,
             _selector,
-            receiveSide,
             oppositeBridge,
             chainId
         );
@@ -191,7 +188,7 @@ contract Bridge is BridgeCore, BaseRelayRecipient, BlsSignatureVerification {
      *                   false to request the change from the current one, so current participants must
      *                   successfully vote for it
      */
-    function daoUpdateEpochRequest(bool resetEpoch) external onlyDao {
+    function daoUpdateEpochRequest(bool resetEpoch) public virtual onlyDao {
         bytes memory epochKeyBytes = abi.encode(epochKey);
         if (resetEpoch) {
             epochNum++;

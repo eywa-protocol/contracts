@@ -1,6 +1,5 @@
-// SPDX-License-Identifier: Apache-2.0
-
-pragma solidity >=0.7.1;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.10;
 
 import "./ModUtils.sol";
 
@@ -234,6 +233,7 @@ contract BlsSignatureVerification {
             }
             x += 1;
         }
+        revert("hashToCurveE1: unreachable end point");
     }
 
     /**

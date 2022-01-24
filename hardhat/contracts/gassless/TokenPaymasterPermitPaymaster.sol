@@ -1,9 +1,8 @@
-// SPDX-License-Identifier:MIT
-pragma solidity ^0.7.6;
-pragma abicoder v2;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/drafts/IERC20Permit.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-IERC20Permit.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
 import "./ImportArtifacts.sol";
 
 import "./interfaces/IUniswap.sol";
@@ -15,7 +14,6 @@ import "./interfaces/IUniswap.sol";
  * - postRelayedCall - refund the caller for the unused gas
  */
 contract TokenPaymasterPermitPaymaster is BasePaymaster {
-    using SafeMath for uint256;
 
     mapping(address => address) public routersMap;
 
@@ -111,21 +109,21 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
     }
 
     function _postRelayedCallInternal(
-        address payer,
-        uint256 tokenPrecharge,
-        uint256 valueRequested,
-        uint256 gasUseWithoutPost,
-        GsnTypes.RelayData calldata relayData,
-        IERC20 token,
-        IUniswap router
+        address _payer,
+        uint256 _tokenPrecharge,
+        uint256 _valueRequested,
+        uint256 _gasUseWithoutPost,
+        GsnTypes.RelayData calldata _relayData,
+        IERC20 _token,
+        IUniswap _router
     ) internal {
-        uint256 ethActualCharge = relayHub.calculateCharge(gasUseWithoutPost.add(gasUsedByPost), relayData);
-        uint256 tokenActualCharge = getTokenToEthOutputPrice(valueRequested.add(ethActualCharge), token, router);
-        uint256 tokenRefund = tokenPrecharge.sub(tokenActualCharge);
-        _refundPayer(payer, token, tokenRefund);
-        _depositProceedsToHub(ethActualCharge, tokenActualCharge, token, router);
+        uint256 ethActualCharge = relayHub.calculateCharge(_gasUseWithoutPost + gasUsedByPost, _relayData);
+        uint256 tokenActualCharge = getTokenToEthOutputPrice(_valueRequested + ethActualCharge, _token, _router);
+        uint256 tokenRefund = _tokenPrecharge - tokenActualCharge;
+        _refundPayer(_payer, _token, tokenRefund);
+        _depositProceedsToHub(ethActualCharge, tokenActualCharge, _token, _router);
 
-        emit TokensCharged(gasUseWithoutPost, gasUsedByPost, ethActualCharge, tokenActualCharge);
+        emit TokensCharged(_gasUseWithoutPost, gasUsedByPost, ethActualCharge, tokenActualCharge);
     }
 
     function _refundPayer(
@@ -147,7 +145,7 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
         address[] memory path = new address[](2);
         path[0] = address(token);
         path[1] = router.WETH();
-        token.approve(address(router), uint256(-1));
+        token.approve(address(router), type(uint256).max);
         router.swapExactTokensForETH(
             tokenActualCharge,
             ethActualCharge,

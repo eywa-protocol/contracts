@@ -1,10 +1,10 @@
 let networkConfig = require('../../helper-hardhat-config.json')
 const hre = require("hardhat");
-const h = require("../../utils/helper");
-const { addressToBytes32 } = require('../../utils/helper');
+const { addressToBytes32, timeout } = require('../../utils/helper');
 
 async function main() {
-
+    // TODO Solana Bridge ProgramId should be calculated dynamically
+    let pidBridge = "0x0adc84829c10a6e1d15291c6a128f6b77448e44551f6b49faf7ac2c42f2e62e0"
     this.bridgeAdr  = networkConfig[network.name].bridge;
     this.s          = networkConfig[network.name].synthesis;
     this.p          = networkConfig[network.name].portal;
@@ -33,22 +33,34 @@ async function main() {
         addressToBytes32(bridgeB),
         addressToBytes32(portal)
         );
-       console.log(`addContractBind for synthesis on ${network.name} with ${netw}: ${this.tx.hash}`); 
+       console.log(`addContractBind for synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
+       await this.tx.wait();
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.p),
         addressToBytes32(bridgeB),
         addressToBytes32(synth)
         );
        console.log(`addContractBind for portal on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await h.timeout(5_000);
+       await this.tx.wait();
 
+        this.tx = await bridgeA.addContractBind(
+            addressToBytes32(mDP),
+            addressToBytes32(bridgeB),
+            addressToBytes32(mockDexPool)
+        );
+        console.log(`addContractBind for mockDexPool on ${network.name} with ${netw}: ${this.tx.hash}`);
+        await this.tx.wait();
+
+        console.log(`-> binding solana program to MockDexPool ${addressToBytes32(mDP)} to send request to solana`)
+        console.log(`-> pidBridge ${pidBridge}`)
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(mDP),
-        addressToBytes32(bridgeB),
-        addressToBytes32(mockDexPool)
+        pidBridge,
+        pidBridge
         );
-       console.log(`addContractBind for mockDexPool on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await h.timeout(5_000);
+        console.log(`-> tx ${tx}`)
+       console.log(`-> addContractBind for mockDexPool on solana ${network.name} with ${netw}: ${this.tx.hash}`);
+       await this.tx.wait();
 //-----
       this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.p),
@@ -56,7 +68,7 @@ async function main() {
         addressToBytes32(curveProxy)
         );
       console.log(`addContractBind for Curve proxy > Portal on ${network.name} with ${netw}: ${this.tx.hash}`);
-      await h.timeout(5_000);
+      await this.tx.wait();
 
       this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.s),
@@ -64,15 +76,15 @@ async function main() {
         addressToBytes32(curveProxy)
         );
       console.log(`addContractBind for Curve proxy > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
-      await h.timeout(5_000);
-      
+      await this.tx.wait();
+
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.cp),
         addressToBytes32(bridgeB),
         addressToBytes32(portal)
         );
        console.log(`addContractBind for Curve proxy > Portal on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await h.timeout(5_000);
+       await this.tx.wait();
 
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.cp),
@@ -80,7 +92,7 @@ async function main() {
         addressToBytes32(synth)
         );
        console.log(`addContractBind for Curve proxy > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await h.timeout(5_000);
+       await this.tx.wait();
 
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.cp),
@@ -88,7 +100,7 @@ async function main() {
         addressToBytes32(curveProxy)
         );
        console.log(`addContractBind for Curve proxy > Curve proxy on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await h.timeout(5_000);
+       await this.tx.wait();
 
      }catch(e){
           const nuLL = '0x0000000000000000000000000000000000000000';

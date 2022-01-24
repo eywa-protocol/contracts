@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "./IBridge.sol";
 import "./RelayRecipient.sol";
@@ -12,12 +11,21 @@ interface IERC20 {
     function name() external returns (string memory);
 
     function symbol() external returns (string memory);
+
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external;
 }
 
 contract Portal is RelayRecipient, SolanaSerialize {
-    using SafeMath for uint256;
-
     mapping(address => uint256) public balanceOf;
+    string public versionRecipient;
     address public bridge;
     address public proxy;
 
@@ -63,7 +71,13 @@ contract Portal is RelayRecipient, SolanaSerialize {
         uint256 chainID;
     }
 
-    uint256 requestCount = 1;
+    struct PermitData {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+        uint256 deadline;
+    }
+
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => UnsynthesizeState) public unsynthesizeStates;
     mapping(address => bytes) public tokenData;
@@ -88,12 +102,21 @@ contract Portal is RelayRecipient, SolanaSerialize {
     event RepresentationRequest(address indexed _rtoken);
     event ApprovedRepresentationRequest(address indexed _rtoken);
 
-    constructor(address _bridge, address _trustedForwarder) RelayRecipient(_trustedForwarder) {
+    function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
+        __Context_init_unchained();
+        __Ownable_init_unchained();
+        versionRecipient = "2.2.3";
         bridge = _bridge;
+        _setTrustedForwarder(_trustedForwarder);
     }
 
     modifier onlyBridge() {
         require(bridge == msg.sender);
+        _;
+    }
+
+    modifier onlyTrusted() {
+        require(bridge == msg.sender || proxy == msg.sender);
         _;
     }
 
@@ -115,7 +138,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         uint256 _chainID
     ) external returns (bytes32 txID) {
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
+        balanceOf[_token] += _amount;
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
@@ -153,7 +176,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
      * @param _txStateBump transaction state bump
      * @param _chainId opposite chain ID
      */
-    function synthesize_solana(
+    function synthesizeToSolana(
         address _token,
         uint256 _amount,
         bytes32[] calldata _pubkeys,
@@ -161,7 +184,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         uint256 _chainId
     ) external returns (bytes32 txID) {
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
+        balanceOf[_token] += _amount;
 
         require(_chainId == SOLANA_CHAIN_ID, "incorrect chainID");
 
@@ -220,7 +243,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         });
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_solana(
+        IBridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                     /* programId: */
@@ -278,7 +301,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         require(_success1, "Approve call failed");
 
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
+        balanceOf[_token] += _amount;
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
@@ -343,11 +366,11 @@ contract Portal is RelayRecipient, SolanaSerialize {
         address _token,
         uint256 _amount,
         address _to
-    ) external onlyBridge {
+    ) external onlyTrusted {
         require(unsynthesizeStates[_txID] == UnsynthesizeState.Default, "Portal: syntatic tokens emergencyUnburn");
 
         TransferHelper.safeTransfer(_token, _to, _amount);
-        balanceOf[_token] = balanceOf[_token].sub(_amount);
+        balanceOf[_token] -= _amount;
 
         unsynthesizeStates[_txID] = UnsynthesizeState.Unsynthesized;
 
@@ -391,7 +414,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
      * @param _pubkeys unsynth data for Solana
      * @param _chainId opposite chain ID
      */
-    function emergencyUnburnRequest_solana(
+    function emergencyUnburnRequestToSolana(
         bytes32 _txID,
         bytes32[] calldata _pubkeys,
         uint256 _chainId
@@ -444,7 +467,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         });
 
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2_solana(
+        IBridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                     /* programId: */
@@ -471,28 +494,29 @@ contract Portal is RelayRecipient, SolanaSerialize {
         bridge = _bridge;
     }
 
-    function versionRecipient() public view returns (string memory) {
-        return "2.0.1";
-    }
-
     function createRepresentationRequest(address _rtoken) external {
         emit RepresentationRequest(_rtoken);
     }
 
     // implies manual verification point
-    function approveRepresentationRequest(address _rtoken) external /**onlyOwner */
-    {
+    function approveRepresentationRequest(
+        address _rtoken /**onlyOwner */
+    ) external {
         tokenData[_rtoken] = abi.encode(IERC20(_rtoken).name(), IERC20(_rtoken).symbol());
         emit ApprovedRepresentationRequest(_rtoken);
     }
 
     //TODO
-    function getTxId() external returns (bytes32) {
+    function getTxId() external view returns (bytes32) {
         return keccak256(abi.encodePacked(this, block.timestamp));
     }
 
     function setProxyCurve(address _proxy) external onlyOwner {
         proxy = _proxy;
+    }
+
+    function setTrustedForwarder(address _forwarder) external onlyOwner {
+        return _setTrustedForwarder(_forwarder);
     }
 
     function synthesize_transit(
@@ -510,7 +534,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         //     "Portal: token must be verified"
         // );
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] = balanceOf[_token].add(_amount);
+        balanceOf[_token] += _amount;
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
 
@@ -549,7 +573,89 @@ contract Portal is RelayRecipient, SolanaSerialize {
             if (_amounts[i] > 0) {
                 TransferHelper.safeTransferFrom(_tokens[i], _msgSender(), address(this), _amounts[i]);
 
-                balanceOf[_tokens[i]] = balanceOf[_tokens[i]].add(_amounts[i]);
+                balanceOf[_tokens[i]] += _amounts[i];
+                uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+
+                txId[i] = keccak256(
+                    abi.encodePacked(
+                        IBridge(bridge).prepareRqId(
+                            bytes32(uint256(uint160(_synth_params.oppositeBridge))),
+                            _synth_params.chainID,
+                            bytes32(uint256(uint160(_synth_params.receiveSide))),
+                            bytes32(uint256(uint160(_msgSender()))),
+                            nonce
+                        ),
+                        i
+                    )
+                );
+
+                // TODO add payment by token
+                TxState storage txState = requests[txId[i]];
+                txState.recipient = bytes32(uint256(uint160(_msgSender()))); //change!
+                txState.chain2address = bytes32(uint256(uint160(_synth_params.chain2address)));
+                txState.rtoken = bytes32(uint256(uint160(_tokens[i])));
+                txState.amount = _amounts[i];
+                txState.state = RequestState.Sent;
+
+                emit SynthesizeRequest(txId[i], _msgSender(), _synth_params.chain2address, _amounts[i], _tokens[i]);
+            }
+        }
+
+        // encode call
+        bytes memory out = abi.encodePacked(
+            _selector,
+            _transit_data,
+            //////////////
+            _tokens,
+            _amounts,
+            txId
+        );
+
+        uint256 general_nonce = IBridge(bridge).getNonce(_msgSender());
+        bytes32 general_txId = IBridge(bridge).prepareRqId(
+            bytes32(uint256(uint160(_synth_params.oppositeBridge))),
+            _synth_params.chainID,
+            bytes32(uint256(uint160(_synth_params.receiveSide))),
+            bytes32(uint256(uint160(_msgSender()))),
+            general_nonce
+        );
+
+        IBridge(bridge).transmitRequestV2(
+            out,
+            _synth_params.receiveSide,
+            _synth_params.oppositeBridge,
+            _synth_params.chainID,
+            general_txId,
+            _msgSender(),
+            general_nonce
+        );
+    }
+
+    function synthesize_batch_transit_with_permit(
+        address[] memory _tokens,
+        uint256[] memory _amounts, // set the amount in order to initiate a synthesize request
+        SynthParams memory _synth_params,
+        bytes4 _selector,
+        bytes memory _transit_data,
+        PermitData[] memory _permit_data
+    ) external {
+        bytes32[] memory txId = new bytes32[](_tokens.length);
+
+        //synthesize request
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            if (_amounts[i] > 0) {
+                IERC20(_tokens[i]).permit(
+                    _msgSender(),
+                    address(this),
+                    _amounts[i],
+                    _permit_data[i].deadline,
+                    _permit_data[i].v,
+                    _permit_data[i].r,
+                    _permit_data[i].s
+                );
+                TransferHelper.safeTransferFrom(_tokens[i], _msgSender(), address(this), _amounts[i]);
+
+                balanceOf[_tokens[i]] += _amounts[i];
                 uint256 nonce = IBridge(bridge).getNonce(_msgSender());
 
                 txId[i] = keccak256(

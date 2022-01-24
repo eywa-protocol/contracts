@@ -1,6 +1,7 @@
 import '@typechain/hardhat';
 import "@nomiclabs/hardhat-truffle5";
 import "@nomiclabs/hardhat-waffle";
+import "@openzeppelin/hardhat-upgrades";
 
 
 export default {
@@ -15,7 +16,7 @@ export default {
   },
   solidity: {
     compilers: [{
-      version: "0.8.0",
+      version: "0.8.10",
       settings: {
         optimizer: {
           enabled: true,

@@ -3,6 +3,7 @@ require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-vyper");
 require("hardhat-gas-reporter");
+require('@openzeppelin/hardhat-upgrades');
 
 require('dotenv').config();
 const networkConfig = require('./helper-hardhat-config.json');
@@ -11,20 +12,15 @@ const PRIVATE_KEY_RINKEBY  = process.env.PRIVATE_KEY_RINKEBY  || "0x000000000000
 const PRIVATE_KEY_BSC      = process.env.PRIVATE_KEY_BSC      || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_MUMBAI   = process.env.PRIVATE_KEY_MUMBAI   || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_GANACHE  = process.env.PRIVATE_KEY_GANACHE  || "0x0000000000000000000000000000000000000000";
-const ETHERSCAN_API_KEY    = process.env.ETHERSCAN_API_KEY    || "0x0000000000000000000000000000000000000000";
-const BINANCESCAN_API_KEY  = process.env.BINANCESCAN_API_KEY  || "0x0000000000000000000000000000000000000000";
-const POLYGONSCAN_API_KEY  = process.env.POLYGONSCAN_API_KEY  || "0x0000000000000000000000000000000000000000";
-const HECOINFOSCAN_API_KEY = process.env.HECOINFOSCAN_API_KEY || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_HECO     = process.env.PRIVATE_KEY_HECO     || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_AVALANCHETESTNET = process.env.PRIVATE_KEY_AVALANCHETESTNET     || "0x0000000000000000000000000000000000000000";
 
-//TODO: Need to resolve dynamic initialization for apiKey. Now it is not working.
-async function getKey(network) {
-  if (network === 'rinkeby')    { console.log(ETHERSCAN_API_KEY); return ETHERSCAN_API_KEY; }
-  if (network === 'bsctestnet') { console.log(BINANCESCAN_API_KEY); return BINANCESCAN_API_KEY; }
-  if (network === 'mumbai') { console.log(POLYGONSCAN_API_KEY); return POLYGONSCAN_API_KEY; }
-  if (network === 'hecotestnet') { console.log(HECOINFOSCAN_API_KEY); return HECOINFOSCAN_API_KEY; }
-}
-
+task("balanceDeployer", "Print info about balance deployer", async () => {
+  const [deployer] = await ethers.getSigners();
+  const balance    = await deployer.getBalance();
+  console.log("Deployer balance: ",ethers.utils.formatEther(balance));
+  
+});
 
 module.exports = {
   defaultNetwork: "hardhat",
@@ -34,6 +30,10 @@ module.exports = {
     },
     localhost: { 
         //
+    },
+    avalanchetestnet:{
+      url: networkConfig.avalanchetestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_AVALANCHETESTNET]
     },
     rinkeby: {
       url: networkConfig.rinkeby.rpcUrl.replace('ws','http').replace('ws/',''),
@@ -45,7 +45,9 @@ module.exports = {
     },
     mumbai:{
         url: networkConfig.mumbai.rpcUrl.replace('ws','http').replace('-ws','-rpc'),
-        accounts: [PRIVATE_KEY_MUMBAI]
+        accounts: [PRIVATE_KEY_MUMBAI],
+        gasPrice: 2_000_000_000
+
     },
     network1: {
        url: networkConfig.network1.rpcUrl.replace('ws','http'),
@@ -69,7 +71,13 @@ module.exports = {
     }
   },
   etherscan: {
-    apiKey: getKey(process.argv[5] || process.env.HARDHAT_NETWORK)
+    apiKey: {
+        rinkeby: process.env.ETHERSCAN_API_KEY,
+        bsctestnet: process.env.BINANCESCAN_API_KEY,
+        mumbai: process.env.POLYGONSCAN_API_KEY,
+        avalanchetestnet: process.env.AVALANCHESCAN_API_KEY,
+        hecotestnet: process.env.HECOINFOSCAN_API_KEY
+    }
   },
   gasReporter: {
     currency: "USD",
@@ -78,7 +86,7 @@ module.exports = {
   },
   solidity: {
     compilers: [{
-      version: "0.8.0",
+      version: "0.8.10",
       settings: {
         optimizer: {
           enabled: true,

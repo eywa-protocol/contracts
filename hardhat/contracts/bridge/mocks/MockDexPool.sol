@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.7.6 <=0.8.0;
+pragma solidity 0.8.10;
 
 import "../Bridge.sol";
+import "../../amm_pool/SolanaSerialize.sol";
 
 /**
  * @notice This is for test purpose.
@@ -9,52 +10,114 @@ import "../Bridge.sol";
  * @dev Short life cycle
  * @dev POOL_1#sendRequestTest --> {logic bridge} --> POOL_2#setPendingRequestsDone
  */
-contract MockDexPool {
+contract MockDexPool is SolanaSerialize {
 
-        string constant private SET_REQUEST_TYPE = "setRequest";
-        uint256 public testData = 0;
+    string constant private SET_REQUEST_TYPE = "setRequest";
+    uint256 public testData = 0;
+    address public bridge;
+    mapping(bytes32 => uint256) public requests;
+    uint256 public doubleRequestError = 0;
 
-        address public bridge;
+    event RequestSent(bytes32 reqId);
+    event RequestReceived(uint256 data);
+    event RequestReceivedV2(bytes32 reqId, uint256 data);
 
-        event RequestSent(bytes32 reqId);
-        event RequestReceived(uint256 data);
+    constructor(address _bridge) {
+        bridge = _bridge;
+    }
 
-        constructor(address _bridge) {
-            bridge = _bridge;
+    /**
+     * @notice send request like second part of pool
+     *
+     * @dev LIFE CYCLE
+     * @dev ${this pool} -> POOL_2
+     * @dev ${this func} ->  bridge#transmitRequest -> node -> adpater#receiveRequest -> mockDexPool_2#receiveRequestTest -> bridge#transmitResponse(reqId) -> node -> adpater#receiveResponse -> mockDexPool_1#setPendingRequestsDone
+     *
+     */
+    function sendRequestTestV2(uint256 testData_, address secondPartPool, address oppBridge, uint chainId) external {
+        require(secondPartPool != address(0), "BAD ADDRESS");
+        // todo some stuff on this part pool
+        // ...
+
+        uint256 nonce = Bridge(bridge).getNonce(msg.sender);
+        bytes32 requestId = Bridge(bridge).prepareRqId(
+            bytes32(uint256(uint160(oppBridge))),
+            chainId,
+            bytes32(uint256(uint160(secondPartPool))),
+            bytes32(uint256(uint160(msg.sender))),
+            nonce
+        );
+        bytes memory output = abi.encodeWithSelector(
+            bytes4(keccak256(bytes('receiveRequestTest(uint256,bytes32)'))),
+            testData_,
+            requestId
+        );
+        Bridge(bridge).transmitRequestV2(
+            output, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
+
+        emit RequestSent(requestId);
+    }
+
+    /**
+     * @notice receive request on the second part of pool
+     *
+     * @dev LIFE CYCLE
+     * @dev POOL_1 -> ${this pool}
+     * @dev mockDexPool_1#sendRequestTest -> bridge#transmitRequest -> node -> adpater#receiveRequest -> ${this func} -> bridge#transmitResponse(reqId) -> node -> adpater#receiveResponse -> mockDexPool_1#setPendingRequestsDone
+     */
+    function receiveRequestTest(uint256 _testData, bytes32 _reqId) public {
+        require(msg.sender == bridge, "ONLY CERTAIN BRIDGE");
+
+        if (requests[_reqId] != 0) {
+            doubleRequestError++;
         }
+        requests[_reqId]++;
 
-        /**
-         * @notice send request like second part of pool
-         *
-         * @dev LIFE CYCLE
-         * @dev ${this pool} -> POOL_2
-         * @dev ${this func} ->  bridge#transmitRequest -> node -> adpater#receiveRequest -> mockDexPool_2#receiveRequestTest -> bridge#transmitResponse(reqId) -> node -> adpater#receiveResponse -> mockDexPool_1#setPendingRequestsDone
-         *
-         */
-        function sendRequestTestV2(uint256 testData_, address secondPartPool, address oppBridge, uint chainId) external {
-                require(secondPartPool != address(0), "BAD ADDRESS");
-                // todo some stuff on this part pool
-                // ...
+        testData = _testData;
+        emit RequestReceived(_testData);
+        emit RequestReceivedV2(_reqId, _testData);
+    }
 
-                uint256 nonce = Bridge(bridge).getNonce(msg.sender);
-                bytes memory out  = abi.encodeWithSelector(bytes4(keccak256(bytes('receiveRequestTest(uint256)'))), testData_);
-                bytes32 requestId = Bridge(bridge).prepareRqId( bytes32(uint256(uint160(oppBridge))), chainId,   bytes32(uint256(uint160(secondPartPool))), bytes32(uint256(uint160(msg.sender))) , nonce);
-                bool success = Bridge(bridge).transmitRequestV2(out, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
+    function sendTestRequestToSolana(bytes32 programId_, uint256 testData_, bytes32 secondPartPool, bytes32 oppBridge, uint chainId) external {
+        testData_; // silence warning
 
-                emit RequestSent(requestId);
-        }
+        require(chainId == SOLANA_CHAIN_ID, "incorrect chainID");
+        uint256 nonce = Bridge(bridge).getNonce(msg.sender);
+        bytes32 requestId = Bridge(bridge).prepareRqId( oppBridge, chainId, secondPartPool, bytes32(uint256(uint160(msg.sender))) , nonce);
+//                        bool success = Bridge(bridge).transmitSolanaRequest(out, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
+        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](2);
 
-        /**
-         * @notice receive request on the second part of pool
-         *
-         * @dev LIFE CYCLE
-         * @dev POOL_1 -> ${this pool}
-         * @dev mockDexPool_1#sendRequestTest -> bridge#transmitRequest -> node -> adpater#receiveRequest -> ${this func} -> bridge#transmitResponse(reqId) -> node -> adpater#receiveResponse -> mockDexPool_1#setPendingRequestsDone
-         */
-        function receiveRequestTest(uint256 _testData) public {
-            require(msg.sender == bridge, "ONLY CERTAIN BRIDGE");
+        accounts[0] = SolanaAccountMeta({
+        pubkey: secondPartPool,
+        isSigner: false,
+        isWritable: true
+        });
 
-            testData = _testData;
-            emit RequestReceived(_testData);
-        }
+        accounts[1] = SolanaAccountMeta({
+        pubkey: oppBridge,
+        isSigner: false,
+        isWritable: true
+        });
+
+        Bridge(bridge).transmitRequestV2ToSolana(
+            serializeSolanaStandaloneInstruction(
+                SolanaStandaloneInstruction(
+                /* programId: */
+                    programId_,
+                /* accounts: */
+                    accounts,
+                /* data: */
+                    abi.encodePacked(requestId)
+                )
+            ),
+            secondPartPool,
+            oppBridge,
+            SOLANA_CHAIN_ID,
+            requestId,
+            msg.sender,
+            nonce
+        );
+
+        emit RequestSent(requestId);
+    }
 }

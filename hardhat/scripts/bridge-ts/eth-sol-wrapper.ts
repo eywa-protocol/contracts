@@ -97,7 +97,7 @@ export class EthSolWrapper {
       pubTxState.toBuffer(),
     ];
 
-    return this.portal.synthesize_solana(token, amount, pubkeys, Buffer.from([bumpTxState]), SOLANA_CHAIN_ID);
+    return this.portal.synthesizeToSolana(token, amount, pubkeys, Buffer.from([bumpTxState]), SOLANA_CHAIN_ID);
   }
 
   async emergencyUnburnRequest(
@@ -120,7 +120,7 @@ export class EthSolWrapper {
       pubOppositeBridgeData.toBuffer(),
     ];
 
-    return this.portal.emergencyUnburnRequest_solana(txId, pubkeys, SOLANA_CHAIN_ID);
+    return this.portal.emergencyUnburnRequestToSolana(txId, pubkeys, SOLANA_CHAIN_ID);
   }
 
   async emergencyUnsyntesizeRequest(
@@ -147,7 +147,7 @@ export class EthSolWrapper {
     
 
     const bumpTxState = 0;
-    return this.synthesis.emergencyUnsyntesizeRequest_solana(pubkeys, `0x${ bumpTxState }`, SOLANA_CHAIN_ID);
+    return this.synthesis.emergencyUnsyntesizeRequestToSolana(pubkeys, `0x${ bumpTxState }`, SOLANA_CHAIN_ID);
   }
 
   async burnSyntheticToken(
@@ -176,7 +176,7 @@ export class EthSolWrapper {
     ];
     
 
-    return this.synthesis.burnSyntheticToken_solana(token, pubkeys, amount, SOLANA_CHAIN_ID);
+    return this.synthesis.burnSyntheticTokenToSolana(token, pubkeys, amount, SOLANA_CHAIN_ID);
   }
     
 }
