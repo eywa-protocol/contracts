@@ -12,10 +12,6 @@ const PRIVATE_KEY_RINKEBY  = process.env.PRIVATE_KEY_RINKEBY  || "0x000000000000
 const PRIVATE_KEY_BSC      = process.env.PRIVATE_KEY_BSC      || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_MUMBAI   = process.env.PRIVATE_KEY_MUMBAI   || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_GANACHE  = process.env.PRIVATE_KEY_GANACHE  || "0x0000000000000000000000000000000000000000";
-const ETHERSCAN_API_KEY    = process.env.ETHERSCAN_API_KEY    || "0x0000000000000000000000000000000000000000";
-const BINANCESCAN_API_KEY  = process.env.BINANCESCAN_API_KEY  || "0x0000000000000000000000000000000000000000";
-const POLYGONSCAN_API_KEY  = process.env.POLYGONSCAN_API_KEY  || "0x0000000000000000000000000000000000000000";
-const HECOINFOSCAN_API_KEY = process.env.HECOINFOSCAN_API_KEY || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_HECO     = process.env.PRIVATE_KEY_HECO     || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_AVALANCHETESTNET = process.env.PRIVATE_KEY_AVALANCHETESTNET     || "0x0000000000000000000000000000000000000000";
 
@@ -25,16 +21,6 @@ task("balanceDeployer", "Print info about balance deployer", async () => {
   console.log("Deployer balance: ",ethers.utils.formatEther(balance));
   
 });
-
-
-//TODO: Need to resolve dynamic initialization for apiKey. Now it is not working.
-async function getKey(network) {
-  if (network === 'rinkeby')    { console.log(ETHERSCAN_API_KEY); return ETHERSCAN_API_KEY; }
-  if (network === 'bsctestnet') { console.log(BINANCESCAN_API_KEY); return BINANCESCAN_API_KEY; }
-  if (network === 'mumbai') { console.log(POLYGONSCAN_API_KEY); return POLYGONSCAN_API_KEY; }
-  if (network === 'hecotestnet') { console.log(HECOINFOSCAN_API_KEY); return HECOINFOSCAN_API_KEY; }
-}
-
 
 module.exports = {
   defaultNetwork: "hardhat",
@@ -85,7 +71,13 @@ module.exports = {
     }
   },
   etherscan: {
-    apiKey: getKey(process.argv[5] || process.env.HARDHAT_NETWORK)
+    apiKey: {
+        rinkeby: process.env.ETHERSCAN_API_KEY,
+        bsctestnet: process.env.BINANCESCAN_API_KEY,
+        mumbai: process.env.POLYGONSCAN_API_KEY,
+        avalanchetestnet: process.env.AVALANCHESCAN_API_KEY,
+        hecotestnet: process.env.HECOINFOSCAN_API_KEY
+    }
   },
   gasReporter: {
     currency: "USD",

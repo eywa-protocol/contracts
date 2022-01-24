@@ -8,6 +8,13 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     console.log("Owner:", deployer.address);
 
+    // Deploy EYWA Test token with permit
+    const _ERC20Permit = await ethers.getContractFactory("TestTokenPermit");
+    const EYWA = await _ERC20Permit.deploy("EYWA", "EYWA");
+    await EYWA.deployed();
+    networkConfig[network.name].eywa = EYWA.address;
+    console.log("EYWA ERC20 address:", EYWA.address);
+
     // Deploy Forwarder
     const _Forwarder = await ethers.getContractFactory("Forwarder");
     const forwarder = await _Forwarder.deploy();
@@ -15,13 +22,28 @@ async function main() {
     networkConfig[network.name].forwarder = forwarder.address;
     console.log("Forwarder address:", forwarder.address);
 
-    // Deploy Bridge
-    const _Bridge = await ethers.getContractFactory("Bridge");
-    //const bridge = await _Bridge.deploy(forwarder.address);
-    const bridge = await upgrades.deployProxy(_Bridge, [forwarder.address], { initializer: 'initialize' });
+    // Deploy RelayerPoolFactory library
+    const _RelayerPoolFactory = await ethers.getContractFactory("RelayerPoolFactory");
+    const relayerPoolFactory = await _RelayerPoolFactory.deploy();
+    await relayerPoolFactory.deployed();
+    console.log("RelayerPoolFactory address:", relayerPoolFactory.address);
+
+    // Deploy NodeRegistry (contains Bridge)
+    const _NodeRegistry = await ethers.getContractFactory("NodeRegistry", {
+      libraries: {
+        RelayerPoolFactory: relayerPoolFactory.address,
+      },
+    });
+    // const bridge = await _NodeRegistry.deploy({gasLimit: 5_000_000});
+    const bridge = await upgrades.deployProxy(
+      _NodeRegistry,
+      [EYWA.address, forwarder.address],
+      { initializer: 'initialize2', unsafeAllow: ['external-library-linking'] }
+    );
     await bridge.deployed();
+    networkConfig[network.name].nodeRegistry = bridge.address;
     networkConfig[network.name].bridge = bridge.address;
-    console.log("Bridge address:", bridge.address);
+    console.log("NodeRegistry address:", bridge.address);
 
     // Deploy MockDexPool
     const _MockDexPool = await ethers.getContractFactory("MockDexPool");

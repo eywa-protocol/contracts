@@ -1,7 +1,7 @@
 #!/bin/bash
 
 while ! [ -d .git ]; do cd ..; done
-cd ../eth-contracts/hardhat/
+cd ../eth-contracts/hardhat/ || cd eth-contracts/hardhat/
 
 for net in network3 network2 network1
 do
