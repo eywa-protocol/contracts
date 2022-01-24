@@ -4,8 +4,6 @@ pragma solidity 0.8.10;
 import "./bls/BlsSignatureVerification.sol";
 import "./core/BridgeCore.sol";
 import "./interface/INodeRegistry.sol";
-import "@openzeppelin/contracts-newone/utils/Address.sol";
-import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
@@ -190,7 +188,7 @@ contract Bridge is Initializable, BridgeCore, BaseRelayRecipient, BlsSignatureVe
      *                   false to request the change from the current one, so current participants must
      *                   successfully vote for it
      */
-    function daoUpdateEpochRequest(bool resetEpoch) external onlyDao {
+    function daoUpdateEpochRequest(bool resetEpoch) public virtual onlyDao {
         bytes memory epochKeyBytes = abi.encode(epochKey);
         if (resetEpoch) {
             epochNum++;
