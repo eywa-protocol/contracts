@@ -94,6 +94,10 @@ import (
 	"github.com/eywa-protocol/wrappers/gsn"
 )
 
+var (
+	_ = big.NewInt(0) // Fake usage
+)
+
 {{$structs := .Structs}}
 {{range $structs}}
 	// {{.Name}} is an auto generated low-level Go binding around an user-defined struct.
