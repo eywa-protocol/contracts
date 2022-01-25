@@ -14,12 +14,12 @@
     "amm_pool": "0x0000000000000000000000000000000000000000",
     "token": [
       {
-        "address": "",
+        "address": "0xB2e6a5a864A1004C3c828a2e767A08C173939b01",
         "name": "EYWA",
         "symbol": "EYWA"
       },
       {
-        "address": "",
+        "address": "0x351950C7C686de38383Fe0175fceC25aF8402b3d",
         "name": "USDT",
         "symbol": "USDT"
       }
@@ -46,7 +46,9 @@
       "rinkeby",
       "mumbai",
       "hecotestnet",
-      "avalanchetestnet"
+      "avalanchetestnet",
+      "metistestnet",
+      "bsctestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -104,7 +106,9 @@
       "rinkeby",
       "mumbai",
       "hecotestnet",
-      "avalanchetestnet"
+      "avalanchetestnet",
+      "coinextestnet",
+      "bsctestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -162,7 +166,9 @@
       "rinkeby",
       "mumbai",
       "hecotestnet",
-      "avalanchetestnet"
+      "avalanchetestnet",
+      "metistestnet",
+      "coinextestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -220,7 +226,9 @@
       "rinkeby",
       "bsctestnet",
       "mumbai",
-      "hecotestnet"
+      "hecotestnet",
+      "coinextestnet",
+      "metistestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -278,7 +286,9 @@
       "bsctestnet",
       "mumbai",
       "hecotestnet",
-      "avalanchetestnet"
+      "avalanchetestnet",
+      "coinextestnet",
+      "metistestnet"      
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -336,7 +346,9 @@
       "rinkeby",
       "bsctestnet",
       "mumbai",
-      "avalanchetestnet"
+      "avalanchetestnet",
+      "coinextestnet",
+      "metistestnet"      
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -394,7 +406,9 @@
       "rinkeby",
       "bsctestnet",
       "hecotestnet",
-      "avalanchetestnet"
+      "avalanchetestnet",
+      "coinextestnet",
+      "metistestnet"      
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
