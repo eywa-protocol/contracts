@@ -32,7 +32,7 @@ async function main() {
     // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
     const totalSupply = ethers.utils.parseEther("100000000000.0")
 
-    if (network.name == "network2") {
+    if (network.name == "network2" || network.name == 'mumbai') {
 
         // let localToken = deployInfo[network.name].localToken
         let localCoins = []

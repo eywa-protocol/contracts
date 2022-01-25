@@ -13,7 +13,9 @@ const PRIVATE_KEY_BSC      = process.env.PRIVATE_KEY_BSC      || "0x000000000000
 const PRIVATE_KEY_MUMBAI   = process.env.PRIVATE_KEY_MUMBAI   || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_GANACHE  = process.env.PRIVATE_KEY_GANACHE  || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_HECO     = process.env.PRIVATE_KEY_HECO     || "0x0000000000000000000000000000000000000000";
-const PRIVATE_KEY_AVALANCHETESTNET = process.env.PRIVATE_KEY_AVALANCHETESTNET     || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_AVALANCHETESTNET = process.env.PRIVATE_KEY_AVALANCHETESTNET || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_METISTESTNET     = process.env.PRIVATE_KEY_METISTESTNET     || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_COINEXTESTNET    = process.env.PRIVATE_KEY_COINEXTESTNET    || "0x0000000000000000000000000000000000000000";
 
 task("balanceDeployer", "Print info about balance deployer", async () => {
   const [deployer] = await ethers.getSigners();
@@ -30,6 +32,14 @@ module.exports = {
     },
     localhost: { 
         //
+    },
+    coinextestnet:{
+      url: networkConfig.coinextestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_COINEXTESTNET]
+    },
+    metistestnet:{
+      url: networkConfig.metistestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_METISTESTNET]
     },
     avalanchetestnet:{
       url: networkConfig.avalanchetestnet.rpcUrl2,
