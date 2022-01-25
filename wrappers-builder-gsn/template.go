@@ -110,8 +110,8 @@ var (
 {{range $contract := .Contracts}}
 	var __contract{{$contract.Type}}SourceABI = "{{.InputABI}}"
 	{{range .Transacts}}
-		func GsnBridge{{.Normalized.Name}}(gsnParams *gsn.CallOpts, args ...interface{})	(txHash common.Hash, err error) {
-			return gsn.BridgeExecutor(gsnParams, __contract{{$contract.Type}}SourceABI, "{{.Original.Name}}", args...) 
+		func {{.Normalized.Name}}(gsnParams *gsn.CallOpts, args ...interface{})	(txHash common.Hash, err error) {
+			return gsn.Executor(gsnParams, __contract{{$contract.Type}}SourceABI, "{{.Original.Name}}", args...) 
 		}
 	{{end}}
 {{end}}
