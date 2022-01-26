@@ -87,18 +87,15 @@ const tmplSourceGo = `
 package {{.Package}}
 
 import (
-	"crypto/ecdsa"
-	"fmt"
 	"math/big"
-	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	
-	"github.com/eywa-protocol/wrappers"
 	"github.com/eywa-protocol/wrappers/gsn"
+)
+
+var (
+	_ = big.NewInt(0) // Fake usage
 )
 
 {{$structs := .Structs}}
@@ -113,79 +110,8 @@ import (
 {{range $contract := .Contracts}}
 	var __contract{{$contract.Type}}SourceABI = "{{.InputABI}}"
 	{{range .Transacts}}
-		func GsnBridge{{.Normalized.Name}}(
-			__gsnCaller gsn.GsnCaller,
-			__chainId *big.Int,
-			__signer *ecdsa.PrivateKey,
-			__contractAddress common.Address {{range .Normalized.Inputs}}, {{.Name}} {{bindtype .Type $structs}} {{end}})	(txHash common.Hash, err error) {
-
-			__contractABI, err := abi.JSON(strings.NewReader(__contract{{$contract.Type}}SourceABI))
-			if err != nil {
-				return common.Hash{}, fmt.Errorf("could not parse ABI: %w", err)
-			}
-		
-			__fRequest, err := __contractABI.Pack("{{.Original.Name}}" {{range .Normalized.Inputs}}, {{.Name}} {{end}})
-			if err != nil {
-				return
-			}
-		
-			__forwarder, err := __gsnCaller.GetForwarder(__chainId)
-			if err != nil {
-				return
-			}
-		
-			__forwarderAddress, err := __gsnCaller.GetForwarderAddress(__chainId)
-			if err != nil {
-				return
-			}
-		
-			__signerAddress := crypto.PubkeyToAddress(__signer.PublicKey)
-		
-			__nonce, err := __forwarder.GetNonce(&bind.CallOpts{}, __signerAddress)
-			if err != nil {
-		
-				return
-			}
-		
-			__req := &wrappers.IForwarderForwardRequest{
-				From:  __signerAddress,
-				To:    __contractAddress,
-				Value: big.NewInt(0),
-				Gas:   big.NewInt(1e6),
-				Nonce: __nonce,
-				Data:  __fRequest,
-			}
-		
-			__typedData, err := gsn.NewForwardRequestTypedData(
-				__req,
-				__forwarderAddress.String(),
-				__contract{{$contract.Type}}SourceABI,
-				"{{.Original.Name}}" {{range .Normalized.Inputs}}, {{.Name}} {{end}})
-			if err != nil {
-				return
-			}
-		
-			__typedDataSignature, _, err := gsn.NewSignature(__typedData, __signer)
-			if err != nil {
-				return
-			}
-		
-			__domainSeparatorHash, err := gsn.NewDomainSeparatorHash(__typedData)
-			if err != nil {
-				return
-			}
-		
-			__genericParams, err := __forwarder.GENERICPARAMS(&bind.CallOpts{})
-			if err != nil {
-				return
-			}
-		
-			__reqTypeHash, err := gsn.NewRequestTypeHash(__genericParams)
-			if err != nil {
-				return
-			}
-		
-			return __gsnCaller.Execute(__chainId, *__req, __domainSeparatorHash, __reqTypeHash, nil, __typedDataSignature)
+		func {{.Normalized.Name}}(gsnParams *gsn.CallOpts, args ...interface{})	(txHash common.Hash, err error) {
+			return gsn.Executor(gsnParams, __contract{{$contract.Type}}SourceABI, "{{.Original.Name}}", args...) 
 		}
 	{{end}}
 {{end}}
