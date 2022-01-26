@@ -572,15 +572,19 @@ contract CurveProxy is Initializable, RelayRecipient {
 
             // transfer asset to the recipient (unsynth)
             uint256 thisBalance = IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).balanceOf(address(this));
-            IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).approve(synthesis, thisBalance);
-            ISynthesis(synthesis).burnSyntheticToken(
-                pool[_params.remove].at(uint256(int256(_params.x))), 
-                thisBalance,  
-                _params.to,
-                _params.receiveSide,
-                _params.oppositeBridge,
-                _params.chainID
-            );
+            if(_params.chainID != 0){  
+                IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).approve(synthesis, thisBalance);
+                ISynthesis(synthesis).burnSyntheticToken(
+                    pool[_params.remove].at(uint256(int256(_params.x))), 
+                    thisBalance,  
+                    _params.to,
+                    _params.receiveSide,
+                    _params.oppositeBridge,
+                    _params.chainID
+                );
+            } else {
+                 IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).safeTransfer(_params.to, thisBalance);
+            }
 
     }
 }
