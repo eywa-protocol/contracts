@@ -13,7 +13,7 @@ async function main() {
     let avalanchetestnet_forwarder = '0xFf5F019aA1992FDA8FcE512065A0CB0C0eaDD552';
     let mumbai_forwarder = '0x45A54326474830219018B59C0d1312588B66e78F';
     let metistestnet_forwarder = '0x86f5F6e8139eA72479D40888FeD66eE8662Ca7E3';
-    let coinextestnet_forwarder = '';
+    let coinextestnet_forwarder = '0x805AB09e70F4d5512cE65543b959B5c7824605f6';
 
     const _Portal = await ethers.getContractFactory("Portal");
     const portal  = await _Portal.attach(networkConfig[network.name].portal);
