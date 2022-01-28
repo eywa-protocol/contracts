@@ -30,15 +30,16 @@ async function main() {
 
       let coinToSynth = deployInfo[network.name].localToken[i].address;
       let amount = ethers.utils.parseEther("100000000.0")
-      let chain2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK2)
-      let chain2address = chain2.address
-      let receiveSide = deployInfo["network2"].synthesis
-      let oppositeBridge = deployInfo["network2"].bridge
-      let chainID = deployInfo["network2"].chainId
+      // let chain2 = new ethers.Wallet(process.env.PRIVATE_KEY_BSC)
+      // let chain2address = chain2.address
+      let hubChainName   = network.name.includes("network") ? 'network2' : 'mumbai';
+      let receiveSide    = deployInfo[hubChainName].synthesis
+      let oppositeBridge = deployInfo[hubChainName].bridge
+      let chainID        = deployInfo[hubChainName].chainId
       tx = await Portal.attach(deployInfo[network.name].portal).synthesize(
         coinToSynth,
         amount,
-        chain2address,
+        owner.address,
         receiveSide,
         oppositeBridge,
         chainID,
