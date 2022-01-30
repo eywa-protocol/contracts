@@ -60,9 +60,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     event RevertBurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event CreatedRepresentation(bytes32 indexed _rtoken, address indexed _stoken);
 
-    function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
-        __Context_init_unchained();
-        __Ownable_init_unchained();
+    constructor(address _bridge, address _trustedForwarder) {
         versionRecipient = "2.2.3";
         bridge = _bridge;
         _setTrustedForwarder(_trustedForwarder);

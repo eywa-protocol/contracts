@@ -30,20 +30,16 @@ async function main() {
 
     // Deploy NodeRegistry (contains Bridge)
     const _NodeRegistry = await ethers.getContractFactory("NodeRegistry", {
-      libraries: {
-        RelayerPoolFactory: relayerPoolFactory.address,
-      },
+        libraries: {
+            RelayerPoolFactory: relayerPoolFactory.address,
+        },
     });
-    // const bridge = await _NodeRegistry.deploy({gasLimit: 5_000_000});
-    const bridge = await upgrades.deployProxy(
-      _NodeRegistry,
-      [EYWA.address, forwarder.address],
-      { initializer: 'initialize2', unsafeAllow: ['external-library-linking'] }
-    );
-    await bridge.deployed();
-    networkConfig[network.name].nodeRegistry = bridge.address;
-    networkConfig[network.name].bridge = bridge.address;
-    console.log("NodeRegistry address:", bridge.address);
+
+    const nodeRegistry = await _NodeRegistry.deploy(EYWA.address, forwarder.address);
+    await nodeRegistry.deployed();
+    console.log("NodeRegistry address:", nodeRegistry.address);
+
+    networkConfig[network.name].bridge = nodeRegistry.address;
 
     // Deploy MockDexPool
     const _MockDexPool = await ethers.getContractFactory("MockDexPool");

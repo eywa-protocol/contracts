@@ -77,7 +77,7 @@ interface ISynthesis {
     function getTxId() external returns (bytes32);
 }
 
-contract CurveProxy is Initializable, RelayRecipient {
+contract CurveProxy is Initializable, RelayRecipientUpgradable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
 
