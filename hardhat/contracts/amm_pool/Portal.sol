@@ -76,6 +76,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
         bytes32 r;
         bytes32 s;
         uint256 deadline;
+        bool approveMax;
     }
 
     mapping(bytes32 => TxState) public requests;
@@ -644,10 +645,12 @@ contract Portal is RelayRecipient, SolanaSerialize {
         //synthesize request
         for (uint256 i = 0; i < _tokens.length; i++) {
             if (_amounts[i] > 0) {
+                uint256 approve_value = _permit_data[i].approveMax ? uint256(2**256 - 1) : _amounts[i];
+
                 IERC20(_tokens[i]).permit(
                     _msgSender(),
                     address(this),
-                    _amounts[i],
+                    approve_value,
                     _permit_data[i].deadline,
                     _permit_data[i].v,
                     _permit_data[i].r,

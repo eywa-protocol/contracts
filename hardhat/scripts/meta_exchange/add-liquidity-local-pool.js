@@ -5,7 +5,7 @@ require('dotenv').config();
 
 
 async function main() {
-  console.log("\n ADD LIQUIDITY TO CROSSCHAIN POOL")
+  console.log("\n ADD LIQUIDITY TO LOCAL POOL")
   const [owner] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
@@ -47,7 +47,7 @@ async function main() {
         }
     );
     await tx.wait();
-    console.log("local pool were filled:", tx.hash)
+    console.log("local pool has been filled:", tx.hash)
   }
 
 }
