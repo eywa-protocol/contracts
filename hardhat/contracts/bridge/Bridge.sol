@@ -12,7 +12,7 @@ import "../amm_pool/RelayRecipient.sol";
 contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
     using Address for address;
 
-    string public versionRecipient = "2.2.3";
+    string public override versionRecipient = "2.2.3";
     E2Point private epochKey; // Aggregated public key of all paricipants of the current epoch
     address public dao; // Address of the DAO
     uint8 public epochParticipantsNum; // Number of participants contributed to the epochKey
@@ -21,7 +21,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
     //event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
-    constructor(address forwarder) public {
+    constructor(address forwarder) {
         dao = _msgSender();
         _setTrustedForwarder(forwarder);
     }

@@ -17,7 +17,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     mapping(bytes32 => SynthesizeState) public synthesizeStates;
     address public bridge;
     address public proxy;
-    string public versionRecipient;
+    string public override versionRecipient;
 
     bytes public constant sighashUnsynthesize =
         abi.encodePacked(uint8(115), uint8(234), uint8(111), uint8(109), uint8(131), uint8(167), uint8(37), uint8(70));
