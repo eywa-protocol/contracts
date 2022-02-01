@@ -48,6 +48,8 @@ var (
 		Usage: "this flag defines the package name that will be used for Go contract wrappers",
 		Value: "wrappers",
 	}
+
+	allStructs = make(map[string]*tmplStruct)
 )
 
 func init() {
@@ -119,10 +121,14 @@ func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputD
 		keyParts := strings.Split(key, ":")
 		types = append(types, keyParts[len(keyParts)-1])
 		fsigs = append(fsigs, value.Hashes)
-		code, err := Bind(types, []string{string(abi)}, []string{value.Code}, fsigs, packageName, LangGo, libs, aliases, tmplSource)
+		structs := make(map[string]*tmplStruct)
+		code, err := Bind(types, []string{string(abi)}, []string{value.Code}, fsigs, packageName, LangGo, libs, aliases, tmplSource, structs)
 		if err != nil {
 			logrus.Fatal(err)
 			return err
+		}
+		for k, v := range structs {
+			allStructs[k] = v
 		}
 		if err := os.MkdirAll(outputDir, 0700); err != nil {
 			logrus.Fatal(err)
@@ -139,7 +145,7 @@ func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputD
 	buf := new(bytes.Buffer)
 
 	tmpl := template.Must(template.New("").Parse(templateGSNBaseGo))
-	if err := tmpl.Execute(buf, nil); err != nil {
+	if err := tmpl.Execute(buf, allStructs); err != nil {
 		logrus.Fatal(err)
 		return err
 	}
@@ -159,6 +165,7 @@ func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputD
 		logrus.Fatal(err)
 		return err
 	}
+
 	return nil
 }
 

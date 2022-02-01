@@ -24,20 +24,10 @@ wrappers: npm compile copy_configs
 	--json ${ARTIFACTS}/bridge/test/TestTarget.sol \
 	--json ${ARTIFACTS}/bridge/test/TestForward.sol \
 	--json ${ARTIFACTS}/bridge/test/TestERC20Permit.sol \
-	--json ${ARTIFACTS}/bridge/merkle/MerkleTest.sol --pkg wrappers --out ../wrappers
-	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/amm_pool/Portal.sol --pkg portal --out ../wrappers/portal
-	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/amm_pool/Synthesis.sol --pkg synthesis --out ../wrappers/synthesis
-	# go run wrappers-builder/main.go --json ${ARTIFACTS}/gassless/ImportArtifacts.sol --pkg gassless --out ../wrappers/gassless
-	#cd wrappers-builder-gsn && go build && cd ..
-	#./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/Bridge.sol --pkg bridge --out ../wrappers/gsn/bridge
-	#./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/NodeRegistry.sol --pkg registry --out ../wrappers/gsn/registry
-	#./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/test/TestForward.sol --pkg test --out ../wrappers/gsn/test
-
-wrappers-gsn:
-	#cd wrappers-builder-gsn && go build && cd ..
-	#./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/Bridge.sol --pkg bridge --out ../wrappers/gsn/bridge
-	#./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/NodeRegistry.sol --pkg registry --out ../wrappers/gsn/registry
-	#./wrappers-builder-gsn/wrappers-builder-gsn --json ${ARTIFACTS}/bridge/test/TestForward.sol --pkg test --out ../wrappers/gsn/test
+	--json ${ARTIFACTS}/bridge/merkle/MerkleTest.sol \
+	--json ${ARTIFACTS}/amm_pool/Portal.sol \
+	--json ${ARTIFACTS}/amm_pool/Synthesis.sol \
+	--pkg wrappers --out ../wrappers
 
 deps:
 	go mod tidy

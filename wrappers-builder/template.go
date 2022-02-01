@@ -117,13 +117,6 @@ var (
 )
 
 {{$structs := .Structs}}
-{{range $structs}}
-	// {{.Name}} is an auto generated low-level Go binding around an user-defined struct.
-	type {{.Name}} struct {
-	{{range $field := .Fields}}
-	{{$field.Name}} {{$field.Type}}{{end}}
-	}
-{{end}}
 
 {{range $contract := .Contracts}}
 	// {{.Type}}MetaData contains all meta data concerning the {{.Type}} contract.
@@ -991,4 +984,15 @@ func GsnWrap(directCall func() (common.Hash, error), gsnCall func() (common.Hash
 
 	return directCall()
 }
+
+// Contract structs
+
+{{$structs := .}}
+{{range $structs}}
+	// {{.Name}} is an auto generated low-level Go binding around an user-defined struct.
+	type {{.Name}} struct {
+	{{range $field := .Fields}}
+	{{$field.Name}} {{$field.Type}}{{end}}
+	}
+{{end}}
 `

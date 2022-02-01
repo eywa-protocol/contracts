@@ -43,17 +43,19 @@ const (
 	LangObjC
 )
 
+var isStructsPresent = make(map[string]struct{})
+
 // Bind generates a Go wrapper around a contract ABI. This wrapper isn't meant
 // to be used as is in client code, but rather as an intermediate struct which
 // enforces compile time type safety and naming convention opposed to having to
 // manually maintain hard coded strings that break on runtime.
-func Bind(types []string, abis []string, bytecodes []string, fsigs []map[string]string, pkg string, lang Lang, libs map[string]string, aliases map[string]string, tmplMap map[Lang]string) (string, error) {
+func Bind(types []string, abis []string, bytecodes []string, fsigs []map[string]string, pkg string, lang Lang, libs map[string]string, aliases map[string]string, tmplMap map[Lang]string, structs map[string]*tmplStruct) (string, error) {
 	var (
 		// contracts is the map of each individual contract requested binding
 		contracts = make(map[string]*tmplContract)
 
 		// structs is the map of all redeclared structs shared by passed contracts.
-		structs = make(map[string]*tmplStruct)
+		// structs = make(map[string]*tmplStruct)
 
 		// isLib is the map used to flag each encountered library as such
 		isLib = make(map[string]struct{})
