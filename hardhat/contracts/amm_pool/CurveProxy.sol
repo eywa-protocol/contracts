@@ -15,6 +15,15 @@ interface IPortal {
         uint256 chainID;
     }
 
+    function synthesize(
+        address _token,
+        uint256 _amount,
+        address _chain2address,
+        address _receiveSide,
+        address _oppositeBridge,
+        uint256 _chainID
+    ) external returns (bytes32 txID);
+
     function unsynthesize(
         bytes32 _txId,
         address _token,
@@ -112,34 +121,42 @@ contract CurveProxy is Initializable, RelayRecipient {
         uint256 chainID;
     }
 
-    struct AddLiquidity3Pool {
+    struct AddLiquidity {
         address add;
         address to;
         uint256 expected_min_mint_amount;
     }
 
-    struct MetaExchangeParams {
-        //pool address
-        address exchange;
-        address remove;
-        //exchange params
-        int128 i; //index value for the coin to send
-        int128 j; //index value of the coin to receive
-        uint256 expected_min_dy;
-        //withdraw one coin params
-        int128 x; // index value of the coin to withdraw
-        uint256 expected_min_amount;
-        //transfer to
+    struct MetaMintEUSD {
+        //crosschain pool params
+        address add_c;
+        uint256 expected_min_mint_amount_c;
+        //incoming coin index for adding liq to hub pool
+        uint256 lp_index;
+        //hub pool params
+        address add_h;
+        uint256 expected_min_mint_amount_h;
+        //recipient address
         address to;
-        //unsynth params
-        address unsynth_token;
-        address chain2address;
-        address receiveSide;
-        address oppositeBridge;
-        uint256 chainID;
     }
 
-    struct MetaExchangeParamsETH {
+    struct MetaRedeemEUSD {
+        //crosschain pool params
+        address remove_c;
+        //outcome index
+        int128 x;
+        uint256 expected_min_amount_c;
+        //hub pool params
+        address remove_h;
+        uint256 token_amount_h;
+        //lp index
+        int128 y;
+        uint256 expected_min_amount_h;
+        //recipient address
+        address to;
+    }
+
+    struct MetaExchangeParams {
         //pool address
         address add;
         address exchange;
@@ -151,12 +168,11 @@ contract CurveProxy is Initializable, RelayRecipient {
         int128 j; //index value of the coin to receive
         uint256 expected_min_dy;
         //withdraw one coin params
-        int128 x; // index value of the coin to withdraw
+        int128 x; //index value of the coin to withdraw
         uint256 expected_min_amount;
         //transfer to
         address to;
         //unsynth params
-        address unsynth_token;
         address chain2address;
         address receiveSide;
         address oppositeBridge;
@@ -176,7 +192,7 @@ contract CurveProxy is Initializable, RelayRecipient {
 
     ///@dev Set the corresponding pool data to use proxy with
     ///@param _pool pool address
-    ///@param _lp_token lp token address for the corresponding  pool
+    ///@param _lp_token lp token address for the corresponding pool
     ///@param _coins listed token addresses
     /////////////////////////////////////////////////////////////
     function setPool(
@@ -190,129 +206,239 @@ contract CurveProxy is Initializable, RelayRecipient {
         lp_token[_pool] = _lp_token;
     }
 
-    ///@dev Meta exhcange stage(A).
-    ///@param _add pool address
-    ///@param _amounts list of amounts of coins to deposit
-    ///@param _min_mint_amount minimum amount of LP tokens to mint from the deposit
-    ///@param _synth_params synth params
-    ///@param _selector proxy function selector
-    ///@param _transit_data encoded data for transition
+    ///@dev Transit synth batch and add liquidity to the 3pool
+    ///@param _params add liquidity params
+    ///@param _synth_token tokens to synth from an external chain
+    ///@param _synth_amount amounts to synth from an external chain
+    ///@param _txId synth transaction IDs
     /////////////////////////////////////////////////////////////
-    function add_liquidity_3pool_transit_synthesize(
-        address _add,
-        uint256[3] memory _amounts,
-        uint256 _min_mint_amount,
-        SynthParams memory _synth_params,
-        bytes4 _selector,
-        bytes memory _transit_data
-    ) external {
-        //add_liquidity_3pool
-        for (uint256 i = 0; i < _amounts.length; i++) {
-            if (_amounts[i] > 0) {
-                IERC20Upgradeable(pool[_add].at(i)).safeTransferFrom(_msgSender(), address(this), _amounts[i]);
-                IERC20Upgradeable(pool[_add].at(i)).approve(address(_add), _amounts[i]);
-            }
-        }
-        IStableSwapPool(_add).add_liquidity(_amounts, _min_mint_amount);
-
-        //approve LP for Portal
-        address lp = lp_token[_add];
-        uint256 this_balance = IERC20Upgradeable(lp).balanceOf(address(this));
-        IERC20Upgradeable(lp).approve(portal, 0); // CurveV2 token support
-        IERC20Upgradeable(lp).approve(portal, this_balance);
-
-        //pack synthesize request with transit
-        bytes memory out = abi.encodePacked(
-            _selector,
-            _transit_data,
-            abi.encode(lp, this_balance, IPortal(portal).getTxId())
-        );
-
-        // transit meta request
-        IPortal(portal).synthesize_transit(
-            lp,
-            this_balance, //amount to synthesize
-            ////////////////////////////
-            _synth_params.chain2address,
-            _synth_params.receiveSide,
-            _synth_params.oppositeBridge,
-            _synth_params.chainID,
-            out
-        );
-    }
-
-    function add_liquidity_3pool_transit_synthesize_batch(
-        address _add,
-        uint256[3] memory _amounts,
-        uint256 _min_mint_amount,
-        SynthParams memory _synth_params,
-        uint8[2] memory _opposite_pool_numbers, // [0]pool_size, [1]coin_index
-        bytes4 _selector,
-        bytes memory _transit_data
-    ) external {
-        //add_liquidity_3pool
-        for (uint256 i = 0; i < _amounts.length; i++) {
-            if (_amounts[i] > 0) {
-                IERC20Upgradeable(pool[_add].at(i)).safeTransferFrom(_msgSender(), address(this), _amounts[i]);
-                IERC20Upgradeable(pool[_add].at(i)).approve(address(_add), _amounts[i]);
-            }
-        }
-        IStableSwapPool(_add).add_liquidity(_amounts, _min_mint_amount);
-
-        // {
-        address[] memory synth_token = new address[](_opposite_pool_numbers[0]);
-        uint256[] memory synth_amount = new uint256[](_opposite_pool_numbers[0]);
-
-        //approve LP for Portal
-        synth_token[_opposite_pool_numbers[1]] = lp_token[_add];
-        synth_amount[_opposite_pool_numbers[1]] = IERC20Upgradeable(synth_token[_opposite_pool_numbers[1]]).balanceOf(
-            address(this)
-        );
-        IERC20Upgradeable(synth_token[_opposite_pool_numbers[1]]).approve(portal, 0); // CurveV2 token support
-        IERC20Upgradeable(synth_token[_opposite_pool_numbers[1]]).approve(portal, synth_amount[_opposite_pool_numbers[1]]);
-
-        // synthesize batch transit => transit_synth_add_liquidity_[_opposite_pool_numbers[0]]pool
-        IPortal(portal).synthesize_batch_transit(
-            synth_token,
-            synth_amount, //amount to synthesize
-            ////////////////////////////
-            IPortal.SynthParams(
-                _synth_params.chain2address,
-                _synth_params.receiveSide,
-                _synth_params.oppositeBridge,
-                _synth_params.chainID
-            ),
-            _selector,
-            _transit_data
-        );
-        // }
-    }
-
-    ///@dev Meta exhcange stage(B).
-    ///@param _params meta exchange params
-    ///@param _synth_token token address to synth
-    ///@param _synth_amount amount to synth
-    ///@param _txId transaction ID
-    /////////////////////////////////////////////////////////////
-    function transit_meta_exchange(
-        MetaExchangeParams memory _params,
-        address _synth_token,
-        uint256 _synth_amount,
-        bytes32 _txId
+    function transit_synth_batch_add_liquidity_3pool(
+        AddLiquidity memory _params,
+        address[3] memory _synth_token,
+        uint256[3] memory _synth_amount,
+        bytes32[3] memory _txId
     ) external onlyBridge {
+        address[3] memory representation;
+
+        //synthesize stage
+        for (uint256 i = 0; i < _txId.length; i++) {
+            representation[i] = ISynthesis(synthesis).getRepresentation(bytes32(uint256(uint160(_synth_token[i]))));
+            if (_synth_amount[i] > 0) {
+                ISynthesis(synthesis).mintSyntheticToken(_txId[i], _synth_token[i], _synth_amount[i], address(this));
+                //representation[i] = ISynthesis(synthesis).getRepresentation(_synth_token[i]);
+                IERC20Upgradeable(representation[i]).approve(_params.add, _synth_amount[i]);
+            } else {
+                _synth_amount[i] = 0;
+            }
+        }
+
+        //add liquidity stage
+        uint256 min_mint_amount = IStableSwapPool(_params.add).calc_token_amount(_synth_amount, true);
+
+        //inconsistency check
+        if (_params.expected_min_mint_amount > min_mint_amount) {
+            for (uint256 i = 0; i < representation.length; i++) {
+                if (_synth_amount[i] > 0) {
+                    IERC20Upgradeable(representation[i]).safeTransfer(_params.to, _synth_amount[i]);
+                    emit InconsistencyCallback(_params.add, representation[i], _params.to, _synth_amount[i]);
+                }
+            }
+            return;
+        }
+
+        //add liquidity
+        IStableSwapPool(_params.add).add_liquidity(_synth_amount, 0);
+
+        //transfer asset to the recipient
+        IERC20Upgradeable(lp_token[_params.add]).safeTransfer(
+            _params.to,
+            IERC20Upgradeable(lp_token[_params.add]).balanceOf(address(this))
+        );
+    }
+
+    ///@dev Mint EUSD local case (hub chain only)
+    ///@param _params MetaMintEUSD params
+    ///@param _token token addresses
+    ///@param _amount amounts to transfer
+    /////////////////////////////////////////////////////////////
+    function add_liquidity_3pool_mint_eusd(
+        MetaMintEUSD memory _params,
+        address[3] memory _token,
+        uint256[3] memory _amount
+    ) external {
+        //initial transfer stage
+        for (uint256 i = 0; i < _amount.length; i++) {
+            if (_amount[i] > 0) {
+                IERC20Upgradeable(_token[i]).safeTransferFrom(_msgSender(), address(this), _amount[i]);
+                IERC20Upgradeable(_token[i]).approve(_params.add_c, _amount[i]);
+            } else {
+                _amount[i] = 0;
+            }
+        }
+
+        //add liquidity stage
+        uint256 min_mint_amount_c = IStableSwapPool(_params.add_c).calc_token_amount(_amount, true);
+
+        //inconsistency check
+        if (_params.expected_min_mint_amount_c > min_mint_amount_c) {
+            for (uint256 i = 0; i < _token.length; i++) {
+                if (_amount[i] > 0) {
+                    IERC20Upgradeable(_token[i]).safeTransfer(_params.to, _amount[i]);
+                    emit InconsistencyCallback(_params.add_c, _token[i], _params.to, _amount[i]);
+                }
+            }
+            return;
+        }
+
+        //add liquidity
+        IStableSwapPool(_params.add_c).add_liquidity(_amount, 0);
+
+        //HUB STAGE (3pool only)
+        IERC20Upgradeable(lp_token[_params.add_c]).approve(
+            _params.add_h,
+            IERC20Upgradeable(lp_token[_params.add_c]).balanceOf(address(this))
+        );
+        uint256[3] memory amount_h;
+        amount_h[_params.lp_index] = IERC20Upgradeable(lp_token[_params.add_c]).balanceOf(address(this));
+
+        //add liquidity hub stage
+        uint256 min_mint_amount_h = IStableSwapPool(_params.add_h).calc_token_amount(_amount, true);
+        //inconsistency check hub stage
+        if (_params.expected_min_mint_amount_h > min_mint_amount_h) {
+            //TODO 
+            IERC20Upgradeable(lp_token[_params.add_h]).safeTransfer(_params.to, amount_h[_params.lp_index]);
+            emit InconsistencyCallback(_params.add_h, lp_token[_params.add_h], _params.to, amount_h[_params.lp_index]);
+            return;
+        }
+
+        //add liquidity
+        IStableSwapPool(_params.add_h).add_liquidity(amount_h, 0);
+
+        //transfer EUSD to the recipient
+        uint256 thisBalance = IERC20Upgradeable(lp_token[_params.add_h]).balanceOf(address(this));
+        IERC20Upgradeable(lp_token[_params.add_h]).safeTransfer(_params.to, thisBalance);
+    }
+
+    ///@dev Mint EUSD from external chains
+    ///@param _params meta mint EUSD params
+    ///@param _synth_token tokens to synth from an external chain
+    ///@param _synth_amount amounts to synth from an external chain
+    ///@param _txId transaction IDs
+    /////////////////////////////////////////////////////////////
+    function transit_synth_batch_add_liquidity_3pool_mint_eusd(
+        MetaMintEUSD memory _params,
+        address[3] memory _synth_token,
+        uint256[3] memory _synth_amount,
+        bytes32[3] memory _txId
+    ) external onlyBridge {
+        address[3] memory representation;
+
+        //synthesize stage
+        for (uint256 i = 0; i < _txId.length; i++) {
+            representation[i] = ISynthesis(synthesis).getRepresentation(bytes32(uint256(uint160(_synth_token[i]))));
+            if (_synth_amount[i] > 0) {
+                ISynthesis(synthesis).mintSyntheticToken(_txId[i], _synth_token[i], _synth_amount[i], address(this));
+                //representation[i] = ISynthesis(synthesis).getRepresentation(_synth_token[i]);
+                IERC20Upgradeable(representation[i]).approve(_params.add_c, _synth_amount[i]);
+            } else {
+                _synth_amount[i] = 0;
+            }
+        }
+
+        //add liquidity crosschain stage
+        uint256 min_mint_amount_c = IStableSwapPool(_params.add_c).calc_token_amount(_synth_amount, true);
+
+        //inconsistency check
+        if (_params.expected_min_mint_amount_c > min_mint_amount_c) {
+            for (uint256 i = 0; i < representation.length; i++) {
+                if (_synth_amount[i] > 0) {
+                    IERC20Upgradeable(representation[i]).safeTransfer(_params.to, _synth_amount[i]);
+                    emit InconsistencyCallback(_params.add_c, representation[i], _params.to, _synth_amount[i]);
+                }
+            }
+            return;
+        }
+
+        //add liquidity to the crosschain pool
+        IStableSwapPool(_params.add_c).add_liquidity(_synth_amount, 0);
+
+        //HUB STAGE (3pool only)
+        IERC20Upgradeable(lp_token[_params.add_c]).approve(
+            _params.add_h,
+            IERC20Upgradeable(lp_token[_params.add_c]).balanceOf(address(this))
+        );
+        uint256[3] memory amount_h;
+        amount_h[_params.lp_index] = IERC20Upgradeable(lp_token[_params.add_c]).balanceOf(address(this));
+
+        //add liquidity hub stage
+        uint256 min_mint_amount_h = IStableSwapPool(_params.add_h).calc_token_amount(_synth_amount, true);
+        //inconsistency check hub stage
+        if (_params.expected_min_mint_amount_h > min_mint_amount_h) {
+            //TODO
+            IERC20Upgradeable(lp_token[_params.add_h]).safeTransfer(_params.to, amount_h[_params.lp_index]);
+            emit InconsistencyCallback(_params.add_h, lp_token[_params.add_h], _params.to, amount_h[_params.lp_index]);
+            return;
+        }
+
+        //add liquidity
+        IStableSwapPool(_params.add_h).add_liquidity(amount_h, 0);
+
+        //transfer EUSD to the recipient
+        uint256 thisBalance = IERC20Upgradeable(lp_token[_params.add_h]).balanceOf(address(this));
+        IERC20Upgradeable(lp_token[_params.add_h]).safeTransfer(_params.to, thisBalance);
+    }
+
+    ///@dev Meta exchange local case (hub chain execution only)
+    ///@param _params meta exchange params
+    ///@param _token token addresses to transfer within initial stage
+    ///@param _amount amounts to transfer within initial stage
+    /////////////////////////////////////////////////////////////
+    function meta_exchange(
+        MetaExchangeParams memory _params,
+        address[3] memory _token,
+        uint256[3] memory _amount
+    ) external {
         {
-            // synthesize stage
-            ISynthesis(synthesis).mintSyntheticToken(_txId, _synth_token, _synth_amount, address(this));
+            //initial transfer stage
+            for (uint256 i = 0; i < _amount.length; i++) {
+                if (_amount[i] > 0) {
+                    IERC20Upgradeable(_token[i]).safeTransferFrom(_msgSender(), address(this), _amount[i]);
+                    IERC20Upgradeable(_token[i]).approve(_params.add, _amount[i]);
+                } else {
+                    _amount[i] = 0;
+                }
+            }
 
-            //exchange stage
-            address representation = ISynthesis(synthesis).getRepresentation(bytes32(uint256(uint160(_synth_token))));
-            IERC20Upgradeable(representation).approve(_params.exchange, 0);
-            IERC20Upgradeable(representation).approve(_params.exchange, IERC20Upgradeable(representation).balanceOf(address(this)));
+            //add liquidity stage
+            uint256 min_mint_amount = IStableSwapPool(_params.add).calc_token_amount(_amount, true);
+            //inconsistency check
+            if (_params.expected_min_mint_amount > min_mint_amount) {
+                for (uint256 i = 0; i < _token.length; i++) {
+                    if (_amount[i] > 0) {
+                        IERC20Upgradeable(_token[i]).safeTransfer(_params.to, _amount[i]);
+                        emit InconsistencyCallback(_params.add, _token[i], _params.to, _amount[i]);
+                    }
+                }
+                return;
+            }
 
-            uint256 dx = IERC20Upgradeable(representation).balanceOf(address(this)); //amount to swap
+            //add liquidity
+            IStableSwapPool(_params.add).add_liquidity(_amount, 0);
+        }
+        //meta-exchange stage
+        {
+            address lpLocalPool = lp_token[_params.add];
+
+            IERC20Upgradeable(lpLocalPool).approve(_params.exchange, 0); //CurveV2 token support
+            IERC20Upgradeable(lpLocalPool).approve(
+                _params.exchange,
+                IERC20Upgradeable(lpLocalPool).balanceOf(address(this))
+            );
+
+            uint256 dx = IERC20Upgradeable(lpLocalPool).balanceOf(address(this)); //amount to swap
             uint256 min_dy = IStableSwapPool(_params.exchange).get_dy(_params.i, _params.j, dx);
 
-            // inconsistency check
+            //inconsistency check
             if (_params.expected_min_dy > min_dy) {
                 IERC20Upgradeable(pool[_params.exchange].at(uint256(int256(_params.i)))).safeTransfer(
                     _params.to,
@@ -327,162 +453,58 @@ contract CurveProxy is Initializable, RelayRecipient {
                 return;
             }
 
-            // perform exhange
+            //perform an exhange
             IStableSwapPool(_params.exchange).exchange(_params.i, _params.j, dx, min_dy);
         }
-        // initiates unsynthesize request if mentioned
-        if (_params.receiveSide != address(0)) {
-            address representation = ISynthesis(synthesis).getRepresentation(
-                bytes32(uint256(uint160(_params.unsynth_token)))
-            );
-            uint256 unsynth_amount = IERC20Upgradeable(representation).balanceOf(address(this));
 
-            bytes memory out = abi.encodeWithSelector(
-                bytes4(
-                    keccak256(
-                        "transit_unsynth_remove_liquidity_one_coin(address,uint256,address,int128,uint256,address,bytes32)"
-                    )
-                ),
-                _params.unsynth_token,
-                unsynth_amount,
-                _params.remove,
-                _params.x,
-                _params.expected_min_amount,
+        //remove liquidity one coin stage
+        address lpToken = lp_token[_params.remove];
+        IERC20Upgradeable(lpToken).approve(_params.remove, 0); //CurveV2 token support
+        IERC20Upgradeable(lpToken).approve(_params.remove, IERC20Upgradeable(lpToken).balanceOf(address(this)));
+
+        uint256 token_amount = IERC20Upgradeable(lpToken).balanceOf(address(this));
+        uint256 min_amount = IStableSwapPool(_params.remove).calc_withdraw_one_coin(token_amount, _params.x);
+
+        //inconsistency check
+        if (_params.expected_min_amount > min_amount) {
+            IERC20Upgradeable(lpToken).safeTransfer(_params.to, token_amount);
+            emit InconsistencyCallback(_params.remove, lpToken, _params.to, token_amount);
+            return;
+        }
+
+        //remove liquidity
+        IStableSwapPool(_params.remove).remove_liquidity_one_coin(token_amount, _params.x, 0);
+
+        //transfer asset to the recipient (unsynth if mentioned)
+        uint256 thisBalance = IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).balanceOf(
+            address(this)
+        );
+        if (_params.chainID != 0) {
+            IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).approve(synthesis, thisBalance);
+            ISynthesis(synthesis).burnSyntheticToken(
+                pool[_params.remove].at(uint256(int256(_params.x))),
+                thisBalance,
                 _params.to,
-                ISynthesis(synthesis).getTxId()
-            );
-
-            ISynthesis(synthesis).burnSyntheticToken_transit(
-                representation,
-                unsynth_amount,
-                ///////////////////////
-                _params.chain2address, // need to delete!!!!!
                 _params.receiveSide,
                 _params.oppositeBridge,
-                _params.chainID,
-                out
+                _params.chainID
             );
-
-            return;
         } else {
-            //remove liquidity one coin stage
-            address lpToken = lp_token[_params.remove];
-            IERC20Upgradeable(lpToken).approve(_params.remove, 0); // CurveV2 token support
-            IERC20Upgradeable(lpToken).approve(_params.remove, IERC20Upgradeable(lpToken).balanceOf(address(this)));
-
-            uint256 token_amount = IERC20Upgradeable(lpToken).balanceOf(address(this));
-            uint256 min_amount = IStableSwapPool(_params.remove).calc_withdraw_one_coin(token_amount, _params.x);
-
-            // inconsistency check
-            if (_params.expected_min_amount > min_amount) {
-                IERC20Upgradeable(lpToken).safeTransfer(_params.to, token_amount);
-                emit InconsistencyCallback(_params.remove, lpToken, _params.to, token_amount);
-                return;
-            }
-
-            // remove liquidity
-            IStableSwapPool(_params.remove).remove_liquidity_one_coin(token_amount, _params.x, min_amount);
-
-            // transfer asset to the recipient
             IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).safeTransfer(
                 _params.to,
-                IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).balanceOf(address(this))
+                thisBalance
             );
-            /////////test
-            // uint256 test = IERC20Upgradeable(pool[_params.remove].at(_params.x)).balanceOf(_params.to);
-            // console.log("address %s %s", _params.to, test);
         }
     }
 
-    ///@dev Meta exhcange stage(C).
-    ///@param _token token address to unsynth
-    ///@param _amount amount to unsynth
-    ///@param _remove pool address to perform withdraw on
-    ///@param _x token address for withdraw
-    ///@param _expected_min_amount expected amount to withdraw
-    ///@param _to recipient address
-    ///@param _txId transaction ID
+    ///@dev Performs a meta exchange on request from external chains
+    ///@param _params meta exchange params
+    ///@param _synth_token tokens to synth from an external chain
+    ///@param _synth_amount amounts to synth from an external chain
+    ///@param _txId synth transaction IDs
     /////////////////////////////////////////////////////////////
-    function transit_unsynth_remove_liquidity_one_coin(
-        address _token,
-        uint256 _amount,
-        address _remove,
-        int128 _x,
-        uint256 _expected_min_amount,
-        address _to,
-        bytes32 _txId
-    ) external onlyBridge {
-        //unsynthesize
-        IPortal(portal).unsynthesize(_txId, _token, _amount, address(this));
-
-        //remove liquidity one coin
-        IERC20Upgradeable(_token).approve(_remove, 0); // CurveV2 token support
-        IERC20Upgradeable(_token).approve(_remove, IERC20Upgradeable(_token).balanceOf(address(this)));
-
-        uint256 token_amount = IERC20Upgradeable(_token).balanceOf(address(this));
-        uint256 min_amount = IStableSwapPool(_remove).calc_withdraw_one_coin(token_amount, _x);
-
-        if (_expected_min_amount > min_amount) {
-            IERC20Upgradeable(_token).safeTransfer(_to, token_amount);
-            emit InconsistencyCallback(_remove, _token, _to, token_amount);
-            return;
-        }
-
-        IStableSwapPool(_remove).remove_liquidity_one_coin(token_amount, _x, min_amount);
-
-        // transfer asset to the recipient
-        IERC20Upgradeable(pool[_remove].at(uint256(int256(_x)))).safeTransfer(_to, IERC20Upgradeable(pool[_remove].at(uint256(int256(_x)))).balanceOf(address(this)));
-    }
-
-    ///@dev transit synth batch and add liquidity to the 3pool.
-    ///@param _params add liquidity 3Pool params
-    ///@param _synth_token tokens to synth
-    ///@param _synth_amount amounts to synth
-    ///@param _txId transaction IDs
-    /////////////////////////////////////////////////////////////
-    function transit_synth_batch_add_liquidity_3pool(
-        AddLiquidity3Pool memory _params,
-        address[3] memory _synth_token,
-        uint256[3] memory _synth_amount,
-        bytes32[3] memory _txId
-    ) external onlyBridge {
-        address[3] memory representation;
-
-        //synthesize stage
-        for (uint256 i = 0; i < _txId.length; i++) {
-            representation[i] = ISynthesis(synthesis).getRepresentation(bytes32(uint256(uint160(_synth_token[i]))));
-            if (_synth_amount[i] > 0) {
-                ISynthesis(synthesis).mintSyntheticToken(_txId[i], _synth_token[i], _synth_amount[i], address(this));
-                // representation[i] = ISynthesis(synthesis).getRepresentation(_synth_token[i]);
-                IERC20Upgradeable(representation[i]).approve(_params.add, _synth_amount[i]);
-            } else {
-                _synth_amount[i] = 0;
-            }
-        }
-
-        //add liquidity stage
-        uint256 min_mint_amount = IStableSwapPool(_params.add).calc_token_amount(_synth_amount, true);
-
-        // inconsistency check
-        if (_params.expected_min_mint_amount > min_mint_amount) {
-            for (uint256 i = 0; i < representation.length; i++) {
-                if (_synth_amount[i] > 0) {
-                    IERC20Upgradeable(representation[i]).safeTransfer(_params.to, _synth_amount[i]);
-                    emit InconsistencyCallback(_params.add, representation[i], _params.to, _synth_amount[i]);
-                }
-            }
-            return;
-        }
-
-        // add liquidity
-        IStableSwapPool(_params.add).add_liquidity(_synth_amount, 0);
-
-        //transfer asset to the recipient
-        IERC20Upgradeable(lp_token[_params.add]).safeTransfer(_params.to, IERC20Upgradeable(lp_token[_params.add]).balanceOf(address(this)));
-    }
-
-    function transit_synth_batch_meta_exchange_eth(
-        MetaExchangeParamsETH memory _params,
+    function transit_synth_batch_meta_exchange(
+        MetaExchangeParams memory _params,
         address[3] memory _synth_token,
         uint256[3] memory _synth_amount,
         bytes32[3] memory _txId
@@ -500,7 +522,7 @@ contract CurveProxy is Initializable, RelayRecipient {
                         _synth_amount[i],
                         address(this)
                     );
-                    // representation[i] = ISynthesis(synthesis).getRepresentation(_synth_token[i]);
+                    //representation[i] = ISynthesis(synthesis).getRepresentation(_synth_token[i]);
                     IERC20Upgradeable(representation[i]).approve(_params.add, _synth_amount[i]);
                 } else {
                     _synth_amount[i] = 0;
@@ -509,7 +531,7 @@ contract CurveProxy is Initializable, RelayRecipient {
 
             //add liquidity stage
             uint256 min_mint_amount = IStableSwapPool(_params.add).calc_token_amount(_synth_amount, true);
-            // inconsistency check
+            //inconsistency check
             if (_params.expected_min_mint_amount > min_mint_amount) {
                 for (uint256 i = 0; i < representation.length; i++) {
                     if (_synth_amount[i] > 0) {
@@ -520,20 +542,23 @@ contract CurveProxy is Initializable, RelayRecipient {
                 return;
             }
 
-            // add liquidity
+            //add liquidity
             IStableSwapPool(_params.add).add_liquidity(_synth_amount, 0);
         }
-        // meta-exchange stage
+        //meta-exchange stage
         {
             address lpLocalPool = lp_token[_params.add];
 
-            IERC20Upgradeable(lpLocalPool).approve(_params.exchange, 0); // CurveV2 token support
-            IERC20Upgradeable(lpLocalPool).approve(_params.exchange, IERC20Upgradeable(lpLocalPool).balanceOf(address(this)));
+            IERC20Upgradeable(lpLocalPool).approve(_params.exchange, 0); //CurveV2 token support
+            IERC20Upgradeable(lpLocalPool).approve(
+                _params.exchange,
+                IERC20Upgradeable(lpLocalPool).balanceOf(address(this))
+            );
 
             uint256 dx = IERC20Upgradeable(lpLocalPool).balanceOf(address(this)); //amount to swap
             uint256 min_dy = IStableSwapPool(_params.exchange).get_dy(_params.i, _params.j, dx);
 
-            // inconsistency check
+            //inconsistency check
             if (_params.expected_min_dy > min_dy) {
                 IERC20Upgradeable(pool[_params.exchange].at(uint256(int256(_params.i)))).safeTransfer(
                     _params.to,
@@ -548,39 +573,131 @@ contract CurveProxy is Initializable, RelayRecipient {
                 return;
             }
 
-            // perform exhange
+            //perform exhange
             IStableSwapPool(_params.exchange).exchange(_params.i, _params.j, dx, min_dy);
         }
 
-            //remove liquidity one coin stage
-            address lpToken = lp_token[_params.remove];
-            IERC20Upgradeable(lpToken).approve(_params.remove, 0); // CurveV2 token support
-            IERC20Upgradeable(lpToken).approve(_params.remove, IERC20Upgradeable(lpToken).balanceOf(address(this)));
+        //remove liquidity one coin stage
+        address lpToken = lp_token[_params.remove];
+        IERC20Upgradeable(lpToken).approve(_params.remove, 0); //CurveV2 token support
+        IERC20Upgradeable(lpToken).approve(_params.remove, IERC20Upgradeable(lpToken).balanceOf(address(this)));
 
-            uint256 token_amount = IERC20Upgradeable(lpToken).balanceOf(address(this));
-            uint256 min_amount = IStableSwapPool(_params.remove).calc_withdraw_one_coin(token_amount, _params.x);
+        uint256 token_amount = IERC20Upgradeable(lpToken).balanceOf(address(this));
+        uint256 min_amount = IStableSwapPool(_params.remove).calc_withdraw_one_coin(token_amount, _params.x);
 
-            // inconsistency check
-            if (_params.expected_min_amount > min_amount) {
-                IERC20Upgradeable(lpToken).safeTransfer(_params.to, token_amount);
-                emit InconsistencyCallback(_params.remove, lpToken, _params.to, token_amount);
-                return;
-            }
+        //inconsistency check
+        if (_params.expected_min_amount > min_amount) {
+            IERC20Upgradeable(lpToken).safeTransfer(_params.to, token_amount);
+            emit InconsistencyCallback(_params.remove, lpToken, _params.to, token_amount);
+            return;
+        }
 
-            // remove liquidity
-            IStableSwapPool(_params.remove).remove_liquidity_one_coin(token_amount, _params.x, min_amount);
+        //remove liquidity
+        IStableSwapPool(_params.remove).remove_liquidity_one_coin(token_amount, _params.x, 0);
 
-            // transfer asset to the recipient (unsynth)
-            uint256 thisBalance = IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).balanceOf(address(this));
+        //transfer asset to the recipient (unsynth if mentioned)
+        uint256 thisBalance = IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).balanceOf(
+            address(this)
+        );
+        if (_params.chainID != 0) {
             IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).approve(synthesis, thisBalance);
             ISynthesis(synthesis).burnSyntheticToken(
-                pool[_params.remove].at(uint256(int256(_params.x))), 
-                thisBalance,  
+                pool[_params.remove].at(uint256(int256(_params.x))),
+                thisBalance,
                 _params.to,
                 _params.receiveSide,
                 _params.oppositeBridge,
                 _params.chainID
             );
+        } else {
+            IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).safeTransfer(
+                _params.to,
+                thisBalance
+            );
+        }
+    }
 
+    ///@dev Redeem EUSD with unsynth operation (hub chain execution only)
+    ///@param _params meta redeem EUSD params
+    ///@param _receiveSide calldata recipient address for unsynth operation
+    ///@param _oppositeBridge opposite bridge contract address
+    ///@param _chainID opposite chain ID
+    /////////////////////////////////////////////////////////////
+    function redeem_eusd(
+        MetaRedeemEUSD memory _params,
+        address _receiveSide,
+        address _oppositeBridge,
+        uint256 _chainID
+    ) external {
+        {
+            //hub pool remove_liquidity_one_coin stage
+            address hubLpToken = lp_token[_params.remove_h];
+            IERC20Upgradeable(hubLpToken).safeTransferFrom(_msgSender(), address(this), _params.token_amount_h);
+            IERC20Upgradeable(hubLpToken).approve(_params.remove_h, 0); //CurveV2 token support
+            IERC20Upgradeable(hubLpToken).approve(_params.remove_h, _params.token_amount_h);
+
+            //inconsistency check
+            uint256 hubLpTokenBalance = IERC20Upgradeable(hubLpToken).balanceOf(address(this));
+            uint256 min_amounts_h = IStableSwapPool(_params.remove_h).calc_withdraw_one_coin(
+                _params.token_amount_h,
+                _params.y
+            );
+
+            if (_params.expected_min_amount_h > min_amounts_h) {
+                IERC20Upgradeable(hubLpToken).safeTransfer(_params.to, hubLpTokenBalance);
+                emit InconsistencyCallback(_params.remove_h, hubLpToken, _params.to, hubLpTokenBalance);
+
+                return;
+            }
+            IStableSwapPool(_params.remove_h).remove_liquidity_one_coin(_params.token_amount_h, _params.y, 0);
+
+            //crosschain pool remove_liquidity_one_coin stage
+            uint256 hubCoinBalance = IERC20Upgradeable(pool[_params.remove_h].at(uint256(int256(_params.y)))).balanceOf(
+                address(this)
+            );
+            uint256 min_amounts_c = IStableSwapPool(_params.remove_c).calc_withdraw_one_coin(hubCoinBalance, _params.x);
+
+            //inconsistency check
+            if (_params.expected_min_amount_c > min_amounts_c) {
+                IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).safeTransfer(
+                    _params.to,
+                    hubCoinBalance
+                );
+                emit InconsistencyCallback(
+                    _params.remove_c,
+                    pool[_params.remove_c].at(uint256(int256(_params.x))),
+                    _params.to,
+                    hubLpTokenBalance
+                );
+                return;
+            }
+
+            IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).approve(_params.remove_c, 0); //CurveV2 token support
+            IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).approve(
+                _params.remove_c,
+                hubCoinBalance
+            );
+            IStableSwapPool(_params.remove_c).remove_liquidity_one_coin(hubCoinBalance, _params.x, 0);
+        }
+        //transfer outcome to the recipient (unsynth if mentioned)
+        uint256 thisBalance = IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).balanceOf(
+            address(this)
+        );
+        if (_chainID != 0) {
+            IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).approve(synthesis, thisBalance);
+            ISynthesis(synthesis).burnSyntheticToken(
+                pool[_params.remove_c].at(uint256(int256(_params.x))),
+                thisBalance,
+                _params.to,
+                _receiveSide,
+                _oppositeBridge,
+                _chainID
+            );
+        } else {
+            IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).safeTransfer(
+                _params.to,
+                thisBalance
+            );
+        }
     }
 }

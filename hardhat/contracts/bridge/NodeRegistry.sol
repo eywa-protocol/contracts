@@ -57,6 +57,7 @@ contract NodeRegistry is Bridge {
         address _forwarder
     ) public initializer {
         require(_EYWA != address(0), Errors.ZERO_ADDRESS);
+
         EYWA = _EYWA;
         Bridge.initialize(_forwarder);
     }

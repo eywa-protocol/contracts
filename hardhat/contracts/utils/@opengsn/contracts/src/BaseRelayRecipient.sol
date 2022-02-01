@@ -11,7 +11,7 @@ import "./IRelayRecipient.sol";
  * A subclass must use "_msgSender()" instead of "msg.sender"
  */
 abstract contract BaseRelayRecipient {
-   
+
     /*
      * Forwarder singleton we accept calls from
      */
@@ -62,5 +62,4 @@ abstract contract BaseRelayRecipient {
             return msg.data;
         }
     }
-
 }

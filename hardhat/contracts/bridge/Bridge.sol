@@ -24,6 +24,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
     function initialize(address forwarder) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
+
         versionRecipient = "2.2.3";
         dao = _msgSender();
         _setTrustedForwarder(forwarder);

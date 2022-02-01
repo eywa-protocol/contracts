@@ -83,10 +83,10 @@ module.exports = {
   etherscan: {
     apiKey: {
         rinkeby: process.env.ETHERSCAN_API_KEY,
-        bsctestnet: process.env.BINANCESCAN_API_KEY,
-        mumbai: process.env.POLYGONSCAN_API_KEY,
-        avalanchetestnet: process.env.AVALANCHESCAN_API_KEY,
-        hecotestnet: process.env.HECOINFOSCAN_API_KEY
+        bscTestnet: process.env.BINANCESCAN_API_KEY,
+        polygonMumbai: process.env.POLYGONSCAN_API_KEY,
+        avalancheFujiTestnet: process.env.AVALANCHESCAN_API_KEY,
+        hecoTestnet: process.env.HECOINFOSCAN_API_KEY
     }
   },
   gasReporter: {

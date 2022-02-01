@@ -63,6 +63,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
+
         versionRecipient = "2.2.3";
         bridge = _bridge;
         _setTrustedForwarder(_trustedForwarder);

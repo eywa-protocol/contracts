@@ -11,3 +11,8 @@ for net in ${nets//\,/ }
   do
   npx hardhat run --no-compile ./scripts/meta_exchange/add-liquidity-hub-pool.js  --network ${net}
 done
+
+for net in ${nets//\,/ }
+  do
+  npx hardhat run --no-compile ./scripts/meta_exchange/add-liquidity-local-pool.js  --network ${net}
+done
