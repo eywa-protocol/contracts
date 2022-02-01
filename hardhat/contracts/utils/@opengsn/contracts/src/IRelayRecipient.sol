@@ -21,7 +21,7 @@ abstract contract IRelayRecipient {
      * otherwise, return `msg.sender`
      * should be used in the contract anywhere instead of msg.sender
      */
-    function _msgSender() internal virtual view returns (address);
+    function _msgSender() internal virtual view returns (address payable);
 
     /**
      * return the msg.data of this call.
@@ -30,7 +30,7 @@ abstract contract IRelayRecipient {
      * otherwise (if the call was made directly and not through the forwarder), return `msg.data`
      * should be used in the contract instead of msg.data, where this difference matters.
      */
-    function _msgData() internal virtual view returns (bytes calldata);
+    function _msgData() internal virtual view returns (bytes memory);
 
     function versionRecipient() external virtual view returns (string memory);
 }
