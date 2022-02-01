@@ -18,7 +18,9 @@ async function main() {
 
     // Deploy Bridge
     const _Bridge = await ethers.getContractFactory("Bridge");
-    const bridge = await _Bridge.deploy(forwarder.address);
+    //const bridge = await _Bridge.deploy(forwarder.address);
+    const bridge = await upgrades.deployProxy(_Bridge, [forwarder.address], { initializer: 'initialize' });
+
     await bridge.deployed();
 
     networkConfig[network.name].bridge = bridge.address;

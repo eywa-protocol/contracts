@@ -35,15 +35,15 @@ contract TestForward is BaseRelayRecipient {
 
     function testExecute(
         ForwardRequest memory req,
-        bytes32 /*domainSeparator*/,
-        bytes32 /*requestTypeHash*/,
-        bytes memory /*suffixData*/,
-        bytes calldata /*sig*/
+        bytes32 domainSeparator,
+        bytes32 requestTypeHash,
+        bytes memory suffixData,
+        bytes calldata sig
     ) external payable
     returns (bool success, string memory ret) {
         require(req.data.length > 0, "req.data absent");
         return (true, "returned test value");
     }
 
-    string public override versionRecipient = "Hello world!";
+    string public versionRecipient = "Hello world!";
 }

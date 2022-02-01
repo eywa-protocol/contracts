@@ -23,9 +23,9 @@ interface IERC20 {
     ) external;
 }
 
-contract Portal is RelayRecipientUpgradable, SolanaSerialize {
+contract Portal is RelayRecipient, SolanaSerialize {
     mapping(address => uint256) public balanceOf;
-    string public override versionRecipient;
+    string public versionRecipient;
     address public bridge;
     address public proxy;
 
