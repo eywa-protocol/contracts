@@ -15,16 +15,16 @@ npm: copy_configs
 
 wrappers: npm compile copy_configs
 	cd wrappers-builder && go build && cd ..
-	./wrappers-builder/wrappers-builder --json hardhat/artifacts/@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol --pkg wrappers --out ../wrappers
-	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/bridge/Bridge.sol --pkg wrappers --out ../wrappers
-	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/bridge/Forwarder.sol --pkg wrappers --out ../wrappers
-	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/bridge/NodeRegistry.sol --pkg wrappers --out ../wrappers
-	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/bridge/RelayerPool.sol --pkg wrappers --out ../wrappers
-	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/bridge/mocks/MockDexPool.sol --pkg wrappers --out ../wrappers
-	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/bridge/test/TestTarget.sol --pkg wrappers --out ../wrappers
-	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/bridge/test/TestForward.sol --pkg wrappers --out ../wrappers
-	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/bridge/test/TestERC20Permit.sol --pkg wrappers --out ../wrappers
-	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/bridge/merkle/MerkleTest.sol --pkg wrappers --out ../wrappers
+	./wrappers-builder/wrappers-builder --json hardhat/artifacts/@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol \
+	--json ${ARTIFACTS}/bridge/Bridge.sol \
+	--json ${ARTIFACTS}/bridge/Forwarder.sol \
+	--json ${ARTIFACTS}/bridge/NodeRegistry.sol \
+	--json ${ARTIFACTS}/bridge/RelayerPool.sol \
+	--json ${ARTIFACTS}/bridge/mocks/MockDexPool.sol \
+	--json ${ARTIFACTS}/bridge/test/TestTarget.sol \
+	--json ${ARTIFACTS}/bridge/test/TestForward.sol \
+	--json ${ARTIFACTS}/bridge/test/TestERC20Permit.sol \
+	--json ${ARTIFACTS}/bridge/merkle/MerkleTest.sol --pkg wrappers --out ../wrappers
 	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/amm_pool/Portal.sol --pkg portal --out ../wrappers/portal
 	./wrappers-builder/wrappers-builder --json ${ARTIFACTS}/amm_pool/Synthesis.sol --pkg synthesis --out ../wrappers/synthesis
 	# go run wrappers-builder/main.go --json ${ARTIFACTS}/gassless/ImportArtifacts.sol --pkg gassless --out ../wrappers/gassless

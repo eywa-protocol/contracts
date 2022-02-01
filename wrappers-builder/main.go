@@ -30,11 +30,11 @@ var (
 	app         *cli.App
 	packageName string
 	outputDir   string
-	solFlag     = cli.StringFlag{
+	solFlag     = cli.StringSliceFlag{
 		Name:  "sol",
 		Usage: "this flag defines that input files will be .sol's and should be compiled with build/wrappers/solc",
 	}
-	jsonFlag = cli.StringFlag{
+	jsonFlag = cli.StringSliceFlag{
 		Name:  "json",
 		Usage: "this flag defines that input files will be .json's compiled by Truffle",
 	}
@@ -75,22 +75,24 @@ func main() {
 }
 
 // findAllSourceFiles recursively find files in directory with root root path with given extensions
-func findAllSourceFiles(root, extension string) ([]string, error) {
+func findAllSourceFiles(roots []string, extension string) ([]string, error) {
 	var sourceFiles []string
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
+	for _, root := range roots {
+		err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+			if filepath.Ext(path) == extension && !strings.Contains(path, ".dbg.json") {
+				sourceFiles = append(sourceFiles, path)
+			}
 			return nil
+		})
+		if err != nil {
+			continue
 		}
-		if filepath.Ext(path) == extension && !strings.Contains(path, ".dbg.json") {
-			sourceFiles = append(sourceFiles, path)
-		}
-		return nil
-	})
-	if err != nil {
-		return []string{}, err
 	}
 	return sourceFiles, nil
 }
@@ -235,8 +237,8 @@ func compile(c *cli.Context) {
 	)
 	switch {
 	case c.IsSet(solFlag.Name):
-		root := c.String("sol")
-		sourceFiles, err = findAllSourceFiles(root, ".sol")
+		roots := c.StringSlice("sol")
+		sourceFiles, err = findAllSourceFiles(roots, ".sol")
 		if err != nil {
 			panic(err)
 		}
@@ -252,8 +254,8 @@ func compile(c *cli.Context) {
 		}
 		contracts, err = compiler.CompileSolidity(solcPath, sourceFiles...)
 	case c.IsSet(jsonFlag.Name):
-		root := c.String("json")
-		sourceFiles, err = findAllSourceFiles(root, ".json")
+		roots := c.StringSlice("json")
+		sourceFiles, err = findAllSourceFiles(roots, ".json")
 		logrus.Printf("found %d files", reflect.ValueOf(sourceFiles).Len())
 		if err != nil {
 			panic(err)
