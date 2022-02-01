@@ -47,8 +47,8 @@ abstract contract BridgeCore {
         bytes32 oppositeBridge,
         bytes32 to
     ) external virtual/**  onlyOwner*/  {
-        require(to != "", "NULL ADDRESS TO");
-        require(from != "", "NULL ADDRESS FROM");
+        require(to != "", "Bridge: invalid 'to' address");
+        require(from != "", "Bridge: invalid 'from' address");
         // TODO
         // to prevent malicious behaviour like switching between older and newer contracts (need to use DAO/Owner for this!)
         contractBind[from][oppositeBridge][to] = true;
@@ -86,6 +86,6 @@ abstract contract BridgeCore {
     * @param nonce provided sender's nonce
     */
     function verifyAndUpdateNonce(address from, uint256 nonce) internal {
-        require(nonces[from]++ == nonce, "nonce mismatch");
+        require(nonces[from]++ == nonce, "Bridge: nonce mismatch");
     }
 }

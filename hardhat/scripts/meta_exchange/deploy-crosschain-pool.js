@@ -3,7 +3,7 @@ const { network } = require("hardhat");
 const { getRepresentation } = require("../../utils/helper");
 let deployInfo = require('../../helper-hardhat-config.json')
 
-// eth pool params
+// crosschain pool params
 const A = 100                 // amplification coefficient for the pool.
 const fee = 4000000           // pool swap fee
 const admin_fee = 5000000000
@@ -89,7 +89,7 @@ async function main() {
       await crosschainPoolLp.deployed()
       deployInfo[network.name].crosschainPool[i].lp.push({ address: crosschainPoolLp.address, name: await crosschainPoolLp.name(), symbol: await crosschainPoolLp.symbol() });
 
-      // deploy an eth pool
+      // deploy crosschain pool
       switch (poolSize) {
         case 2:
           crosschainPool = await StableSwap2Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee)
