@@ -5,7 +5,7 @@ const { ethers } = require("hardhat");
 
 describe("E2E CurveProxy local test", () => {
 
-    before(async () => {
+    beforeEach(async () => {
         ERC20A = artifacts.require('ERC20Mock')
         ERC20B = artifacts.require('ERC20Mock')
         ERC20C = artifacts.require('ERC20Mock')
@@ -43,15 +43,143 @@ describe("E2E CurveProxy local test", () => {
     })
 
 
-    it("Mint EUSD: network1 -> network2(hub)", async function () {
-        selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
-            'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address),address[3],uint256[3],bytes32[3])'
-        )
+    // it("Mint EUSD: network1 -> network2(hub)", async function () {
+    //     selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
+    //         'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address),address[3],uint256[3],bytes32[3])'
+    //     )
 
-        this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
-        this.tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
-        this.tokenA3 = await ERC20A.at(deployInfo["network1"].localToken[2].address)
-        this.portalA = await PortalA.at(deployInfo["network1"].portal)
+    //     this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
+    //     this.tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
+    //     this.tokenA3 = await ERC20A.at(deployInfo["network1"].localToken[2].address)
+    //     this.portalA = await PortalA.at(deployInfo["network1"].portal)
+    //     this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
+    //     this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
+    //     this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
+    //     this.EUSD = await ERC20B.at(deployInfo["network2"].hubPool.lp)
+
+    //     this.balanceEUSD = (await this.EUSD.balanceOf(userNet2)).toString()
+
+    //     //synthesize params
+    //     const synthParams = {
+    //         chain2address: deployInfo["network2"].curveProxy,
+    //         receiveSide: deployInfo["network2"].curveProxy,
+    //         oppositeBridge: deployInfo["network2"].bridge,
+    //         chainID: deployInfo["network2"].chainId
+    //     }
+
+    //     const mintEUSDparams = {
+    //         add_c: deployInfo["network2"].crosschainPool[0].address,
+    //         //add liquidity params
+    //         expected_min_mint_amount_c: 0,
+    //         //exchange params
+    //         lp_index: 0,
+    //         add_h: deployInfo["network2"].hubPool.address,
+    //         expected_min_mint_amount_h: 0,
+    //         to: userNet2
+    //     }
+
+    //     const encodedTransitData = web3.eth.abi.encodeParameters(
+    //         ["address", "uint256", "uint256", "address", "uint256", "address"],
+    //         [mintEUSDparams.add_c,
+    //         mintEUSDparams.expected_min_mint_amount_c,
+    //         mintEUSDparams.lp_index,
+    //         /////
+    //         mintEUSDparams.add_h,
+    //         /////
+    //         mintEUSDparams.expected_min_mint_amount_h,
+    //         mintEUSDparams.to
+    //         ]
+    //     )
+
+    //     await this.tokenA1.approve(this.portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+    //     const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
+    //     const testAmount = Math.floor((Math.random() * 100) + 1);
+    //     amounts[0] = ethers.utils.parseEther(testAmount + ".0")
+    //     const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
+
+    //     await this.portalA.synthesize_batch_transit(
+    //         tokensToSynth,
+    //         amounts,
+    //         synthParams,
+    //         selectorMintEUSD,
+    //         encodedTransitData,
+    //         { from: userNet1, gas: 1000_000 }
+    //     )
+
+    //     await timeout(15000)
+    //     assert(this.balanceEUSD < await this.EUSD.balanceOf(userNet2))
+    // })
+
+    // it("Mint EUSD: network3 -> network2(hub)", async function () {
+    //     selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
+    //         'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address),address[3],uint256[3],bytes32[3])'
+    //     )
+
+    //     this.tokenA1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
+    //     this.tokenA2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
+    //     this.tokenA3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
+    //     this.portalA = await PortalC.at(deployInfo["network3"].portal)
+    //     this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
+    //     this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
+    //     this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
+    //     this.EUSD = await ERC20B.at(deployInfo["network2"].hubPool.lp)
+
+    //     this.balanceEUSD = (await this.EUSD.balanceOf(userNet2)).toString()
+
+    //     //synthesize params
+    //     const synthParams = {
+    //         chain2address: deployInfo["network2"].curveProxy,
+    //         receiveSide: deployInfo["network2"].curveProxy,
+    //         oppositeBridge: deployInfo["network2"].bridge,
+    //         chainID: deployInfo["network2"].chainId
+    //     }
+
+    //     const mintEUSDparams = {
+    //         add_c: deployInfo["network2"].crosschainPool[0].address,
+    //         //add liquidity params
+    //         expected_min_mint_amount_c: 0,
+    //         //exchange params
+    //         lp_index: 0,
+    //         add_h: deployInfo["network2"].hubPool.address,
+    //         expected_min_mint_amount_h: 0,
+    //         to: userNet2
+    //     }
+
+    //     const encodedTransitData = web3.eth.abi.encodeParameters(
+    //         ["address", "uint256", "uint256", "address", "uint256", "address"],
+    //         [mintEUSDparams.add_c,
+    //         mintEUSDparams.expected_min_mint_amount_c,
+    //         mintEUSDparams.lp_index,
+    //         /////
+    //         mintEUSDparams.add_h,
+    //         /////
+    //         mintEUSDparams.expected_min_mint_amount_h,
+    //         mintEUSDparams.to
+    //         ]
+    //     )
+
+    //     await this.tokenA1.approve(this.portalA.address, totalSupply, { from: userNet3, gas: 300_000 })
+    //     const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
+    //     const testAmount = Math.floor((Math.random() * 100) + 1);
+    //     amounts[0] = ethers.utils.parseEther(testAmount + ".0")
+    //     const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
+
+    //     await this.portalA.synthesize_batch_transit(
+    //         tokensToSynth,
+    //         amounts,
+    //         synthParams,
+    //         selectorMintEUSD,
+    //         encodedTransitData,
+    //         { from: userNet3, gas: 1000_000 }
+    //     )
+
+    //     await timeout(15000)
+    //     assert(this.balanceEUSD < await this.EUSD.balanceOf(userNet2).toString())
+    // })
+
+    it("Mint EUSD: network2(hub) -> network2(hub)", async function () { 
+
+        this.curveproxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
         this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
         this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
         this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -59,61 +187,35 @@ describe("E2E CurveProxy local test", () => {
 
         this.balanceEUSD = (await this.EUSD.balanceOf(userNet2)).toString()
 
-        //synthesize params
-        const synthParams = {
-            chain2address: deployInfo["network2"].curveProxy,
-            receiveSide: deployInfo["network2"].curveProxy,
-            oppositeBridge: deployInfo["network2"].bridge,
-            chainID: deployInfo["network2"].chainId
-        }
-
         const mintEUSDparams = {
-            add_c: deployInfo["network2"].crosschainPool[0].address,
+            add_c: deployInfo["network2"].localPool.address,
             //add liquidity params
             expected_min_mint_amount_c: 0,
             //exchange params
-            lp_index: 0,
+            lp_index: 2,
             add_h: deployInfo["network2"].hubPool.address,
             expected_min_mint_amount_h: 0,
             to: userNet2
         }
 
-        const encodedTransitData = web3.eth.abi.encodeParameters(
-            ["address", "uint256", "uint256", "address", "uint256", "address"],
-            [mintEUSDparams.add_c,
-            mintEUSDparams.expected_min_mint_amount_c,
-            mintEUSDparams.lp_index,
-            /////
-            mintEUSDparams.add_h,
-            /////
-            mintEUSDparams.expected_min_mint_amount_h,
-            mintEUSDparams.to
-            ]
-        )
-
-        await this.tokenA1.approve(this.portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+        //await this.tokenA1.approve(this.curveproxyB.address, totalSupply, { from: userNet2, gas: 300_000 })
+        await this.tokenB1.approve(this.curveproxyB.address, 0, { from: userNet2, gas: 300_000 });
+        await this.tokenB1.approve(this.curveproxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
         const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
         const testAmount = Math.floor((Math.random() * 100) + 1);
         amounts[0] = ethers.utils.parseEther(testAmount + ".0")
-        const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
+        const tokensToSynth = [this.tokenB1.address, this.tokenB2.address, this.tokenB3.address]
 
-        await this.portalA.synthesize_batch_transit(
+        await this.curveproxyB.add_liquidity_3pool_mint_eusd(
+            mintEUSDparams,
             tokensToSynth,
             amounts,
-            synthParams,
-            selectorMintEUSD,
-            encodedTransitData,
-            { from: userNet1, gas: 1000_000 }
+            { from: userNet2, gas: 1000_000 }
         )
 
         await timeout(15000)
-        assert(this.balanceEUSD < await this.EUSD.balanceOf(userNet2))
+        assert(this.balanceEUSD < await this.EUSD.balanceOf(userNet2).toString())
     })
-
-
-    //TODO
-    it("???-TODO-: Mint EUSD: network3 -> network2(hub)", async function () { })
-    it("???-TODO-: Mint EUSD: network2(hub) -> network2(hub)", async function () { })
 
 
     it("Redeem EUSD: network2(hub) -> network1", async function () {
@@ -162,9 +264,51 @@ describe("E2E CurveProxy local test", () => {
         assert(this.balanceA3 < await this.tokenA3.balanceOf(userNet1))
     })
 
-
+    it("Redeem EUSD: network2(hub) -> network3", async function () { 
     //TODO
-    it("???-TODO-: Redeem EUSD: network2(hub) -> network3", async function () { })
+        this.curveProxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+        this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
+        this.tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
+        this.tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
+        this.EUSD = await ERC20B.at(deployInfo["network2"].hubPool.lp)
+
+        this.balanceC3 = (await this.tokenC3.balanceOf(userNet3)).toString()
+
+        //unsynthesize params
+        const unsynthParams = {
+            receiveSide: deployInfo["network3"].portal,
+            oppositeBridge: deployInfo["network3"].bridge,
+            chainID: deployInfo["network3"].chainId
+        }
+
+        const redeemEUSDParams = {
+            remove_c: deployInfo["network2"].crosschainPool[1].address,
+            x: 2,
+            expected_min_amount_c: 0,
+            //hub pool params
+            remove_h: deployInfo["network2"].hubPool.address,
+            //amount to transfer
+            token_amount_h: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
+            y: 1,
+            expected_min_amount_h: 0,
+            //recipient address
+            to: userNet3
+        }
+
+        await this.EUSD.approve(this.curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
+        await this.EUSD.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
+
+        await this.curveProxyB.redeem_eusd(
+            redeemEUSDParams,
+            unsynthParams.receiveSide,
+            unsynthParams.oppositeBridge,
+            unsynthParams.chainID,
+            { from: userNet2, gas: 1000_000 }
+        )
+
+        await timeout(15000)
+        assert(this.balanceC3 < await this.tokenC3.balanceOf(userNet3).toString())
+     })
 
 
     it("Exchange: network1 -> network3", async function () {
@@ -398,8 +542,53 @@ describe("E2E CurveProxy local test", () => {
         assert(this.balanceA2 < await this.tokenA2.balanceOf(userNet1))
     })
 
+    it("Exchange: network2(hub) -> network3", async function () { 
+        this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
+        this.tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
+        this.tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
+        this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
+        this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
+        this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
+        this.curveProxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
 
-    //TODO
-    it("???-TODO-: Exchange: network2(hub) -> network3", async function () { })
+        this.balanceC2 = (await this.tokenC2.balanceOf(userNet3)).toString()
+
+        const metaExchangeParams = {
+            add: deployInfo["network2"].localPool.address,
+            exchange: deployInfo["network2"].hubPool.address,  //exchange pool address
+            remove: deployInfo["network2"].crosschainPool[1].address,         //remove pool address
+            //add liquidity params
+            expected_min_mint_amount: 0,
+            //exchange params
+            i: 2,                                             //index value for the coin to send
+            j: 1,                                             //index value of the coin to receive
+            expected_min_dy: 0,
+            //withdraw one coin params
+            x: 1,                                             // index value of the coin to withdraw
+            expected_min_amount: 0,
+            //mint synth params
+            to: userNet3,
+            //unsynth params
+            chain2address: deployInfo["network3"].portal,
+            receiveSide: deployInfo["network3"].portal,
+            oppositeBridge: deployInfo["network3"].bridge,
+            chainID: deployInfo["network3"].chainId
+        }
+
+        await this.tokenB1.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 })
+        const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
+        const testAmount = Math.floor((Math.random() * 100) + 1);
+        amounts[0] = ethers.utils.parseEther(testAmount + ".0")
+        const tokens = [this.tokenB1.address, this.tokenB2.address, this.tokenB3.address]
+
+        await this.curveProxyB.meta_exchange(
+            metaExchangeParams,
+            tokens,
+            amounts,
+            { from: userNet2, gas: 1000_000 }
+        )
+        await timeout(25000)
+        assert(this.balanceC2 < await this.tokenC2.balanceOf(userNet3).toString())
+    })
 
 })
