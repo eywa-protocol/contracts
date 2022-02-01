@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"go/format"
 	"io/ioutil"
 	"os"
 	"path"
@@ -13,7 +15,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/compiler"
 	"github.com/sirupsen/logrus"
 	cli "gopkg.in/urfave/cli.v1"
@@ -73,7 +74,7 @@ func main() {
 	app.Run(os.Args)
 }
 
-//findAllSourceFiles recursively find files in directory with root root path with given extensions
+// findAllSourceFiles recursively find files in directory with root root path with given extensions
 func findAllSourceFiles(root, extension string) ([]string, error) {
 	var sourceFiles []string
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -94,48 +95,68 @@ func findAllSourceFiles(root, extension string) ([]string, error) {
 	return sourceFiles, nil
 }
 
-//dumpContracts generates go binding files from contract ABI and write them to files
+// dumpContracts generates go binding files from contract ABI and write them to files
 func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputDir string) error {
 	for key, value := range contracts {
-		//logrus.Printf("VALUE %x \n",value.Code)
-		//logrus.Printf("KEY %s \n",key)
+		// logrus.Printf("VALUE %x \n",value.Code)
+		// logrus.Printf("KEY %s \n",key)
 		var (
 			types   []string
 			fsigs   []map[string]string
 			libs    = make(map[string]string)
 			aliases = make(map[string]string)
 		)
-		logrus.Print("1")
-		//logrus.Print(value)
+		// logrus.Print(value)
 
-		//if value.Code == "0x" {
+		// if value.Code == "0x" {
 		abi, err := json.Marshal(value.Info.AbiDefinition)
 		if err != nil {
 			logrus.Fatal(err)
 			return err
 		}
-		logrus.Print("2")
 		keyParts := strings.Split(key, ":")
 		types = append(types, keyParts[len(keyParts)-1])
 		fsigs = append(fsigs, value.Hashes)
-		logrus.Print("3")
-		code, err := bind.Bind(types, []string{string(abi)}, []string{value.Code}, fsigs, packageName, bind.LangGo, libs, aliases)
+		code, err := Bind(types, []string{string(abi)}, []string{value.Code}, fsigs, packageName, LangGo, libs, aliases, tmplSource)
 		if err != nil {
 			logrus.Fatal(err)
 			return err
 		}
-		logrus.Print("4")
 		if err := os.MkdirAll(outputDir, 0700); err != nil {
 			logrus.Fatal(err)
 			return err
 		}
-		//logrus.Print(code)
+		// logrus.Print(code)
 		if err := ioutil.WriteFile(filepath.Join(outputDir, types[0]+".go"), []byte(code), 0600); err != nil {
 			logrus.Fatal(err)
 			return err
 		}
 	}
-	//}
+	// }
+	// Libs code
+	buf := new(bytes.Buffer)
+
+	tmpl := template.Must(template.New("").Parse(templateGSNBaseGo))
+	if err := tmpl.Execute(buf, nil); err != nil {
+		logrus.Fatal(err)
+		return err
+	}
+	// For Go bindings pass the code through gofmt to clean it up
+	code, err := format.Source(buf.Bytes())
+	if err != nil {
+		err = fmt.Errorf("%v\n%s", err, buf)
+		logrus.Fatal(err)
+		return err
+	}
+	if err = os.MkdirAll(outputDir, 0700); err != nil {
+		logrus.Fatal(err)
+		return err
+	}
+	// logrus.Print(code)
+	if err := ioutil.WriteFile(filepath.Join(outputDir, "libs.go"), []byte(code), 0600); err != nil {
+		logrus.Fatal(err)
+		return err
+	}
 	return nil
 }
 
@@ -149,7 +170,7 @@ func findContract(name string, contracts map[string]*compiler.Contract) *compile
 	return nil
 }
 
-//updateFront generates JS binding file from contract ABI
+// updateFront generates JS binding file from contract ABI
 func updateFront(contracts map[string]*compiler.Contract) {
 	js, err := os.Create("./arm/src/contracts.json")
 	if err != nil {
@@ -203,7 +224,7 @@ func PackagePathFile(name string) string {
 	return path.Join(filepath.Dir(thisFile), name)
 }
 
-//Method compiles go wrappers from sol files or json files
+// Method compiles go wrappers from sol files or json files
 func compile(c *cli.Context) {
 	outputDir = c.String("output")
 	packageName = c.String("package")
@@ -238,7 +259,7 @@ func compile(c *cli.Context) {
 			panic(err)
 		}
 		contracts, err = CompileJson(sourceFiles...)
-		//logrus.Printf("DUMPING CONTRACTS %t package %s dir %s",contracts, packageName, outputDir)
+		// logrus.Printf("DUMPING CONTRACTS %t package %s dir %s",contracts, packageName, outputDir)
 	default:
 		panic("You should either set --sol or --json flag. Run command with --help or --h flag to see more information about command")
 	}
@@ -252,18 +273,18 @@ func compile(c *cli.Context) {
 		logrus.Fatal(err)
 		panic(err)
 	}
-	//updateFront(contracts)
+	// updateFront(contracts)
 }
 
 func CompileJson(sourcefiles ...string) (contracts map[string]*compiler.Contract, err error) {
 	contracts = make(map[string]*compiler.Contract)
 	for num, file := range sourcefiles {
 		logrus.Printf("number %d file %s", num, file)
-		//TODO:find a proper way to find contract name
+		// TODO:find a proper way to find contract name
 		o := strings.Split(file, "/")
 		name := strings.Split(o[len(o)-1], ".")[0]
 		jsonOutput, err := ioutil.ReadFile(file)
-		//logrus.Printf("JSON", jsonOutput)
+		// logrus.Printf("JSON", jsonOutput)
 		if err != nil {
 			return contracts, err
 		}
