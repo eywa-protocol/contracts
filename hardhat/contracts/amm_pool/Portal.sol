@@ -5,6 +5,7 @@ import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "./IBridge.sol";
 import "./RelayRecipient.sol";
 import "./SolanaSerialize.sol";
+import "../utils/Typecast.sol";
 
 //TODO: relocate
 interface IERC20 {
@@ -23,7 +24,7 @@ interface IERC20 {
     ) external;
 }
 
-contract Portal is RelayRecipient, SolanaSerialize {
+contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     mapping(address => uint256) public balanceOf;
     string public versionRecipient;
     address public bridge;
@@ -143,10 +144,10 @@ contract Portal is RelayRecipient, SolanaSerialize {
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_oppositeBridge))),
+            castToBytes32(_oppositeBridge),
             _chainID,
-            bytes32(uint256(uint160(_receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(_receiveSide),
+            castToBytes32(_msgSender()),
             nonce
         );
 
@@ -160,9 +161,9 @@ contract Portal is RelayRecipient, SolanaSerialize {
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
-        txState.recipient = bytes32(uint256(uint160(_msgSender())));
-        txState.chain2address = bytes32(uint256(uint160(_chain2address)));
-        txState.rtoken = bytes32(uint256(uint160(_token)));
+        txState.recipient = castToBytes32(_msgSender());
+        txState.chain2address = castToBytes32(_chain2address);
+        txState.rtoken = castToBytes32(_token);
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
@@ -204,7 +205,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
             _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(_msgSender()),
             nonce
         );
 
@@ -264,9 +265,9 @@ contract Portal is RelayRecipient, SolanaSerialize {
         );
 
         TxState storage txState = requests[txID];
-        txState.recipient = bytes32(uint256(uint160(_msgSender())));
+        txState.recipient = castToBytes32(_msgSender());
         txState.chain2address = _pubkeys[uint256(SynthesizePubkeys.chain2address)];
-        txState.rtoken = bytes32(uint256(uint160(_token)));
+        txState.rtoken = castToBytes32(_token);
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
@@ -306,10 +307,10 @@ contract Portal is RelayRecipient, SolanaSerialize {
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_oppositeBridge))),
+            castToBytes32(_oppositeBridge),
             _chainID,
-            bytes32(uint256(uint160(_receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(_receiveSide),
+            castToBytes32(_msgSender()),
             nonce
         );
 
@@ -323,9 +324,9 @@ contract Portal is RelayRecipient, SolanaSerialize {
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
-        txState.recipient = bytes32(uint256(uint160(_msgSender())));
-        txState.chain2address = bytes32(uint256(uint160(_chain2address)));
-        txState.rtoken = bytes32(uint256(uint160(_token)));
+        txState.recipient = castToBytes32(_msgSender());
+        txState.chain2address = castToBytes32(_chain2address);
+        txState.rtoken = castToBytes32(_token);
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
@@ -340,18 +341,14 @@ contract Portal is RelayRecipient, SolanaSerialize {
         TxState storage txState = requests[_txID];
         require(txState.state == RequestState.Sent, "Portal: state not open or tx does not exist");
 
-        txState.state = RequestState.Reverted; // close
-        TransferHelper.safeTransfer(
-            address(uint160(uint256(txState.rtoken))),
-            address(uint160(uint256(txState.recipient))),
-            txState.amount
-        );
+        txState.state = RequestState.Reverted;
+        TransferHelper.safeTransfer(castToAddress(txState.rtoken), castToAddress(txState.recipient), txState.amount);
 
         emit RevertSynthesizeCompleted(
             _txID,
-            address(uint160(uint256(txState.recipient))),
+            castToAddress(txState.recipient),
             txState.amount,
-            address(uint160(uint256(txState.rtoken)))
+            castToAddress(txState.rtoken)
         );
     }
 
@@ -367,14 +364,11 @@ contract Portal is RelayRecipient, SolanaSerialize {
         address _token,
         uint256 _amount,
         address _to
-    ) external onlyTrusted {
+    ) external onlyBridge {
         require(unsynthesizeStates[_txID] == UnsynthesizeState.Default, "Portal: synthetic tokens emergencyUnburn");
-
         TransferHelper.safeTransfer(_token, _to, _amount);
         balanceOf[_token] -= _amount;
-
         unsynthesizeStates[_txID] = UnsynthesizeState.Unsynthesized;
-
         emit BurnCompleted(_txID, _to, _amount, _token);
     }
 
@@ -398,10 +392,10 @@ contract Portal is RelayRecipient, SolanaSerialize {
         // TODO add payment by token
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 txID = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_oppositeBridge))),
+            castToBytes32(_oppositeBridge),
             _chainId,
-            bytes32(uint256(uint160(_receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(_receiveSide),
+            castToBytes32(_msgSender()),
             nonce
         );
         IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainId, txID, _msgSender(), nonce);
@@ -430,7 +424,7 @@ contract Portal is RelayRecipient, SolanaSerialize {
             _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(_msgSender()),
             nonce
         );
 
@@ -524,12 +518,11 @@ contract Portal is RelayRecipient, SolanaSerialize {
     function synthesize_transit(
         address _token,
         uint256 _amount,
-        //////////////////////
         address _chain2address,
         address _receiveSide,
         address _oppositeBridge,
         uint256 _chainID,
-        bytes memory _out
+        bytes calldata _out
     ) external returns (bytes32 txId) {
         // require(
         //     tokenData[_token].length != 0,
@@ -541,32 +534,32 @@ contract Portal is RelayRecipient, SolanaSerialize {
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
 
         txId = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_oppositeBridge))),
+            castToBytes32(_oppositeBridge),
             _chainID,
-            bytes32(uint256(uint160(_receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(_receiveSide),
+            castToBytes32(_msgSender()),
             nonce
         );
 
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(_out, _receiveSide, _oppositeBridge, _chainID, txId, _msgSender(), nonce);
         TxState storage txState = requests[txId];
-        txState.recipient = bytes32(uint256(uint160(_msgSender()))); //change!
-        txState.chain2address = bytes32(uint256(uint160(_chain2address)));
-        txState.rtoken = bytes32(uint256(uint160(_token)));
+        txState.recipient = castToBytes32(_msgSender()); //change!
+        txState.chain2address = castToBytes32(_chain2address);
+        txState.rtoken = castToBytes32(_token);
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
         emit SynthesizeRequest(txId, _msgSender(), _chain2address, _amount, _token);
     }
 
-
+    //TODO: revisit memory location and logic in general (may need to use a single case scenario only)
     function synthesize_batch_transit(
         address[] memory _tokens,
-        uint256[] memory _amounts, // set the amount in order to initiate a synthesize request
+        uint256[] memory _amounts, // set a positive amount in order to initiate a synthesize request
         SynthParams memory _synth_params,
         bytes4 _selector,
-        bytes memory _transit_data,
+        bytes calldata _transit_data,
         PermitData[] memory _permit_data
     ) external {
         bytes32[] memory txId = new bytes32[](_tokens.length);
@@ -594,10 +587,10 @@ contract Portal is RelayRecipient, SolanaSerialize {
                 txId[i] = keccak256(
                     abi.encodePacked(
                         IBridge(bridge).prepareRqId(
-                            bytes32(uint256(uint160(_synth_params.oppositeBridge))),
+                            castToBytes32(_synth_params.oppositeBridge),
                             _synth_params.chainID,
-                            bytes32(uint256(uint160(_synth_params.receiveSide))),
-                            bytes32(uint256(uint160(_msgSender()))),
+                            castToBytes32(_synth_params.receiveSide),
+                            castToBytes32(_msgSender()),
                             nonce
                         ),
                         i
@@ -606,9 +599,9 @@ contract Portal is RelayRecipient, SolanaSerialize {
 
                 // TODO add payment by token
                 TxState storage txState = requests[txId[i]];
-                txState.recipient = bytes32(uint256(uint160(_msgSender()))); //change!
-                txState.chain2address = bytes32(uint256(uint160(_synth_params.chain2address)));
-                txState.rtoken = bytes32(uint256(uint160(_tokens[i])));
+                txState.recipient = castToBytes32(_msgSender()); //change!
+                txState.chain2address = castToBytes32(_synth_params.chain2address);
+                txState.rtoken = castToBytes32(_tokens[i]);
                 txState.amount = _amounts[i];
                 txState.state = RequestState.Sent;
 
@@ -628,10 +621,10 @@ contract Portal is RelayRecipient, SolanaSerialize {
 
         uint256 general_nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 general_txId = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_synth_params.oppositeBridge))),
+            castToBytes32(_synth_params.oppositeBridge),
             _synth_params.chainID,
-            bytes32(uint256(uint160(_synth_params.receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(_synth_params.receiveSide),
+            castToBytes32(_msgSender()),
             general_nonce
         );
 

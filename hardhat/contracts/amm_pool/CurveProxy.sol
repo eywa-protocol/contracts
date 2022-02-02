@@ -220,7 +220,7 @@ contract CurveProxy is Initializable, RelayRecipient {
     function setPool(
         address _pool,
         address _lp_token,
-        address[] memory _coins
+        address[] calldata _coins
     ) public {
         for (uint256 i = 0; i < _coins.length; i++) {
             pool[_pool].add(_coins[i]);
@@ -236,10 +236,10 @@ contract CurveProxy is Initializable, RelayRecipient {
      * @param _txId synth transaction IDs
      */
     function transit_synth_batch_add_liquidity_3pool(
-        AddLiquidity memory _params,
-        address[3] memory _synth_token,
-        uint256[3] memory _synth_amount,
-        bytes32[3] memory _txId
+        AddLiquidity calldata _params,
+        address[3] calldata _synth_token,
+        uint256[3] calldata _synth_amount,
+        bytes32[3] calldata _txId
     ) external onlyBridge {
         address[3] memory representation;
 
@@ -284,10 +284,10 @@ contract CurveProxy is Initializable, RelayRecipient {
      * @param _amount amounts to transfer
      */
     function add_liquidity_3pool_mint_eusd(
-        MetaMintEUSD memory _params,
-        PermitData[] memory _permit,
-        address[3] memory _token,
-        uint256[3] memory _amount
+        MetaMintEUSD calldata _params,
+        PermitData[] calldata _permit,
+        address[3] calldata _token,
+        uint256[3] calldata _amount
     ) external {
         //initial transfer stage
         for (uint256 i = 0; i < _amount.length; i++) {
@@ -360,10 +360,10 @@ contract CurveProxy is Initializable, RelayRecipient {
      * @param _txId transaction IDs
      */
     function transit_synth_batch_add_liquidity_3pool_mint_eusd(
-        MetaMintEUSD memory _params,
-        address[3] memory _synth_token,
-        uint256[3] memory _synth_amount,
-        bytes32[3] memory _txId
+        MetaMintEUSD calldata _params,
+        address[3] calldata _synth_token,
+        uint256[3] calldata _synth_amount,
+        bytes32[3] calldata _txId
     ) external onlyBridge {
         address[3] memory representation;
 
@@ -428,10 +428,10 @@ contract CurveProxy is Initializable, RelayRecipient {
      * @param _amount amounts to transfer within initial stage
      */
     function meta_exchange(
-        MetaExchangeParams memory _params,
-        PermitData[] memory _permit,
-        address[3] memory _token,
-        uint256[3] memory _amount
+        MetaExchangeParams calldata _params,
+        PermitData[] calldata _permit,
+        address[3] calldata _token,
+        uint256[3] calldata _amount
     ) external {
         {
             //initial transfer stage
@@ -550,10 +550,10 @@ contract CurveProxy is Initializable, RelayRecipient {
      * @param _txId synth transaction IDs
      */
     function transit_synth_batch_meta_exchange(
-        MetaExchangeParams memory _params,
-        address[3] memory _synth_token,
-        uint256[3] memory _synth_amount,
-        bytes32[3] memory _txId
+        MetaExchangeParams calldata _params,
+        address[3] calldata _synth_token,
+        uint256[3] calldata _synth_amount,
+        bytes32[3] calldata _txId
     ) external onlyBridge {
         {
             address[3] memory representation;
@@ -669,8 +669,8 @@ contract CurveProxy is Initializable, RelayRecipient {
      * @param _chainID opposite chain ID
      */
     function redeem_eusd(
-        MetaRedeemEUSD memory _params,
-        PermitData memory _permit,
+        MetaRedeemEUSD calldata _params,
+        PermitData calldata _permit,
         address _receiveSide,
         address _oppositeBridge,
         uint256 _chainID

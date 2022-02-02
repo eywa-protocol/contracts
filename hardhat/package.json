@@ -15,7 +15,7 @@
     "clean:ts": "hardhat --config ts-hardhat.config.ts clean",
     "compile:ts": "hardhat --config ts-hardhat.config.ts compile --force",
     "test:ts": "npm run hh:compile:ts && ts-mocha --exit -p ./tsconfig.json ./test/{,**}/*.test.ts",
-    "test:typecast": "hardhat --config ts-hardhat.config.ts test ./test/typecast.test.ts",
+    "test:typecast": "hardhat --config ts-hardhat.config.ts test ./utils/typecast.test.ts",
     "test:solana:calldata": "hardhat --config ts-hardhat.config.ts test ./test/solana/solana-calldata.test.ts",
     "prettier": "prettier --write 'contracts/**/*.sol'"
   },

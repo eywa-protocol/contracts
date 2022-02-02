@@ -7,9 +7,9 @@ import "./interface/INodeRegistry.sol";
 import "@openzeppelin/contracts-newone/utils/Address.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "../amm_pool/RelayRecipient.sol";
+import "../utils/Typecast.sol";
 
-
-contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
+contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecast {
     using AddressUpgradeable for address;
 
     string public versionRecipient;
@@ -19,6 +19,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
     uint32 public epochNum; // Sequential number of the epoch
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
+
     //event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
     function initialize(address forwarder) public initializer {
@@ -32,8 +33,9 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
         require(
-            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][bytes32(uint256(uint160(oppositeBridge)))][
-                bytes32(uint256(uint160(receiveSide)))] == true,
+            contractBind[castToBytes32(address(_msgSender()))][castToBytes32(oppositeBridge)][
+                castToBytes32(receiveSide)
+            ] == true,
             "Bridge: untrusted contract"
         );
         _;
@@ -41,7 +43,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
 
     modifier onlyTrustedContractBytes32(bytes32 receiveSide, bytes32 oppositeBridge) {
         require(
-            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][oppositeBridge][receiveSide] == true,
+            contractBind[castToBytes32(address(_msgSender()))][oppositeBridge][receiveSide] == true,
             "Bridge: untrusted contract"
         );
         _;
@@ -88,9 +90,15 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
 
         if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
             require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "Bridge: not enough participants"); // TODO configure
-            require(epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum), "Bridge: bitmask too big");
+            require(
+                epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum),
+                "Bridge: bitmask too big"
+            );
             bytes memory data = abi.encodePacked(newKey.x, newKey.y, _newEpochParticipantsNum, _newEpochNum);
-            require(verifyMultisig(epochKey, votersPubKey, data, votersSignature, _votersMask), "Bridge: multisig mismatch");
+            require(
+                verifyMultisig(epochKey, votersPubKey, data, votersSignature, _votersMask),
+                "Bridge: multisig mismatch"
+            );
         }
 
         emit NewEpoch(abi.encode(epochKey), abi.encode(newKey), false, _newEpochNum);
@@ -110,7 +118,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
      * @param nonce sender's nonce
      */
     function transmitRequestV2(
-        bytes memory _selector,
+        bytes calldata _selector,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId,
@@ -134,7 +142,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
      * @param nonce sender's nonce
      */
     function transmitRequestV2ToSolana(
-        bytes memory _selector,
+        bytes calldata _selector,
         bytes32 receiveSide,
         bytes32 oppositeBridge,
         uint256 chainId,
@@ -145,7 +153,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
         verifyAndUpdateNonce(sender, nonce);
         emit OracleRequestSolana(
             "setRequest",
-            bytes32(uint256(uint160(address(this)))),
+            castToBytes32(address(this)),
             requestId,
             _selector,
             oppositeBridge,
@@ -166,7 +174,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
      */
     function receiveRequestV2(
         bytes32 _reqId,
-        bytes memory _sel,
+        bytes calldata _sel,
         address _receiveSide,
         bytes32 _bridgeFrom,
         bytes calldata _votersPubKey,
@@ -180,10 +188,16 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
         E2Point memory votersPubKey = decodeE2Point(_votersPubKey);
         E1Point memory votersSignature = decodeE1Point(_votersSignature);
         bytes memory sigData = abi.encodePacked(_reqId, _sel, _receiveSide, _bridgeFrom, epochNum);
-        require(verifyMultisig(epochKey, votersPubKey, sigData, votersSignature, _votersMask), "Bridge: multisig mismatch");
+        require(
+            verifyMultisig(epochKey, votersPubKey, sigData, votersSignature, _votersMask),
+            "Bridge: multisig mismatch"
+        );
 
         bytes memory data = _receiveSide.functionCall(_sel, "Bridge: receiveRequestV2: failed");
-        require(data.length == 0 || abi.decode(data, (bool)), "Bridge: receiveRequestV2: unable to decode returned data");
+        require(
+            data.length == 0 || abi.decode(data, (bool)),
+            "Bridge: receiveRequestV2: unable to decode returned data"
+        );
         emit ReceiveRequest(_reqId, _receiveSide, _bridgeFrom);
     }
 
