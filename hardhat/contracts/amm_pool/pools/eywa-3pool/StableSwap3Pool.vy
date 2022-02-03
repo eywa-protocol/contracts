@@ -6,8 +6,8 @@ from vyper.interfaces import ERC20
 
 interface CurveToken:
     def totalSupply() -> uint256: view
-    def mint(_to: address, _value: uint256) -> bool: nonpayable
-    def burnFrom(_to: address, _value: uint256) -> bool: nonpayable
+    def mint(account: address, amount: uint256): nonpayable
+    def burnFrom(account: address, amount: uint256): nonpayable
 
 
 # Events

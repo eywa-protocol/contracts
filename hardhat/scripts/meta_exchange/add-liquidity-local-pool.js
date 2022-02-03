@@ -9,16 +9,12 @@ async function main() {
   const [owner] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
-  console.log(`Deploying with the account: ${owner.address}`);
+  console.log(`Account: ${owner.address}`);
   const balance = await owner.getBalance();
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
   const ERC20 = await ethers.getContractFactory('ERC20Mock')
-  const Portal = await ethers.getContractFactory('Portal')
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
-  // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
-  // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
-  // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
   
   const totalSupply = ethers.utils.parseEther("100000000000.0")
 

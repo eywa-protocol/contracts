@@ -9,7 +9,7 @@ async function main() {
   const [owner] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
-  console.log(`Deploying with the account: ${owner.address}`);
+  console.log(`Account: ${owner.address}`);
   const balance = await owner.getBalance();
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
@@ -49,7 +49,7 @@ async function main() {
         }
       )
       await tx.wait()
-      console.log("synthesize ETH token", tx.hash)
+      console.log("synthesize stable token:", tx.hash)
       await h.timeout(8_000);
     }
   }
@@ -76,7 +76,7 @@ async function main() {
         }
       )
       await tx.wait()
-      console.log("add_liquidity ETH pool", tx.hash)
+      console.log("add liquidity crosschainPool pool:", tx.hash)
     }
     await h.timeout(5_000);
   }
