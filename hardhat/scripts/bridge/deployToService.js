@@ -43,7 +43,7 @@ async function main() {
 
     // Deploy MockDexPool
     const _MockDexPool = await ethers.getContractFactory("MockDexPool");
-    const mockDexPool = await _MockDexPool.deploy(bridge.address);
+    const mockDexPool = await _MockDexPool.deploy(nodeRegistry.address);
     await mockDexPool.deployed();
     networkConfig[network.name].mockDexPool = mockDexPool.address;
     console.log(`MockDexPool address: ${mockDexPool.address}`);
