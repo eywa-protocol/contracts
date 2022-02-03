@@ -45,5 +45,5 @@ contract TestForward is BaseRelayRecipient {
         return (true, "returned test value");
     }
 
-    string public versionRecipient = "Hello world!";
+    string public override versionRecipient = "Hello world!";
 }

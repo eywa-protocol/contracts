@@ -11,7 +11,7 @@ import "./RelayerPoolFactory.sol";
 
 contract NodeRegistry is Bridge {
     using EnumerableSet for EnumerableSet.AddressSet;
-    using SafeERC20Upgradeable for IERC20Upgradeable;
+    using SafeERC20 for IERC20;
 
     struct Node {
         address owner;     // address of node signer key
@@ -52,14 +52,13 @@ contract NodeRegistry is Bridge {
         uint256 nodeId
     );
 
-    function initialize2(
+    constructor(
         address _EYWA,
         address _forwarder
-    ) public initializer {
+    ) Bridge(_forwarder) {
         require(_EYWA != address(0), Errors.ZERO_ADDRESS);
 
         EYWA = _EYWA;
-        Bridge.initialize(_forwarder);
     }
 
     modifier isNewNode(address _owner) {
@@ -140,7 +139,7 @@ contract NodeRegistry is Bridge {
         uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
         require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");
         IERC20Permit(EYWA).permit(_msgSender(), address(this), nodeBalance, _deadline, _v, _r, _s);
-        IERC20Upgradeable(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
+        IERC20(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
         _node.pool = address(relayerPool);
         addNode(_node);
     }

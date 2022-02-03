@@ -15,8 +15,7 @@ async function main() {
     console.log("Portal address:", portal.address);
 
     const _Synthesis = await ethers.getContractFactory("Synthesis");
-    //const synthesis  = await _Synthesis.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
-    const synthesis = await upgrades.deployProxy(_Synthesis, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder], { initializer: 'initializeFunc' });
+    const synthesis  = await _Synthesis.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
     await synthesis.deployed();
     console.log("Synthesis address:", synthesis.address);
 

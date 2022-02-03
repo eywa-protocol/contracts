@@ -18,7 +18,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     mapping(bytes32 => SynthesizeState) public synthesizeStates;
     address public bridge;
     address public proxy;
-    string public versionRecipient;
+    string public override versionRecipient = "2.2.3";
 
     bytes public constant sighashUnsynthesize =
         abi.encodePacked(uint8(115), uint8(234), uint8(111), uint8(109), uint8(131), uint8(167), uint8(37), uint8(70));
@@ -61,11 +61,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     event RevertBurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event CreatedRepresentation(bytes32 indexed _rtoken, address indexed _stoken);
 
-    function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
-        __Context_init_unchained();
-        __Ownable_init_unchained();
-
-        versionRecipient = "2.2.3";
+    constructor(address _bridge, address _trustedForwarder) {
         bridge = _bridge;
         _setTrustedForwarder(_trustedForwarder);
     }

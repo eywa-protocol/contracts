@@ -1,61 +1,32 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts-newone/access/Ownable.sol";
+import "@openzeppelin/contracts-newone/utils/Context.sol";
+
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
-abstract contract RelayRecipient is ContextUpgradeable, OwnableUpgradeable {
+import "../utils/@opengsn/contracts/src/BaseRelayRecipient.sol";
 
-    /*
-     * Forwarder singleton we accept calls from
-     */
-    address private _trustedForwarder;
-
-    function trustedForwarder() public virtual view returns (address){
-        return _trustedForwarder;
+abstract contract RelayRecipientUpgradable is OwnableUpgradeable, BaseRelayRecipient {
+    function _msgSender() internal override(BaseRelayRecipient, ContextUpgradeable) virtual view returns (address) {
+        return BaseRelayRecipient._msgSender();
     }
 
-    function _setTrustedForwarder(address _forwarder) internal {
-        _trustedForwarder = _forwarder;
+    function _msgData() internal override(BaseRelayRecipient, ContextUpgradeable) virtual view returns (bytes calldata) {
+        return BaseRelayRecipient._msgData();
     }
 
-    function isTrustedForwarder(address forwarder) public virtual view returns(bool) {
-        return forwarder == _trustedForwarder;
+}
+
+abstract contract RelayRecipient is Ownable, BaseRelayRecipient {
+    function _msgSender() internal override(BaseRelayRecipient, Context) virtual view returns (address) {
+        return BaseRelayRecipient._msgSender();
     }
 
-    /**
-     * return the sender of this call.
-     * if the call came through our trusted forwarder, return the original sender.
-     * otherwise, return `msg.sender`.
-     * should be used in the contract anywhere instead of msg.sender
-     */
-    function _msgSender() internal override virtual view returns (address ret) {
-        if (msg.data.length >= 20 && isTrustedForwarder(msg.sender)) {
-            // At this point we know that the sender is a trusted forwarder,
-            // so we trust that the last bytes of msg.data are the verified sender address.
-            // extract sender address from the end of msg.data
-            assembly {
-                ret := shr(96,calldataload(sub(calldatasize(),20)))
-            }
-        } else {
-            ret = msg.sender;
-        }
+    function _msgData() internal override(BaseRelayRecipient, Context) virtual view returns (bytes calldata) {
+        return BaseRelayRecipient._msgData();
     }
-
-    /**
-     * return the msg.data of this call.
-     * if the call came through our trusted forwarder, then the real sender was appended as the last 20 bytes
-     * of the msg.data - so this method will strip those 20 bytes off.
-     * otherwise (if the call was made directly and not through the forwarder), return `msg.data`
-     * should be used in the contract instead of msg.data, where this difference matters.
-     */
-    function _msgData() internal override virtual view returns (bytes calldata ret) {
-        if (msg.data.length >= 20 && isTrustedForwarder(msg.sender)) {
-            return msg.data[0:msg.data.length-20];
-        } else {
-            return msg.data;
-        }
-    }
-
 }
 

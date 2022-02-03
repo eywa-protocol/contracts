@@ -99,11 +99,11 @@ interface IERC20WithPermit {
     ) external;
 }
 
-contract CurveProxy is Initializable, RelayRecipient {
+contract CurveProxy is Initializable, RelayRecipientUpgradable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
 
-    string public versionRecipient;
+    string public override versionRecipient;
     //pool_address => enumerable_token_set
     mapping(address => EnumerableSetUpgradeable.AddressSet) private pool;
     //pool_address => lp_token_address
