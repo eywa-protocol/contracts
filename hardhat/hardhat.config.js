@@ -114,7 +114,7 @@ module.exports = {
     }]
   },
   vyper: {
-    version: "0.2.4",
+    compilers: [{ version: "0.2.4" }, { version: "0.3.1" }],
   },
   mocha: {
     timeout: 100000

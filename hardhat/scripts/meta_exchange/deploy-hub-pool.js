@@ -13,7 +13,7 @@ async function main() {
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
   const CurveProxy = await ethers.getContractFactory('CurveProxy');
-  const LpToken = await ethers.getContractFactory('StablePoolLpToken')
+  const LpToken = await ethers.getContractFactory('CurveTokenV5')
   // const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
   // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
@@ -46,7 +46,7 @@ async function main() {
     }
 
     // deploy LP token
-    hubPoolLp = await LpToken.deploy("Lphub", "LPC", "18", 0)
+    hubPoolLp = await LpToken.deploy("Lphub", "LPC")
     await hubPoolLp.deployed()
 
     // deploy hub pool

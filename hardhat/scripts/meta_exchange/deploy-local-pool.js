@@ -22,7 +22,7 @@ async function main() {
 
     const ERC20 = await ethers.getContractFactory('SyntERC20')
     const CurveProxy = await ethers.getContractFactory('CurveProxy');
-    const LpToken = await ethers.getContractFactory('StablePoolLpToken')
+    const LpToken = await ethers.getContractFactory('CurveTokenV5')
     const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
 
     const totalSupply = ethers.utils.parseEther("100000000000.0")
@@ -49,7 +49,7 @@ async function main() {
         // }
 
         // deploy the LP token
-        localLp = await LpToken.deploy(network.name + "LpLocal", "LP", "18", 0)
+        localLp = await LpToken.deploy(network.name + "LpLocal", "LP")
         await localLp.deployed()
         deployInfo[network.name].localPool.lp = { address: localLp.address, name: await localLp.name(), symbol: await localLp.symbol() }
 

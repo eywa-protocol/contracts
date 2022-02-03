@@ -24,7 +24,7 @@ async function main() {
   const Portal = await ethers.getContractFactory('Portal')
   const Synthesis = await ethers.getContractFactory('Synthesis')
   const CurveProxy = await ethers.getContractFactory('CurveProxy');
-  const LpToken = await ethers.getContractFactory('StablePoolLpToken')
+  const LpToken = await ethers.getContractFactory('CurveTokenV5')
   // const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
   // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
@@ -84,7 +84,7 @@ async function main() {
     for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
       let net = deployInfo[network.name].crosschainPool[i].network
 
-      crosschainPoolLp = await LpToken.deploy(net + "LpPoolCrosschain", "LPC", "18", 0)
+      crosschainPoolLp = await LpToken.deploy(net + "LpPoolCrosschain", "LPC")
       await crosschainPoolLp.deployed()
       deployInfo[network.name].crosschainPool[i].lp.push({ address: crosschainPoolLp.address, name: await crosschainPoolLp.name(), symbol: await crosschainPoolLp.symbol() });
 
