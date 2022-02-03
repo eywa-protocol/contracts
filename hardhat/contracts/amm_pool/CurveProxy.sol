@@ -372,7 +372,6 @@ contract CurveProxy is Initializable, RelayRecipient {
             representation[i] = ISynthesis(synthesis).getRepresentation(bytes32(uint256(uint160(_synth_token[i]))));
             if (_synth_amount[i] > 0) {
                 ISynthesis(synthesis).mintSyntheticToken(_txId[i], _synth_token[i], _synth_amount[i], address(this));
-                //representation[i] = ISynthesis(synthesis).getRepresentation(_synth_token[i]);
                 IERC20Upgradeable(representation[i]).approve(_params.add_c, _synth_amount[i]);
             }
         }
@@ -474,7 +473,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         {
             address lpLocalPool = lp_token[_params.add];
 
-            IERC20Upgradeable(lpLocalPool).approve(_params.exchange, 0); //CurveV2 token support
+            // IERC20Upgradeable(lpLocalPool).approve(_params.exchange, 0); //CurveV2 token support
             IERC20Upgradeable(lpLocalPool).approve(
                 _params.exchange,
                 IERC20Upgradeable(lpLocalPool).balanceOf(address(this))
@@ -504,7 +503,7 @@ contract CurveProxy is Initializable, RelayRecipient {
 
         //remove liquidity one coin stage
         address lpToken = lp_token[_params.remove];
-        IERC20Upgradeable(lpToken).approve(_params.remove, 0); //CurveV2 token support
+        // IERC20Upgradeable(lpToken).approve(_params.remove, 0); //CurveV2 token support
         IERC20Upgradeable(lpToken).approve(_params.remove, IERC20Upgradeable(lpToken).balanceOf(address(this)));
 
         uint256 token_amount = IERC20Upgradeable(lpToken).balanceOf(address(this));
@@ -592,7 +591,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         {
             address lpLocalPool = lp_token[_params.add];
 
-            IERC20Upgradeable(lpLocalPool).approve(_params.exchange, 0); //CurveV2 token support
+            // IERC20Upgradeable(lpLocalPool).approve(_params.exchange, 0); //CurveV2 token support
             IERC20Upgradeable(lpLocalPool).approve(
                 _params.exchange,
                 IERC20Upgradeable(lpLocalPool).balanceOf(address(this))
@@ -622,7 +621,7 @@ contract CurveProxy is Initializable, RelayRecipient {
 
         //remove liquidity one coin stage
         address lpToken = lp_token[_params.remove];
-        IERC20Upgradeable(lpToken).approve(_params.remove, 0); //CurveV2 token support
+        // IERC20Upgradeable(lpToken).approve(_params.remove, 0); //CurveV2 token support
         IERC20Upgradeable(lpToken).approve(_params.remove, IERC20Upgradeable(lpToken).balanceOf(address(this)));
 
         uint256 token_amount = IERC20Upgradeable(lpToken).balanceOf(address(this));
@@ -694,7 +693,7 @@ contract CurveProxy is Initializable, RelayRecipient {
 
             //hub pool remove_liquidity_one_coin stage
             IERC20Upgradeable(hubLpToken).safeTransferFrom(_msgSender(), address(this), _params.token_amount_h);
-            IERC20Upgradeable(hubLpToken).approve(_params.remove_h, 0); //CurveV2 token support
+            // IERC20Upgradeable(hubLpToken).approve(_params.remove_h, 0); //CurveV2 token support
             IERC20Upgradeable(hubLpToken).approve(_params.remove_h, _params.token_amount_h);
 
             //inconsistency check
@@ -734,7 +733,7 @@ contract CurveProxy is Initializable, RelayRecipient {
                 return;
             }
 
-            IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).approve(_params.remove_c, 0); //CurveV2 token support
+            // IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).approve(_params.remove_c, 0); //CurveV2 token support
             IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).approve(
                 _params.remove_c,
                 hubCoinBalance
