@@ -80,7 +80,7 @@ describe("Solana calldata", function () {
 
     // Deploy Bridge
     const _Bridge = await ethers.getContractFactory("Bridge");
-    const bridge  = await _Bridge.deploy(forwarder.address);
+    const bridge  = await _Bridge.deploy(forwarder.address) as Bridge;
     await bridge.deployed();
     console.log("Bridge address:", bridge.address);
 
@@ -90,7 +90,7 @@ describe("Solana calldata", function () {
     console.log("Portal address:", portal.address);
 
     const _Synthesis = await ethers.getContractFactory("Synthesis");
-    const synthesis  = await _Synthesis.deploy(bridge.address, forwarder.address);
+    const synthesis  = await _Synthesis.deploy(bridge.address, forwarder.address) as Synthesis;
     await synthesis.deployed();
     console.log("Synthesis address:", synthesis.address);
 
