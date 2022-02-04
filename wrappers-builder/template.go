@@ -95,6 +95,7 @@ import (
 	"math/big"
 	"strings"
 	"errors"
+	"fmt"
 
 	ethereum "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -114,6 +115,7 @@ var (
 	_ = common.Big1
 	_ = types.BloomLookup
 	_ = event.NewSubscription
+	_ = fmt.Errorf("")
 )
 
 {{$structs := .Structs}}
@@ -361,34 +363,31 @@ var (
 		// {{.Normalized.Name}} is a paid mutator transaction binding the contract method 0x{{printf "%x" .Original.ID}}.
 		//
 		// Solidity: {{.Original.String}}
-		func (_{{$contract.Type}} *{{$contract.Type}}Transactor) {{.Normalized.Name}}(opts *bind.TransactOpts {{range .Normalized.Inputs}}, {{.Name}} {{bindtype .Type $structs}} {{end}}) (common.Hash, error) {
-			return GsnWrap(
-				_{{$contract.Type}}.gsn,
-				func() (common.Hash, error) {
-					tx, errIn := _{{$contract.Type}}.contract.Transact(opts, "{{.Original.Name}}" {{range .Normalized.Inputs}}, {{.Name}}{{end}})
-					if tx != nil {
-						return tx.Hash(), errIn
-					}
-					return common.Hash{}, errIn
-				},
-				func() (common.Hash, error) {
-					return GsnExecutor(_{{$contract.Type}}.gsn, {{$contract.Type}}MetaData.ABI, "{{.Original.Name}}" {{range .Normalized.Inputs}}, {{.Name}}{{end}}) 
-				},
-			)
+		func (_{{$contract.Type}} *{{$contract.Type}}Transactor) {{.Normalized.Name}}(opts *bind.TransactOpts {{range .Normalized.Inputs}}, {{.Name}} {{bindtype .Type $structs}} {{end}}) (*types.Transaction, error) {
+			return _{{$contract.Type}}.contract.Transact(opts, "{{.Original.Name}}" {{range .Normalized.Inputs}}, {{.Name}}{{end}})
+		}
+		func (_{{$contract.Type}} *{{$contract.Type}}Transactor) {{.Normalized.Name}}OverGsn(opts *bind.TransactOpts {{range .Normalized.Inputs}}, {{.Name}} {{bindtype .Type $structs}} {{end}}) (common.Hash, error) {
+			return GsnExecutor(_{{$contract.Type}}.gsn, {{$contract.Type}}MetaData.ABI, "{{.Original.Name}}" {{range .Normalized.Inputs}}, {{.Name}}{{end}}) 
 		}
 
 		// {{.Normalized.Name}} is a paid mutator transaction binding the contract method 0x{{printf "%x" .Original.ID}}.
 		//
 		// Solidity: {{.Original.String}}
-		func (_{{$contract.Type}} *{{$contract.Type}}Session) {{.Normalized.Name}}({{range $i, $_ := .Normalized.Inputs}}{{if ne $i 0}},{{end}} {{.Name}} {{bindtype .Type $structs}} {{end}}) (common.Hash, error) {
+		func (_{{$contract.Type}} *{{$contract.Type}}Session) {{.Normalized.Name}}({{range $i, $_ := .Normalized.Inputs}}{{if ne $i 0}},{{end}} {{.Name}} {{bindtype .Type $structs}} {{end}}) (*types.Transaction, error) {
 		  return _{{$contract.Type}}.Contract.{{.Normalized.Name}}(&_{{$contract.Type}}.TransactOpts {{range $i, $_ := .Normalized.Inputs}}, {{.Name}}{{end}})
+		}
+		func (_{{$contract.Type}} *{{$contract.Type}}Session) {{.Normalized.Name}}OverGsn({{range $i, $_ := .Normalized.Inputs}}{{if ne $i 0}},{{end}} {{.Name}} {{bindtype .Type $structs}} {{end}}) (common.Hash, error) {
+		  return _{{$contract.Type}}.Contract.{{.Normalized.Name}}OverGsn(&_{{$contract.Type}}.TransactOpts {{range $i, $_ := .Normalized.Inputs}}, {{.Name}}{{end}})
 		}
 
 		// {{.Normalized.Name}} is a paid mutator transaction binding the contract method 0x{{printf "%x" .Original.ID}}.
 		//
 		// Solidity: {{.Original.String}}
-		func (_{{$contract.Type}} *{{$contract.Type}}TransactorSession) {{.Normalized.Name}}({{range $i, $_ := .Normalized.Inputs}}{{if ne $i 0}},{{end}} {{.Name}} {{bindtype .Type $structs}} {{end}}) (common.Hash, error) {
+		func (_{{$contract.Type}} *{{$contract.Type}}TransactorSession) {{.Normalized.Name}}({{range $i, $_ := .Normalized.Inputs}}{{if ne $i 0}},{{end}} {{.Name}} {{bindtype .Type $structs}} {{end}}) (*types.Transaction, error) {
 		  return _{{$contract.Type}}.Contract.{{.Normalized.Name}}(&_{{$contract.Type}}.TransactOpts {{range $i, $_ := .Normalized.Inputs}}, {{.Name}}{{end}})
+		}
+		func (_{{$contract.Type}} *{{$contract.Type}}TransactorSession) {{.Normalized.Name}}OverGsn({{range $i, $_ := .Normalized.Inputs}}{{if ne $i 0}},{{end}} {{.Name}} {{bindtype .Type $structs}} {{end}}) (common.Hash, error) {
+		  return _{{$contract.Type}}.Contract.{{.Normalized.Name}}OverGsn(&_{{$contract.Type}}.TransactOpts {{range $i, $_ := .Normalized.Inputs}}, {{.Name}}{{end}})
 		}
 	{{end}}
 
@@ -973,17 +972,6 @@ func GsnExecutor(gsnParams *GsnCallOpts, abiSrc, methodName string, args ...inte
 	}
 
 	return gsnParams.GsnCaller.Execute(gsnParams.ChainId, *__req, __domainSeparatorHash, __reqTypeHash, nil, __typedDataSignature)
-}
-
-func GsnWrap(gsnOpts *GsnCallOpts, directCall func() (common.Hash, error), gsnCall func() (common.Hash, error)) (common.Hash, error) {
-	if UseGsnFlag && gsnOpts != nil && gsnCall != nil {
-		return gsnCall()
-	}
-	if directCall == nil {
-		return common.Hash{}, errors.New("directCall method absent")
-	}
-
-	return directCall()
 }
 
 // Contract structs
