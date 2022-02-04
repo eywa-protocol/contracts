@@ -363,6 +363,7 @@ var (
 		// Solidity: {{.Original.String}}
 		func (_{{$contract.Type}} *{{$contract.Type}}Transactor) {{.Normalized.Name}}(opts *bind.TransactOpts {{range .Normalized.Inputs}}, {{.Name}} {{bindtype .Type $structs}} {{end}}) (common.Hash, error) {
 			return GsnWrap(
+				_{{$contract.Type}}.gsn,
 				func() (common.Hash, error) {
 					tx, errIn := _{{$contract.Type}}.contract.Transact(opts, "{{.Original.Name}}" {{range .Normalized.Inputs}}, {{.Name}}{{end}})
 					if tx != nil {
@@ -974,8 +975,8 @@ func GsnExecutor(gsnParams *GsnCallOpts, abiSrc, methodName string, args ...inte
 	return gsnParams.GsnCaller.Execute(gsnParams.ChainId, *__req, __domainSeparatorHash, __reqTypeHash, nil, __typedDataSignature)
 }
 
-func GsnWrap(directCall func() (common.Hash, error), gsnCall func() (common.Hash, error)) (common.Hash, error) {
-	if UseGsnFlag && gsnCall != nil {
+func GsnWrap(gsnOpts *GsnCallOpts, directCall func() (common.Hash, error), gsnCall func() (common.Hash, error)) (common.Hash, error) {
+	if UseGsnFlag && gsnOpts != nil && gsnCall != nil {
 		return gsnCall()
 	}
 	if directCall == nil {
