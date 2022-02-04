@@ -91,11 +91,11 @@ const getCreate2Address = (creatorAddress, saltHex, byteCode) => {
         .join('')}`).slice(-40)}`.toLowerCase()
 }
 
-const getRepresentation = async (realToken, synthesisAddress) => {
+const getRepresentation = async (realToken, netwiker, synthesisAddress) => {
     const SyntERC20 = await ethers.getContractFactory('SyntERC20')
     const bytecodeWithParams = SyntERC20.bytecode + web3.eth.abi.encodeParameters(
         ['string', 'string'],
-        ["e" + realToken.name, "e" + realToken.symbol]
+        [`e${realToken.name}`, `e${realToken.symbol}(${netwiker})`]
     ).slice(2)
     const salt = web3.utils.keccak256(addressToBytes32(realToken.address))
     return web3.utils.toChecksumAddress(getCreate2Address(

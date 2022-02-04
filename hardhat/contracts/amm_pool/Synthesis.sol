@@ -8,8 +8,9 @@ import "./ISyntERC20.sol";
 import "./SyntERC20.sol";
 import "./RelayRecipient.sol";
 import "./SolanaSerialize.sol";
+import "../utils/Typecast.sol";
 
-contract Synthesis is RelayRecipient, SolanaSerialize {
+contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     mapping(address => bytes32) public representationReal;
     mapping(bytes32 => address) public representationSynt;
     bytes32[] private keys;
@@ -70,12 +71,12 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     }
 
     modifier onlyBridge() {
-        require(bridge == msg.sender);
+        require(bridge == msg.sender, "Synthesis: bridge only");
         _;
     }
 
     modifier onlyTrusted() {
-        require(bridge == msg.sender || proxy == msg.sender);
+        require(bridge == msg.sender || proxy == msg.sender, "Synthesis: only trusted contract");
         _;
     }
 
@@ -103,10 +104,10 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     ) external onlyTrusted {
         require(
             synthesizeStates[_txID] == SynthesizeState.Default,
-            "Synt: emergencyUnsynthesizedRequest called or tokens has been already synthesized"
+            "Synthesis: emergencyUnsynthesizedRequest called or tokens have been synthesized"
         );
 
-        ISyntERC20(representationSynt[bytes32(uint256(uint160(_tokenReal)))]).mint(_to, _amount);
+        ISyntERC20(representationSynt[castToBytes32(_tokenReal)]).mint(_to, _amount);
         synthesizeStates[_txID] = SynthesizeState.Synthesized;
 
         emit SynthesizeCompleted(_txID, _to, _amount, _tokenReal);
@@ -125,10 +126,10 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         uint256 _amount,
         address _to
     ) external onlyBridge {
-        // TODO add chek to Default
+        // TODO add check to Default
         require(
             synthesizeStates[_txID] == SynthesizeState.Default,
-            "Synt: emergencyUnsynthesizedRequest called or tokens has been already synthesized"
+            "Synthesis: emergencyUnsynthesizedRequest called or tokens have been synthesized"
         );
 
         ISyntERC20(representationSynt[_tokenReal]).mint(_to, _amount);
@@ -150,16 +151,16 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         address _oppositeBridge,
         uint256 _chainID
     ) external {
-        require(synthesizeStates[_txID] != SynthesizeState.Synthesized, "Synt: syntatic tokens already minted");
+        require(synthesizeStates[_txID] != SynthesizeState.Synthesized, "Synthesis: synthetic tokens already minted");
         synthesizeStates[_txID] = SynthesizeState.RevertRequest; // close
         bytes memory out = abi.encodeWithSelector(bytes4(keccak256(bytes("emergencyUnsynthesize(bytes32)"))), _txID);
         // TODO add payment by token
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 txID = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_oppositeBridge))),
+            castToBytes32(_oppositeBridge),
             _chainID,
-            bytes32(uint256(uint160(_receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(_receiveSide),
+            castToBytes32(_msgSender()),
             nonce
         );
         IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
@@ -178,18 +179,18 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         bytes1 _bumpSynthesizeRequest,
         uint256 _chainId
     ) external {
-        require(_chainId == SOLANA_CHAIN_ID, "incorrect chainId");
+        require(_chainId == SOLANA_CHAIN_ID, "Synthesis: incorrect chainId");
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 txID = IBridge(bridge).prepareRqId(
             _pubkeys[uint256(UnsynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             _pubkeys[uint256(UnsynthesizePubkeys.receiveSide)],
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(_msgSender()),
             nonce
         );
 
-        require(synthesizeStates[txID] != SynthesizeState.Synthesized, "Synt: syntatic tokens already minted");
+        require(synthesizeStates[txID] != SynthesizeState.Synthesized, "Synthesis: synthetic tokens already minted");
         synthesizeStates[txID] = SynthesizeState.RevertRequest; // close
 
         SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](7);
@@ -249,7 +250,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     }
 
     /**
-     * @dev Burns synthetic token with unsynthesize request.
+     * @dev Burns the original representation of given synthetic token in the destination chain
      * @param _stoken transaction ID
      * @param _amount amount to burn
      * @param _chain2address recipient address
@@ -268,10 +269,10 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         ISyntERC20(_stoken).burn(_msgSender(), _amount);
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_oppositeBridge))),
+            castToBytes32(_oppositeBridge),
             _chainID,
-            bytes32(uint256(uint160(_receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(_receiveSide),
+            castToBytes32(_msgSender()),
             nonce
         );
 
@@ -285,8 +286,8 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
-        txState.recipient = bytes32(uint256(uint160(_msgSender())));
-        txState.chain2address = bytes32(uint256(uint160(_chain2address)));
+        txState.recipient = castToBytes32(_msgSender());
+        txState.chain2address = castToBytes32(_chain2address);
         txState.stoken = _stoken;
         txState.amount = _amount;
         txState.state = RequestState.Sent;
@@ -295,7 +296,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
     }
 
     /* *
-     * @dev Burns synthetic token with unsynthesize request and bytes32 support for Solana.
+     * @dev Burns the original representation of given synthetic token with unsynthesize request and bytes32 support for Solana.
      * @param _stoken representation address
      * @param _amount amount to burn
      * @param _chain2address recipient address
@@ -309,10 +310,10 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         uint256 _amount,
         uint256 _chainId
     ) external returns (bytes32 txID) {
-        require(_chainId == SOLANA_CHAIN_ID, "incorrect chainId");
+        require(_chainId == SOLANA_CHAIN_ID, "Synthesis: incorrect chainId");
 
         // TODO: fix amount digits for solana (digits 18 -> 6)
-        require(_amount < type(uint64).max, "amount too large");
+        require(_amount < type(uint64).max, "Synthesis: amount too large");
         uint64 solAmount = uint64(_amount);
         // swap bytes
         solAmount = ((solAmount & 0xFF00FF00FF00FF00) >> 8) | ((solAmount & 0x00FF00FF00FF00FF) << 8);
@@ -328,7 +329,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
             _pubkeys[uint256(UnsynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             _pubkeys[uint256(UnsynthesizePubkeys.receiveSide)],
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(_msgSender()),
             nonce
         );
 
@@ -388,7 +389,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         );
 
         TxState storage txState = requests[txID];
-        txState.recipient = bytes32(uint256(uint160(_msgSender())));
+        txState.recipient = castToBytes32(_msgSender());
         txState.chain2address = _pubkeys[uint256(UnsynthesizePubkeys.destination)];
         txState.stoken = _stoken;
         txState.amount = _amount;
@@ -409,11 +410,11 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
      */
     function emergencyUnburn(bytes32 _txID) external onlyBridge {
         TxState storage txState = requests[_txID];
-        require(txState.state == RequestState.Sent, "Synt: state not open or tx does not exist");
+        require(txState.state == RequestState.Sent, "Synthesis: state not open or tx does not exist");
         txState.state = RequestState.Reverted; // close
-        ISyntERC20(txState.stoken).mint(address(uint160(uint256(txState.recipient))), txState.amount);
+        ISyntERC20(txState.stoken).mint(castToAddress(txState.recipient), txState.amount);
 
-        emit RevertBurnCompleted(_txID, address(uint160(uint256(txState.recipient))), txState.amount, txState.stoken);
+        emit RevertBurnCompleted(_txID, castToAddress(txState.recipient), txState.amount, txState.stoken);
     }
 
     /**
@@ -424,11 +425,11 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
      */
     function createRepresentation(
         bytes32 _rtoken,
-        string memory _name,
-        string memory _symbol
+        string calldata _name,
+        string calldata _symbol
     ) external onlyOwner {
-        require(representationSynt[_rtoken] == address(0), "Representation already exists");
-        require(representationReal[address(uint160(uint256(_rtoken)))] == 0, "Representation already exists");
+        require(representationSynt[_rtoken] == address(0), "Synthesis: representation already exists");
+        require(representationReal[castToAddress(_rtoken)] == 0, "Synthesis: representation already exists");
         address stoken = Create2.deploy(
             0,
             keccak256(abi.encodePacked(_rtoken)),
@@ -482,16 +483,16 @@ contract Synthesis is RelayRecipient, SolanaSerialize {
         address _receiveSide,
         address _oppositeBridge,
         uint256 _chainID,
-        bytes memory _out
+        bytes calldata _out
     ) external returns (bytes32 txID) {
         ISyntERC20(_stoken).burn(_msgSender(), _amount);
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
 
         txID = IBridge(bridge).prepareRqId(
-            bytes32(uint256(uint160(_oppositeBridge))),
+            castToBytes32(_oppositeBridge),
             _chainID,
-            bytes32(uint256(uint160(_receiveSide))),
-            bytes32(uint256(uint160(_msgSender()))),
+            castToBytes32(_receiveSide),
+            castToBytes32(_msgSender()),
             nonce
         );
 

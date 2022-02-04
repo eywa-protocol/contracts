@@ -8,12 +8,12 @@ async function main() {
   const [deployer] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
-  console.log(`Deploying with the account: ${deployer.address}`);
+  console.log(`Account: ${deployer.address}`);
   const balance = await deployer.getBalance();
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
   const CurveProxy = await ethers.getContractFactory('CurveProxy');
-  const CurveTokenV2 = await ethers.getContractFactory('CurveTokenV2')
+  const LpToken = await ethers.getContractFactory('CurveTokenV5')
   // const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
   // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
@@ -46,7 +46,7 @@ async function main() {
     }
 
     // deploy LP token
-    hubPoolLp = await CurveTokenV2.deploy("Lphub", "LPC", "18", 0)
+    hubPoolLp = await LpToken.deploy("Lphub", "LPC")
     await hubPoolLp.deployed()
 
     // deploy hub pool

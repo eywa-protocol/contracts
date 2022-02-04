@@ -7,9 +7,9 @@ import "./interface/INodeRegistry.sol";
 import "@openzeppelin/contracts-newone/utils/Address.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "../amm_pool/RelayRecipient.sol";
+import "../utils/Typecast.sol";
 
-
-contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
+contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecast {
     using AddressUpgradeable for address;
 
     string public versionRecipient;
@@ -19,6 +19,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
     uint32 public epochNum; // Sequential number of the epoch
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
+
     //event OwnershipTransferred(address indexed previousDao, address indexed newDao);
 
     function initialize(address forwarder) public initializer {
@@ -32,23 +33,24 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
 
     modifier onlyTrustedContract(address receiveSide, address oppositeBridge) {
         require(
-            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][bytes32(uint256(uint160(oppositeBridge)))][
-                bytes32(uint256(uint160(receiveSide)))] == true,
-            "UNTRUSTED CONTRACT"
+            contractBind[castToBytes32(address(_msgSender()))][castToBytes32(oppositeBridge)][
+                castToBytes32(receiveSide)
+            ] == true,
+            "Bridge: untrusted contract"
         );
         _;
     }
 
     modifier onlyTrustedContractBytes32(bytes32 receiveSide, bytes32 oppositeBridge) {
         require(
-            contractBind[bytes32(uint256(uint160(address(_msgSender()))))][oppositeBridge][receiveSide] == true,
-            "UNTRUSTED CONTRACT"
+            contractBind[castToBytes32(address(_msgSender()))][oppositeBridge][receiveSide] == true,
+            "Bridge: untrusted contract"
         );
         _;
     }
 
     modifier onlyDao() {
-        require(_msgSender() == dao, "Only DAO");
+        require(_msgSender() == dao, "Bridge: only DAO");
         _;
     }
 
@@ -80,17 +82,23 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
         uint8 _newEpochParticipantsNum,
         uint32 _newEpochNum
     ) external {
-        require(epochNum + 1 == _newEpochNum, "wrong epoch number");
+        require(epochNum + 1 == _newEpochNum, "Bridge: wrong epoch number");
 
         E2Point memory newKey = decodeE2Point(_newKey);
         E2Point memory votersPubKey = decodeE2Point(_votersPubKey);
         E1Point memory votersSignature = decodeE1Point(_votersSignature);
 
         if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
-            require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "not enough participants"); // TODO configure
-            require(epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum), "bitmask too big");
+            require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "Bridge: not enough participants"); // TODO configure
+            require(
+                epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum),
+                "Bridge: bitmask too big"
+            );
             bytes memory data = abi.encodePacked(newKey.x, newKey.y, _newEpochParticipantsNum, _newEpochNum);
-            require(verifyMultisig(epochKey, votersPubKey, data, votersSignature, _votersMask), "multisig mismatch");
+            require(
+                verifyMultisig(epochKey, votersPubKey, data, votersSignature, _votersMask),
+                "Bridge: multisig mismatch"
+            );
         }
 
         emit NewEpoch(abi.encode(epochKey), abi.encode(newKey), false, _newEpochNum);
@@ -110,7 +118,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
      * @param nonce sender's nonce
      */
     function transmitRequestV2(
-        bytes memory _selector,
+        bytes calldata _selector,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId,
@@ -134,7 +142,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
      * @param nonce sender's nonce
      */
     function transmitRequestV2ToSolana(
-        bytes memory _selector,
+        bytes calldata _selector,
         bytes32 receiveSide,
         bytes32 oppositeBridge,
         uint256 chainId,
@@ -145,7 +153,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
         verifyAndUpdateNonce(sender, nonce);
         emit OracleRequestSolana(
             "setRequest",
-            bytes32(uint256(uint160(address(this)))),
+            castToBytes32(address(this)),
             requestId,
             _selector,
             oppositeBridge,
@@ -166,24 +174,30 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
      */
     function receiveRequestV2(
         bytes32 _reqId,
-        bytes memory _sel,
+        bytes calldata _sel,
         address _receiveSide,
         bytes32 _bridgeFrom,
         bytes calldata _votersPubKey,
         bytes calldata _votersSignature,
         uint256 _votersMask
     ) external {
-        require(epochKey.x[0] != 0 || epochKey.x[1] != 0, "epoch not set");
-        require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "not enough participants"); // TODO configure
-        require(epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum), "bitmask too big");
+        require(epochKey.x[0] != 0 || epochKey.x[1] != 0, "Bridge: epoch not set");
+        require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "Bridge: not enough participants"); // TODO configure
+        require(epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum), "Bridge: bitmask too big");
 
         E2Point memory votersPubKey = decodeE2Point(_votersPubKey);
         E1Point memory votersSignature = decodeE1Point(_votersSignature);
         bytes memory sigData = abi.encodePacked(_reqId, _sel, _receiveSide, _bridgeFrom, epochNum);
-        require(verifyMultisig(epochKey, votersPubKey, sigData, votersSignature, _votersMask), "multisig mismatch");
+        require(
+            verifyMultisig(epochKey, votersPubKey, sigData, votersSignature, _votersMask),
+            "Bridge: multisig mismatch"
+        );
 
-        bytes memory data = _receiveSide.functionCall(_sel, "receiveRequestV2 failed");
-        require(data.length == 0 || abi.decode(data, (bool)), "receiveRequestV2: Unable to decode rerurned data");
+        bytes memory data = _receiveSide.functionCall(_sel, "Bridge: receiveRequestV2: failed");
+        require(
+            data.length == 0 || abi.decode(data, (bool)),
+            "Bridge: receiveRequestV2: unable to decode returned data"
+        );
         emit ReceiveRequest(_reqId, _receiveSide, _bridgeFrom);
     }
 
@@ -209,7 +223,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification {
      * @dev Transfer DAO to another address.
      */
     function daoTransferOwnership(address newDao) external {
-        require(dao == address(0) || _msgSender() == dao, "only DAO");
+        require(dao == address(0) || _msgSender() == dao, "Bridge: only DAO");
         emit OwnershipTransferred(dao, newDao);
         dao = newDao;
     }
