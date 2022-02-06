@@ -13,6 +13,7 @@ truffle/build/contracts
 **/.env
 networks_env
 wrappers-builder-gsn/wrappers-builder-gsn
+wrappers-builder/wrappers-builder
 
 .idea
 .vscode
