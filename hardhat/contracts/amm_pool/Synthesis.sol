@@ -295,13 +295,11 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
     }
 
-    /* *
+    /**
      * @dev Burns the original representation of given synthetic token with unsynthesize request and bytes32 support for Solana.
      * @param _stoken representation address
-     * @param _amount amount to burn
-     * @param _chain2address recipient address
-     * @param _receiveSide request recipient address
-     * @param _oppositeBridge opposite bridge address
+     * @param _pubkeys public keys
+     * @param _amount amountot burn
      * @param _chainId opposite chain ID
      */
     function burnSyntheticTokenToSolana(
@@ -471,11 +469,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         proxy = _proxy;
     }
 
-    //TODO
-    function getTxId() external view returns (bytes32) {
-        return keccak256(abi.encodePacked(this, block.timestamp));
-    }
-
+    //TODO: may need to delete 
     function burnSyntheticToken_transit(
         address _stoken,
         uint256 _amount,

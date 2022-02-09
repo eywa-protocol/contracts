@@ -111,10 +111,18 @@ module.exports = {
           runs: 200
         }
       }
+    }, {
+      version: "0.4.24",
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200
+        }
+      }
     }]
   },
   vyper: {
-    compilers: [{ version: "0.2.4" }, { version: "0.3.1" }],
+    compilers: [{ version: "0.2.4" }, { version: "0.2.7" }, { version: "0.3.1" }],
   },
   mocha: {
     timeout: 100000

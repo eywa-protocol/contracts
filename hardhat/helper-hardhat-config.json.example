@@ -454,6 +454,7 @@
       "eywa":"",
       "votingEscrow":"",
       "gaugeController":"",
+      "poolProxy":"",
       "minter":""
     },
     "localToken": [],
