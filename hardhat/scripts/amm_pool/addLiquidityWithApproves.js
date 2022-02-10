@@ -1,4 +1,4 @@
-//  npx hardhat run --network rinkeby scripts/amm_pool/addLiquidityWithApproves.js
+//  npx hardhat run --network rinkeby scripts/05
 const hre = require("hardhat");
 const network = hre.network.name;
 
@@ -32,8 +32,9 @@ async function main() {
         {"inputs":[{"internalType":"address","name":"tokenA","type":"address"},{"internalType":"address","name":"tokenB","type":"address"},{"internalType":"uint256","name":"amountADesired","type":"uint256"},{"internalType":"uint256","name":"amountBDesired","type":"uint256"},{"internalType":"uint256","name":"amountAMin","type":"uint256"},{"internalType":"uint256","name":"amountBMin","type":"uint256"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"name":"addLiquidity","outputs":[{"internalType":"uint256","name":"amountA","type":"uint256"},{"internalType":"uint256","name":"amountB","type":"uint256"},{"internalType":"uint256","name":"liquidity","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},
     ];
 
+    const UniV2Router = await hre.ethers.getContractFactory('UniV2Router');
     let routerAddress = process.env.ADD_LIQUIDITY_ROUTER;
-    const router = await hre.ethers.Contract(routerAddress, minABI, hre.provider);
+    const router = await UniV2Router.attach(routerAddress);
 
     console.log('Router address', router.address);
 
@@ -45,7 +46,8 @@ async function main() {
         1,
         1,
         deployer.address,
-        process.env.ADD_LIQUIDITY_DEADLINE_TIMESTAMP
+        process.env.ADD_LIQUIDITY_DEADLINE_TIMESTAMP,
+        {gasLimit: 1000000}
     );
 
     await tx.wait();
