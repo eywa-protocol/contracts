@@ -17,6 +17,7 @@ async function main() {
     const liquidityToken2 = await ERC20Token.attach(process.env.ADD_LIQUIDITY_TOKEN_ADDRESS_2);
     console.log('Liquidity token #2 address:', liquidityToken2.address);
 
+    //@todo getAmounts
     let amount1 = process.env.ADD_LIQUIDITY_TOKEN_AMOUNT_1;
     let amount2 = process.env.ADD_LIQUIDITY_TOKEN_AMOUNT_2;
 
@@ -27,10 +28,6 @@ async function main() {
     tx = await liquidityToken2.approve(pool, amount2);
     await tx.wait();
     console.log('Approved liquidity token #2 to pool: ', tx.hash);
-
-    let minABI = [
-        {"inputs":[{"internalType":"address","name":"tokenA","type":"address"},{"internalType":"address","name":"tokenB","type":"address"},{"internalType":"uint256","name":"amountADesired","type":"uint256"},{"internalType":"uint256","name":"amountBDesired","type":"uint256"},{"internalType":"uint256","name":"amountAMin","type":"uint256"},{"internalType":"uint256","name":"amountBMin","type":"uint256"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"name":"addLiquidity","outputs":[{"internalType":"uint256","name":"amountA","type":"uint256"},{"internalType":"uint256","name":"amountB","type":"uint256"},{"internalType":"uint256","name":"liquidity","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},
-    ];
 
     const UniV2Router = await hre.ethers.getContractFactory('UniV2Router');
     let routerAddress = process.env.ADD_LIQUIDITY_ROUTER;
