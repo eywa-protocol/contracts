@@ -2,9 +2,6 @@
 const hre = require("hardhat");
 const network = hre.network.name;
 
-    // Get ERC20 Token contract instance
-    let contract = await new web3.eth.Contract(minABI, '0xdc734e62dc5002e54480555fad3db3d50cd2c6ba');
-
 async function main() {
 
     const [deployer] = await ethers.getSigners();
