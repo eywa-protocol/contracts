@@ -720,7 +720,7 @@ contract CurveProxy is Initializable, RelayRecipient {
 
             //inconsistency check
             if (_params.expected_min_amount_c > min_amounts_c) {
-                IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).safeTransfer(
+                IERC20Upgradeable(pool[_params.remove_h].at(uint256(int256(_params.y)))).safeTransfer(
                     _params.to,
                     hubCoinBalance
                 );
