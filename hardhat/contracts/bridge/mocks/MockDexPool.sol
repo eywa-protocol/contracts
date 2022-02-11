@@ -16,7 +16,8 @@ contract MockDexPool is SolanaSerialize {
     uint256 public testData = 0;
     address public bridge;
     mapping(bytes32 => uint256) public requests;
-    uint256 public doubleRequestError = 0;
+    bytes32[] public doubleRequestIds;
+    uint256 public totalRequests = 0;
 
     event RequestSent(bytes32 reqId);
     event RequestReceived(uint256 data);
@@ -69,9 +70,10 @@ contract MockDexPool is SolanaSerialize {
         require(msg.sender == bridge, "ONLY CERTAIN BRIDGE");
 
         if (requests[_reqId] != 0) {
-            doubleRequestError++;
+            doubleRequestIds.push(_reqId);
         }
         requests[_reqId]++;
+        totalRequests++;
 
         testData = _testData;
         emit RequestReceived(_testData);
@@ -126,4 +128,16 @@ contract MockDexPool is SolanaSerialize {
         return bytes8(sha256(bytes(_data)));
     }
 
+    function doubles() public view returns(bytes32[] memory) {
+        return doubleRequestIds;
+    }
+
+    function doubleRequestError() public view returns(uint256) {
+        return doubleRequestIds.length;
+    }
+
+    function clearStats() public {
+        delete doubleRequestIds;
+        totalRequests = 0;
+    }
 }
