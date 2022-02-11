@@ -2,7 +2,8 @@ import '@typechain/hardhat';
 import "@nomiclabs/hardhat-truffle5";
 import "@nomiclabs/hardhat-waffle";
 import "@openzeppelin/hardhat-upgrades";
-
+import '@1hive/hardhat-aragon'
+import 'hardhat-deploy'
 
 export default {
   defaultNetwork: "hardhat",
@@ -31,7 +32,18 @@ export default {
           runs: 200
         }
       }
+    }, {
+      version: "0.4.24",
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200
+        }
+      }
     }]
+  }, aragon: {
+    appEnsName: "counter.open.aragonpm.eth", // counter.open.aragonpm.eth
+    appContractName: "TEST" // Counter
   },
   mocha: {
     timeout: 100000

@@ -287,7 +287,7 @@ def _get_weight(gauge_addr: address) -> uint256:
 
 
 @external
-def add_gauge(addr: address, gauge_type: int128, weight: uint256 = 0):
+def add_gauge(addr: address, gauge_type: int128, weight: uint256):
     """
     @notice Add gauge `addr` of type `gauge_type` with weight `weight`
     @param addr Gauge address
@@ -419,7 +419,7 @@ def _change_type_weight(type_id: int128, weight: uint256):
 
 
 @external
-def add_type(_name: String[64], weight: uint256 = 0):
+def add_type(_name: String[64], weight: uint256):
     """
     @notice Add gauge type with name `_name` and weight `weight`
     @param _name Name of gauge type

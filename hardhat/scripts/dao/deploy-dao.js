@@ -1,10 +1,10 @@
 const fs = require("fs");
-const { network } = require("hardhat");
+const { network, web3 } = require("hardhat");
 let deployInfo = require('../../helper-hardhat-config.json')
 
 
 async function main() {
-    console.log("\n DAO contracts  deployment");
+    console.log("\nDAO contracts  deployment");
     const [admin] = await ethers.getSigners();
     console.log("Network:", network.name);
     console.log("Network Id:", await web3.eth.net.getId());
@@ -18,6 +18,7 @@ async function main() {
     const GaugeController = await ethers.getContractFactory('GaugeController')
     const PoolProxy = await ethers.getContractFactory('PoolProxy')
     const Minter = await ethers.getContractFactory('Minter')
+    const Voting = await ethers.getContractFactory('Voting')
     const ERC20CRV = await ethers.getContractFactory('ERC20CRV')
 
     if (network.name == "network2" || network.name == "mumbai") {
@@ -45,7 +46,8 @@ async function main() {
         // @param _voting_escrow `VotingEscrow` contract address
         const gaugeController = await GaugeController.deploy(eywa.address, votingEscrow.address)
         await gaugeController.deployed()
-        await gaugeController.add_type("Liquidity",  10 ** 18)
+
+        await gaugeController.add_type("Liquidity", "1000000000000000000" /* 10**18 */, { gasLimit: 1000000 }) //new web3.utils.BN(10).pow(new web3.utils.BN(18)
         deployInfo[network.name].dao.gaugeController = gaugeController.address
 
         // deploy gauge controller
@@ -54,7 +56,7 @@ async function main() {
         const poolProxy = await PoolProxy.deploy(admin.address, admin.address, admin.address)
         await poolProxy.deployed()
         deployInfo[network.name].dao.poolProxy = poolProxy.address
-        
+
         // deploy minter 
         // @param token: address, 
         // @param controller: address
@@ -72,26 +74,70 @@ async function main() {
             // @param lp_addr: address, 
             // @param minter: address
             // @param admin: address
-            gauge[i]= await LiquidityGauge.deploy(lpToken.address, minter.address, admin.address)
+            gauge[i] = await LiquidityGauge.deploy(lpToken.address, minter.address, admin.address)
             await gauge[i].deployed()
             deployInfo[network.name].crosschainPool[i].gauge = gauge[i].address
 
             // console.log(gaugeController)
             //register gauge
-            await gaugeController.add_gauge(gauge[i].address, 0, 0/*weight*/)
+            await gaugeController.add_gauge(gauge[i].address, 0, 0/*weight*/, { gasLimit: 1000000 })
         }
+
+
+        // deploy aragon voting contract 
+        const _token = votingEscrow.address                       //Address that will be used as governance token
+        const _supportRequiredPct = "510000000000000000"  //Percentage of yeas in casted votes for a vote to succeed (expressed as a percentage of 10^18; eg. 10^16 = 1%, 10^18 = 100%)
+        const _minAcceptQuorumPct = "510000000000000000"   //Percentage of yeas in total possible votes for a vote to succeed (expressed as a percentage of 10^18; eg. 10^16 = 1%, 10^18 = 100%)
+        const _voteTime = "36000"                         //Seconds that a vote will be open for token holders to vote (unless enough yeas or nays have been cast to make an early decision)
+        const _minBalance = "0"                           //Minumum balance that a token holder should have to create a new vote
+        const _minTime = "0"                              //Minimum time between a user's previous vote and creating a new vote
+        const _minBalanceLowerLimit = "0"                 //Hardcoded lower limit for _minBalance on initialization
+        const _minBalanceUpperLimit = "0"                 //Hardcoded upper limit for _minBalance on initialization
+        const _minTimeLowerLimit = "0"                    //Hardcoded lower limit for _minTime on initialization
+        const _minTimeUpperLimit = "0"                    //Hardcoded upper limit for _minTime on initialization
+
+        const voting = await upgrades.deployProxy(Voting, [
+            _token,
+            _supportRequiredPct,
+            _minAcceptQuorumPct,
+            _voteTime,
+            _minBalance,
+            _minTime,
+            _minBalanceLowerLimit,
+            _minBalanceUpperLimit,
+            _minTimeLowerLimit,
+            _minTimeUpperLimit
+        ], { initializer: 'initialize' });
+        deployInfo[network.name].dao.voting = voting.address
+
         console.log(`
-        "ERC20EYWA": ${eywa.address},
-        "VotingEscrow": ${votingEscrow.address},
-        "GaugeController": ${gaugeController.address},
-        "Minter": ${minter.address},
-        "LiquidityGauge": {${gauge}},
-        "LiquidityGaugeReward": {},
-        "PoolProxy": ${poolProxy.address},
-    `)
+            "ERC20EYWA": ${eywa.address},
+            "VotingEscrow": ${votingEscrow.address},
+            "GaugeController": ${gaugeController.address},
+            "Minter": ${minter.address},
+            "LiquidityGauge": {${gauge}},
+            "LiquidityGaugeReward": {},
+            "PoolProxy": ${poolProxy.address},
+            "Voting": ${voting.address},
+        `)
+
+
+        //  Create a new vote about "`_metadata`"
+        const _executionScript = "0x0"       //EVM script to be executed on approval
+        const _metadata = "TEST"          //Vote metadata
+        const _castVote = false           //Whether to also cast newly created vote
+        const _executesIfDecided = false  //Whether to also immediately execute newly created vote if decided
+        
+        const voteId = await voting.newVote(
+            _executionScript,
+            _metadata,
+            _castVote,
+            _executesIfDecided
+        )
+        console.log(voteId)
     }
 
-   
+
 
     // write out the deploy configuration 
     fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
