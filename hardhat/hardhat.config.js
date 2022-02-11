@@ -21,16 +21,16 @@ task("balanceDeployer", "Print info about balance deployer", async () => {
   const [deployer] = await ethers.getSigners();
   const balance    = await deployer.getBalance();
   console.log("Deployer balance: ",ethers.utils.formatEther(balance));
-  
+
 });
 
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-     
+
     },
-    localhost: { 
+    localhost: {
         //
     },
     coinextestnet:{
@@ -114,7 +114,7 @@ module.exports = {
     }]
   },
   vyper: {
-    compilers: [{ version: "0.2.4" }, { version: "0.3.1" }],
+    compilers: [{ version: "0.2.4" }, { version: "0.2.7" }, { version: "0.3.1" }],
   },
   mocha: {
     timeout: 100000
