@@ -11,12 +11,13 @@ import "../../amm_pool/SolanaSerialize.sol";
  * @dev POOL_1#sendRequestTest --> {logic bridge} --> POOL_2#setPendingRequestsDone
  */
 contract MockDexPool is SolanaSerialize {
-
+    bytes8 private SET_VALUE_SIGHASH = sigHash("global:set_value");
     string constant private SET_REQUEST_TYPE = "setRequest";
     uint256 public testData = 0;
     address public bridge;
     mapping(bytes32 => uint256) public requests;
-    uint256 public doubleRequestError = 0;
+    bytes32[] public doubleRequestIds;
+    uint256 public totalRequests = 0;
 
     event RequestSent(bytes32 reqId);
     event RequestReceived(uint256 data);
@@ -69,33 +70,35 @@ contract MockDexPool is SolanaSerialize {
         require(msg.sender == bridge, "ONLY CERTAIN BRIDGE");
 
         if (requests[_reqId] != 0) {
-            doubleRequestError++;
+            doubleRequestIds.push(_reqId);
         }
         requests[_reqId]++;
+        totalRequests++;
 
         testData = _testData;
         emit RequestReceived(_testData);
         emit RequestReceivedV2(_reqId, _testData);
     }
 
-    function sendTestRequestToSolana(bytes32 programId_, uint256 testData_, bytes32 secondPartPool, bytes32 oppBridge, uint chainId) external {
+    function sendTestRequestToSolana(bytes32 testStubPID_, bytes32 solBridgePID_, bytes32 dataAcc_, bytes32 bridgePDASigner_, uint256 testData_, uint chainId) external {
         testData_; // silence warning
 
         require(chainId == SOLANA_CHAIN_ID, "incorrect chainID");
         uint256 nonce = Bridge(bridge).getNonce(msg.sender);
-        bytes32 requestId = Bridge(bridge).prepareRqId( oppBridge, chainId, secondPartPool, bytes32(uint256(uint160(msg.sender))) , nonce);
+
+        bytes32 requestId = Bridge(bridge).prepareRqId( testStubPID_, chainId, dataAcc_, bytes32(uint256(uint160(msg.sender))) , nonce);
 //                        bool success = Bridge(bridge).transmitSolanaRequest(out, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
         SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](2);
 
         accounts[0] = SolanaAccountMeta({
-        pubkey: secondPartPool,
+        pubkey: dataAcc_,
         isSigner: false,
         isWritable: true
         });
 
         accounts[1] = SolanaAccountMeta({
-        pubkey: oppBridge,
-        isSigner: false,
+        pubkey: bridgePDASigner_,
+        isSigner: true,
         isWritable: true
         });
 
@@ -103,15 +106,15 @@ contract MockDexPool is SolanaSerialize {
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
                 /* programId: */
-                    programId_,
+                    testStubPID_,
                 /* accounts: */
                     accounts,
                 /* data: */
-                    abi.encodePacked(requestId)
+                    abi.encodePacked(SET_VALUE_SIGHASH, testData_)
                 )
             ),
-            secondPartPool,
-            oppBridge,
+                testStubPID_,
+                solBridgePID_,
             SOLANA_CHAIN_ID,
             requestId,
             msg.sender,
@@ -119,5 +122,22 @@ contract MockDexPool is SolanaSerialize {
         );
 
         emit RequestSent(requestId);
+    }
+
+    function sigHash(string memory _data) public pure returns (bytes8) {
+        return bytes8(sha256(bytes(_data)));
+    }
+
+    function doubles() public view returns(bytes32[] memory) {
+        return doubleRequestIds;
+    }
+
+    function doubleRequestError() public view returns(uint256) {
+        return doubleRequestIds.length;
+    }
+
+    function clearStats() public {
+        delete doubleRequestIds;
+        totalRequests = 0;
     }
 }

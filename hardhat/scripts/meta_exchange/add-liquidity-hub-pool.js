@@ -8,7 +8,7 @@ async function main() {
   const [owner] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
-  console.log(`Deploying with the account: ${owner.address}`);
+  console.log(`Account: ${owner.address}`);
   const balance = await owner.getBalance();
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
@@ -34,9 +34,9 @@ async function main() {
       case "network2":
         hubPool = StableSwap3Pool.attach(deployInfo[network.name].hubPool.address);
         break;
-      // case "mumbai":
-      //   hubPool = StableSwap5Pool.attach(deployInfo[network.name].hubPool.address);
-      //   break;
+      case "mumbai":
+        hubPool = StableSwap3Pool.attach(deployInfo[network.name].hubPool.address);
+        break;
     }
 
     this.hubPoolCoins = deployInfo[network.name].hubPool.coins;
@@ -44,8 +44,9 @@ async function main() {
     for (let hubLp of this.hubPoolCoins) {
       const lp = ERC20.attach(hubLp);
       const localLpBalance = await lp.balanceOf(owner.address)
+      console.log(localLpBalance)
       amounts.push(localLpBalance)
-      await (await lp.approve(hubPool.address, 0)).wait()
+      // await (await lp.approve(hubPool.address, 0)).wait()
       await (await lp.approve(hubPool.address, totalSupply)).wait()
     }
 

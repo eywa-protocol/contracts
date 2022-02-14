@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 abstract contract RelayRecipient is ContextUpgradeable, OwnableUpgradeable {
-   
+
     /*
      * Forwarder singleton we accept calls from
      */
@@ -58,3 +58,4 @@ abstract contract RelayRecipient is ContextUpgradeable, OwnableUpgradeable {
     }
 
 }
+

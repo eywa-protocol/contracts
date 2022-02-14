@@ -13,23 +13,33 @@ const PRIVATE_KEY_BSC      = process.env.PRIVATE_KEY_BSC      || "0x000000000000
 const PRIVATE_KEY_MUMBAI   = process.env.PRIVATE_KEY_MUMBAI   || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_GANACHE  = process.env.PRIVATE_KEY_GANACHE  || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_HECO     = process.env.PRIVATE_KEY_HECO     || "0x0000000000000000000000000000000000000000";
-const PRIVATE_KEY_AVALANCHETESTNET = process.env.PRIVATE_KEY_AVALANCHETESTNET     || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_AVALANCHETESTNET = process.env.PRIVATE_KEY_AVALANCHETESTNET || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_METISTESTNET     = process.env.PRIVATE_KEY_METISTESTNET     || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_COINEXTESTNET    = process.env.PRIVATE_KEY_COINEXTESTNET    || "0x0000000000000000000000000000000000000000";
 
 task("balanceDeployer", "Print info about balance deployer", async () => {
   const [deployer] = await ethers.getSigners();
   const balance    = await deployer.getBalance();
   console.log("Deployer balance: ",ethers.utils.formatEther(balance));
-  
+
 });
 
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-     
+
     },
-    localhost: { 
+    localhost: {
         //
+    },
+    coinextestnet:{
+      url: networkConfig.coinextestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_COINEXTESTNET]
+    },
+    metistestnet:{
+      url: networkConfig.metistestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_METISTESTNET]
     },
     avalanchetestnet:{
       url: networkConfig.avalanchetestnet.rpcUrl2,
@@ -73,10 +83,10 @@ module.exports = {
   etherscan: {
     apiKey: {
         rinkeby: process.env.ETHERSCAN_API_KEY,
-        bsctestnet: process.env.BINANCESCAN_API_KEY,
-        mumbai: process.env.POLYGONSCAN_API_KEY,
-        avalanchetestnet: process.env.AVALANCHESCAN_API_KEY,
-        hecotestnet: process.env.HECOINFOSCAN_API_KEY
+        bscTestnet: process.env.BINANCESCAN_API_KEY,
+        polygonMumbai: process.env.POLYGONSCAN_API_KEY,
+        avalancheFujiTestnet: process.env.AVALANCHESCAN_API_KEY,
+        hecoTestnet: process.env.HECOINFOSCAN_API_KEY
     }
   },
   gasReporter: {
@@ -104,7 +114,7 @@ module.exports = {
     }]
   },
   vyper: {
-    version: "0.2.4",
+    compilers: [{ version: "0.2.4" }, { version: "0.2.7" }, { version: "0.3.1" }],
   },
   mocha: {
     timeout: 100000

@@ -9,7 +9,7 @@ async function main() {
   const [owner] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
-  console.log(`Deploying with the account: ${owner.address}`);
+  console.log(`Account: ${owner.address}`);
   const balance = await owner.getBalance();
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
@@ -32,13 +32,15 @@ async function main() {
       let amount = ethers.utils.parseEther("100000000.0")
       let chain2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK2)
       let chain2address = chain2.address
-      let receiveSide = deployInfo["network2"].synthesis
-      let oppositeBridge = deployInfo["network2"].bridge
-      let chainID = deployInfo["network2"].chainId
+      let hubChainName   = network.name.includes("network") ? 'network2' : 'mumbai';
+      let receiveSide    = deployInfo[hubChainName].synthesis
+      let oppositeBridge = deployInfo[hubChainName].bridge
+      let chainID        = deployInfo[hubChainName].chainId
       tx = await Portal.attach(deployInfo[network.name].portal).synthesize(
         coinToSynth,
         amount,
         chain2address,
+        // owner.address,
         receiveSide,
         oppositeBridge,
         chainID,
@@ -47,7 +49,7 @@ async function main() {
         }
       )
       await tx.wait()
-      console.log("synthesize ETH token", tx.hash)
+      console.log("synthesize stable token:", tx.hash)
       await h.timeout(8_000);
     }
   }
@@ -74,7 +76,7 @@ async function main() {
         }
       )
       await tx.wait()
-      console.log("add_liquidity ETH pool", tx.hash)
+      console.log("add liquidity crosschainPool pool:", tx.hash)
     }
     await h.timeout(5_000);
   }

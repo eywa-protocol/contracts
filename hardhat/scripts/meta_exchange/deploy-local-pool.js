@@ -14,25 +14,20 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     console.log("Network:", network.name);
     console.log("Network Id:", await web3.eth.net.getId());
-    console.log(`Deploying with the account: ${deployer.address}`);
+    console.log(`Account: ${deployer.address}`);
     const balance = await deployer.getBalance();
     console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
     console.log("Pool size:", poolSize);
     console.log("Deployment in progress...");
 
     const ERC20 = await ethers.getContractFactory('SyntERC20')
-    const Portal = await ethers.getContractFactory('Portal')
-    const Synthesis = await ethers.getContractFactory('Synthesis')
     const CurveProxy = await ethers.getContractFactory('CurveProxy');
-    const CurveTokenV2 = await ethers.getContractFactory('CurveTokenV2')
-    // const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
+    const LpToken = await ethers.getContractFactory('CurveTokenV5')
     const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
-    // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
-    // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
-    // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
+
     const totalSupply = ethers.utils.parseEther("100000000000.0")
 
-    if (network.name == "network2") {
+    if (network.name == "network2" || network.name == 'mumbai') {
 
         // let localToken = deployInfo[network.name].localToken
         let localCoins = []
@@ -54,7 +49,7 @@ async function main() {
         // }
 
         // deploy the LP token
-        localLp = await CurveTokenV2.deploy(network.name + "LpLocal", "LP", "18", 0)
+        localLp = await LpToken.deploy(network.name + "LpLocal", "LP")
         await localLp.deployed()
         deployInfo[network.name].localPool.lp = { address: localLp.address, name: await localLp.name(), symbol: await localLp.symbol() }
 
@@ -106,7 +101,6 @@ async function main() {
         
 
         // write out the deploy configuration 
-        console.log("_______________________________________");
         fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
         console.log("Local Pool Deployed!\n");
     }

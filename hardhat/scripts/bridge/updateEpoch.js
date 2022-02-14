@@ -11,7 +11,7 @@ async function main() {
   const Bridge = await ethers.getContractFactory("Bridge");
   const [deployer] = await ethers.getSigners();
   const bridge  = await Bridge.attach(networkConfig[name].bridge);
-  console.log("Updating epoch. Network:", name, " Owner:", deployer.address, " Bridge:", bridge.address, " Reset:", needReset);
+  console.log("Updating epoch. Network:", name, " Owner:", deployer.address, " Bridge:", bridge.address, " Reset:", needReset, "Epoch before:", await bridge.epochNum());
 
   const dao = await bridge.dao();
   if (dao === '0x0000000000000000000000000000000000000000') {
@@ -24,6 +24,8 @@ async function main() {
 
   const tx = await bridge.daoUpdateEpochRequest(needReset, {from: deployer.address});
   console.log("✓ Epoch update requested at tx", tx.hash);
+  await tx.wait();
+
 }
 
 main()

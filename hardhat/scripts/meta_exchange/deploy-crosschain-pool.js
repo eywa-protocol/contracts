@@ -3,7 +3,7 @@ const { network } = require("hardhat");
 const { getRepresentation } = require("../../utils/helper");
 let deployInfo = require('../../helper-hardhat-config.json')
 
-// eth pool params
+// crosschain pool params
 const A = 100                 // amplification coefficient for the pool.
 const fee = 4000000           // pool swap fee
 const admin_fee = 5000000000
@@ -14,7 +14,7 @@ async function main() {
   const [deployer] = await ethers.getSigners();
   console.log("Network:", network.name);
   console.log("Network Id:", await web3.eth.net.getId());
-  console.log(`Deploying with the account: ${deployer.address}`);
+  console.log(`Account: ${deployer.address}`);
   const balance = await deployer.getBalance();
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
   console.log("Pool size:", poolSize);
@@ -24,7 +24,7 @@ async function main() {
   const Portal = await ethers.getContractFactory('Portal')
   const Synthesis = await ethers.getContractFactory('Synthesis')
   const CurveProxy = await ethers.getContractFactory('CurveProxy');
-  const CurveTokenV2 = await ethers.getContractFactory('CurveTokenV2')
+  const LpToken = await ethers.getContractFactory('CurveTokenV5')
   // const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
   // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
@@ -53,28 +53,30 @@ async function main() {
   let crosschainPoolCoins = []
   let crosschainPoolLp
   let crosschainPool
-
+  let bulevo = false;
   // creating local stable tokens for specified networks
-  //if (network.name != "network2" && network.name != "mumbai") {
+  if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "mumbai") bulevo = true;
+  if (network.name.includes("network")) bulevo = true;
+  
+  if (bulevo) {    
     //empty the array
     deployInfo[network.name].localToken = []
 
     for (let i = 0; i < poolSize; i++) {
       localToken[i] = await ERC20.deploy(network.name + "TokenStable" + i, "TKS" + i)
       await localToken[i].deployed()
-      // localToken[i] = localToken[i].address
       deployInfo[network.name].localToken.push({ address: localToken[i].address, name: await localToken[i].name(), symbol: await localToken[i].symbol() });
       if (network.name == "network1" || network.name == "network3")
-        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], deployInfo["network2"].synthesis))
-      if (network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
-        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], deployInfo["mumbai"].synthesis))
+        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], deployInfo[network.name].netwiker, deployInfo["network2"].synthesis))
+      if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
+        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], deployInfo[network.name].netwiker, deployInfo["mumbai"].synthesis))
     }
     if (network.name == "network1" || network.name == "network3")
       deployInfo["network2"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });
-    if (network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
+    if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
       deployInfo["mumbai"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });
 
- // }
+ }
 
   // creating crosschain pool for specified networks
   if (network.name == "network2" || network.name == "mumbai") {
@@ -82,11 +84,11 @@ async function main() {
     for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
       let net = deployInfo[network.name].crosschainPool[i].network
 
-      crosschainPoolLp = await CurveTokenV2.deploy(net + "LpPoolCrosschain", "LPC", "18", 0)
+      crosschainPoolLp = await LpToken.deploy(net + "LpPoolCrosschain", "LPC")
       await crosschainPoolLp.deployed()
       deployInfo[network.name].crosschainPool[i].lp.push({ address: crosschainPoolLp.address, name: await crosschainPoolLp.name(), symbol: await crosschainPoolLp.symbol() });
 
-      // deploy an eth pool
+      // deploy crosschain pool
       switch (poolSize) {
         case 2:
           crosschainPool = await StableSwap2Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee)

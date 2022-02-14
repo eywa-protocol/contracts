@@ -21,8 +21,8 @@ async function main() {
 
     if (network.name == "network2" || network.name == "mumbai") {
         // deploy EYWA `ERC20CRV`
-        const name = "EYWA"
-        const symbol = "EYWA"
+        const name = "EYWA-GOV"
+        const symbol = "EYWA-GOV"
         const decimals = 18
         const eywa = await ERC20CRV.deploy(name, symbol, decimals)
         await eywa.deployed()
