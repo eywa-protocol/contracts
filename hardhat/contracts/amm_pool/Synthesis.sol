@@ -422,11 +422,15 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
      * @param _rtoken real token address
      * @param _name real token name
      * @param _symbol real token symbol
+     * @param _chainID real token chain id
+     * @param _chainsymbol real token chain symbol
      */
     function createRepresentation(
         bytes32 _rtoken,
         string calldata _name,
-        string calldata _symbol
+        string calldata _symbol,
+        uint256 _chainID,
+        string calldata _chainsymbol
     ) external onlyOwner {
         require(representationSynt[_rtoken] == address(0), "Synthesis: representation already exists");
         require(representationReal[castToAddress(_rtoken)] == 0, "Synthesis: representation already exists");
@@ -435,7 +439,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             keccak256(abi.encodePacked(_rtoken)),
             abi.encodePacked(
                 type(SyntERC20).creationCode,
-                abi.encode(string(abi.encodePacked("e", _name)), string(abi.encodePacked("e", _symbol)))
+                abi.encode(string(abi.encodePacked("e", _name)), string(abi.encodePacked("e", _symbol)), abi.encode(_rtoken), abi.encode(_chainID), abi.encode(_chainsymbol))
             )
         );
         setRepresentation(_rtoken, stoken);

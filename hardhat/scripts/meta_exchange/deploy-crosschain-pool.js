@@ -20,7 +20,7 @@ async function main() {
   console.log("Pool size:", poolSize);
   console.log("Deployment in progress...");
 
-  const ERC20 = await ethers.getContractFactory('SyntERC20')
+  const ERC20 = await ethers.getContractFactory('PermitERC20')
   const Portal = await ethers.getContractFactory('Portal')
   const Synthesis = await ethers.getContractFactory('Synthesis')
   const CurveProxy = await ethers.getContractFactory('CurveProxy');
