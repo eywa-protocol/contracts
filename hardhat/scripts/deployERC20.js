@@ -12,7 +12,7 @@ async function main() {
 
         this.listFutureTokens =  networkConfig[network.name].token;
 
-        const Token = await ethers.getContractFactory("SyntERC20");
+        const Token = await ethers.getContractFactory("TestToken");
         let i = 0;
         for(let tkn of this.listFutureTokens){
             let token  = await Token.deploy(tkn.name, tkn.symbol);
