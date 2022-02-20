@@ -11,6 +11,7 @@ npm: copy_configs
 			echo "installed"; \
 			else \
 			cd hardhat;npm ci; \
+			npm audit fix --force; \
 			fi;
 
 wrappers: npm compile copy_configs
