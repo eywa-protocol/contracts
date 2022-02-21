@@ -4,5 +4,15 @@ include:
     file: '/.gitlab-ci.yml'
 
 stages:
+  - build
   - test
   - autotest
+
+build:
+  stage: build
+  script:
+    - echo "Noop"
+  only:
+    - branches
+  tags:
+    - docker
