@@ -1,6 +1,6 @@
 include:
   - project: 'blockchainlaboratory/gitlab-ci'
-    ref: v0.0.4
+    ref: v0.0.5
     file: '/.gitlab-ci.yml'
 
 stages:
@@ -9,23 +9,18 @@ stages:
   - autotest
 
 build:
+  extends:
+    - .noop
   stage: build
-  script:
-    - echo "Noop"
   only:
     - branches
   tags:
     - docker
 
 test:
+  extends:
+    - .unit_tests
   stage: test
-  before_script:
-    - mkdir -p $(pwd)/${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA}
-  script:
-    - docker run -t --rm -v $(pwd):/go/testdir -w /go/testdir golang:1.16 go test -v ./... -race -coverprofile=/go/testdir/${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA}/coverage.out
-  artifacts:
-    paths:
-      - ${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA}/*
   tags:
     - docker
   only:
