@@ -439,7 +439,12 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             keccak256(abi.encodePacked(_rtoken)),
             abi.encodePacked(
                 type(SyntERC20).creationCode,
-                abi.encode(string(abi.encodePacked("e", _name)), string(abi.encodePacked("e", _symbol)), abi.encode(_rtoken), abi.encode(_chainID), abi.encode(_chainsymbol))
+                abi.encode(
+                    string(abi.encodePacked("e", _name)),
+                    string(abi.encodePacked("e", _symbol)),
+                    abi.encode(_rtoken), abi.encode(_chainID),
+                    abi.encode(_chainsymbol)
+                )
             )
         );
         setRepresentation(_rtoken, stoken);
