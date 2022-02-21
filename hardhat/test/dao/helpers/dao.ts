@@ -29,6 +29,8 @@ export const newDao = async (
   const rootAddress = await root.getAddress();
 
   const daoReceipt = await (await daoFactory.newDAO(rootAddress)).wait();
+  console.log(daoReceipt)
+  
   const daoAddress = await getEventArgument(
     daoFactory,
     daoReceipt.transactionHash,

@@ -62,8 +62,10 @@ describe("Voting", function () {
 
   before("Set up DAO", async () => {
     signers = await ethers.getSigners();
-    [root, voteCreator, voter] = signers;
-console.log(voteCreator);
+    [root/*, voteCreator, voter*/] = signers;
+    voteCreator= root
+    voter = root
+console.log(root);
     [dao, acl] = await newDao(root);
   });
 
