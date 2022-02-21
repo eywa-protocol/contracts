@@ -23,8 +23,6 @@ async function main() {
         }
 
         fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
-        console.log(JSON.stringify(networkConfig, undefined, 2))
-
     }
 }
 
