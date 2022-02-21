@@ -1,39 +1,9 @@
-services:
-  - docker:bind
+include:
+  - project: 'blockchainlaboratory/gitlab-ci'
+    ref: v0.0.4
+    file: '/.gitlab-ci.yml'
 
 stages:
-  - deploy
-
-deploy:
-  stage: deploy
-  before_script:
-    - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
-  script:
-    - docker run -t --rm -v $(pwd):/app --user builder registry.digiu.ai/base/eywa-contracts:2 make -C /app eth-testnet-migrate
-  only:
-    - tags
-  tags:
-    - docker
-  when: manual
-  artifacts:
-    paths:
-        - wrappers/
-        - helper-hardhat-config.json
-        - networks_env
-
-rebuild:
-  stage: deploy
-  before_script:
-    - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
-  script:
-    - docker run -t --rm -v $(pwd):/app --user builder registry.digiu.ai/base/eywa-contracts:2 make -C /app wrappers
-  only:
-    - tags
-  tags:
-    - docker
-  when: manual
-  artifacts:
-    paths:
-        - wrappers/
-        - helper-hardhat-config.json
-        - networks_env
+  - build
+  - test
+  - autotest
