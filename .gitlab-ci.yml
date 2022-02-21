@@ -1,27 +1,24 @@
 include:
   - project: 'blockchainlaboratory/gitlab-ci'
-    ref: v0.0.5
+    ref: v0.0.6
     file: '/.gitlab-ci.yml'
 
 stages:
-  - build
   - test
   - autotest
-
-build:
-  extends:
-    - .noop
-  stage: build
-  only:
-    - branches
-  tags:
-    - docker
 
 test:
   extends:
     - .unit_tests
   stage: test
-  tags:
-    - docker
   only:
     - branches
+
+autotest:
+  extends:
+    - .autotest
+  stage: autotest
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+  allow_failure: true
