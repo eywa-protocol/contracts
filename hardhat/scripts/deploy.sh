@@ -60,6 +60,7 @@ else
 fi
 
 npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
+npx hardhat run --no-compile ./scripts/deployERC20.js --network ${net}
 
 ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
   RPC_URL=$(getField ${net}.rpcUrl) \

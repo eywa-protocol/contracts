@@ -45,10 +45,10 @@ testnet-test:
 	cd hardhat;npm run e2e:testnet;
 
 eth-local-migrate: deps npm wrappers
-	cd hardhat;./scripts/deploy.sh network1,network2,network3
+	cd hardhat;./scripts/deploy.sh network2,network1,network3
 
 eth-testnet-migrate: deps npm wrappers
-	cd hardhat;./scripts/deploy.sh bsctestnet,avalanchetestnet,mumbai,hecotestnet,rinkeby
+	cd hardhat;./scripts/deploy.sh mumbai,bsctestnet,avalanchetestnet,hecotestnet,rinkeby
 
 copy_configs:
 	cp ./hardhat/helper-hardhat-config.json.example ./hardhat/helper-hardhat-config.json;cp ./hardhat/.env.example ./hardhat/.env;
