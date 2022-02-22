@@ -26,7 +26,6 @@ async function main() {
     await frontHelper.deployed();
     networkConfig[network.name].frontHelper = frontHelper.address;
     console.log(`FrontHelper address: ${frontHelper.address}`);
-    
 
     networkConfig[network.name].portal    = portal.address;
     networkConfig[network.name].synthesis = synthesis.address;
