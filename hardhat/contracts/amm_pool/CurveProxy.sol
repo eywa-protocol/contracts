@@ -81,6 +81,13 @@ interface ISynthesis {
         bytes memory _out
     ) external returns (bytes32 txId);
 
+    function emergencyUnsyntesizeRequest(
+        bytes32 _txID,
+        address _receiveSide,
+        address _oppositeBridge,
+        uint256 _chainID
+    ) external;
+
     function getRepresentation(bytes32 _rtoken) external view returns (address);
 
     function getTxId() external returns (bytes32);
@@ -198,6 +205,9 @@ contract CurveProxy is Initializable, RelayRecipient {
         address receiveSide;
         address oppositeBridge;
         uint256 chainID;
+        //emergency unsynth params
+        address receiverBridge;
+        uint256 receiverChainID;
     }
 
     event InconsistencyCallback(address pool, address token, address to, uint256 amount);
@@ -577,7 +587,7 @@ contract CurveProxy is Initializable, RelayRecipient {
             if (_params.expected_min_mint_amount > min_mint_amount) {
                 for (uint256 i = 0; i < representation.length; i++) {
                     if (_synth_amount[i] > 0) {
-                        IERC20Upgradeable(representation[i]).safeTransfer(_params.to, _synth_amount[i]);
+                        ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
                         emit InconsistencyCallback(_params.add, representation[i], _params.to, _synth_amount[i]);
                     }
                 }
@@ -598,25 +608,32 @@ contract CurveProxy is Initializable, RelayRecipient {
             );
 
             uint256 dx = IERC20Upgradeable(lpLocalPool).balanceOf(address(this)); //amount to swap
-            uint256 min_dy = IStableSwapPool(_params.exchange).get_dy(_params.i, _params.j, dx);
-
-            //inconsistency check
-            if (_params.expected_min_dy > min_dy) {
-                IERC20Upgradeable(pool[_params.exchange].at(uint256(int256(_params.i)))).safeTransfer(
-                    _params.to,
-                    IERC20Upgradeable(pool[_params.exchange].at(uint256(int256(_params.i)))).balanceOf(address(this))
-                );
-                emit InconsistencyCallback(
-                    _params.exchange,
-                    pool[_params.exchange].at(uint256(int256(_params.i))),
-                    _params.to,
-                    IERC20Upgradeable(pool[_params.exchange].at(uint256(int256(_params.i)))).balanceOf(address(this))
-                );
+            try IStableSwapPool(_params.exchange).get_dy(_params.i, _params.j, dx) returns (uint256 min_dy) {
+                //inconsistency check
+                if (_params.expected_min_dy > min_dy) {
+                    for (uint256 i = 0; i < _txId.length; i++) {
+                        if (_synth_amount[i] > 0) {
+                            ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                        }
+                    }
+                    emit InconsistencyCallback(
+                        _params.exchange,
+                        pool[_params.exchange].at(uint256(int256(_params.i))),
+                        _params.to,
+                        IERC20Upgradeable(pool[_params.exchange].at(uint256(int256(_params.i)))).balanceOf(address(this))
+                    );
+                    return;
+                }
+                //perform exhange
+                IStableSwapPool(_params.exchange).exchange(_params.i, _params.j, dx, min_dy);
+            } catch {
+                for (uint256 i = 0; i < _txId.length; i++) {
+                    if (_synth_amount[i] > 0) {
+                        ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                    }
+                }
                 return;
             }
-
-            //perform exhange
-            IStableSwapPool(_params.exchange).exchange(_params.i, _params.j, dx, min_dy);
         }
 
         //remove liquidity one coin stage
@@ -625,37 +642,53 @@ contract CurveProxy is Initializable, RelayRecipient {
         IERC20Upgradeable(lpToken).approve(_params.remove, IERC20Upgradeable(lpToken).balanceOf(address(this)));
 
         uint256 token_amount = IERC20Upgradeable(lpToken).balanceOf(address(this));
-        uint256 min_amount = IStableSwapPool(_params.remove).calc_withdraw_one_coin(token_amount, _params.x);
-
-        //inconsistency check
-        if (_params.expected_min_amount > min_amount) {
-            IERC20Upgradeable(lpToken).safeTransfer(_params.to, token_amount);
-            emit InconsistencyCallback(_params.remove, lpToken, _params.to, token_amount);
-            return;
+        try IStableSwapPool(_params.remove).calc_withdraw_one_coin(token_amount, _params.x) returns (uint256 min_amount) {
+            //inconsistency check
+            if (_params.expected_min_amount > min_amount) {
+                for (uint256 i = 0; i < _txId.length; i++) {
+                        if (_synth_amount[i] > 0) {
+                            ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                        }
+                    }
+                emit InconsistencyCallback(_params.remove, lpToken, _params.to, token_amount);
+                return;
+            }
+        } catch {
+            for (uint256 i = 0; i < _txId.length; i++) {
+                if (_synth_amount[i] > 0) {
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                }
+            }
         }
 
         //remove liquidity
-        IStableSwapPool(_params.remove).remove_liquidity_one_coin(token_amount, _params.x, 0);
-
-        //transfer asset to the recipient (unsynth if mentioned)
-        uint256 thisBalance = IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).balanceOf(
-            address(this)
-        );
-        if (_params.chainID != 0) {
-            IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).approve(synthesis, thisBalance);
-            ISynthesis(synthesis).burnSyntheticToken(
-                pool[_params.remove].at(uint256(int256(_params.x))),
-                thisBalance,
-                _params.to,
-                _params.receiveSide,
-                _params.oppositeBridge,
-                _params.chainID
+        try IStableSwapPool(_params.remove).remove_liquidity_one_coin(token_amount, _params.x, 0) {
+            //transfer asset to the recipient (unsynth if mentioned)
+            uint256 thisBalance = IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).balanceOf(
+                address(this)
             );
-        } else {
-            IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).safeTransfer(
-                _params.to,
-                thisBalance
-            );
+            if (_params.chainID != 0) {
+                IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).approve(synthesis, thisBalance);
+                ISynthesis(synthesis).burnSyntheticToken(
+                    pool[_params.remove].at(uint256(int256(_params.x))),
+                    thisBalance,
+                    _params.to,
+                    _params.receiveSide,
+                    _params.oppositeBridge,
+                    _params.chainID
+                );
+            } else {
+                IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).safeTransfer(
+                    _params.to,
+                    thisBalance
+                );
+            }
+        } catch {
+            for (uint256 i = 0; i < _txId.length; i++) {
+                if (_synth_amount[i] > 0) {
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                }
+            }
         }
     }
 
