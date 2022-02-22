@@ -1,6 +1,6 @@
 const fs = require("fs");
 const { network } = require("hardhat");
-let deployInfo = require('../../helper-hardhat-config.json')
+let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json')
 
 // local pool params
 const A = 100                 // amplification coefficient for the pool.
@@ -101,7 +101,7 @@ async function main() {
         
 
         // write out the deploy configuration 
-        fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
+        fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
         console.log("Local Pool Deployed!\n");
     }
 

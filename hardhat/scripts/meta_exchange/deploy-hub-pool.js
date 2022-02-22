@@ -1,5 +1,5 @@
 const fs = require("fs");
-let deployInfo = require('../../helper-hardhat-config.json');
+let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
 const { network } = require("hardhat");
 
 
@@ -71,7 +71,7 @@ async function main() {
     deployInfo[network.name].hubPool.coins = hubPoolCoins
 
     // write out the deploy configuration 
-    fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
+    fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
     console.log("Hub pool deployed!");
   }
 

@@ -1,4 +1,4 @@
-let networkConfig = require('../../helper-hardhat-config.json')
+let networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json')
 const hre = require("hardhat");
 const { addressToBytes32, timeout } = require('../../utils/helper');
 

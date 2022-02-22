@@ -1,5 +1,5 @@
 const fs = require("fs");
-let networkConfig = require('../../helper-hardhat-config.json')
+let networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json')
 const hre = require("hardhat");
 const { upgrades } = require("hardhat");
 
@@ -35,7 +35,7 @@ async function main() {
     console.log(`MockDexPool address: ${mockDexPool.address}`);
 
     // Write deployed contracts addresses to config
-    fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
+    fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
 
 }
 

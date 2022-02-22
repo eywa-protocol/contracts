@@ -4,7 +4,7 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 const Web3 = require('web3');
 const web3 = new Web3();
 const { networks } = require('../hardhat.config');
-const network = require('../helper-hardhat-config.json')
+const network = require( process.env.HHC_PASS ? process.env.HHC_PASS : '../helper-hardhat-config.json')
 const env = require('dotenv').config({ path: `./.env` });
 
 function toWei(n) { return web3.utils.toWei(n, 'ether'); }

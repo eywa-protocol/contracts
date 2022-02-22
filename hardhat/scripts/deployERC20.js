@@ -1,5 +1,5 @@
 const fs = require("fs");
-let networkConfig = require('../helper-hardhat-config.json')
+let networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../helper-hardhat-config.json')
 const hre = require("hardhat");
 const h = require("../utils/helper");
 
@@ -22,7 +22,7 @@ async function main() {
             i++;
         }
 
-        fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
+        fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
     }
 }
 
