@@ -490,13 +490,13 @@
     "token": [
       {
         "address": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
-        "name": "",
-        "symbol": ""
+        "name": "EYWA",
+        "symbol": "EYWA"
       },
       {
         "address": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
-        "name": "",
-        "symbol": ""
+        "name": "USDT",
+        "symbol": "USDT"
       }
     ],
     "crosschainPool": [],
@@ -546,13 +546,13 @@
     "token": [
       {
         "address": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
-        "name": "",
-        "symbol": ""
+        "name": "EYWA",
+        "symbol": "EYWA"
       },
       {
         "address": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
-        "name": "",
-        "symbol": ""
+        "name": "USDT",
+        "symbol": "USDT"
       }
     ],
     "crosschainPool": [],
@@ -602,13 +602,13 @@
     "token": [
       {
         "address": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
-        "name": "",
-        "symbol": ""
+        "name": "EYWA",
+        "symbol": "EYWA"
       },
       {
         "address": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
-        "name": "",
-        "symbol": ""
+        "name": "USDT",
+        "symbol": "USDT"
       }
     ],
     "crosschainPool": [],
