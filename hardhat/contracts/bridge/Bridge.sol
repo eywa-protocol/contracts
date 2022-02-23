@@ -8,15 +8,19 @@ import "@openzeppelin/contracts-newone/utils/Address.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "../amm_pool/RelayRecipient.sol";
 import "../utils/Typecast.sol";
+import "../utils/ReqIdFilter.sol";
 
 contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecast {
     using AddressUpgradeable for address;
+    using ReqIdFilter for ReqIdFilter.Data;
 
     string public versionRecipient;
     E2Point private epochKey; // Aggregated public key of all paricipants of the current epoch
     address public dao; // Address of the DAO
     uint8 public epochParticipantsNum; // Number of participants contributed to the epochKey
     uint32 public epochNum; // Sequential number of the epoch
+
+    ReqIdFilter.Data private reqIdFilter; // Filteres request ID against repetition
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
 
@@ -91,7 +95,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
         if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
             require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "Bridge: not enough participants"); // TODO configure
             require(
-                epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum),
+                epochParticipantsNum == 255 || _votersMask < (1 << epochParticipantsNum),
                 "Bridge: bitmask too big"
             );
             bytes memory data = abi.encodePacked(newKey.x, newKey.y, _newEpochParticipantsNum, _newEpochNum);
@@ -105,6 +109,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
         epochKey = newKey;
         epochParticipantsNum = _newEpochParticipantsNum; // TODO: require minimum
         epochNum = _newEpochNum;
+        reqIdFilter.clear();
     }
 
     /**
@@ -181,6 +186,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
         bytes calldata _votersSignature,
         uint256 _votersMask
     ) external {
+        require(reqIdFilter.testAndSet(_reqId) == false, "Already seen");
         require(epochKey.x[0] != 0 || epochKey.x[1] != 0, "Bridge: epoch not set");
         require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "Bridge: not enough participants"); // TODO configure
         require(epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum), "Bridge: bitmask too big");
