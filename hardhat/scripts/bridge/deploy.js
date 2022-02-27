@@ -1,3 +1,5 @@
+// $ npx hardhat run scripts/bridge/deploy.js --network rinkeby
+
 const fs = require("fs");
 let networkConfig = require('../../helper-hardhat-config.json')
 const hre = require("hardhat");
