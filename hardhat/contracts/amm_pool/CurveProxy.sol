@@ -153,6 +153,9 @@ contract CurveProxy is Initializable, RelayRecipient {
         address add;
         address to;
         uint256 expected_min_mint_amount;
+        //emergency unsynth params
+        address receiverBridge;
+        uint256 receiverChainID;
     }
 
     struct MetaMintEUSD {
@@ -166,6 +169,9 @@ contract CurveProxy is Initializable, RelayRecipient {
         uint256 expected_min_mint_amount_h;
         //recipient address
         address to;
+        //emergency unsynth params
+        address receiverBridge;
+        uint256 receiverChainID;
     }
 
     struct MetaRedeemEUSD {
@@ -269,7 +275,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         if (_params.expected_min_mint_amount > min_mint_amount) {
             for (uint256 i = 0; i < representation.length; i++) {
                 if (_synth_amount[i] > 0) {
-                    IERC20Upgradeable(representation[i]).safeTransfer(_params.to, _synth_amount[i]);
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
                     emit InconsistencyCallback(_params.add, representation[i], _params.to, _synth_amount[i]);
                 }
             }
@@ -393,7 +399,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         if (_params.expected_min_mint_amount_c > min_mint_amount_c) {
             for (uint256 i = 0; i < representation.length; i++) {
                 if (_synth_amount[i] > 0) {
-                    IERC20Upgradeable(representation[i]).safeTransfer(_params.to, _synth_amount[i]);
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
                     emit InconsistencyCallback(_params.add_c, representation[i], _params.to, _synth_amount[i]);
                 }
             }
@@ -416,7 +422,11 @@ contract CurveProxy is Initializable, RelayRecipient {
         //inconsistency check hub stage
         if (_params.expected_min_mint_amount_h > min_mint_amount_h) {
             //TODO: check index
-            IERC20Upgradeable(lp_token[_params.add_h]).safeTransfer(_params.to, amount_h[_params.lp_index]);
+            for (uint256 i = 0; i < _txId.length; i++) {
+                if (_synth_amount[i] > 0) {
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                }
+            }
             emit InconsistencyCallback(_params.add_h, lp_token[_params.add_h], _params.to, amount_h[_params.lp_index]);
             return;
         }

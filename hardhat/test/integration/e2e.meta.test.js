@@ -46,7 +46,7 @@ contract('CurveProxy', () => {
 
         it("Mint EUSD: network1 -> network2(hub)", async function () {
             selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
-                'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address),address[3],uint256[3],bytes32[3])'
+                'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
             )
 
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
@@ -76,11 +76,13 @@ contract('CurveProxy', () => {
                 lp_index: 0,
                 add_h: deployInfo["network2"].hubPool.address,
                 expected_min_mint_amount_h: 0,
-                to: userNet2
+                to: userNet2,
+                receiverBridge:deployInfo["network2"].bridge,
+                receiverChainID:deployInfo["network2"].chainId
             }
 
             const encodedTransitData = web3.eth.abi.encodeParameters(
-                ["address", "uint256", "uint256", "address", "uint256", "address"],
+                ["address", "uint256", "uint256", "address", "uint256", "address","address","uint256"],
                 [mintEUSDparams.add_c,
                 mintEUSDparams.expected_min_mint_amount_c,
                 mintEUSDparams.lp_index,
@@ -88,7 +90,9 @@ contract('CurveProxy', () => {
                 mintEUSDparams.add_h,
                 /////
                 mintEUSDparams.expected_min_mint_amount_h,
-                mintEUSDparams.to
+                mintEUSDparams.to,
+                mintEUSDparams.receiverBridge,
+                mintEUSDparams.receiverChainID
                 ]
             )
 

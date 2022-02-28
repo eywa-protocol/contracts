@@ -123,6 +123,14 @@ describe("E2E CurveProxy local test", () => {
             ]
         )
 
+        const permitParams = new Array(3).fill({
+            v: 0,
+            r: ethers.constants.HashZero,
+            s: ethers.constants.HashZero,
+            deadline: 0,
+            approveMax: false
+        })
+
         await tokenC1.approve(portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
         const tokensToSynth = [tokenC1.address, tokenC2.address, tokenC3.address]
         
@@ -132,14 +140,15 @@ describe("E2E CurveProxy local test", () => {
         console.log("selectorMetaExchange: ", selectorMetaExchange)
         console.log("encodedTransitData: ", encodedTransitData)
 
-        // await portalC.synthesize_batch_transit(
-        //     tokensToSynth,
-        //     amounts,
-        //     synthParams,
-        //     selectorMetaExchange,
-        //     encodedTransitData,
-        //     { from: userNet3, gas: 1000_000 }
-        // )
+        await portalC.synthesize_batch_transit(
+            tokensToSynth,
+            amounts,
+            synthParams,
+            selectorMetaExchange,
+            encodedTransitData,
+            permitParams,
+            { from: userNet3, gas: 1000_000 }
+        )
 
         await timeout(25000)
         
@@ -148,7 +157,7 @@ describe("E2E CurveProxy local test", () => {
 
     it("Exchange: Inconsistency - min_dy", async function () {
         selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-            'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256),address[3],uint256[3],bytes32[3])'
+            'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
         )
 
         this.balanceA2 = (await tokenA2.balanceOf(userNet1))
@@ -180,12 +189,14 @@ describe("E2E CurveProxy local test", () => {
             chain2address: deployInfo["network1"].portal,
             receiveSide: deployInfo["network1"].portal,
             oppositeBridge: deployInfo["network1"].bridge,
-            chainID: deployInfo["network1"].chainId
+            chainID: deployInfo["network1"].chainId,
+            receiverBridge:deployInfo["network3"].bridge,
+            receiverChainID:deployInfo["network3"].chainId
         }
 
         const encodedTransitData = web3.eth.abi.encodeParameters(
             ['address', 'address', 'address', 'uint256', 'int128', 'int128', 'uint256', 'int128', 'uint256',
-             'address', 'address', 'address', 'address', 'uint256'],
+             'address', 'address', 'address', 'address', 'uint256', 'address', 'uint256'],
             [metaExchangeParams.add,
             metaExchangeParams.exchange,
             metaExchangeParams.remove,
@@ -204,9 +215,19 @@ describe("E2E CurveProxy local test", () => {
             metaExchangeParams.chain2address,
             metaExchangeParams.receiveSide,
             metaExchangeParams.oppositeBridge,
-            metaExchangeParams.chainID
+            metaExchangeParams.chainID,
+            metaExchangeParams.receiverBridge,
+            metaExchangeParams.receiverChainID
             ]
         )
+
+        const permitParams = new Array(3).fill({
+            v: 0,
+            r: ethers.constants.HashZero,
+            s: ethers.constants.HashZero,
+            deadline: 0,
+            approveMax: false
+        })
 
         await tokenC1.approve(portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
         const tokensToSynth = [tokenC1.address, tokenC2.address, tokenC3.address]
@@ -217,6 +238,7 @@ describe("E2E CurveProxy local test", () => {
             synthParams,
             selectorMetaExchange,
             encodedTransitData,
+            permitParams,
             { from: userNet3, gas: 1000_000 }
         )
 
@@ -225,279 +247,339 @@ describe("E2E CurveProxy local test", () => {
         assert(this.balanceA2.eq(await tokenA2.balanceOf(userNet1)))
     })
 
-    // it("Exchange: Inconsistency - min_amount", async function () {
-    //     selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-    //         'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256),address[3],uint256[3],bytes32[3])'
-    //     )
+    it("Exchange: Inconsistency - min_amount", async function () {
+        selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
+            'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
+        )
 
-    //     this.balanceA2 = (await tokenA2.balanceOf(userNet1))
+        this.balanceA2 = (await tokenA2.balanceOf(userNet1))
 
-    //     //synthesize params
-    //     const synthParams = {
-    //         chain2address: deployInfo["network2"].curveProxy,
-    //         receiveSide: deployInfo["network2"].curveProxy,
-    //         oppositeBridge: deployInfo["network2"].bridge,
-    //         chainID: deployInfo["network2"].chainId
-    //     }
+        //synthesize params
+        const synthParams = {
+            chain2address: deployInfo["network2"].curveProxy,
+            receiveSide: deployInfo["network2"].curveProxy,
+            oppositeBridge: deployInfo["network2"].bridge,
+            chainID: deployInfo["network2"].chainId
+        }
 
-    //     const metaExchangeParams = {
-    //         add: deployInfo["network2"].crosschainPool[1].address,            //add pool address
-    //         exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
-    //         remove: deployInfo["network2"].crosschainPool[0].address,         //remove pool address
-    //         //add liquidity params
-    //         expected_min_mint_amount: 0,
-    //         //exchange params
-    //         i: 1,                                             //index value for the coin to send
-    //         j: 0,                                             //index value of the coin to receive
-    //         expected_min_dy: 0,
-    //         //withdraw one coin params
-    //         x: 1,                                             // index value of the coin to withdraw
-    //         expected_min_amount: ethers.constants.MaxUint256,
-    //         //mint synth params
-    //         to: userNet1,
-    //         //unsynth params
-    //         chain2address: deployInfo["network1"].portal,
-    //         receiveSide: deployInfo["network1"].portal,
-    //         oppositeBridge: deployInfo["network1"].bridge,
-    //         chainID: deployInfo["network1"].chainId
-    //     }
+        const metaExchangeParams = {
+            add: deployInfo["network2"].crosschainPool[1].address,            //add pool address
+            exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
+            remove: deployInfo["network2"].crosschainPool[0].address,         //remove pool address
+            //add liquidity params
+            expected_min_mint_amount: 0,
+            //exchange params
+            i: 1,                                             //index value for the coin to send
+            j: 0,                                             //index value of the coin to receive
+            expected_min_dy: 0,
+            //withdraw one coin params
+            x: 1,                                             // index value of the coin to withdraw
+            expected_min_amount: ethers.constants.MaxUint256,
+            //mint synth params
+            to: userNet1,
+            //unsynth params
+            chain2address: deployInfo["network1"].portal,
+            receiveSide: deployInfo["network1"].portal,
+            oppositeBridge: deployInfo["network1"].bridge,
+            chainID: deployInfo["network1"].chainId,
+            receiverBridge:deployInfo["network3"].bridge,
+            receiverChainID:deployInfo["network3"].chainId
+        }
 
-    //     const encodedTransitData = web3.eth.abi.encodeParameters(
-    //         ['address', 'address', 'address', 'uint256', 'int128', 'int128', 'uint256', 'int128', 'uint256',
-    //          'address', 'address', 'address', 'address', 'uint256'],
-    //         [metaExchangeParams.add,
-    //         metaExchangeParams.exchange,
-    //         metaExchangeParams.remove,
-    //         /////
-    //         metaExchangeParams.expected_min_mint_amount,
-    //         /////
-    //         metaExchangeParams.i,
-    //         metaExchangeParams.j,
-    //         metaExchangeParams.expected_min_dy,
-    //         /////
-    //         metaExchangeParams.x,
-    //         metaExchangeParams.expected_min_amount,
-    //         /////
-    //         metaExchangeParams.to,
-    //         /////
-    //         metaExchangeParams.chain2address,
-    //         metaExchangeParams.receiveSide,
-    //         metaExchangeParams.oppositeBridge,
-    //         metaExchangeParams.chainID
-    //         ]
-    //     )
+        const encodedTransitData = web3.eth.abi.encodeParameters(
+            ['address', 'address', 'address', 'uint256', 'int128', 'int128', 'uint256', 'int128', 'uint256',
+             'address', 'address', 'address', 'address', 'uint256', 'address', 'uint256'],
+            [metaExchangeParams.add,
+            metaExchangeParams.exchange,
+            metaExchangeParams.remove,
+            /////
+            metaExchangeParams.expected_min_mint_amount,
+            /////
+            metaExchangeParams.i,
+            metaExchangeParams.j,
+            metaExchangeParams.expected_min_dy,
+            /////
+            metaExchangeParams.x,
+            metaExchangeParams.expected_min_amount,
+            /////
+            metaExchangeParams.to,
+            /////
+            metaExchangeParams.chain2address,
+            metaExchangeParams.receiveSide,
+            metaExchangeParams.oppositeBridge,
+            metaExchangeParams.chainID,
+            metaExchangeParams.receiverBridge,
+            metaExchangeParams.receiverChainID
+            ]
+        )
 
-    //     await tokenC1.approve(portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
-    //     const tokensToSynth = [tokenC1.address, tokenC2.address, tokenC3.address]
+        const permitParams = new Array(3).fill({
+            v: 0,
+            r: ethers.constants.HashZero,
+            s: ethers.constants.HashZero,
+            deadline: 0,
+            approveMax: false
+        })
 
-    //     await portalC.synthesize_batch_transit(
-    //         tokensToSynth,
-    //         amounts,
-    //         synthParams,
-    //         selectorMetaExchange,
-    //         encodedTransitData,
-    //         { from: userNet3, gas: 1000_000 }
-    //     )
+        await tokenC1.approve(portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
+        const tokensToSynth = [tokenC1.address, tokenC2.address, tokenC3.address]
 
-    //     await timeout(25000)
+        await portalC.synthesize_batch_transit(
+            tokensToSynth,
+            amounts,
+            synthParams,
+            selectorMetaExchange,
+            encodedTransitData,
+            permitParams,
+            { from: userNet3, gas: 1000_000 }
+        )
+
+        await timeout(25000)
         
-    //     assert(this.balanceA2.eq(await tokenA2.balanceOf(userNet1)))
-    // })
+        assert(this.balanceA2.eq(await tokenA2.balanceOf(userNet1)))
+    })
 
-    // it("Mint EUSD: Inconsistency - expected_min_mint_amount_c", async function () {
-    //     selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
-    //         'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address),address[3],uint256[3],bytes32[3])'
-    //     )
+    it("Mint EUSD: Inconsistency - expected_min_mint_amount_c", async function () {
+        selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
+            'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
+        )
 
-    //     this.balanceEUSD = (await EUSD.balanceOf(userNet2))
+        this.balanceEUSD = (await EUSD.balanceOf(userNet2))
 
-    //     //synthesize params
-    //     const synthParams = {
-    //         chain2address: deployInfo["network2"].curveProxy,
-    //         receiveSide: deployInfo["network2"].curveProxy,
-    //         oppositeBridge: deployInfo["network2"].bridge,
-    //         chainID: deployInfo["network2"].chainId
-    //     }
+        //synthesize params
+        const synthParams = {
+            chain2address: deployInfo["network2"].curveProxy,
+            receiveSide: deployInfo["network2"].curveProxy,
+            oppositeBridge: deployInfo["network2"].bridge,
+            chainID: deployInfo["network2"].chainId
+        }
 
-    //     const mintEUSDparams = {
-    //         add_c: deployInfo["network2"].crosschainPool[0].address,
-    //         //add liquidity params
-    //         expected_min_mint_amount_c: ethers.constants.MaxUint256,
-    //         //exchange params
-    //         lp_index: 0,
-    //         add_h: deployInfo["network2"].hubPool.address,
-    //         expected_min_mint_amount_h: 0,
-    //         to: userNet2
-    //     }
+        const mintEUSDparams = {
+            add_c: deployInfo["network2"].crosschainPool[0].address,
+            //add liquidity params
+            expected_min_mint_amount_c: ethers.constants.MaxUint256,
+            //exchange params
+            lp_index: 0,
+            add_h: deployInfo["network2"].hubPool.address,
+            expected_min_mint_amount_h: 0,
+            to: userNet2,
+            receiverBridge:deployInfo["network2"].bridge,
+            receiverChainID:deployInfo["network2"].chainId
+        }
 
-    //     const encodedTransitData = web3.eth.abi.encodeParameters(
-    //         ["address", "uint256", "uint256", "address", "uint256", "address"],
-    //         [mintEUSDparams.add_c,
-    //         mintEUSDparams.expected_min_mint_amount_c,
-    //         mintEUSDparams.lp_index,
-    //         /////
-    //         mintEUSDparams.add_h,
-    //         /////
-    //         mintEUSDparams.expected_min_mint_amount_h,
-    //         mintEUSDparams.to
-    //         ]
-    //     )
+        const encodedTransitData = web3.eth.abi.encodeParameters(
+            ["address", "uint256", "uint256", "address", "uint256", "address", "address", "uint256"],
+            [mintEUSDparams.add_c,
+            mintEUSDparams.expected_min_mint_amount_c,
+            mintEUSDparams.lp_index,
+            /////
+            mintEUSDparams.add_h,
+            /////
+            mintEUSDparams.expected_min_mint_amount_h,
+            mintEUSDparams.to,
+            mintEUSDparams.receiverBridge,
+            mintEUSDparams.receiverChainID
+            ]
+        )
 
-    //     await tokenA1.approve(portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
-    //     const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
-    //     const testAmount = Math.floor((Math.random() * 100) + 1);
-    //     amounts[0] = ethers.utils.parseEther(testAmount + ".0")
-    //     const tokensToSynth = [tokenA1.address, tokenA2.address, tokenA3.address]
+        const permitParams = new Array(3).fill({
+            v: 0,
+            r: ethers.constants.HashZero,
+            s: ethers.constants.HashZero,
+            deadline: 0,
+            approveMax: false
+        })
 
-    //     await portalA.synthesize_batch_transit(
-    //         tokensToSynth,
-    //         amounts,
-    //         synthParams,
-    //         selectorMintEUSD,
-    //         encodedTransitData,
-    //         { from: userNet1, gas: 1000_000 }
-    //     )
+        await tokenA1.approve(portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+        const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
+        const testAmount = Math.floor((Math.random() * 100) + 1);
+        amounts[0] = ethers.utils.parseEther(testAmount + ".0")
+        const tokensToSynth = [tokenA1.address, tokenA2.address, tokenA3.address]
 
-    //     await timeout(15000)
-    //     assert(this.balanceEUSD.eq(await EUSD.balanceOf(userNet2)))
-    // })
+        await portalA.synthesize_batch_transit(
+            tokensToSynth,
+            amounts,
+            synthParams,
+            selectorMintEUSD,
+            encodedTransitData,
+            permitParams,
+            { from: userNet1, gas: 1000_000 }
+        )
+
+        await timeout(15000)
+        assert(this.balanceEUSD.eq(await EUSD.balanceOf(userNet2)))
+    })
 
 
-    // it("Mint EUSD: Inconsistency - expected_min_mint_amount_h", async function () {
-    //     selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
-    //         'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address),address[3],uint256[3],bytes32[3])'
-    //     )
+    it("Mint EUSD: Inconsistency - expected_min_mint_amount_h", async function () {
+        selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
+            'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
+        )
 
-    //     this.balanceEUSD = (await EUSD.balanceOf(userNet2))
+        this.balanceEUSD = (await EUSD.balanceOf(userNet2))
 
-    //     //synthesize params
-    //     const synthParams = {
-    //         chain2address: deployInfo["network2"].curveProxy,
-    //         receiveSide: deployInfo["network2"].curveProxy,
-    //         oppositeBridge: deployInfo["network2"].bridge,
-    //         chainID: deployInfo["network2"].chainId
-    //     }
+        //synthesize params
+        const synthParams = {
+            chain2address: deployInfo["network2"].curveProxy,
+            receiveSide: deployInfo["network2"].curveProxy,
+            oppositeBridge: deployInfo["network2"].bridge,
+            chainID: deployInfo["network2"].chainId,
+            receiverBridge:deployInfo["network2"].bridge,
+            receiverChainID:deployInfo["network2"].chainId
+        }
 
-    //     const mintEUSDparams = {
-    //         add_c: deployInfo["network2"].crosschainPool[0].address,
-    //         //add liquidity params
-    //         expected_min_mint_amount_c: 0,
-    //         //exchange params
-    //         lp_index: 0,
-    //         add_h: deployInfo["network2"].hubPool.address,
-    //         expected_min_mint_amount_h: ethers.constants.MaxUint256,
-    //         to: userNet2
-    //     }
+        const mintEUSDparams = {
+            add_c: deployInfo["network2"].crosschainPool[0].address,
+            //add liquidity params
+            expected_min_mint_amount_c: 0,
+            //exchange params
+            lp_index: 0,
+            add_h: deployInfo["network2"].hubPool.address,
+            expected_min_mint_amount_h: ethers.constants.MaxUint256,
+            to: userNet2,
+            receiverBridge:deployInfo["network2"].bridge,
+            receiverChainID:deployInfo["network2"].chainId
+        }
 
-    //     const encodedTransitData = web3.eth.abi.encodeParameters(
-    //         ["address", "uint256", "uint256", "address", "uint256", "address"],
-    //         [mintEUSDparams.add_c,
-    //         mintEUSDparams.expected_min_mint_amount_c,
-    //         mintEUSDparams.lp_index,
-    //         /////
-    //         mintEUSDparams.add_h,
-    //         /////
-    //         mintEUSDparams.expected_min_mint_amount_h,
-    //         mintEUSDparams.to
-    //         ]
-    //     )
+        const encodedTransitData = web3.eth.abi.encodeParameters(
+            ["address", "uint256", "uint256", "address", "uint256", "address", "address", "uint256"],
+            [mintEUSDparams.add_c,
+            mintEUSDparams.expected_min_mint_amount_c,
+            mintEUSDparams.lp_index,
+            /////
+            mintEUSDparams.add_h,
+            /////
+            mintEUSDparams.expected_min_mint_amount_h,
+            mintEUSDparams.to,
+            mintEUSDparams.receiverBridge,
+            mintEUSDparams.receiverChainID
+            ]
+        )
 
-    //     await tokenA1.approve(portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
-    //     const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
-    //     const testAmount = Math.floor((Math.random() * 100) + 1);
-    //     amounts[0] = ethers.utils.parseEther(testAmount + ".0")
-    //     const tokensToSynth = [tokenA1.address, tokenA2.address, tokenA3.address]
+        const permitParams = new Array(3).fill({
+            v: 0,
+            r: ethers.constants.HashZero,
+            s: ethers.constants.HashZero,
+            deadline: 0,
+            approveMax: false
+        })
 
-    //     await portalA.synthesize_batch_transit(
-    //         tokensToSynth,
-    //         amounts,
-    //         synthParams,
-    //         selectorMintEUSD,
-    //         encodedTransitData,
-    //         { from: userNet1, gas: 1000_000 }
-    //     )
+        await tokenA1.approve(portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+        const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
+        const testAmount = Math.floor((Math.random() * 100) + 1);
+        amounts[0] = ethers.utils.parseEther(testAmount + ".0")
+        const tokensToSynth = [tokenA1.address, tokenA2.address, tokenA3.address]
 
-    //     await timeout(15000)
-    //     assert(this.balanceEUSD.eq(await EUSD.balanceOf(userNet2)))
-    // })
+        await portalA.synthesize_batch_transit(
+            tokensToSynth,
+            amounts,
+            synthParams,
+            selectorMintEUSD,
+            encodedTransitData,
+            permitParams,
+            { from: userNet1, gas: 1000_000 }
+        )
 
-    // it("Redeem EUSD: Inconsistecny - expected_min_amount_c", async function () {
+        await timeout(15000)
+        assert(this.balanceEUSD.eq(await EUSD.balanceOf(userNet2)))
+    })
 
-    //     this.balanceA3 = (await tokenA3.balanceOf(userNet1))
+    it("Redeem EUSD: Inconsistecny - expected_min_amount_c", async function () {
 
-    //     //unsynthesize params
-    //     const unsynthParams = {
-    //         receiveSide: deployInfo["network1"].portal,
-    //         oppositeBridge: deployInfo["network1"].bridge,
-    //         chainID: deployInfo["network1"].chainId
-    //     }
+        this.balanceA3 = (await tokenA3.balanceOf(userNet1))
 
-    //     const redeemEUSDParams = {
-    //         remove_c: deployInfo["network2"].crosschainPool[0].address,
-    //         x: 2,
-    //         expected_min_amount_c: ethers.constants.MaxUint256,
-    //         //hub pool params
-    //         remove_h: deployInfo["network2"].hubPool.address,
-    //         //amount to transfer
-    //         token_amount_h: 1, //test amount
-    //         y: 0,
-    //         expected_min_amount_h: 0,
-    //         //recipient address
-    //         to: userNet1
-    //     }
+        //unsynthesize params
+        const unsynthParams = {
+            receiveSide: deployInfo["network1"].portal,
+            oppositeBridge: deployInfo["network1"].bridge,
+            chainID: deployInfo["network1"].chainId
+        }
 
-    //     await EUSD.approve(curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
-    //     await EUSD.approve(curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
+        const redeemEUSDParams = {
+            remove_c: deployInfo["network2"].crosschainPool[0].address,
+            x: 2,
+            expected_min_amount_c: ethers.constants.MaxUint256,
+            //expected_min_amount_c: 0,
+            //hub pool params
+            remove_h: deployInfo["network2"].hubPool.address,
+            //amount to transfer
+            token_amount_h: 1, //test amount
+            y: 0,
+            expected_min_amount_h: 0,
+            //recipient address
+            to: userNet1
+        }
 
-    //     await curveProxyB.redeem_eusd(
-    //         redeemEUSDParams,
-    //         unsynthParams.receiveSide,
-    //         unsynthParams.oppositeBridge,
-    //         unsynthParams.chainID,
-    //         { from: userNet2, gas: 1000_000 }
-    //     )
+        const permitParams = {
+            v: 0,
+            r: ethers.constants.HashZero,
+            s: ethers.constants.HashZero,
+            deadline: 0,
+            approveMax: false
+        }
 
-    //     await timeout(15000)
-    //     assert(this.balanceA3.eq(await tokenA3.balanceOf(userNet1)))
-    // })
+        await EUSD.approve(curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
+        await EUSD.approve(curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
-    // it("Redeem EUSD: Inconsistecny - expected_min_amount_h", async function () {
+        await curveProxyB.redeem_eusd(
+            redeemEUSDParams,
+            permitParams,
+            unsynthParams.receiveSide,
+            unsynthParams.oppositeBridge,
+            unsynthParams.chainID,
+            { from: userNet2, gas: 1000_000 }
+        )
 
-    //     this.balanceA3 = (await tokenA3.balanceOf(userNet1))
+        await timeout(15000)
+        assert(this.balanceA3.eq(await tokenA3.balanceOf(userNet1)))
+    })
 
-    //     //unsynthesize params
-    //     const unsynthParams = {
-    //         receiveSide: deployInfo["network1"].portal,
-    //         oppositeBridge: deployInfo["network1"].bridge,
-    //         chainID: deployInfo["network1"].chainId
-    //     }
+    it("Redeem EUSD: Inconsistecny - expected_min_amount_h", async function () {
 
-    //     const redeemEUSDParams = {
-    //         remove_c: deployInfo["network2"].crosschainPool[0].address,
-    //         x: 2,
-    //         expected_min_amount_c: 0,
-    //         //hub pool params
-    //         remove_h: deployInfo["network2"].hubPool.address,
-    //         //amount to transfer
-    //         token_amount_h: 1, //test amount
-    //         y: 0,
-    //         expected_min_amount_h: ethers.constants.MaxUint256,
-    //         //recipient address
-    //         to: userNet1
-    //     }
+        this.balanceA3 = (await tokenA3.balanceOf(userNet1))
 
-    //     await EUSD.approve(curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
-    //     await EUSD.approve(curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
+        //unsynthesize params
+        const unsynthParams = {
+            receiveSide: deployInfo["network1"].portal,
+            oppositeBridge: deployInfo["network1"].bridge,
+            chainID: deployInfo["network1"].chainId
+        }
 
-    //     await curveProxyB.redeem_eusd(
-    //         redeemEUSDParams,
-    //         unsynthParams.receiveSide,
-    //         unsynthParams.oppositeBridge,
-    //         unsynthParams.chainID,
-    //         { from: userNet2, gas: 1000_000 }
-    //     )
+        const redeemEUSDParams = {
+            remove_c: deployInfo["network2"].crosschainPool[0].address,
+            x: 2,
+            expected_min_amount_c: 0,
+            //hub pool params
+            remove_h: deployInfo["network2"].hubPool.address,
+            //amount to transfer
+            token_amount_h: 1, //test amount
+            y: 0,
+            expected_min_amount_h: ethers.constants.MaxUint256,
+            //recipient address
+            to: userNet1
+        }
 
-    //     await timeout(15000)
-    //     assert(this.balanceA3.eq(await tokenA3.balanceOf(userNet1)))
-    // })
+        const permitParams = {
+            v: 0,
+            r: ethers.constants.HashZero,
+            s: ethers.constants.HashZero,
+            deadline: 0,
+            approveMax: false
+        }
+
+        await EUSD.approve(curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
+        await EUSD.approve(curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
+
+        await curveProxyB.redeem_eusd(
+            redeemEUSDParams,
+            permitParams,
+            unsynthParams.receiveSide,
+            unsynthParams.oppositeBridge,
+            unsynthParams.chainID,
+            { from: userNet2, gas: 1000_000 }
+        )
+
+        await timeout(15000)
+        assert(this.balanceA3.eq(await tokenA3.balanceOf(userNet1)))
+    })
 })
