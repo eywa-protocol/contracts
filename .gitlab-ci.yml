@@ -50,7 +50,7 @@ deploy_bridge:
     PART: deploy_bridge
   artifacts:
     paths:
-        - helper-hardhat-config.json
+        - hardhat/helper-hardhat-config.json
 
 deploy:cross_pool:
   stage: deploy
@@ -70,7 +70,7 @@ deploy:cross_pool:
     PART: deploy_crosspool
   artifacts:
     paths:
-        - helper-hardhat-config.json
+        - hardhat/helper-hardhat-config.json
 
 init:
   stage: init
@@ -89,7 +89,7 @@ init:
     STEP: init
   artifacts:
     paths:
-        - helper-hardhat-config.json
+        - hardhat/helper-hardhat-config.json
 
 test:
   extends:
