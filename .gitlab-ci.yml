@@ -37,8 +37,9 @@ deploy_bridge:
     - source ./tmp_src
     - export NETWORKS=$NETWORKS
     - export HHC_PATH="/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
+    - cp ${HHC_PATH} ./hardhat/helper-hardhat-config.json
     - make eth-testnet-ci-migrate
-    - cp ./helper-hardhat-config.json ${HHC_PATH}
+    - cp ./hardhat/helper-hardhat-config.json ${HHC_PATH}
   only:
     - tags
   tags:
@@ -56,8 +57,9 @@ deploy:cross_pool:
   script:
     - source ./tmp_src
     - export HHC_PATH="/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
+    - cp ${HHC_PATH} ./hardhat/helper-hardhat-config.json
     - make eth-testnet-ci-migrate
-    - cp ./helper-hardhat-config.json ${HHC_PATH}
+    - cp ./hardhat/helper-hardhat-config.json ${HHC_PATH}
   only:
     - tags
   tags:
@@ -75,8 +77,9 @@ init:
   script:
     - source ./tmp_src
     - export HHC_PATH="/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
+    - cp ${HHC_PATH} ./hardhat/helper-hardhat-config.json
     - make eth-testnet-ci-migrate
-    - cp ./helper-hardhat-config.json ${HHC_PATH}
+    - cp ./hardhat/helper-hardhat-config.json ${HHC_PATH}
   only:
     - tags
   tags:
