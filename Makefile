@@ -2,9 +2,10 @@
 
 .PHONY: wrappers
 
-ARTIFACTS="hardhat/artifacts/contracts"
-
+WRAPPERS ?= ../wrappers
+ARTIFACTS ?= hardhat/artifacts/contracts
 all: wrappers
+        : '$(WRAPPERS)'
 
 npm: copy_configs
 	@if [ -d hardhat/node_modules ]; then \
@@ -14,6 +15,7 @@ npm: copy_configs
 			fi;
 
 wrappers: npm compile copy_configs
+	echo "path ${WRAPPERS}"
 	cd wrappers-builder && go build && cd ..
 	./wrappers-builder/wrappers-builder --json hardhat/artifacts/@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol \
 	--json ${ARTIFACTS}/bridge/Bridge.sol \
@@ -27,7 +29,7 @@ wrappers: npm compile copy_configs
 	--json ${ARTIFACTS}/bridge/merkle/MerkleTest.sol \
 	--json ${ARTIFACTS}/amm_pool/Portal.sol \
 	--json ${ARTIFACTS}/amm_pool/Synthesis.sol \
-	--pkg wrappers --out ../wrappers
+	--pkg wrappers --out ${WRAPPERS}
 
 deps:
 	go mod tidy
@@ -49,6 +51,10 @@ eth-local-migrate: deps npm wrappers
 
 eth-testnet-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh mumbai,bsctestnet,avalanchetestnet,hecotestnet,rinkeby
+
+eth-testnet-ci-migrate: deps npm wrappers
+	cd hardhat;./scripts/deploy.sh ${NETWORKS}
+
 
 copy_configs:
 	cp ./hardhat/helper-hardhat-config.json.example ./hardhat/helper-hardhat-config.json;cp ./hardhat/.env.example ./hardhat/.env;
