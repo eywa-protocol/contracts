@@ -134,12 +134,6 @@ describe("E2E CurveProxy local test", () => {
         await tokenC1.approve(portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
         const tokensToSynth = [tokenC1.address, tokenC2.address, tokenC3.address]
         
-        console.log("TokensToSynt: ", tokensToSynth)
-        console.log("amounts: ", amounts)
-        console.log("synthParams: ", synthParams)
-        console.log("selectorMetaExchange: ", selectorMetaExchange)
-        console.log("encodedTransitData: ", encodedTransitData)
-
         await portalC.synthesize_batch_transit(
             tokensToSynth,
             amounts,
