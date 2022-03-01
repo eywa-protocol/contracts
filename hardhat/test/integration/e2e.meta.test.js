@@ -141,11 +141,6 @@ contract('CurveProxy', () => {
             this.EUSD = await ERC20B.at(deployInfo["network2"].hubPool.lp)
 
             this.balanceEUSD = await this.EUSD.balanceOf(userNet2)
-            console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            console.log((await this.EUSD.balanceOf(userNet2)).toString())
-            console.log((await this.tokenB1.balanceOf(userNet2)).toString())
-            console.log((await this.tokenB2.balanceOf(userNet2)).toString())
-            console.log((await this.tokenB3.balanceOf(userNet2)).toString())
 
             //synthesize params
             const synthParams = {
@@ -210,10 +205,6 @@ contract('CurveProxy', () => {
 
             await timeout(15000)
             this.newBalanceEUSD = await this.EUSD.balanceOf(userNet2)
-            console.log((await this.EUSD.balanceOf(userNet2)).toString())
-            console.log((await this.tokenB1.balanceOf(userNet2)).toString())
-            console.log((await this.tokenB2.balanceOf(userNet2)).toString())
-            console.log((await this.tokenB3.balanceOf(userNet2)).toString())
             assert(this.balanceEUSD.lt(this.newBalanceEUSD))
         })
 
