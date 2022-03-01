@@ -25,7 +25,7 @@ build:
   tags:
     - contracts
   variables:
-    hhc_path: "~/contracts/$FOLDER/helper-hardhat-config.json"
+    HHC_PATH: "/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
   artifacts:
     paths:
         - wrappers/
@@ -38,7 +38,7 @@ deploy_bridge:
     - export NETWORKS=$NETWORKS
     - export HHC_PATH="/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
     - make eth-testnet-ci-migrate
-    - cp ${HHC_PATH} ./helper-hardhat-config.json
+    - cp ./helper-hardhat-config.json ${HHC_PATH}
   only:
     - tags
   tags:
@@ -57,7 +57,7 @@ deploy:cross_pool:
     - source ./tmp_src
     - export HHC_PATH="/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
     - make eth-testnet-ci-migrate
-    - cp ${HHC_PATH} ./helper-hardhat-config.json
+    - cp ./helper-hardhat-config.json ${HHC_PATH}
   only:
     - tags
   tags:
@@ -76,7 +76,7 @@ init:
     - source ./tmp_src
     - export HHC_PATH="/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
     - make eth-testnet-ci-migrate
-    - cp ${HHC_PATH} ./helper-hardhat-config.json
+    - cp ./helper-hardhat-config.json ${HHC_PATH}
   only:
     - tags
   tags:
