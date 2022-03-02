@@ -276,7 +276,7 @@ def set_approve_deposit(addr: address, can_deposit: bool):
 
 @external
 @nonreentrant('lock')
-def deposit(_value: uint256, addr: address = msg.sender):
+def deposit(_value: uint256, addr: address):
     """
     @notice Deposit `_value` LP tokens
     @param _value Number of tokens to deposit
