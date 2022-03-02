@@ -1,7 +1,7 @@
 import { artifacts, contract, ethers } from 'hardhat';
 import { assert, expect } from 'chai';
 
-import type { Typecast } from '../artifacts-types/Typecast';
+import type { Typecast } from '../scripts/bridge-ts/artifacts-types/Typecast';
 
 const CTypecast = artifacts.require("Typecast");
 
@@ -38,5 +38,13 @@ describe("Typecast from ethers", function () {
     const a2 = await caster.castToAddress(x2);
     // console.log('a2:', a2);
     expect(a1).to.equal(a2);
+
+    const res = await caster.signatureTest(
+      '0x1100000000000000000000000000000000000000000000000000000000000011',
+      '0x2200000000000000000000000000000000000000000000000000000000000022',
+    );
+    console.log('res');
+    console.log(res);
+
   });
 });

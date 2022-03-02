@@ -222,7 +222,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         accounts[5] = SolanaAccountMeta({
             pubkey: _pubkeys[uint256(UnsynthesizePubkeys.oppositeBridgeData)],
             isSigner: true,
-            isWritable: false
+            isWritable: true
         });
         accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
 
@@ -307,6 +307,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     function burnSyntheticTokenToSolana(
         address _stoken,
         bytes32[] calldata _pubkeys,
+        bytes1 _bumpSynthesizeRequest,
         uint256 _amount,
         uint256 _chainId
     ) external returns (bytes32 txID) {
@@ -322,8 +323,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         // swap 4-byte long pairs
         solAmount = (solAmount >> 32) | (solAmount << 32);
 
-        // ISyntERC20(_stoken).burn(_msgSender(), _amount);
-        // require(false, "!!!");
+        ISyntERC20(_stoken).burn(_msgSender(), _amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
@@ -334,7 +334,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             nonce
         );
 
-        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](9);
+        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](10);
         accounts[0] = SolanaAccountMeta({
             pubkey: _pubkeys[uint256(UnsynthesizePubkeys.receiveSideData)],
             isSigner: false,
@@ -346,28 +346,33 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             isWritable: false
         });
         accounts[2] = SolanaAccountMeta({
+            pubkey: txID,
+            isSigner: false,
+            isWritable: false
+        });
+        accounts[3] = SolanaAccountMeta({
             pubkey: _pubkeys[uint256(UnsynthesizePubkeys.txState)],
             isSigner: false,
             isWritable: true
         });
-        accounts[3] = SolanaAccountMeta({
+        accounts[4] = SolanaAccountMeta({
             pubkey: _pubkeys[uint256(UnsynthesizePubkeys.source)],
             isSigner: false,
             isWritable: true
         });
-        accounts[4] = SolanaAccountMeta({
+        accounts[5] = SolanaAccountMeta({
             pubkey: _pubkeys[uint256(UnsynthesizePubkeys.destination)],
             isSigner: false,
             isWritable: true
         });
-        accounts[5] = SolanaAccountMeta({
+        accounts[6] = SolanaAccountMeta({
             pubkey: _pubkeys[uint256(UnsynthesizePubkeys.oppositeBridgeData)],
             isSigner: true,
-            isWritable: false
+            isWritable: true
         });
-        accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
-        accounts[7] = SolanaAccountMeta({ pubkey: SOLANA_RENT, isSigner: false, isWritable: false });
-        accounts[8] = SolanaAccountMeta({ pubkey: SOLANA_SYSTEM_PROGRAM, isSigner: false, isWritable: false });
+        accounts[7] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
+        accounts[8] = SolanaAccountMeta({ pubkey: SOLANA_RENT, isSigner: false, isWritable: false });
+        accounts[9] = SolanaAccountMeta({ pubkey: SOLANA_SYSTEM_PROGRAM, isSigner: false, isWritable: false });
 
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2ToSolana(
@@ -378,7 +383,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
                     /* accounts: */
                     accounts,
                     /* data: */
-                    abi.encodePacked(sighashUnsynthesize, solAmount)
+                    abi.encodePacked(sighashUnsynthesize, _bumpSynthesizeRequest, solAmount)
                 )
             ),
             _pubkeys[uint256(UnsynthesizePubkeys.receiveSide)],

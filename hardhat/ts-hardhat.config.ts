@@ -13,6 +13,13 @@ export default {
       //   url: MAINNET_RPC_URL
       // }
     },
+    local: { 
+      url: "http://127.0.0.1:8546",
+      accounts: [
+        '0x82fbb897465f75a8aeaca30e8ce487fc22e37ad77788f9c21e365f094456b43d',
+        '0xb17814ea1c2cb50419b70ac53db95c1282d4a098a29c223071df6db588bbbdbd'
+      ]
+    },
   },
   solidity: {
     compilers: [{
@@ -43,7 +50,7 @@ export default {
     artifacts: "./artifacts",
   },
   typechain: {
-    outDir: 'artifacts-types',
+    outDir: 'scripts/bridge-ts/artifacts-types',
     target: 'ethers-v5',
     alwaysGenerateOverloads: true,
     externalArtifacts: ['externalArtifacts/*.json'],
