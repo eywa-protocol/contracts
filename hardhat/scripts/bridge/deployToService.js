@@ -1,3 +1,4 @@
+// npx hardhat run scripts/bridge/deployToService.js --network rinkeby
 const fs = require("fs");
 let networkConfig = require('../../helper-hardhat-config.json')
 const hre = require("hardhat");
@@ -26,6 +27,7 @@ async function main() {
     const _RelayerPoolFactory = await ethers.getContractFactory("RelayerPoolFactory");
     const relayerPoolFactory = await _RelayerPoolFactory.deploy();
     await relayerPoolFactory.deployed();
+    networkConfig[network.name].relayerPoolFactory = relayerPoolFactory.address;
     console.log("RelayerPoolFactory address:", relayerPoolFactory.address);
 
     // Deploy NodeRegistry (contains Bridge)
