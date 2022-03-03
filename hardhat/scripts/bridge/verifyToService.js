@@ -1,6 +1,6 @@
 // npx hardhat run scripts/bridge/verifyToService.js --network rinkeby
 
-// verify Forwarder, proxy Bridge and MockDexPool
+// verify EYWA Test token, forwarder, proxy NodeRegistry and MockDexPool
 let networkConfig = require('../../helper-hardhat-config.json')
 const { upgrades } = require("hardhat");
 const hre = require("hardhat");
