@@ -41,7 +41,7 @@ if [[ ${1} =~ ^('')$ ]]; then
   exit 0
  fi
 
-regnet="${REGNET:-(cut -d "," -f1 <<<$nets)}"
+regnet="${REGNET:-$(cut -d "," -f1 <<<$nets)}"
 for net in ${nets//\,/ }; do
 echo 'bash script for network:' ${net}
 echo '==========================================='
@@ -58,6 +58,7 @@ npx hardhat balanceDeployer --network ${net}
     fi
 
     npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
+    npx hardhat run --no-compile ./scripts/deployERC20.js --network ${net}
 
     if [ -z "$REGNET" ]; then
       echo "It's not run"
