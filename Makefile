@@ -57,7 +57,7 @@ eth-testnet-ci-migrate: deps npm wrappers
 
 
 copy_configs:
-	cp -n ./hardhat/helper-hardhat-config.json.example ./hardhat/helper-hardhat-config.json;cp -n ./hardhat/.env.example ./hardhat/.env;
+	cp ./hardhat/helper-hardhat-config.json.example ./hardhat/helper-hardhat-config.json;cp ./hardhat/.env.example ./hardhat/.env;
 
 compile:
 	cd hardhat;npx hardhat compile

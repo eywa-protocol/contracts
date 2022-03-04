@@ -60,7 +60,7 @@ async function main() {
             // console.log(await lp.balanceOf(user.address))
 
             await lp.approve(gauge.address, ethers.utils.parseEther("100.0"))
-            // await gauge.deposit(ethers.utils.parseEther("100.0"), user.address)
+            await gauge.deposit(ethers.utils.parseEther("1.0"), user.address)
             // await gauge.withdraw(ethers.utils.parseEther("100.0")) 
 
             console.log(parseInt(await gauge.claimable_tokens(user.address)))
@@ -69,9 +69,22 @@ async function main() {
             // await minter.mint(gauge.address)
 
         }
+
+        //local gauge
+      
+        let lpForLocal = LpToken.attach(deployInfo[network.name].localPool.lp.address)
+        let gaugeLocal = await LiquidityGauge.attach(deployInfo[network.name].localPool.gauge)
+        // console.log(await lp.balanceOf(user.address))
+
+        await lpForLocal.approve(gaugeLocal.address, ethers.utils.parseEther("100.0"))
+        await gaugeLocal.deposit(ethers.utils.parseEther("1.0"), user.address)
+        console.log(parseInt(await gaugeLocal.claimable_tokens(user.address)))
+
+
+
         // await minter.toggle_approve_mint(user.address)
-        // await increaseTime(2592000)
-        await minter.mint(deployInfo[network.name].crosschainPool[0].gauge)
+        await increaseTime(604800)
+        await minter.mint(gaugeLocal.address)
         // console.log( await eywa.start_epoch_time_write())
 
         console.log(await eywa.balanceOf(user.address))

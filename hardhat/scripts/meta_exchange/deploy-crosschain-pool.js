@@ -82,6 +82,7 @@ async function main() {
   if (network.name == "network2" || network.name == "mumbai") {
     // deploy LP token
     for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
+
       let net = deployInfo[network.name].crosschainPool[i].network
 
       crosschainPoolLp = await LpToken.deploy(net + "LpPoolCrosschain", "LPC")

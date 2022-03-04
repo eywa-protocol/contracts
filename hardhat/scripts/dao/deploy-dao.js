@@ -71,6 +71,11 @@ async function main() {
             //register gauge
             await gaugeController.add_gauge(gauge.address, 0, "10000000000000000000"/*weight*/,{ gasLimit: 1000000 })
         }
+        //add local gauge
+        let gaugeLocal = await LiquidityGauge.deploy(deployInfo[network.name].localPool.lp.address, minter.address, deployer.address)
+        await gaugeLocal.deployed()
+        await gaugeController.add_gauge(gaugeLocal.address, 0, "10000000000000000000"/*weight*/,{ gasLimit: 1000000 })
+        deployInfo[network.name].localPool.gauge = gaugeLocal.address
     }
 
     // write out the deploy configuration 
