@@ -7,6 +7,19 @@ import "./RelayRecipient.sol";
 import "./SolanaSerialize.sol";
 import "../utils/Typecast.sol";
 
+interface Treasury {
+     function depositWithPermit(
+        bytes calldata _approvalData,
+        address _token,
+        uint256 _amount
+    ) external;
+
+    function deposit(
+        address _token,
+        uint256 _amount
+    ) external;
+}
+
 //TODO: relocate
 interface IERC20 {
     function name() external returns (string memory);
@@ -22,13 +35,20 @@ interface IERC20 {
         bytes32 r,
         bytes32 s
     ) external;
+
+    function approve(
+        address spender,
+        uint256 amount
+    ) external returns (bool);
 }
 
 contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     mapping(address => uint256) public balanceOf;
     string public versionRecipient;
     address public bridge;
+    address public treasury;
     address public proxy;
+    uint256 public basePercent;
 
     bytes public constant sighashMintSyntheticToken =
         abi.encodePacked(uint8(44), uint8(253), uint8(1), uint8(101), uint8(130), uint8(139), uint8(18), uint8(78));
@@ -104,11 +124,13 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     event RepresentationRequest(address indexed _rtoken);
     event ApprovedRepresentationRequest(address indexed _rtoken);
 
-    function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
+    function initializeFunc(address _bridge, address _trustedForwarder,address _treasury) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
         versionRecipient = "2.2.3";
+        basePercent = 1000;
         bridge = _bridge;
+        treasury = _treasury;
         _setTrustedForwarder(_trustedForwarder);
     }
 
@@ -139,8 +161,12 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _oppositeBridge,
         uint256 _chainID
     ) external returns (bytes32 txID) {
-        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] += _amount;
+        uint256 fee = calcFee(_amount);
+        uint256 amountToTransfer = _amount - fee;
+        TransferHelper.safeTransferFrom(_token, msg.sender, address(this), _amount);
+        IERC20(_token).approve(treasury,f ee);
+        Treasury(treasury).deposit(_token, fee);
+        balanceOf[_token] += amountToTransfer;
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
@@ -366,7 +392,11 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _to
     ) external onlyBridge {
         require(unsynthesizeStates[_txID] == UnsynthesizeState.Default, "Portal: synthetic tokens emergencyUnburn");
-        TransferHelper.safeTransfer(_token, _to, _amount);
+        uint256 fee = calcFee(_amount);
+        uint256 amountToTransfer = _amount - fee;
+        IERC20(_token).approve(treasury, fee);
+        Treasury(treasury).deposit(_token, fee);
+        TransferHelper.safeTransfer(_token, _to, amountToTransfer);
         balanceOf[_token] -= _amount;
         unsynthesizeStates[_txID] = UnsynthesizeState.Unsynthesized;
         emit BurnCompleted(_txID, _to, _amount, _token);
@@ -637,5 +667,15 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             _msgSender(),
             general_nonce
         );
+    }
+
+    function calcFee(uint256 amount)
+        public
+        view
+        returns (uint256 txFee)
+    {
+        require(amount >= 10, "Transfer amount is too small");
+        txFee = (amount * basePercent) / 10000;
+        return (txFee);
     }
 }
