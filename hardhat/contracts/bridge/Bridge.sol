@@ -70,6 +70,10 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
         return (abi.encode(epochKey), epochParticipantsNum, epochNum);
     }
 
+    function statFilterLen() external returns (uint256) {
+        return reqIdFilter.length();
+    }
+
     /**
      * @dev Updates current epoch.
      * @param _newKey aggregated public key of all new epoch participants

@@ -7,6 +7,10 @@ library ReqIdFilter {
         bytes32[] used;
     }
 
+    function length(Data storage data) internal returns(uint256) {
+        return data.used.length;
+    }
+
     function testAndSet(Data storage data, bytes32 id) internal returns(bool) {
         if (data.filter[id]) return true;
         data.filter[id] = true;
