@@ -8,9 +8,14 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     console.log("Owner:", deployer.address);
 
+    const _Treasury = await ethers.getContractFactory("Treasury");
+    const treasury = await _Treasury.deploy();
+    await treasury.deployed();
+    console.log("Treasury address:", treasury.address)
+
     const _Portal = await ethers.getContractFactory("Portal");
     //const portal  = await _Portal.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
-    const portal = await upgrades.deployProxy(_Portal, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder], { initializer: 'initializeFunc' });
+    const portal = await upgrades.deployProxy(_Portal, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder, treasury.address], { initializer: 'initializeFunc' });
     await portal.deployed();
     console.log("Portal address:", portal.address);
 
@@ -27,7 +32,7 @@ async function main() {
     networkConfig[network.name].frontHelper = frontHelper.address;
     console.log(`FrontHelper address: ${frontHelper.address}`);
     
-
+    networkConfig[network.name].treasury    = treasury.address;
     networkConfig[network.name].portal    = portal.address;
     networkConfig[network.name].synthesis = synthesis.address;
     fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));

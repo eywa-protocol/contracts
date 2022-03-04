@@ -7,7 +7,7 @@ import "./RelayRecipient.sol";
 import "./SolanaSerialize.sol";
 import "../utils/Typecast.sol";
 
-interface Treasury {
+interface ITreasury {
      function depositWithPermit(
         bytes calldata _approvalData,
         address _token,
@@ -124,7 +124,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     event RepresentationRequest(address indexed _rtoken);
     event ApprovedRepresentationRequest(address indexed _rtoken);
 
-    function initializeFunc(address _bridge, address _trustedForwarder,address _treasury) public initializer {
+    function initializeFunc(address _bridge, address _trustedForwarder, address _treasury) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
         versionRecipient = "2.2.3";
@@ -164,8 +164,8 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         uint256 fee = calcFee(_amount);
         uint256 amountToTransfer = _amount - fee;
         TransferHelper.safeTransferFrom(_token, msg.sender, address(this), _amount);
-        IERC20(_token).approve(treasury,f ee);
-        Treasury(treasury).deposit(_token, fee);
+        IERC20(_token).approve(treasury, fee);
+        ITreasury(treasury).deposit(_token, fee);
         balanceOf[_token] += amountToTransfer;
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
@@ -193,7 +193,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
-        emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
+        //emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
     }
 
     /**
@@ -395,7 +395,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         uint256 fee = calcFee(_amount);
         uint256 amountToTransfer = _amount - fee;
         IERC20(_token).approve(treasury, fee);
-        Treasury(treasury).deposit(_token, fee);
+        ITreasury(treasury).deposit(_token, fee);
         TransferHelper.safeTransfer(_token, _to, amountToTransfer);
         balanceOf[_token] -= _amount;
         unsynthesizeStates[_txID] = UnsynthesizeState.Unsynthesized;
