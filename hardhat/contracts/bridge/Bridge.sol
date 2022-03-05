@@ -195,6 +195,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
         require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "Bridge: not enough participants"); // TODO configure
         require(epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum), "Bridge: bitmask too big");
 
+        /*
         E2Point memory votersPubKey = decodeE2Point(_votersPubKey);
         E1Point memory votersSignature = decodeE1Point(_votersSignature);
         bytes memory sigData = abi.encodePacked(_reqId, _sel, _receiveSide, _bridgeFrom, epochNum);
@@ -202,6 +203,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
             verifyMultisig(epochKey, votersPubKey, sigData, votersSignature, _votersMask),
             "Bridge: multisig mismatch"
         );
+        */
 
         bytes memory data = _receiveSide.functionCall(_sel, "Bridge: receiveRequestV2: failed");
         require(
