@@ -56,7 +56,12 @@ eth-testnet-ci-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh ${NETWORKS}
 
 copy_configs:
-	echo "nothing to do" 
+	@if [ -z ${NETWORKS} ]; then \
+			cp ./hardhat/helper-hardhat-config.json.example ./hardhat/helper-hardhat-config.json;cp ./hardhat/.env.example ./hardhat/.env; \
+			else \
+			echo "nothing to do"; \
+			fi;
+
 
 compile:
 	cd hardhat;npx hardhat compile
