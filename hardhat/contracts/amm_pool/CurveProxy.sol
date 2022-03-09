@@ -154,8 +154,8 @@ contract CurveProxy is Initializable, RelayRecipient {
         address to;
         uint256 expected_min_mint_amount;
         //emergency unsynth params
-        address receiverBridge;
-        uint256 receiverChainID;
+        address initialBridge;
+        uint256 initialChainID;
     }
 
     struct MetaMintEUSD {
@@ -170,8 +170,8 @@ contract CurveProxy is Initializable, RelayRecipient {
         //recipient address
         address to;
         //emergency unsynth params
-        address receiverBridge;
-        uint256 receiverChainID;
+        address initialBridge;
+        uint256 initialChainID;
     }
 
     struct MetaRedeemEUSD {
@@ -212,8 +212,8 @@ contract CurveProxy is Initializable, RelayRecipient {
         address oppositeBridge;
         uint256 chainID;
         //emergency unsynth params
-        address receiverBridge;
-        uint256 receiverChainID;
+        address initialBridge;
+        uint256 initialChainID;
     }
 
     event InconsistencyCallback(address pool, address token, address to, uint256 amount);
@@ -275,7 +275,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         if (_params.expected_min_mint_amount > min_mint_amount) {
             for (uint256 i = 0; i < representation.length; i++) {
                 if (_synth_amount[i] > 0) {
-                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
                     emit InconsistencyCallback(_params.add, representation[i], _params.to, _synth_amount[i]);
                 }
             }
@@ -399,7 +399,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         if (_params.expected_min_mint_amount_c > min_mint_amount_c) {
             for (uint256 i = 0; i < representation.length; i++) {
                 if (_synth_amount[i] > 0) {
-                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
                     emit InconsistencyCallback(_params.add_c, representation[i], _params.to, _synth_amount[i]);
                 }
             }
@@ -424,7 +424,7 @@ contract CurveProxy is Initializable, RelayRecipient {
             //TODO: check index
             for (uint256 i = 0; i < _txId.length; i++) {
                 if (_synth_amount[i] > 0) {
-                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
                 }
             }
             emit InconsistencyCallback(_params.add_h, lp_token[_params.add_h], _params.to, amount_h[_params.lp_index]);
@@ -597,7 +597,7 @@ contract CurveProxy is Initializable, RelayRecipient {
             if (_params.expected_min_mint_amount > min_mint_amount) {
                 for (uint256 i = 0; i < representation.length; i++) {
                     if (_synth_amount[i] > 0) {
-                        ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                        ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
                         emit InconsistencyCallback(_params.add, representation[i], _params.to, _synth_amount[i]);
                     }
                 }
@@ -623,7 +623,7 @@ contract CurveProxy is Initializable, RelayRecipient {
                 if (_params.expected_min_dy > min_dy) {
                     for (uint256 i = 0; i < _txId.length; i++) {
                         if (_synth_amount[i] > 0) {
-                            ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                            ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
                         }
                     }
                     emit InconsistencyCallback(
@@ -639,7 +639,7 @@ contract CurveProxy is Initializable, RelayRecipient {
             } catch {
                 for (uint256 i = 0; i < _txId.length; i++) {
                     if (_synth_amount[i] > 0) {
-                        ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                        ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
                     }
                 }
                 return;
@@ -657,7 +657,7 @@ contract CurveProxy is Initializable, RelayRecipient {
             if (_params.expected_min_amount > min_amount) {
                 for (uint256 i = 0; i < _txId.length; i++) {
                         if (_synth_amount[i] > 0) {
-                            ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                            ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
                         }
                     }
                 emit InconsistencyCallback(_params.remove, lpToken, _params.to, token_amount);
@@ -666,7 +666,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         } catch {
             for (uint256 i = 0; i < _txId.length; i++) {
                 if (_synth_amount[i] > 0) {
-                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
                 }
             }
         }
@@ -696,7 +696,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         } catch {
             for (uint256 i = 0; i < _txId.length; i++) {
                 if (_synth_amount[i] > 0) {
-                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.receiverBridge, _params.receiverChainID);
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
                 }
             }
         }
