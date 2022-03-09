@@ -20,7 +20,7 @@ async function main() {
   console.log("Pool size:", poolSize);
   console.log("Deployment in progress...");
 
-  const ERC20 = await ethers.getContractFactory('SyntERC20')
+  const ERC20 = await ethers.getContractFactory('PermitERC20')
   const Portal = await ethers.getContractFactory('Portal')
   const Synthesis = await ethers.getContractFactory('Synthesis')
   const CurveProxy = await ethers.getContractFactory('CurveProxy');
@@ -67,9 +67,11 @@ async function main() {
       await localToken[i].deployed()
       deployInfo[network.name].localToken.push({ address: localToken[i].address, name: await localToken[i].name(), symbol: await localToken[i].symbol() });
       if (network.name == "network1" || network.name == "network3")
-        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], deployInfo[network.name].netwiker, deployInfo["network2"].synthesis))
+      //TODO (realToken, decimals, chainId, netwiker, synthesisAddress)
+        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], "18",  deployInfo[network.name].chainId, deployInfo[network.name].netwiker, deployInfo["network2"].synthesis))
       if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
-        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], deployInfo[network.name].netwiker, deployInfo["mumbai"].synthesis))
+      //TODO
+        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], "18",  deployInfo[network.name].chainId, deployInfo[network.name].netwiker, deployInfo["mumbai"].synthesis))
     }
     if (network.name == "network1" || network.name == "network3")
       deployInfo["network2"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });

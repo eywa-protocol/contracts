@@ -4,7 +4,7 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 const Web3 = require('web3');
 const web3 = new Web3();
 const { networks } = require('../hardhat.config');
-const network = require( process.env.HHC_PASS ? process.env.HHC_PASS : '../helper-hardhat-config.json')
+const network = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../helper-hardhat-config.json')
 const env = require('dotenv').config({ path: `./.env` });
 
 function toWei(n) { return web3.utils.toWei(n, 'ether'); }
@@ -91,11 +91,11 @@ const getCreate2Address = (creatorAddress, saltHex, byteCode) => {
         .join('')}`).slice(-40)}`.toLowerCase()
 }
 
-const getRepresentation = async (realToken, netwiker, synthesisAddress) => {
+const getRepresentation = async (realToken, decimals, chainId, netwiker, synthesisAddress) => {
     const SyntERC20 = await ethers.getContractFactory('SyntERC20')
     const bytecodeWithParams = SyntERC20.bytecode + web3.eth.abi.encodeParameters(
-        ['string', 'string'],
-        [`e${realToken.name}`, `e${realToken.symbol}(${netwiker})`]
+        ['string', 'string', 'uint8', 'uint256', 'bytes32', 'string'],
+        [`e${realToken.name}`, `e${realToken.symbol}(${netwiker})`, decimals, chainId, addressToBytes32(realToken.address), netwiker]
     ).slice(2)
     const salt = web3.utils.keccak256(addressToBytes32(realToken.address))
     return web3.utils.toChecksumAddress(getCreate2Address(

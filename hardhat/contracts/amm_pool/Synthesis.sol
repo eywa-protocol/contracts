@@ -13,6 +13,7 @@ import "../utils/Typecast.sol";
 contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     mapping(address => bytes32) public representationReal;
     mapping(bytes32 => address) public representationSynt;
+    mapping(bytes32 => uint8) public tokenDecimals;
     bytes32[] private keys;
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => SynthesizeState) public synthesizeStates;
@@ -421,12 +422,18 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
      * @dev Creates a representation with the given arguments.
      * @param _rtoken real token address
      * @param _name real token name
+     * @param _decimals real token decimals number
      * @param _symbol real token symbol
+     * @param _chainID real token chain id
+     * @param _chainSymbol real token chain symbol
      */
     function createRepresentation(
         bytes32 _rtoken,
-        string calldata _name,
-        string calldata _symbol
+        uint8 _decimals,
+        string memory _name,
+        string memory _symbol,
+        uint256 _chainID,
+        string memory _chainSymbol
     ) external onlyOwner {
         require(representationSynt[_rtoken] == address(0), "Synthesis: representation already exists");
         require(representationReal[castToAddress(_rtoken)] == 0, "Synthesis: representation already exists");
@@ -435,10 +442,17 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             keccak256(abi.encodePacked(_rtoken)),
             abi.encodePacked(
                 type(SyntERC20).creationCode,
-                abi.encode(string(abi.encodePacked("e", _name)), string(abi.encodePacked("e", _symbol)))
+                abi.encode(
+                    string(abi.encodePacked("e", _name)),
+                    string(abi.encodePacked("e", _symbol)),
+                    _decimals,
+                    _chainID,
+                    _rtoken,
+                    _chainSymbol
+                )
             )
         );
-        setRepresentation(_rtoken, stoken);
+        setRepresentation(_rtoken, stoken, _decimals);
         emit CreatedRepresentation(_rtoken, stoken);
     }
 
@@ -448,9 +462,10 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     // utils
-    function setRepresentation(bytes32 _rtoken, address _stoken) internal {
+    function setRepresentation(bytes32 _rtoken, address _stoken, uint8 _decimals) internal {
         representationSynt[_rtoken] = _stoken;
         representationReal[_stoken] = _rtoken;
+        tokenDecimals[_rtoken] = _decimals;
         keys.push(_rtoken);
     }
 

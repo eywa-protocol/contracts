@@ -77,8 +77,8 @@ contract('CurveProxy', () => {
                 add_h: deployInfo["network2"].hubPool.address,
                 expected_min_mint_amount_h: 0,
                 to: userNet2,
-                receiverBridge:deployInfo["network2"].bridge,
-                receiverChainID:deployInfo["network2"].chainId
+                initialBridge:deployInfo["network2"].bridge,
+                initialChainID:deployInfo["network2"].chainId
             }
 
             const encodedTransitData = web3.eth.abi.encodeParameters(
@@ -91,8 +91,8 @@ contract('CurveProxy', () => {
                 /////
                 mintEUSDparams.expected_min_mint_amount_h,
                 mintEUSDparams.to,
-                mintEUSDparams.receiverBridge,
-                mintEUSDparams.receiverChainID
+                mintEUSDparams.initialBridge,
+                mintEUSDparams.initialChainID
                 ]
             )
 
@@ -159,8 +159,8 @@ contract('CurveProxy', () => {
                 add_h: deployInfo["network2"].hubPool.address,
                 expected_min_mint_amount_h: 0,
                 to: userNet2,
-                receiverBridge:deployInfo["network3"].bridge,
-                receiverChainID:deployInfo["network3"].chainId
+                initialBridge:deployInfo["network3"].bridge,
+                initialChainID:deployInfo["network3"].chainId
             }
 
             const encodedTransitData = web3.eth.abi.encodeParameters(
@@ -173,8 +173,8 @@ contract('CurveProxy', () => {
                 /////
                 mintEUSDparams.expected_min_mint_amount_h,
                 mintEUSDparams.to,
-                mintEUSDparams.receiverBridge,
-                mintEUSDparams.receiverChainID
+                mintEUSDparams.initialBridge,
+                mintEUSDparams.initialChainID
                 ]
             )
 
@@ -227,8 +227,8 @@ contract('CurveProxy', () => {
                 add_h: deployInfo["network2"].hubPool.address,
                 expected_min_mint_amount_h: 0,
                 to: userNet2,
-                receiverBridge:deployInfo["network2"].bridge,
-                receiverChainID:deployInfo["network2"].chainId
+                initialBridge:deployInfo["network2"].bridge,
+                initialChainID:deployInfo["network2"].chainId
             }
 
             //unused in this case
@@ -471,8 +471,8 @@ contract('CurveProxy', () => {
                 receiveSide: deployInfo["network3"].portal,
                 oppositeBridge: deployInfo["network3"].bridge,
                 chainID: deployInfo["network3"].chainId,
-                receiverBridge:deployInfo["network1"].bridge,
-                receiverChainID:deployInfo["network1"].chainId
+                initialBridge:deployInfo["network1"].bridge,
+                initialChainID:deployInfo["network1"].chainId
             }
 
             const encodedTransitData = web3.eth.abi.encodeParameters(
@@ -497,8 +497,8 @@ contract('CurveProxy', () => {
                 metaExchangeParams.receiveSide,
                 metaExchangeParams.oppositeBridge,
                 metaExchangeParams.chainID,
-                metaExchangeParams.receiverBridge,
-                metaExchangeParams.receiverChainID
+                metaExchangeParams.initialBridge,
+                metaExchangeParams.initialChainID
                 ]
             )
 
@@ -575,8 +575,8 @@ contract('CurveProxy', () => {
                 receiveSide: deployInfo["network1"].portal,
                 oppositeBridge: deployInfo["network1"].bridge,
                 chainID: deployInfo["network1"].chainId,
-                receiverBridge:deployInfo["network3"].bridge,
-                receiverChainID:deployInfo["network3"].chainId
+                initialBridge:deployInfo["network3"].bridge,
+                initialChainID:deployInfo["network3"].chainId
             }
 
             //unused in this case
@@ -610,8 +610,8 @@ contract('CurveProxy', () => {
                 metaExchangeParams.receiveSide,
                 metaExchangeParams.oppositeBridge,
                 metaExchangeParams.chainID,
-                metaExchangeParams.receiverBridge,
-                metaExchangeParams.receiverChainID
+                metaExchangeParams.initialBridge,
+                metaExchangeParams.initialChainID
                 ]
             )
 
@@ -668,8 +668,8 @@ contract('CurveProxy', () => {
                 receiveSide: deployInfo["network1"].portal,
                 oppositeBridge: deployInfo["network1"].bridge,
                 chainID: deployInfo["network1"].chainId,
-                receiverBridge:deployInfo["network2"].bridge,
-                receiverChainID:deployInfo["network2"].chainId
+                initialBridge:deployInfo["network2"].bridge,
+                initialChainID:deployInfo["network2"].chainId
             }
 
             //unused in this case
@@ -729,8 +729,8 @@ contract('CurveProxy', () => {
                 receiveSide: deployInfo["network3"].portal,
                 oppositeBridge: deployInfo["network3"].bridge,
                 chainID: deployInfo["network3"].chainId,
-                receiverBridge:deployInfo["network2"].bridge,
-                receiverChainID:deployInfo["network2"].chainId
+                initialBridge:deployInfo["network2"].bridge,
+                initialChainID:deployInfo["network2"].chainId
             }
 
             //unused in this case
@@ -802,8 +802,8 @@ contract('CurveProxy', () => {
                 receiveSide: ethers.constants.AddressZero,
                 oppositeBridge: ethers.constants.AddressZero,
                 chainID: 0,
-                receiverBridge:deployInfo["network1"].bridge,
-                receiverChainID:deployInfo["network1"].chainId
+                initialBridge:deployInfo["network1"].bridge,
+                initialChainID:deployInfo["network1"].chainId
             }
 
             //unused in this case
@@ -837,8 +837,8 @@ contract('CurveProxy', () => {
                 metaExchangeParams.receiveSide,
                 metaExchangeParams.oppositeBridge,
                 metaExchangeParams.chainID,
-                metaExchangeParams.receiverBridge,
-                metaExchangeParams.receiverChainID
+                metaExchangeParams.initialBridge,
+                metaExchangeParams.initialChainID
                 ]
             )
 
@@ -906,8 +906,8 @@ contract('CurveProxy', () => {
                 receiveSide: ethers.constants.AddressZero,
                 oppositeBridge: ethers.constants.AddressZero,
                 chainID: 0,
-                receiverBridge:deployInfo["network3"].bridge,
-                receiverChainID:deployInfo["network3"].chainId
+                initialBridge:deployInfo["network3"].bridge,
+                initialChainID:deployInfo["network3"].chainId
             }
 
             //unused in this case
@@ -941,8 +941,8 @@ contract('CurveProxy', () => {
                 metaExchangeParams.receiveSide,
                 metaExchangeParams.oppositeBridge,
                 metaExchangeParams.chainID,
-                metaExchangeParams.receiverBridge,
-                metaExchangeParams.receiverChainID
+                metaExchangeParams.initialBridge,
+                metaExchangeParams.initialChainID
                 ]
             )
 

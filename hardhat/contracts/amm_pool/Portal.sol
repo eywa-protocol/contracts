@@ -82,7 +82,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
 
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => UnsynthesizeState) public unsynthesizeStates;
-    mapping(address => bytes) public tokenData;
+    mapping(bytes32 => uint8) public tokenDecimals;
 
     event SynthesizeRequest(
         bytes32 indexed _id,
@@ -102,7 +102,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     event BurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event RevertSynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event RepresentationRequest(address indexed _rtoken);
-    event ApprovedRepresentationRequest(address indexed _rtoken);
+    event ApprovedRepresentationRequest(bytes32 indexed _rtoken);
 
     function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
         __Context_init_unchained();
@@ -139,6 +139,9 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _oppositeBridge,
         uint256 _chainID
     ) external returns (bytes32 txID) {
+        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
+        require(_amount >= 10**tokenDecimals[castToBytes32(_token)], "Portal: transfer below minimum amount");
+
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] += _amount;
 
@@ -185,6 +188,9 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bytes1 _txStateBump,
         uint256 _chainId
     ) external returns (bytes32 txID) {
+        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
+        require(_amount >= 10**tokenDecimals[castToBytes32(_token)], "Portal: transfer below minimum amount");
+
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] += _amount;
 
@@ -299,6 +305,9 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _oppositeBridge,
         uint256 _chainID
     ) external returns (bytes32 txID) {
+        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
+        require(_amount >= 10**tokenDecimals[castToBytes32(_token)], "Portal: transfer below minimum amount");
+
         (bool _success1, ) = _token.call(_approvalData);
         require(_success1, "Portal: approve call failed");
 
@@ -494,17 +503,16 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     // implies manual verification point
-    function approveRepresentationRequest(
-        address _rtoken /**onlyOwner */
-    ) external {
-        tokenData[_rtoken] = abi.encode(IERC20(_rtoken).name(), IERC20(_rtoken).symbol());
+    function approveRepresentationRequest(bytes32 _rtoken, uint8 _decimals) external /**onlyOwner */
+    {
+        tokenDecimals[_rtoken] = _decimals;
         emit ApprovedRepresentationRequest(_rtoken);
     }
 
     //TODO
-    function getTxId() external view returns (bytes32) {
-        return keccak256(abi.encodePacked(this, block.timestamp));
-    }
+    // function getTxId() external view returns (bytes32) {
+    //     return keccak256(abi.encodePacked(this, block.timestamp));
+    // }
 
     function setProxyCurve(address _proxy) external onlyOwner {
         proxy = _proxy;
@@ -524,10 +532,9 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         uint256 _chainID,
         bytes calldata _out
     ) external returns (bytes32 txId) {
-        // require(
-        //     tokenData[_token].length != 0,
-        //     "Portal: token must be verified"
-        // );
+        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
+        require(_amount >= 10**tokenDecimals[castToBytes32(_token)], "Portal: transfer below minimum amount");
+
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] += _amount;
 
@@ -567,6 +574,8 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         //synthesize request
         for (uint256 i = 0; i < _tokens.length; i++) {
             if (_amounts[i] > 0) {
+                // require(tokenDecimals[castToBytes32(_token)[i]] > 0, "Portal: token must be verified");
+                require(_amounts[i] >= 10**tokenDecimals[castToBytes32(_tokens[i])], "Portal: transfer below minimum amount");
                 if (_permit_data[i].v != 0) {
                     uint256 approve_value = _permit_data[i].approveMax ? uint256(2**256 - 1) : _amounts[i];
                     IERC20(_tokens[i]).permit(
