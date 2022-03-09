@@ -63,7 +63,7 @@ copy_configs:
 	@if [ -z ${NETWORKS} ]; then \
 			cp ./hardhat/helper-hardhat-config.json.example ./hardhat/helper-hardhat-config.json;cp ./hardhat/.env.example ./hardhat/.env; \
 			else \
-			echo "nothing to do"; \
+			cp ./hardhat/.env.example ./hardhat/.env; \
 			fi;
 
 
