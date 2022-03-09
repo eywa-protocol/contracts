@@ -92,8 +92,8 @@ describe("E2E CurveProxy local test", () => {
             receiveSide: deployInfo["network1"].portal,
             oppositeBridge: deployInfo["network1"].bridge,
             chainID: deployInfo["network1"].chainId,
-            receiverBridge:deployInfo["network3"].bridge,
-            receiverChainID:deployInfo["network3"].chainId
+            initialBridge:deployInfo["network3"].bridge,
+            initialChainID:deployInfo["network3"].chainId
         }
 
         const encodedTransitData = web3.eth.abi.encodeParameters(
@@ -118,8 +118,8 @@ describe("E2E CurveProxy local test", () => {
             metaExchangeParams.receiveSide,
             metaExchangeParams.oppositeBridge,
             metaExchangeParams.chainID,
-            metaExchangeParams.receiverBridge,
-            metaExchangeParams.receiverChainID
+            metaExchangeParams.initialBridge,
+            metaExchangeParams.initialChainID
             ]
         )
 
@@ -184,8 +184,8 @@ describe("E2E CurveProxy local test", () => {
             receiveSide: deployInfo["network1"].portal,
             oppositeBridge: deployInfo["network1"].bridge,
             chainID: deployInfo["network1"].chainId,
-            receiverBridge:deployInfo["network3"].bridge,
-            receiverChainID:deployInfo["network3"].chainId
+            initialBridge:deployInfo["network3"].bridge,
+            initialChainID:deployInfo["network3"].chainId
         }
 
         const encodedTransitData = web3.eth.abi.encodeParameters(
@@ -210,8 +210,8 @@ describe("E2E CurveProxy local test", () => {
             metaExchangeParams.receiveSide,
             metaExchangeParams.oppositeBridge,
             metaExchangeParams.chainID,
-            metaExchangeParams.receiverBridge,
-            metaExchangeParams.receiverChainID
+            metaExchangeParams.initialBridge,
+            metaExchangeParams.initialChainID
             ]
         )
 
@@ -276,8 +276,8 @@ describe("E2E CurveProxy local test", () => {
             receiveSide: deployInfo["network1"].portal,
             oppositeBridge: deployInfo["network1"].bridge,
             chainID: deployInfo["network1"].chainId,
-            receiverBridge:deployInfo["network3"].bridge,
-            receiverChainID:deployInfo["network3"].chainId
+            initialBridge:deployInfo["network3"].bridge,
+            initialChainID:deployInfo["network3"].chainId
         }
 
         const encodedTransitData = web3.eth.abi.encodeParameters(
@@ -302,8 +302,8 @@ describe("E2E CurveProxy local test", () => {
             metaExchangeParams.receiveSide,
             metaExchangeParams.oppositeBridge,
             metaExchangeParams.chainID,
-            metaExchangeParams.receiverBridge,
-            metaExchangeParams.receiverChainID
+            metaExchangeParams.initialBridge,
+            metaExchangeParams.initialChainID
             ]
         )
 
@@ -357,8 +357,8 @@ describe("E2E CurveProxy local test", () => {
             add_h: deployInfo["network2"].hubPool.address,
             expected_min_mint_amount_h: 0,
             to: userNet2,
-            receiverBridge:deployInfo["network2"].bridge,
-            receiverChainID:deployInfo["network2"].chainId
+            initialBridge:deployInfo["network2"].bridge,
+            initialChainID:deployInfo["network2"].chainId
         }
 
         const encodedTransitData = web3.eth.abi.encodeParameters(
@@ -371,8 +371,8 @@ describe("E2E CurveProxy local test", () => {
             /////
             mintEUSDparams.expected_min_mint_amount_h,
             mintEUSDparams.to,
-            mintEUSDparams.receiverBridge,
-            mintEUSDparams.receiverChainID
+            mintEUSDparams.initialBridge,
+            mintEUSDparams.initialChainID
             ]
         )
 
@@ -418,8 +418,8 @@ describe("E2E CurveProxy local test", () => {
             receiveSide: deployInfo["network2"].curveProxy,
             oppositeBridge: deployInfo["network2"].bridge,
             chainID: deployInfo["network2"].chainId,
-            receiverBridge:deployInfo["network2"].bridge,
-            receiverChainID:deployInfo["network2"].chainId
+            initialBridge:deployInfo["network2"].bridge,
+            initialChainID:deployInfo["network2"].chainId
         }
 
         const mintEUSDparams = {
@@ -431,8 +431,8 @@ describe("E2E CurveProxy local test", () => {
             add_h: deployInfo["network2"].hubPool.address,
             expected_min_mint_amount_h: ethers.constants.MaxUint256,
             to: userNet2,
-            receiverBridge:deployInfo["network2"].bridge,
-            receiverChainID:deployInfo["network2"].chainId
+            initialBridge:deployInfo["network2"].bridge,
+            initialChainID:deployInfo["network2"].chainId
         }
 
         const encodedTransitData = web3.eth.abi.encodeParameters(
@@ -445,8 +445,8 @@ describe("E2E CurveProxy local test", () => {
             /////
             mintEUSDparams.expected_min_mint_amount_h,
             mintEUSDparams.to,
-            mintEUSDparams.receiverBridge,
-            mintEUSDparams.receiverChainID
+            mintEUSDparams.initialBridge,
+            mintEUSDparams.initialChainID
             ]
         )
 
