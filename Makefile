@@ -52,8 +52,11 @@ eth-local-migrate: deps npm wrappers
 eth-testnet-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh mumbai,bsctestnet,avalanchetestnet,hecotestnet,rinkeby
 
-eth-testnet-ci-migrate: deps npm wrappers
+eth-testnet-ci-migrate: debug deps npm wrappers
 	cd hardhat;./scripts/deploy.sh ${NETWORKS}
+
+debug:
+	echo "$NETWORKS"
 
 copy_configs:
 	@if [ -z ${NETWORKS} ]; then \

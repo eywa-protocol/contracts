@@ -36,6 +36,7 @@ deploy_bridge:
   script:
     - source ./tmp_src
     - export NETWORKS=$NETWORKS
+    - echo "$NETWORKS"
     - export HHC_PATH="/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
     - cp ${HHC_PATH} ./hardhat/helper-hardhat-config.json
     - make eth-testnet-ci-migrate
