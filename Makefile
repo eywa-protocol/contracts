@@ -53,6 +53,7 @@ eth-testnet-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh mumbai,bsctestnet,avalanchetestnet,hecotestnet,rinkeby
 
 eth-testnet-ci-migrate: debug deps npm wrappers
+	echo "${NETWORKS}";
 	cd hardhat;./scripts/deploy.sh ${NETWORKS}
 
 debug:

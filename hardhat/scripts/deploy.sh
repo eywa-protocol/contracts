@@ -7,6 +7,7 @@ getField(){
 }
 
 nets=${1}
+echo "From deploy.sh $nets"
 if [[ ${1} =~ ^('')$ ]]; then
   nets=$(jq 'keys[]' ./helper-hardhat-config.json)
   nets=${nets//\"/ }
