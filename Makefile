@@ -56,7 +56,7 @@ eth-testnet-ci-migrate: debug deps npm wrappers
 	cd hardhat;./scripts/deploy.sh ${NETWORKS}
 
 debug:
-	echo "$NETWORKS"
+	echo "${NETWORKS}"
 
 copy_configs:
 	@if [ -z ${NETWORKS} ]; then \
