@@ -1,4 +1,4 @@
-// $ npx hardhat run scripts/bridge/verify.js --network rinkeby
+// npx hardhat run scripts/bridge/verify.js --network rinkeby
 
 // verify Forwarder, proxy Bridge and MockDexPool
 let networkConfig = require('../../helper-hardhat-config.json')
