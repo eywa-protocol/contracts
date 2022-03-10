@@ -46,18 +46,17 @@ async function main() {
     }
   }
 
-  for (let netw of networks) {
-      let tokens = networkConfig[netw].localToken;
-      for (let t of tokens) {
-        let tokenAddressBytes32 = addressToBytes32(t.address);
-        if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
-          this.tx = await portal.approveRepresentationRequest( t.address, "18"/*_decimals*/)
-          console.log(`approveRepresentationRequest for ${t.name} token on ${network.name} source from ${netw}: ${this.tx.hash}`);
-          await this.tx.wait();
-        }
-      }
-
-  }
+  // for (let netw of networks) {
+  //     let tokens = networkConfig[netw].localToken;
+  //     for (let t of tokens) {
+  //       let tokenAddressBytes32 = addressToBytes32(t.address);
+  //       if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
+  //         this.tx = await portal.approveRepresentationRequest( t.address, "18"/*_decimals*/)
+  //         console.log(`approveRepresentationRequest for ${t.name} token on ${network.name} source from ${netw}: ${this.tx.hash}`);
+  //         await this.tx.wait();
+  //       }
+  //    }
+  // }
 
 }
 

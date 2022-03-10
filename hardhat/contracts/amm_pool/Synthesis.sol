@@ -491,34 +491,6 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         return keccak256(abi.encodePacked(this, block.timestamp));
     }
 
-    function burnSyntheticToken_transit(
-        address _stoken,
-        uint256 _amount,
-        address _chain2address,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID,
-        bytes calldata _out
-    ) external returns (bytes32 txID) {
-        ISyntERC20(_stoken).burn(_msgSender(), _amount);
-        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-
-        txID = IBridge(bridge).prepareRqId(
-            castToBytes32(_oppositeBridge),
-            _chainID,
-            castToBytes32(_receiveSide),
-            castToBytes32(_msgSender()),
-            nonce
-        );
-
-        // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(_out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
-        TxState storage txState = requests[txID];
-        txState.state = RequestState.Sent;
-
-        emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
-    }
-
     function setTrustedForwarder(address _forwarder) external onlyOwner {
         return _setTrustedForwarder(_forwarder);
     }

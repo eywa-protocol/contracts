@@ -71,16 +71,6 @@ interface ISynthesis {
         uint256 _chainID
     ) external returns (bytes32 txID);
 
-    function burnSyntheticToken_transit(
-        address _stoken,
-        uint256 _amount,
-        address _chain2address,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID,
-        bytes memory _out
-    ) external returns (bytes32 txId);
-
     function emergencyUnsyntesizeRequest(
         bytes32 _txID,
         address _receiveSide,
@@ -237,7 +227,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         address _pool,
         address _lp_token,
         address[] calldata _coins
-    ) public {
+    ) public /**onlyOwner*/{
         for (uint256 i = 0; i < _coins.length; i++) {
             pool[_pool].add(_coins[i]);
         }
