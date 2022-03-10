@@ -140,7 +140,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         uint256 _chainID
     ) external returns (bytes32 txID) {
         // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
-        require(_amount >= 10**tokenDecimals[castToBytes32(_token)], "Portal: transfer below minimum amount");
 
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] += _amount;
@@ -189,7 +188,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         uint256 _chainId
     ) external returns (bytes32 txID) {
         // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
-        require(_amount >= 10**tokenDecimals[castToBytes32(_token)], "Portal: transfer below minimum amount");
 
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] += _amount;
@@ -306,7 +304,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         uint256 _chainID
     ) external returns (bytes32 txID) {
         // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
-        require(_amount >= 10**tokenDecimals[castToBytes32(_token)], "Portal: transfer below minimum amount");
 
         (bool _success1, ) = _token.call(_approvalData);
         require(_success1, "Portal: approve call failed");
@@ -533,7 +530,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bytes calldata _out
     ) external returns (bytes32 txId) {
         // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
-        require(_amount >= 10**tokenDecimals[castToBytes32(_token)], "Portal: transfer below minimum amount");
 
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] += _amount;
@@ -575,7 +571,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         for (uint256 i = 0; i < _tokens.length; i++) {
             if (_amounts[i] > 0) {
                 // require(tokenDecimals[castToBytes32(_token)[i]] > 0, "Portal: token must be verified");
-                require(_amounts[i] >= 10**tokenDecimals[castToBytes32(_tokens[i])], "Portal: transfer below minimum amount");
                 if (_permit_data[i].v != 0) {
                     uint256 approve_value = _permit_data[i].approveMax ? uint256(2**256 - 1) : _amounts[i];
                     IERC20(_tokens[i]).permit(
