@@ -1,7 +1,8 @@
+// npx hardhat run scripts/dao/deploy-dao.js --network mumbai
+
 const fs = require("fs");
 const { network } = require("hardhat");
 let deployInfo = require('../../helper-hardhat-config.json')
-
 
 async function main() {
     console.log("\n DAO contracts  deployment");
@@ -27,6 +28,7 @@ async function main() {
         const eywa = await ERC20CRV.deploy(name, symbol, decimals)
         await eywa.deployed()
         deployInfo[network.name].dao.eywa = eywa.address
+        console.log('Deploy eywa', eywa.address);
 
         // deploy voting escrow
         // @param token_addr `ERC20CRV` token address
@@ -37,6 +39,7 @@ async function main() {
         const votingEscrow = await VotingEscrow.deploy(eywa.address, name, symbol, version)
         await votingEscrow.deployed()
         deployInfo[network.name].dao.votingEscrow = votingEscrow.address
+        console.log('Deploy votingEscrow', votingEscrow.address);
 
         // deploy gauge controller
         // @param _token `ERC20CRV` contract address
@@ -44,6 +47,7 @@ async function main() {
         const gaugeController = await GaugeController.deploy(eywa.address, votingEscrow.address)
         await gaugeController.deployed()
         deployInfo[network.name].dao.gaugeController = gaugeController.address
+        console.log('Deploy gaugeController', gaugeController.address);
 
         // deploy minter 
         // @param token: address, 
@@ -51,6 +55,7 @@ async function main() {
         const minter = await Minter.deploy(eywa.address, gaugeController.address)
         await minter.deployed()
         deployInfo[network.name].dao.minter = minter.address
+        console.log('Deploy minter', minter.address);
 
         // deploy gauge
         for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
@@ -64,6 +69,8 @@ async function main() {
             let gauge = await LiquidityGauge.deploy(lpToken.address, minter.address, owner)
             await gauge.deployed()
             deployInfo[network.name].crosschainPool[i].gauge = gauge.address
+
+            console.log('Deploy gauge', gauge.address);
         }
     }
 
