@@ -15,6 +15,7 @@ async function main() {
     const decimals = 18;
     const version = '0.0.1';
 
+    // todo not work with vyper contracts
     // eywa verify
     try {
         await hre.run("verify:verify", {
