@@ -26,9 +26,9 @@ wrappers: npm compile copy_configs
 	--json ${ARTIFACTS}/bridge/test/TestTarget.sol \
 	--json ${ARTIFACTS}/bridge/test/TestForward.sol \
 	--json ${ARTIFACTS}/bridge/test/TestERC20Permit.sol \
-	--json ${ARTIFACTS}/bridge/merkle/MerkleTest.sol \
 	--json ${ARTIFACTS}/amm_pool/Portal.sol \
 	--json ${ARTIFACTS}/amm_pool/Synthesis.sol \
+	--json ${ARTIFACTS}/test/MerkleTest.sol \
 	--json ${ARTIFACTS}/test/BlockTest.sol \
 	--pkg wrappers --out ${WRAPPERS}
 
