@@ -6,8 +6,13 @@ getField(){
  node -pe 'JSON.parse(process.argv[1]).'$1 "$(cat $helper_path)"
 }
 
+echo "-----debug----"
+echo "nets - $nets"
+echo "regnet - $REGNET"
+echo "part - $PART"
+echo "step - $STEP"
+
 nets=${1}
-echo "From deploy.sh $nets"
 if [[ ${1} =~ ^('')$ ]]; then
   nets=$(jq 'keys[]' ./helper-hardhat-config.json)
   nets=${nets//\"/ }
