@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-import "../utils/Utils.sol";
+import "../utils/Block.sol";
 
 contract BlockTest {
     function blockHash(
@@ -19,6 +19,6 @@ contract BlockTest {
 
     function blockHeaderRawDataTest(bytes calldata _data) public pure returns (bytes32 allBlockHash, bytes32 blockTxHash) {
         allBlockHash = sha256(abi.encodePacked(_data));
-        blockTxHash = Utils.bytesToBytes32(_data[72:104]);
+        blockTxHash = Block.transactionsRoot(_data);
     }
 }

@@ -7,7 +7,7 @@ library ReqIdFilter {
         bytes32[] used;
     }
 
-    function length(Data storage data) internal returns(uint256) {
+    function length(Data storage data) internal view returns(uint256) {
         return data.used.length;
     }
 

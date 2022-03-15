@@ -241,13 +241,13 @@ library ZeroCopySource {
     *  @param offset        The position from where we read the bytes value
     *  @return              The read bytes20 value and updated offset
     */
-    function NextBytes20(bytes memory buff, uint256 offset) internal pure returns (bytes20 , uint256) {
-        require(offset + 20 <= buff.length && offset < offset + 20, "NextBytes20, offset exceeds maximum");
+    function NextAddress(bytes memory buff, uint256 offset) internal pure returns (address, uint256) {
+        require(offset + 20 <= buff.length && offset < offset + 20, "NextAddress, offset exceeds maximum");
         bytes20 v;
         assembly {
             v := mload(add(buff, add(offset, 0x20)))
         }
-        return (v, offset + 20);
+        return (address(v), offset + 20);
     }
     
     function NextVarUint(bytes memory buff, uint256 offset) internal pure returns(uint, uint256) {
