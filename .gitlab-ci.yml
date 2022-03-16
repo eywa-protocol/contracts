@@ -1,5 +1,7 @@
-services:
-  - docker:bind
+include:
+  - project: 'blockchainlaboratory/gitlab-ci'
+    ref: v0.0.6
+    file: '/.gitlab-ci.yml'
 
 stages:
   - test
@@ -26,8 +28,8 @@ build:
     HHC_PATH: "/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
   artifacts:
     paths:
-        - wrappers/
-        - tmp_src
+      - wrappers/
+      - tmp_src
 
 deploy_bridge:
   stage: deploy
@@ -48,7 +50,7 @@ deploy_bridge:
     PART: deploy_bridge
   artifacts:
     paths:
-        - hardhat/helper-hardhat-config.json
+      - hardhat/helper-hardhat-config.json
 
 deploy:cross_pool:
   stage: deploy
@@ -68,7 +70,7 @@ deploy:cross_pool:
     PART: deploy_crosspool
   artifacts:
     paths:
-        - hardhat/helper-hardhat-config.json
+      - hardhat/helper-hardhat-config.json
 
 init:
   stage: init
@@ -87,38 +89,20 @@ init:
     STEP: init
   artifacts:
     paths:
-        - hardhat/helper-hardhat-config.json
+      - hardhat/helper-hardhat-config.json
 
-deploy:
-  stage: deploy
-  before_script:
-    - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
-  script:
-    - docker run -t --rm -v $(pwd):/app --user builder registry.digiu.ai/base/eywa-contracts:2 make -C /app eth-testnet-migrate
+test:
+  extends:
+    - .unit_tests
+  stage: test
   only:
-    - tags
-  tags:
-    - docker
-  when: manual
-  artifacts:
-    paths:
-        - wrappers/
-        - helper-hardhat-config.json
-        - networks_env
+    - branches
 
-rebuild:
-  stage: deploy
-  before_script:
-    - docker login -u ${DOCKER_REGISTRY_USER_NAME} -p ${DOCKER_REGISTRY_USER_PASSWORD} registry.digiu.ai
-  script:
-    - docker run -t --rm -v $(pwd):/app --user builder registry.digiu.ai/base/eywa-contracts:2 make -C /app wrappers
-  only:
-    - tags
-  tags:
-    - docker
-  when: manual
-  artifacts:
-    paths:
-        - wrappers/
-        - helper-hardhat-config.json
-        - networks_env
+autotest:
+  extends:
+    - .autotest
+  stage: autotest
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+  allow_failure: true
