@@ -1,6 +1,6 @@
 // npx hardhat run scripts/gassless/deploy.js --network rinkeby
 const fs = require("fs");
-let networkConfig = require('../../helper-hardhat-config.json')
+let networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json')
 const hre = require("hardhat");
 
 async function main() {
@@ -34,8 +34,8 @@ async function main() {
     console.log("Paymaster deposited for:", amount);
 
     networkConfig[network.name].paymaster = paymaster.address;
-    fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(networkConfig, undefined, 2));
-
+    fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
+        JSON.stringify(networkConfig, undefined, 2));
 }
 
 main()

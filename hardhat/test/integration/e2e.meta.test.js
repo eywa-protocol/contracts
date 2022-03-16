@@ -1,4 +1,4 @@
-let deployInfo = require('../../helper-hardhat-config.json');
+let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
 const { checkoutProvider, timeout } = require("../../utils/helper");
 const { ethers } = require("hardhat");
 

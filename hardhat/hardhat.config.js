@@ -6,7 +6,7 @@ require("hardhat-gas-reporter");
 require('@openzeppelin/hardhat-upgrades');
 
 require('dotenv').config();
-const networkConfig = require('./helper-hardhat-config.json');
+const networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : './helper-hardhat-config.json');
 
 const PRIVATE_KEY_RINKEBY  = process.env.PRIVATE_KEY_RINKEBY  || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_BSC      = process.env.PRIVATE_KEY_BSC      || "0x0000000000000000000000000000000000000000";

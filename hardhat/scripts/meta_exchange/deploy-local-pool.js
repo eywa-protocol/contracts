@@ -1,6 +1,6 @@
 const fs = require("fs");
 const { network } = require("hardhat");
-let deployInfo = require('../../helper-hardhat-config.json')
+let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json')
 
 // local pool params
 const A = 100                 // amplification coefficient for the pool.
@@ -80,7 +80,6 @@ async function main() {
         deployInfo[network.name].localPool.address = localPool.address
         deployInfo[network.name].localPool.coins = localCoins
 
-
         // add liquidity
         for (let i = 0; i < deployInfo[network.name].localPool.coins.length; i++) {
             await ERC20.attach(deployInfo[network.name].localToken[i].address).mint(deployer.address, totalSupply)
@@ -101,7 +100,8 @@ async function main() {
         
 
         // write out the deploy configuration 
-        fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
+        fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
+            JSON.stringify(deployInfo, undefined, 2));
         console.log("Local Pool Deployed!\n");
     }
 
