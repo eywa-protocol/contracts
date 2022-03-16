@@ -2,7 +2,92 @@ services:
   - docker:bind
 
 stages:
+  - test
+  - autotest
+  - build
   - deploy
+  - init
+
+build:
+  stage: build
+  script:
+    - /bin/bash .ci/get-tag.sh
+    - source ./tmp_src
+    - export WRAPPERS="/var/lib/gitlab-runner/contracts/$FOLDER/wrappers"
+    - mkdir -p /var/lib/gitlab-runner//contracts/$FOLDER/
+    - cp -n hardhat/helper-hardhat-config.json.example /var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json
+    - make wrappers
+    - cp -r /var/lib/gitlab-runner/contracts/$FOLDER/wrappers ./wrappers
+  only:
+    - tags
+  tags:
+    - contracts
+  variables:
+    HHC_PATH: "/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
+  artifacts:
+    paths:
+        - wrappers/
+        - tmp_src
+
+deploy_bridge:
+  stage: deploy
+  script:
+    - source ./tmp_src
+    - export NETWORKS=$NETWORKS
+    - export HHC_PATH="/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
+    - cp ${HHC_PATH} ./hardhat/helper-hardhat-config.json
+    - make eth-testnet-ci-migrate
+    - cp ./hardhat/helper-hardhat-config.json ${HHC_PATH}
+  only:
+    - tags
+  tags:
+    - contracts
+  when: manual
+  variables:
+    STEP: deploy
+    PART: deploy_bridge
+  artifacts:
+    paths:
+        - hardhat/helper-hardhat-config.json
+
+deploy:cross_pool:
+  stage: deploy
+  script:
+    - source ./tmp_src
+    - export HHC_PATH="/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
+    - cp ${HHC_PATH} ./hardhat/helper-hardhat-config.json
+    - make eth-testnet-ci-migrate
+    - cp ./hardhat/helper-hardhat-config.json ${HHC_PATH}
+  only:
+    - tags
+  tags:
+    - contracts
+  when: manual
+  variables:
+    STEP: deploy
+    PART: deploy_crosspool
+  artifacts:
+    paths:
+        - hardhat/helper-hardhat-config.json
+
+init:
+  stage: init
+  script:
+    - source ./tmp_src
+    - export HHC_PATH="/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
+    - cp ${HHC_PATH} ./hardhat/helper-hardhat-config.json
+    - make eth-testnet-ci-migrate
+    - cp ./hardhat/helper-hardhat-config.json ${HHC_PATH}
+  only:
+    - tags
+  tags:
+    - contracts
+  when: manual
+  variables:
+    STEP: init
+  artifacts:
+    paths:
+        - hardhat/helper-hardhat-config.json
 
 deploy:
   stage: deploy

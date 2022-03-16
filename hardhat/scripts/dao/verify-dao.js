@@ -21,7 +21,7 @@ async function main() {
         await hre.run("verify:verify", {
             address: eywaAddress,
             constructorArguments: [name, symbol, decimals],
-            contract: "contracts/dao/ERC20CRV.vy:ERC20CRV"
+            // contract: "contracts/dao/ERC20CRV.vy:ERC20CRV"
         });
     } catch (e) {
         console.log(e);

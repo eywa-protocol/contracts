@@ -82,7 +82,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
 
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => UnsynthesizeState) public unsynthesizeStates;
-    mapping(address => bytes) public tokenData;
+    mapping(bytes32 => uint8) public tokenDecimals;
 
     event SynthesizeRequest(
         bytes32 indexed _id,
@@ -102,7 +102,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     event BurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event RevertSynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event RepresentationRequest(address indexed _rtoken);
-    event ApprovedRepresentationRequest(address indexed _rtoken);
+    event ApprovedRepresentationRequest(bytes32 indexed _rtoken);
 
     function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
         __Context_init_unchained();
@@ -139,6 +139,8 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _oppositeBridge,
         uint256 _chainID
     ) external returns (bytes32 txID) {
+        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
+
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] += _amount;
 
@@ -185,6 +187,8 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bytes1 _txStateBump,
         uint256 _chainId
     ) external returns (bytes32 txID) {
+        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
+
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] += _amount;
 
@@ -282,7 +286,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
 
     /**
      * @dev Synthesize token request with permit.
-     * @param _approvalData permit data
+     * @param _permitData permit data
      * @param _token token address to synthesize
      * @param _amount amount to synthesize
      * @param _chain2address amount recipient address
@@ -291,7 +295,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
      * @param _chainID opposite chain ID
      */
     function synthesizeWithPermit(
-        bytes calldata _approvalData,
+        PermitData memory _permitData,
         address _token,
         uint256 _amount,
         address _chain2address,
@@ -299,8 +303,17 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _oppositeBridge,
         uint256 _chainID
     ) external returns (bytes32 txID) {
-        (bool _success1, ) = _token.call(_approvalData);
-        require(_success1, "Portal: approve call failed");
+        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
+
+        IERC20(_token).permit(
+            _msgSender(),
+            address(this),
+            _permitData.approveMax ? uint256(2**256 - 1) : _amount,
+            _permitData.deadline,
+            _permitData.v,
+            _permitData.r,
+            _permitData.s
+        );
 
         TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
         balanceOf[_token] += _amount;
@@ -385,7 +398,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _oppositeBridge,
         uint256 _chainId
     ) external {
-        require(unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized, "Portal: real tokens already transfered");
+        require(unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized, "Portal: real tokens already transferred");
         unsynthesizeStates[_txID] = UnsynthesizeState.RevertRequest;
 
         bytes memory out = abi.encodeWithSelector(bytes4(keccak256(bytes("emergencyUnburn(bytes32)"))), _txID);
@@ -415,7 +428,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         uint256 _chainId
     ) external {
         require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainID");
-        require(unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized, "Portal: real tokens already transfered");
+        require(unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized, "Portal: real tokens already transferred");
 
         unsynthesizeStates[_txID] = UnsynthesizeState.RevertRequest;
 
@@ -495,62 +508,20 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
 
     // implies manual verification point
     function approveRepresentationRequest(
-        address _rtoken /**onlyOwner */
+        bytes32 _rtoken,
+        uint8 _decimals /**onlyOwner */
     ) external {
-        tokenData[_rtoken] = abi.encode(IERC20(_rtoken).name(), IERC20(_rtoken).symbol());
+        tokenDecimals[_rtoken] = _decimals;
         emit ApprovedRepresentationRequest(_rtoken);
     }
 
     //TODO
-    function getTxId() external view returns (bytes32) {
-        return keccak256(abi.encodePacked(this, block.timestamp));
-    }
-
     function setProxyCurve(address _proxy) external onlyOwner {
         proxy = _proxy;
     }
 
     function setTrustedForwarder(address _forwarder) external onlyOwner {
         return _setTrustedForwarder(_forwarder);
-    }
-
-    //TODO: redo for single coin case
-    function synthesize_transit(
-        address _token,
-        uint256 _amount,
-        address _chain2address,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID,
-        bytes calldata _out
-    ) external returns (bytes32 txId) {
-        // require(
-        //     tokenData[_token].length != 0,
-        //     "Portal: token must be verified"
-        // );
-        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] += _amount;
-
-        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-
-        txId = IBridge(bridge).prepareRqId(
-            castToBytes32(_oppositeBridge),
-            _chainID,
-            castToBytes32(_receiveSide),
-            castToBytes32(_msgSender()),
-            nonce
-        );
-
-        // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(_out, _receiveSide, _oppositeBridge, _chainID, txId, _msgSender(), nonce);
-        TxState storage txState = requests[txId];
-        txState.recipient = castToBytes32(_msgSender()); //change!
-        txState.chain2address = castToBytes32(_chain2address);
-        txState.rtoken = castToBytes32(_token);
-        txState.amount = _amount;
-        txState.state = RequestState.Sent;
-
-        emit SynthesizeRequest(txId, _msgSender(), _chain2address, _amount, _token);
     }
 
     //TODO: revisit memory location and logic in general (may need to use a single case scenario only)
@@ -567,6 +538,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         //synthesize request
         for (uint256 i = 0; i < _tokens.length; i++) {
             if (_amounts[i] > 0) {
+                // require(tokenDecimals[castToBytes32(_token)[i]] > 0, "Portal: token must be verified");
                 if (_permit_data[i].v != 0) {
                     uint256 approve_value = _permit_data[i].approveMax ? uint256(2**256 - 1) : _amounts[i];
                     IERC20(_tokens[i]).permit(

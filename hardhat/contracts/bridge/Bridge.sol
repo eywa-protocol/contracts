@@ -1,22 +1,29 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts-newone/utils/Address.sol";
+import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
+
+import "../amm_pool/RelayRecipient.sol";
+import "../utils/Block.sol";
+import "../utils/Merkle.sol";
+import "../utils/ReqIdFilter.sol";
+import "../utils/Typecast.sol";
 import "./bls/BlsSignatureVerification.sol";
 import "./core/BridgeCore.sol";
 import "./interface/INodeRegistry.sol";
-import "@openzeppelin/contracts-newone/utils/Address.sol";
-import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
-import "../amm_pool/RelayRecipient.sol";
-import "../utils/Typecast.sol";
 
 contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecast {
     using AddressUpgradeable for address;
+    using ReqIdFilter for ReqIdFilter.Data;
 
     string public versionRecipient;
     E2Point private epochKey; // Aggregated public key of all paricipants of the current epoch
     address public dao; // Address of the DAO
     uint8 public epochParticipantsNum; // Number of participants contributed to the epochKey
     uint32 public epochNum; // Sequential number of the epoch
+
+    ReqIdFilter.Data private reqIdFilter; // Filteres request ID against repetition
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
 
@@ -66,6 +73,10 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
         return (abi.encode(epochKey), epochParticipantsNum, epochNum);
     }
 
+    function statFilterLen() external view returns (uint256) {
+        return reqIdFilter.length();
+    }
+
     /**
      * @dev Updates current epoch.
      * @param _newKey aggregated public key of all new epoch participants
@@ -91,7 +102,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
         if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
             require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "Bridge: not enough participants"); // TODO configure
             require(
-                epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum),
+                epochParticipantsNum == 255 || _votersMask < (1 << epochParticipantsNum),
                 "Bridge: bitmask too big"
             );
             bytes memory data = abi.encodePacked(newKey.x, newKey.y, _newEpochParticipantsNum, _newEpochNum);
@@ -105,6 +116,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
         epochKey = newKey;
         epochParticipantsNum = _newEpochParticipantsNum; // TODO: require minimum
         epochNum = _newEpochNum;
+        reqIdFilter.clear();
     }
 
     /**
@@ -164,19 +176,15 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
 
     /**
      * @dev Receive crosschain request v2.
-     * @param _reqId request ID
-     * @param _sel function selector
-     * @param _receiveSide receiver address
-     * @param _bridgeFrom opposite bridge address
-     * @param _votersPubKey aggregated public key of the old epoch participants, who voted for the update
-     * @param _votersSignature aggregated signature of the old epoch participants, who voted for the update
-     * @param _votersMask bitmask of old epoch participants, who voted, amoung all participants
+     * @param _blockHeader block header serialization
+     * @param _txMerkleProve OracleRequest transaction payload and its Merkle audit path
+     * @param _votersPubKey aggregated public key of the old epoch participants, who voted for the block
+     * @param _votersSignature aggregated signature of the old epoch participants, who voted for the block
+     * @param _votersMask bitmask of epoch participants, who voted, amoung all participants
      */
     function receiveRequestV2(
-        bytes32 _reqId,
-        bytes calldata _sel,
-        address _receiveSide,
-        bytes32 _bridgeFrom,
+        bytes calldata _blockHeader,
+        bytes calldata _txMerkleProve,
         bytes calldata _votersPubKey,
         bytes calldata _votersSignature,
         uint256 _votersMask
@@ -185,20 +193,26 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
         require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "Bridge: not enough participants"); // TODO configure
         require(epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum), "Bridge: bitmask too big");
 
+        // Verify the block signature
         E2Point memory votersPubKey = decodeE2Point(_votersPubKey);
         E1Point memory votersSignature = decodeE1Point(_votersSignature);
-        bytes memory sigData = abi.encodePacked(_reqId, _sel, _receiveSide, _bridgeFrom, epochNum);
         require(
-            verifyMultisig(epochKey, votersPubKey, sigData, votersSignature, _votersMask),
+            verifyMultisig(epochKey, votersPubKey, _blockHeader, votersSignature, _votersMask),
             "Bridge: multisig mismatch"
         );
 
-        bytes memory data = _receiveSide.functionCall(_sel, "Bridge: receiveRequestV2: failed");
+        // Verify that the transaction is really in the block
+        bytes memory payload = Merkle.prove(_txMerkleProve, Block.transactionsRoot(_blockHeader));
+
+        // Make the call
+        (address bridgeFrom, bytes32 reqId, bytes memory sel, address receiveSide) = Block.oracleRequestTx(payload);
+        require(reqIdFilter.testAndSet(reqId) == false, "Already seen");
+        bytes memory data = receiveSide.functionCall(sel, "Bridge: receiveRequestV2: failed");
         require(
             data.length == 0 || abi.decode(data, (bool)),
             "Bridge: receiveRequestV2: unable to decode returned data"
         );
-        emit ReceiveRequest(_reqId, _receiveSide, _bridgeFrom);
+        emit ReceiveRequest(reqId, receiveSide, bytes32(bytes20(bridgeFrom)));
     }
 
     /**
