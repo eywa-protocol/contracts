@@ -67,7 +67,7 @@ async function main() {
             await gauge.deployed()
             deployInfo[network.name].crosschainPool[i].gauge = gauge.address
             // await gauge.self
-            
+
             //register gauge
             await gaugeController.add_gauge(gauge.address, 0, "10000000000000000000"/*weight*/,{ gasLimit: 1000000 })
         }

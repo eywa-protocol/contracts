@@ -240,8 +240,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "rinkeby": {
-    "rpcUrl": "wss://rinkeby.infura.io/ws/v3/ab95bf9f6dd743e6a8526579b76fe358",
-    "rpcUrl2": "https://rinkeby.infura.io/v3/ab95bf9f6dd743e6a8526579b76fe358",
+    "rpcUrl": "wss://rinkeby.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+    "rpcUrl2": "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
     "n": "RINKEBY",
     "netwiker": "ETH",
     "env_file": [

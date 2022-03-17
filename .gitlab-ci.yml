@@ -28,8 +28,8 @@ build:
     HHC_PATH: "/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
   artifacts:
     paths:
-        - wrappers/
-        - tmp_src
+      - wrappers/
+      - tmp_src
 
 deploy_bridge:
   stage: deploy
@@ -50,7 +50,7 @@ deploy_bridge:
     PART: deploy_bridge
   artifacts:
     paths:
-        - hardhat/helper-hardhat-config.json
+      - hardhat/helper-hardhat-config.json
 
 deploy:cross_pool:
   stage: deploy
@@ -70,7 +70,7 @@ deploy:cross_pool:
     PART: deploy_crosspool
   artifacts:
     paths:
-        - hardhat/helper-hardhat-config.json
+      - hardhat/helper-hardhat-config.json
 
 init:
   stage: init
@@ -89,7 +89,7 @@ init:
     STEP: init
   artifacts:
     paths:
-        - hardhat/helper-hardhat-config.json
+      - hardhat/helper-hardhat-config.json
 
 test:
   extends:

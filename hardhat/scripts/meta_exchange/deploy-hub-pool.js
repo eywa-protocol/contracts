@@ -2,7 +2,6 @@ const fs = require("fs");
 let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
 const { network } = require("hardhat");
 
-
 async function main() {
   console.log("\n HUB POOL DEPLOYMENT");
   const [deployer] = await ethers.getSigners();
@@ -70,8 +69,9 @@ async function main() {
     deployInfo[network.name].hubPool.lp = hubPoolLp.address
     deployInfo[network.name].hubPool.coins = hubPoolCoins
 
-    // write out the deploy configuration 
-    fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
+    // write out the deploy configuration
+    fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
+        JSON.stringify(deployInfo, undefined, 2));
     console.log("Hub pool deployed!");
   }
 
