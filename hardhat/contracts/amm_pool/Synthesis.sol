@@ -48,6 +48,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         RevertRequest
     }
 
+    event SynthTransfer(bytes32 indexed _id, address indexed _to, address _chain2address, uint256 _amount, bytes32 _token);
     event BurnRequest(bytes32 indexed _id, address indexed _from, address indexed _to, uint256 _amount, address _token);
     event BurnRequestSolana(
         bytes32 indexed _id,
@@ -91,12 +92,56 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Mints synthetic token. Can be called only by bridge after initiation on a second chain
-     * @param _txID transaction ID
+     * @dev Transfers synthetic token to another chain
      * @param _tokenReal real token address
-     * @param _amount amount to mint
-     * @param _to recipient address
+     * @param _amount amount to transfer
+     * @param _oppositeBridge opposite bridge address
+     * @param _receiveSide request recipient address
+     * @param _chainID opposite chain ID
+     * @param _chain2address recipient address
      */
+    function synthTransfer(
+        bytes32 _tokenReal,
+        uint256 _amount,
+        address _oppositeBridge,
+        address _receiveSide,
+        uint256 _chainID,
+        address _chain2address
+    ) external {
+        require(representationSynt[_tokenReal] != address(0));
+        address synth = representationSynt[_tokenReal];
+        ISyntERC20(synth).burn(_msgSender(), _amount);
+        
+        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+        bytes32 txID = IBridge(bridge).prepareRqId(
+            castToBytes32(_oppositeBridge),
+            _chainID,
+            castToBytes32(_receiveSide),
+            castToBytes32(_msgSender()),
+            nonce
+        );
+
+
+        bytes memory out = abi.encodeWithSelector(
+            bytes4(keccak256(bytes("mintSyntheticToken(bytes32,address,uint256,address)"))),
+            txID,
+            _tokenReal,
+            _amount,
+            _chain2address
+        );
+    
+        // TODO add payment by token
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        TxState storage txState = requests[txID];
+        txState.recipient = castToBytes32(_msgSender());
+        txState.chain2address = castToBytes32(_chain2address);
+        txState.stoken = synth;
+        txState.amount = _amount;
+        txState.state = RequestState.Sent;
+
+        emit SynthTransfer(txID, _msgSender(), _chain2address, _amount, _tokenReal);
+    }
+
     function mintSyntheticToken(
         bytes32 _txID,
         address _tokenReal,
