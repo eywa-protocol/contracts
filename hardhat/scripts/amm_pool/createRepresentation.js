@@ -24,7 +24,7 @@ async function main() {
       if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
         this.tx = await synthesis.createRepresentation(tokenAddressBytes32, "18", `${t.name}`, `${t.symbol}(${networkConfig[netw].netwiker})`,
           networkConfig[netw].chainId, networkConfig[netw].netwiker)
-        console.log(`createRepresentation for synthesis on ${network.name} source from ${netw}: ${this.tx.hash}`);
+        console.log(`createRepresentation for ${t.name} on ${network.name} source from ${netw}: ${this.tx.hash}`);
         await this.tx.wait();
       }
     }

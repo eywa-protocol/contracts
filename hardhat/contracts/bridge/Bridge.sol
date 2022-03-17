@@ -191,7 +191,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
     ) external {
         require(epochKey.x[0] != 0 || epochKey.x[1] != 0, "Bridge: epoch not set");
         require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "Bridge: not enough participants"); // TODO configure
-        require(epochParticipantsNum == 256 || _votersMask < (1 << epochParticipantsNum), "Bridge: bitmask too big");
+        require(epochParticipantsNum == 255 || _votersMask < (1 << epochParticipantsNum), "Bridge: bitmask too big");
 
         // Verify the block signature
         E2Point memory votersPubKey = decodeE2Point(_votersPubKey);

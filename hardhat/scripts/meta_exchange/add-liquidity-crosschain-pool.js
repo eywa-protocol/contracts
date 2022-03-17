@@ -61,6 +61,7 @@ async function main() {
     for (let x = 0; x < deployInfo[network.name].crosschainPool.length; x++) {
       for (let i = 0; i < deployInfo[network.name].crosschainPool[x].coins.length; i++) {
         await (await ERC20.attach(deployInfo[network.name].crosschainPool[x].coins[i]).approve(deployInfo[network.name].crosschainPool[x].address, totalSupply)).wait()
+        console.log(await ERC20.attach(deployInfo[network.name].crosschainPool[x].coins[i]).balanceOf(owner.address))
       }
     }
 

@@ -7,7 +7,7 @@ import {Ownable} from '@openzeppelin/contracts-newone/access/Ownable.sol';
 import {EnumerableSet} from '@openzeppelin/contracts-newone/utils/structs/EnumerableSet.sol';
 import {IERC20} from '@openzeppelin/contracts-newone/token/ERC20/IERC20.sol';
 import {SafeERC20} from '@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol';
-import {ReentrancyGuard} from '@openzeppelin/contracts-newone/security/ReentrancyGuard.sol';
+// import {ReentrancyGuard} from '@openzeppelin/contracts-newone/security/ReentrancyGuard.sol';
 
 
 //todo discuss заморозка через оптимизацию array or enumerableSet with depositId
@@ -27,7 +27,7 @@ library Errors {
     string public constant ZERO_PROFIT = "ZERO_PROFIT";
 }
 
-contract RelayerPool is ReentrancyGuard {
+contract RelayerPool /*is ReentrancyGuard */{
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.UintSet;
 
