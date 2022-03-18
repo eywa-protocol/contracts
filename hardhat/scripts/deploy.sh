@@ -112,10 +112,10 @@ if [ \( ! -z "$REGNET" -a "$PART" == "deploy_crosspool" -a "$STEP" != "init" \) 
     npx hardhat run --no-compile ./scripts/meta_exchange/deploy-local-pool.js --network ${net}
   done
 
-  for net in ${nets//\,/ }
-    do
-    npx hardhat run --no-compile ./scripts/meta_exchange/deploy-hub-pool.js --network ${net}
-  done
+  # for net in ${nets//\,/ }
+  #   do
+  #   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-hub-pool.js --network ${net}
+  # done
 fi
 
 
