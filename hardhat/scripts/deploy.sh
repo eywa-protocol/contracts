@@ -91,44 +91,44 @@ npx hardhat balanceDeployer --network ${net}
   fi
 done
 
-# if [ ! -z "$REGNET" -a "$PART" == "deploy_crosspool" -a "$STEP" != "init" ]; then
-#   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network "$net"
-#   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network "$regnet"
-# elif [ -z "$STEP" ]; then
-#   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network1
-#   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network3
-#   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network2
-# fi
+if [ ! -z "$REGNET" -a "$PART" == "deploy_crosspool" -a "$STEP" != "init" ]; then
+  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network "$net"
+  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network "$regnet"
+elif [ -z "$STEP" ]; then
+  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network1
+  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network3
+  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network2
+fi
 
-# if [ \( ! -z "$REGNET" -a "$PART" == "deploy_crosspool" -a "$STEP" != "init" \) -o -z "$REGNET" ]; then
-#   for net in ${nets//\,/ }
-#     do
-#     npx hardhat run --no-compile ./scripts/meta_exchange/deploy-local-pool.js --network ${net}
-#   done
+if [ \( ! -z "$REGNET" -a "$PART" == "deploy_crosspool" -a "$STEP" != "init" \) -o -z "$REGNET" ]; then
+  for net in ${nets//\,/ }
+    do
+    npx hardhat run --no-compile ./scripts/meta_exchange/deploy-local-pool.js --network ${net}
+  done
 
-#   for net in ${nets//\,/ }
-#     do
-#     npx hardhat run --no-compile ./scripts/meta_exchange/deploy-hub-pool.js --network ${net}
-#   done
-# fi
-
-
-# if [ \( ! -z "$REGNET" -a "$STEP" == "init" \) -o -z "$REGNET" ]; then
-#   for net in ${nets//\,/ }; do
-#     echo 'init into:' ${net}
-#     npx hardhat balanceDeployer --network ${net}
-#     npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
-#   done
+  for net in ${nets//\,/ }
+    do
+    npx hardhat run --no-compile ./scripts/meta_exchange/deploy-hub-pool.js --network ${net}
+  done
+fi
 
 
-#   for net in ${nets//\,/ }; do
-#     npx hardhat balanceDeployer --network ${net}
-#     npx hardhat run --no-compile ./scripts/bridge/updateDexBind.js  --network ${net}
-#   done
+if [ \( ! -z "$REGNET" -a "$STEP" == "init" \) -o -z "$REGNET" ]; then
+  for net in ${nets//\,/ }; do
+    echo 'init into:' ${net}
+    npx hardhat balanceDeployer --network ${net}
+    npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
+  done
 
-#   if [ ! -z "$REGNET" -a "$STEP" == "init" ]; then
-#     npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network ${regnet}
-#   elif [ -z "$STEP" ]; then
-#     npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network network2
-#   fi
-# fi
+
+  for net in ${nets//\,/ }; do
+    npx hardhat balanceDeployer --network ${net}
+    npx hardhat run --no-compile ./scripts/bridge/updateDexBind.js  --network ${net}
+  done
+
+  if [ ! -z "$REGNET" -a "$STEP" == "init" ]; then
+    npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network ${regnet}
+  elif [ -z "$STEP" ]; then
+    npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network network2
+  fi
+fi
