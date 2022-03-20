@@ -642,4 +642,48 @@
     "curveProxy": "0x0000000000000000000000000000000000000000",
     "frontHelper": "0x0000000000000000000000000000000000000000"
   }
+  "harmony": {
+    "rpcUrl": "ws://172.20.128.14:9920",
+    "rpcUrl2": "http://172.20.128.14:9620",
+    "n": "HARMONY",
+    "netwiker": "HARM3",
+    "env_file": [
+      "networks_env/env_connect_to_harmony.env",
+      "networks_env/env_test_for_harmony.env"
+    ],
+    "chainId": 2,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [
+    ],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  }
 }
