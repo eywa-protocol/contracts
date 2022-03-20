@@ -641,17 +641,61 @@
     "synthesis": "0x0000000000000000000000000000000000000000",
     "curveProxy": "0x0000000000000000000000000000000000000000",
     "frontHelper": "0x0000000000000000000000000000000000000000"
-  }
-  "harmony": {
-    "rpcUrl": "ws://172.20.128.14:9920",
-    "rpcUrl2": "http://172.20.128.14:9620",
-    "n": "HARMONY",
-    "netwiker": "HARM3",
+  },
+  "harmonylocal": {
+    "rpcUrl": "ws://172.20.128.14:9800",
+    "rpcUrl2": "http://172.20.128.14:9500",
+    "n": "HARMONYLOCAL",
+    "netwiker": "HRM",
     "env_file": [
-      "networks_env/env_connect_to_harmony.env",
-      "networks_env/env_test_for_harmony.env"
+      "networks_env/env_connect_to_harmonylocal.env",
+      "networks_env/env_test_for_harmonylocal.env"
     ],
-    "chainId": 2,
+    "chainId": 789,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [
+    ],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+  "harmonytestnet": {
+    "rpcUrl": "",
+    "rpcUrl2": "",
+    "n": "HARMONYTESTNET",
+    "netwiker": "HRM",
+    "env_file": [
+      "networks_env/env_connect_to_harmonytestnet.env",
+      "networks_env/env_test_for_harmonytestnet.env"
+    ],
+    "chainId": 780,
     "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
