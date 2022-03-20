@@ -97,6 +97,7 @@ if [ ! -z "$REGNET" -a "$PART" == "deploy_crosspool" -a "$STEP" != "init" ]; the
 elif [ -z "$STEP" ]; then
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network1
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network3
+  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network harmonylocal
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network2
 fi
 
