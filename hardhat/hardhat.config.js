@@ -6,7 +6,7 @@ require("hardhat-gas-reporter");
 require('@openzeppelin/hardhat-upgrades');
 
 require('dotenv').config();
-const networkConfig = require('./helper-hardhat-config.json');
+const networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : './helper-hardhat-config.json');
 
 const PRIVATE_KEY_RINKEBY  = process.env.PRIVATE_KEY_RINKEBY  || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_BSC      = process.env.PRIVATE_KEY_BSC      || "0x0000000000000000000000000000000000000000";
@@ -111,10 +111,18 @@ module.exports = {
           runs: 200
         }
       }
+    }, {
+      version: "0.8.2",
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200
+        }
+      }
     }]
   },
   vyper: {
-    compilers: [{ version: "0.2.4" }, { version: "0.2.7" }, { version: "0.3.1" }],
+    compilers: [{ version: "0.2.4" }, { version: "0.2.7" }, { version: "0.2.8" },{ version: "0.3.1" }],
   },
   mocha: {
     timeout: 100000

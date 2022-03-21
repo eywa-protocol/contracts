@@ -1,7 +1,7 @@
 // Run: NEED_RESET=1 npx hardhat run --no-compile scripts/bridge/updateEpoch.js --network network1
 
 const fs = require("fs");
-const networkConfig = require('../../helper-hardhat-config.json')
+const networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json')
 const hre = require("hardhat");
 
 const name = hre.network.name;

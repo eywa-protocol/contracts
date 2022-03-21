@@ -1,4 +1,4 @@
-let networkConfig = require('../../helper-hardhat-config.json')
+let networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json')
 const hre = require("hardhat");
 const { addressToBytes32, timeout } = require('../../utils/helper');
 
@@ -102,6 +102,24 @@ async function main() {
         addressToBytes32(curveProxy)
         );
        console.log(`addContractBind for Curve proxy > Curve proxy on ${network.name} with ${netw}: ${this.tx.hash}`);
+       await this.tx.wait();
+
+
+       
+       this.tx = await bridgeA.addContractBind(
+        addressToBytes32(this.s),
+        addressToBytes32(bridgeB),
+        addressToBytes32(synth)
+        );
+       console.log(`addContractBind for Synthesis  > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
+       await this.tx.wait();
+
+       this.tx = await bridgeA.addContractBind(
+        addressToBytes32(synth),
+        addressToBytes32(bridgeB),
+        addressToBytes32(this.s)
+        );
+       console.log(`addContractBind for Synthesis  > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
        await this.tx.wait();
 
      }catch(e){

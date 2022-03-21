@@ -1,6 +1,6 @@
 // npx hardhat run --no-compile scripts/bridge/queryNodeRegistry.js --network network1
 
-let networkConfig = require('../../helper-hardhat-config.json')
+let networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json')
 const hre = require("hardhat");
 
 async function main() {

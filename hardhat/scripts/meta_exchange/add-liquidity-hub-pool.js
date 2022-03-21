@@ -1,5 +1,5 @@
 const { network } = require("hardhat");
-let deployInfo = require('../../helper-hardhat-config.json')
+let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json')
 require('dotenv').config();
 
 

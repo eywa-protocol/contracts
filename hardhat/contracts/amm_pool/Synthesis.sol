@@ -13,6 +13,7 @@ import "../utils/Typecast.sol";
 contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     mapping(address => bytes32) public representationReal;
     mapping(bytes32 => address) public representationSynt;
+    mapping(bytes32 => uint8) public tokenDecimals;
     bytes32[] private keys;
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => SynthesizeState) public synthesizeStates;
@@ -58,6 +59,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     event RevertSynthesizeRequest(bytes32 indexed _id, address indexed _to);
     event SynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event SynthesizeCompletedSolana(bytes32 indexed _id, address indexed _to, uint256 _amount, bytes32 _token);
+    event SynthTransfer(bytes32 indexed _id, address indexed _from, address indexed _to, uint256 _amount, bytes32 _realToken);
     event RevertBurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
     event CreatedRepresentation(bytes32 indexed _rtoken, address indexed _stoken);
 
@@ -137,6 +139,57 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
 
         emit SynthesizeCompletedSolana(_txID, _to, _amount, _tokenReal);
     }
+
+    /**
+     * @dev Transfers synthetic token to another chain
+     * @param _tokenReal real token address
+     * @param _amount amount to transfer
+     * @param _oppositeBridge opposite bridge address
+     * @param _receiveSide request recipient address
+     * @param _chainID opposite chain ID
+     * @param _chain2address recipient address
+     */
+    function synthTransfer(
+        bytes32 _tokenReal,
+        uint256 _amount,
+        address _oppositeBridge,
+        address _receiveSide,
+        uint256 _chainID,
+        address _chain2address
+    ) external {
+        address synth = representationSynt[_tokenReal];
+        require(ISyntERC20(synth).getChainId() != _chainID, "Synthesis: can not synthesize in the intial chain");
+        ISyntERC20(synth).burn(_msgSender(), _amount);
+
+        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+        bytes32 txID = IBridge(bridge).prepareRqId(
+            castToBytes32(_oppositeBridge),
+            _chainID,
+            castToBytes32(_receiveSide),
+            castToBytes32(_msgSender()),
+            nonce
+        );
+
+        bytes memory out = abi.encodeWithSelector(
+            bytes4(keccak256(bytes("mintSyntheticToken(bytes32,address,uint256,address)"))),
+            txID,
+            _tokenReal,
+            _amount,
+            _chain2address
+        );
+    
+        // TODO add payment by token
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        TxState storage txState = requests[txID];
+        txState.recipient = castToBytes32(_msgSender());
+        txState.chain2address = castToBytes32(_chain2address);
+        txState.stoken = synth;
+        txState.amount = _amount;
+        txState.state = RequestState.Sent;
+
+        emit SynthTransfer(txID, _msgSender(), _chain2address, _amount, _tokenReal);
+    }
+
 
     /**
      * @dev Revert synthesize() operation, can be called several times
@@ -427,12 +480,18 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
      * @dev Creates a representation with the given arguments.
      * @param _rtoken real token address
      * @param _name real token name
+     * @param _decimals real token decimals number
      * @param _symbol real token symbol
+     * @param _chainID real token chain id
+     * @param _chainSymbol real token chain symbol
      */
     function createRepresentation(
         bytes32 _rtoken,
-        string calldata _name,
-        string calldata _symbol
+        uint8 _decimals,
+        string memory _name,
+        string memory _symbol,
+        uint256 _chainID,
+        string memory _chainSymbol
     ) external onlyOwner {
         require(representationSynt[_rtoken] == address(0), "Synthesis: representation already exists");
         require(representationReal[castToAddress(_rtoken)] == 0, "Synthesis: representation already exists");
@@ -441,10 +500,17 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             keccak256(abi.encodePacked(_rtoken)),
             abi.encodePacked(
                 type(SyntERC20).creationCode,
-                abi.encode(string(abi.encodePacked("e", _name)), string(abi.encodePacked("e", _symbol)))
+                abi.encode(
+                    string(abi.encodePacked("e", _name)),
+                    string(abi.encodePacked("e", _symbol)),
+                    _decimals,
+                    _chainID,
+                    _rtoken,
+                    _chainSymbol
+                )
             )
         );
-        setRepresentation(_rtoken, stoken);
+        setRepresentation(_rtoken, stoken, _decimals);
         emit CreatedRepresentation(_rtoken, stoken);
     }
 
@@ -454,9 +520,10 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     // utils
-    function setRepresentation(bytes32 _rtoken, address _stoken) internal {
+    function setRepresentation(bytes32 _rtoken, address _stoken, uint8 _decimals) internal {
         representationSynt[_rtoken] = _stoken;
         representationReal[_stoken] = _rtoken;
+        tokenDecimals[_rtoken] = _decimals;
         keys.push(_rtoken);
     }
 
@@ -482,35 +549,8 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         return keccak256(abi.encodePacked(this, block.timestamp));
     }
 
-    function burnSyntheticToken_transit(
-        address _stoken,
-        uint256 _amount,
-        address _chain2address,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID,
-        bytes calldata _out
-    ) external returns (bytes32 txID) {
-        ISyntERC20(_stoken).burn(_msgSender(), _amount);
-        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-
-        txID = IBridge(bridge).prepareRqId(
-            castToBytes32(_oppositeBridge),
-            _chainID,
-            castToBytes32(_receiveSide),
-            castToBytes32(_msgSender()),
-            nonce
-        );
-
-        // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(_out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
-        TxState storage txState = requests[txID];
-        txState.state = RequestState.Sent;
-
-        emit BurnRequest(txID, _msgSender(), _chain2address, _amount, _stoken);
-    }
-
     function setTrustedForwarder(address _forwarder) external onlyOwner {
         return _setTrustedForwarder(_forwarder);
     }
+
 }

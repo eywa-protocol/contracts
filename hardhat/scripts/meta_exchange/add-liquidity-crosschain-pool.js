@@ -1,5 +1,5 @@
 const { network } = require("hardhat");
-let deployInfo = require('../../helper-hardhat-config.json')
+let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json')
 const h = require("../../utils/helper");
 require('dotenv').config();
 
@@ -61,6 +61,7 @@ async function main() {
     for (let x = 0; x < deployInfo[network.name].crosschainPool.length; x++) {
       for (let i = 0; i < deployInfo[network.name].crosschainPool[x].coins.length; i++) {
         await (await ERC20.attach(deployInfo[network.name].crosschainPool[x].coins[i]).approve(deployInfo[network.name].crosschainPool[x].address, totalSupply)).wait()
+        console.log(await ERC20.attach(deployInfo[network.name].crosschainPool[x].coins[i]).balanceOf(owner.address))
       }
     }
 

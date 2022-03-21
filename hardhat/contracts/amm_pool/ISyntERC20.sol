@@ -8,4 +8,5 @@ interface ISyntERC20 is IERC20 {
     function mintWithAllowance(address account, address spender, uint256 amount) external;
     function burnWithAllowanceDecrease(address account, address spender, uint256 amount) external;
     function burn(address account, uint256 amount) external;
+    function getChainId() external returns (uint256);
 }

@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 library Utils {
-
     /* @notice      Convert the bytes array to bytes32 type, the bytes array length must be 32
     *  @param _bs   Source bytes array
     *  @return      bytes32
@@ -78,23 +77,6 @@ library Utils {
             // Update the free-memory pointer by padding our last write location to 32 bytes
             mstore(0x40, add(bs, 0x40))
        }
-    }
-
-    /* @notice          Do hash leaf as the multi-chain does
-    *  @param _data     Data in bytes format
-    *  @return          Hashed value in bytes32 format
-    */
-    function hashLeaf(bytes memory _data) internal pure returns (bytes32 result)  {
-        result = sha256(abi.encodePacked(uint8(0x0), _data));
-    }
-
-    /* @notice          Do hash children as the multi-chain does
-    *  @param _l        Left node
-    *  @param _r        Right node
-    *  @return          Hashed value in bytes32 format
-    */
-    function hashChildren(bytes32 _l, bytes32  _r) internal pure returns (bytes32 result)  {
-        result = sha256(abi.encodePacked(bytes1(0x01), _l, _r));
     }
 
     /* @notice              Compare if two bytes are equal, which are in storage and memory, seperately
