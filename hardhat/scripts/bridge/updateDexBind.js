@@ -3,6 +3,8 @@ const hre = require("hardhat");
 const { addressToBytes32, timeout } = require('../../utils/helper');
 
 async function main() {
+
+    const nuLL = '0x0000000000000000000000000000000000000000';
     // TODO Solana Bridge ProgramId should be calculated dynamically
     let pidBridge = "0x0adc84829c10a6e1d15291c6a128f6b77448e44551f6b49faf7ac2c42f2e62e0"
     let pidTestStub = "0x70d257a99aaa3ec60da9af20bddf2a0fd652d3e39c9d5ece041894795649cd60"
@@ -106,7 +108,6 @@ async function main() {
 	       await this.tx.wait();
 	}
      }catch(e){
-          const nuLL = '0x0000000000000000000000000000000000000000';
           if(e.message.indexOf('cannot estimate gas') >= 0 &&
              (portal === nuLL || bridgeB === nuLL || mockDexPool === nuLL || curveProxy === nuLL)){
             console.log(`WARNING: Can't bind with ${netw}. Check json config.`);
