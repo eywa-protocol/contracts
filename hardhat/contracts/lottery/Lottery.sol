@@ -10,16 +10,20 @@ contract Lottery {
         uint160 id;
     }
 
+    /// @dev Lottery allows shuffle only ones
+    bool public isShuffled;
+
     /// @dev tidly packet array of candidates
     Ticket[] public candidates;
+
+    /// @dev tidly packet array of winner
+    Ticket[] public winners;
 
     // calculated total weight
     uint96 public totalWeight;
 
     // Map of already known candidates
     mapping(uint160 => bool) knownCandidates;
-
-    constructor() {}
 
     function drawTickets(Ticket[] calldata pendingCandidates) public {
         for (uint256 index = 0; index < pendingCandidates.length; index++) {
@@ -79,16 +83,16 @@ contract Lottery {
         return candidate;
     }
 
-    function getSnapshot(uint256 max, uint256 rand) public returns (address[] memory) {
+    function shuffle(uint256 max, uint256 rand) public returns (Ticket[] memory) {
+        require(winners.length == 0, LotteryErrors.SHUFFLED);
         uint256 len = candidates.length;
         len = max > len ? len : max;
-        address[] memory winners = new address[](len);
 
         for (uint256 index = 0; index < len; index++) {
             unchecked {
                 rand = rand * 6364136223846793005 + 1442695040888963407;
             } // TODO unsafe
-            winners[index] = address(_pickNext(rand).id);
+            winners[index] = _pickNext(rand);
         }
 
         return winners;
@@ -96,5 +100,9 @@ contract Lottery {
 
     function allCandidates() public returns (Ticket[] memory) {
         return candidates;
+    }
+
+    function allWinners() public returns (Ticket[] memory) {
+        return winners;
     }
 }
