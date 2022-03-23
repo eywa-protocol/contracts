@@ -49,7 +49,6 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         signAdmin = _signAdmin;
         signatureTimeStamp = _signatureTimeStamp;
 
-        uint256 memory vEywaSupply;
         for(i=0; i < len(initialAddresses);i++){
             _mint(_initialAddresses[i], _initialSupplyAddresses[i]);
             vEywaInitialSupply = vEywaInitialSupply + _initialSupplyAddresses[i];
