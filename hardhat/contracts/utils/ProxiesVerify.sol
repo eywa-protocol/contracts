@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-newone/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts-newone/proxy/transparent/ProxyAdmin.sol";

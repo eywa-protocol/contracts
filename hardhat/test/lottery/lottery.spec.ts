@@ -66,7 +66,7 @@ describe("Lottery", () => {
             lottery = await new Lottery__factory(owner).deploy();
             await lottery.drawTickets(candidates);
 
-            const [winnerAddress] = await lottery.callStatic.getSnapshot(1, Math.ceil(Math.random() * 1000000));
+            const [winnerAddress] = await lottery.callStatic.shuffle(1, Math.ceil(Math.random() * 1000000));
             const winner = Number(winnerAddress.slice(-1));
             winners[winner] = winners[winner] + 1 || 1;
           }
@@ -93,7 +93,7 @@ describe("Lottery", () => {
               .map((_, index) => ({ weight: Math.ceil(((index + 1) / count) * weights), id: index })),
           );
 
-          const gasSpent = await lottery.estimateGas.getSnapshot(5, 42);
+          const gasSpent = await lottery.estimateGas.shuffle(5, 42);
           console.log(`Calculated snapshot for ${count} candidate with ${gasSpent} gas`);
         }).timeout(60000);
       }
