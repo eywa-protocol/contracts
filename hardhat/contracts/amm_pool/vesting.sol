@@ -1,243 +1,145 @@
 // SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+pragma solidity ^0.8.0;
+
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/math/Math.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/math/SafeMath.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 
+contract EywaVesting is ERC20, ReentrancyGuard {
+    using SafeMath for uint256;
 
-contract VestingEscrow is ERC20, ReentrancyGuard {
+    address private signAdmin; // address which can sign early transfer
+    uint256 public signatureTimeStamp;
+    
+    uint256 public immutable started; // timestamp start
     IERC20 public immutable eywaToken;
+    uint256 public immutable cliffDuration; // timestamp cliff duration
+    uint256 public immutable stepDuration; // linear step duration
+    uint256 public immutable cliffAmount; // realeseble number of tokens after cliff
+    uint256 public immutable stepAmount; // realeseble number of tokens after 1 step
+    uint256 public immutable numOfSteps; // number of linear steps
 
-    address private signAdmin;
-
-    uint256 private startTime; // timestamp
-    uint256 private endTime; // timestampx
-    uint256 private signatureCliff; // timestamp
-    uint256 private cliff; // timestamp TODO: not cliff
-    uint256 private cliffBasePercent; // percent to unlock on cliff time
-    uint256 private epochDuration; // epoch duration in seconds
-    uint256 private epochPercent;
-
-    uint256 totalEpochNumber;
-    // uint256 epochReleaseAmount;
-    // uint256 cliffUnlockAmount;
-
-    uint256 totalReleased;
-
-    uint256 currentEpoch; //TODO: get current epoch
-
+    mapping (address => uint256) public claimed; // how much already claimed
     mapping(bytes32 => bool) private usedNonces;
-
-    mapping(address => uint256) private currentEpochNumber;
-
-    // mapping(address => uint256) private currentEpochNumber;
-    // mappa address => canRasreleasedNumber
-    // transfer 
-
-    // TODO if else если все эпохи пройдены все снять
+    uint256 public vEywaInitialSupply;
 
     constructor(
-        IERC20 _EywaToken, 
+        IERC20 _eywaToken,
+        uint256 _started,
+        uint256 _cliffDuration,
+        uint256 _stepDuration,
+        uint256 _cliffAmount,
+        uint256 _stepAmount,
+        uint256 _numOfSteps,
         address _signAdmin,
-        uint256 _startTime, 
-        uint256 _endTime,
-        uint256 _signatureCliff,
-        uint256 _cliff,
-        uint256 _cliffBasePercent,
-        uint256 _epochDuration,
-        uint256 _epochPercent,
+        uint256 _signatureTimeStamp,
         address[] _initialAddresses,
         address[] _initialSupplyAddresses
-        ) ERC20("EYWA Token (Vested)", "vEYWA") {
-        require(len(_initialAddresses)==len(_initialSupplyAddresses), "Length of arrays not the same");
-                    
-        eywaToken = _EywaToken;
+
+    ) {
+        eywaToken = _eywaToken;
+        started = _started;
+        cliffDuration = _cliffDuration;
+        stepDuration = _stepDuration;
+        cliffAmount = _cliffAmount;
+        stepAmount = _stepAmount;
+        numOfSteps = _numOfSteps;
         signAdmin = _signAdmin;
+        signatureTimeStamp = _signatureTimeStamp;
 
-        startTime = _startTime; 
-        endTime = _endTime; 
-        signatureCliff = _signatureCliff; 
-        cliff = _cliff; 
-        cliffBasePercent = _cliffBasePercent; 
-        epochDuration = _epochDuration; 
-        epochPercent = _epochPercent;
-
-        totalEpochNumber = startTime - endTime / epochDuration;
-        // epochReleaseAmount = totalSupply / _totalEpochNumber;
-        // cliffUnlockAmount = totalSupply * cliffBasePercent / 10000;
-        cliff = _cliff;
-        SafeERC20.safeTransferFrom(eywaToken, msg.sender, address(this), vEywaSupply);
+        uint256 memory vEywaSupply;
         for(i=0; i < len(initialAddresses);i++){
             _mint(_initialAddresses[i], _initialSupplyAddresses[i]);
+            vEywaInitialSupply = vEywaInitialSupply + _initialSupplyAddresses[i];
         }
-        // require(totalSupply()==_EywaToken.totalSupply());
+        SafeERC20.safeTransferFrom(eywaToken, msg.sender, address(this), vEywaInitialSupply);
     }
 
-    function realeseTokens(address tokensOwner) public nonReentrant() returns (bool) {
-        // require(balanceOf(tokensOwner) > 0);
-        if(balanceOf(tokensOwner) == 0){
-            return true;
+
+    function available(uint256 time, address tokenOwner) public view returns(uint256) {
+        return claimable(time).mul(balanceOf(tokenOwner) / vEywaInitialSupply).sub(claimed[tokenOwner]);
+
+    }
+
+    // returns number of claimable tokens by this time
+    function claimable(uint256 time) public view returns(uint256) {
+        if (time == 0) {
+            return 0;
         }
-        uint256 memory currentEpoch;
-        if(cliff + startTime <= block.timestamp) {
-            currentEpoch = currentEpoch + 1;
-            uint256 epochCount = (block.timestamp - (cliff + startTime)) / epochDuration;
-            if(epochCount >= 1){
-                currentEpoch = currentEpoch + epochCount;
-            }
+        // cliffAmount +  stepAmount * min((time - (started + cliffDuration))/stepDuration, numOfSteps)
+        uint256 passedSinceCliff = time.sub(started.add(cliffDuration));
+        uint256 stepsPassed = Math.min(numOfSteps, passedSinceCliff.div(stepDuration));
+        return cliffAmount.add(
+            stepsPassed.mul(stepAmount)
+        );
+    }
+
+    function claim(uint256 claimedAmount) external nonReentrant() {
+        uint256 claimableAmount = claimable(block.timestamp);
+        if (claimable >= vEywaInitialSupply && balanceOf(msg.sender) >= claimedAmount) {
+            _burn(msg.sender, claimedAmount);
+            SafeERC20.safeTransferFrom(eywaToken, address(this), msg.sender, claimedAmount);
         }
-
-        if(block.timestamp >= endTime) {
-            currentEpochNumber[tokensOwner] = totalEpochNumber;
-            uint256 eywaAmount = balanceOf(tokensOwner);
-            if(eywaAmount > 0){
-                _burn(tokensOwner, eywaAmount);
-                SafeERC20.safeTransferFrom(eywaToken, address(this), tokensOwner, eywaAmount);
-            }
-        }
-
-        if(currentEpochNumber[tokensOwner] == 0 && currentEpoch == 1){
-            currentEpochNumber[tokensOwner] = 1;
-            require(_cliffBasePercent <= 100);
-            uint256 eywaAmount = balanceOf(tokensOwner) * _cliffBasePercent / 100;
-            if(eywaAmount > 0){
-                _burn(tokensOwner, eywaAmount);
-                SafeERC20.safeTransferFrom(eywaToken, address(this), tokensOwner, eywaAmount);
-            }
-            return true;
-        }
-        
-        if(currentEpochNumber[tokensOwner] == 0 && currentEpoch > 1){
-            currentEpochNumber[tokensOwner] = currentEpoch;
-            require((_cliffBasePercent + (currentEpoch - 1)*epochPercent) <= 100);
-            uint256 eywaAmount = balanceOf(tokensOwner) * (_cliffBasePercent + (currentEpoch - 1) * epochPercent) / 100;
-            if(eywaAmount > 0){
-                _burn(tokensOwner, eywaAmount);
-                SafeERC20.safeTransferFrom(eywaToken, address(this), tokensOwner, eywaAmount);
-            }
-            return true;
-        }
-
-        if(currentEpochNumber[tokensOwner] == 1 && currentEpoch > 1){
-            currentEpochNumber[tokensOwner] = currentEpoch;
-            require(((currentEpoch - 1)*epochPercent) <= 100);
-            uint256 eywaAmount = balanceOf(tokensOwner) * ((currentEpoch - 1) * epochPercent) / 100;
-            if(eywaAmount > 0){
-                _burn(tokensOwner, eywaAmount);
-                SafeERC20.safeTransferFrom(eywaToken, address(this), tokensOwner, eywaAmount);
-            }
-            return true;
-        }
-
-        if(currentEpochNumber[tokensOwner] > 1 && currentEpoch > 1 && currentEpochNumber[tokensOwner] < currentEpoch){
-            require(((currentEpoch - currentEpochNumber[tokensOwner])*epochPercent) <= 100);
-            uint256 eywaAmount = balanceOf(tokensOwner) * ((currentEpoch - currentEpochNumber[tokensOwner])*epochPercent) / 100;
-            currentEpochNumber[tokensOwner] = currentEpoch;
-            if(eywaAmount > 0){
-                _burn(tokensOwner, eywaAmount);
-                SafeERC20.safeTransferFrom(eywaToken, address(this), tokensOwner, eywaAmount);
-            }
-            return true;
-        }
-        return true;
+        uint256 availableAmount = available(block.timestamp, msg.sender);
+        require(claimedAmount > 0, "available amount is 0");
+        require(availableAmount >= claimedAmount, "the amount is not available");
+        claimed[msg.sender] = claimed[msg.sender].add(claimedAmount);
+        _burn(msg.sender, claimedAmount);
+        SafeERC20.safeTransferFrom(eywaToken, address(this), msg.sender, claimedAmount);
     }
-
-    function approve(address spender, uint256 amount) external override nonReentrant() returns (bool) {
-        require(block.timestamp >= startTime + signatureCliff);
-        bool result = super.approve(sender, recipient, amount);
-        return result;
-    }
-
-    function approve(address spender, uint256 amount, uint8 v, bytes32 r, bytes32 s, uint256 nonce) external override nonReentrant() returns (bool) {
-        require(usedNonces[nonce] == false);
-        usedNonces[nonce] = true;
-        string memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(spender)),  keccak256(abi.encodePacked(amount))));
-        require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
-        bool result = super.approve(sender, recipient, amount);
-        return result;
-    }
-
-    // if msg.sender is not owner of vEywa
-    function transferFrom(address sender, address recipient, uint256 amount) external override nonReentrant() returns (bool) {
-        require(block.timestamp >= startTime + signatureCliff);
-        realeseTokens(sender);
-        realeseTokens(recipient);
-        require(block.timestamp >= cliff);
-        if (msg.sender == sender) {
-            require(block.timestamp >= publicCliff, "you are owner and you should use transfer() function");
-        }
-        bool result = super.transferFrom(sender, recipient, amount);
-        return result;
-    }
-
-    // if msg.sender is owner of vEywa
-    function transferFrom(address sender, address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s, bytes32 nonce) external override nonReentrant() returns (bool) {
-        realeseTokens(sender);
-        realeseTokens(recipient);
-        require(usedNonces[nonce] == false);
-        usedNonces[nonce] = true;
-        // TODO: seach openzep or do library
-        string memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(sender)), keccak256(abi.encodePacked(recipient)),  keccak256(abi.encodePacked(amount))));
-        require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
-
-        bool result = super.transferFrom(sender, recipient, amount);
-        return result;
-    }
-
-    function transfer(address recipient, uint256 amount) external override returns (bool) {
-        require(block.timestamp >= startTime + signatureCliff);
-        realeseTokens(msg.sender);
-        realeseTokens(recipient);
-        bool result = super.transfer(recipient, amount);
-        return result;
-    }
-
-    function transfer(address recipient, uint256 amount,  uint8 v, bytes32 r, bytes32 s, bytes32 nonce) external override returns (bool) {
-        realeseTokens(msg.sender);
-        realeseTokens(recipient);
-        string memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(msg.sender)), keccak256(abi.encodePacked(recipient)),  keccak256(abi.encodePacked(amount))));
-        require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
-
-        bool result = super.transfer(recipient, amount);
-        return result;
-    }
-
-
-    function decreaseAllowance(address spender, uint256 subtractedValue, uint8 v, bytes32 r, bytes32 s, bytes32 nonce) external override nonReentrant() returns (bool) {
-        require(usedNonces[nonce] == false);
-        usedNonces[nonce] = true;
-        string memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(spender)), keccak256(abi.encodePacked(subtractedValue))));
-        
-    }
-
-    function decreaseAllowance(address spender, uint256 subtractedValue) external override nonReentrant() returns (bool) {
-        require(block.timestamp >= startTime + signatureCliff);
-        bool result = super.decreaseAllowance(spender, subtractedValue);
-        return result;
-    }
-
-   function increaseAllowance(address spender, uint256 addedValue, uint8 v, bytes32 r, bytes32 s, bytes32 nonce) external override nonReentrant() returns (bool) {
-        require(usedNonces[nonce] == false);
-        usedNonces[nonce] = true;
-        string memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(spender)), keccak256(abi.encodePacked(addedValue))));
-        
-    }
-
-    function increaseAllowance(address spender, uint256 addedValue) external override nonReentrant() returns (bool) {
-        require(block.timestamp >= startTime + signatureCliff);
-        bool result = super.decreaseAllowance(spender, addedValue);
-        return result;
-    }
-
 
     function isNonceUsed(bytes32 nonce) public view returns (bool) {
         return usedNonces[nonce];
     }
-    
 
+    function transfer(address recipient, uint256 amount,  uint8 v, bytes32 r, bytes32 s, bytes32 nonce) external override returns (bool) {
+        require(usedNonces[nonce] == false);
+        usedNonces[nonce] = true;
+        string memory prefix = "\x19Ethereum Signed Message:\n32";
+        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(msg.sender)), keccak256(abi.encodePacked(recipient)),  keccak256(abi.encodePacked(amount))));
+        require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
+
+        uint256 memory claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
+        claimed[msg.sender] = claimed[msg.sender] - claimedNumberTransfer;
+        claimed[recipient] = claimedNumberTransfer;
+        bool result = super.transfer(recipient, amount);
+        return result;
+    }
+
+    function transfer(address recipient, uint256 amount) external override returns (bool) {
+        require(block.timestamp >= started + signatureTimeStamp);
+
+        uint256 memory claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
+        claimed[msg.sender] = claimed[msg.sender] - claimedNumberTransfer;
+        claimed[recipient] = claimedNumberTransfer;
+        bool result = super.transfer(recipient, amount);
+        return result;
+    }
+
+    function transferFrom(address sender, address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s, bytes32 nonce) external override nonReentrant() returns (bool) {
+        require(usedNonces[nonce] == false);
+        usedNonces[nonce] = true;
+        string memory prefix = "\x19Ethereum Signed Message:\n32";
+        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(sender)), keccak256(abi.encodePacked(recipient)),  keccak256(abi.encodePacked(amount))));
+        require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
+
+        uint256 memory claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
+        claimed[sender] = claimed[msg.sender] - claimedNumberTransfer;
+        claimed[recipient] = claimedNumberTransfer;
+        bool result = super.transferFrom(sender, recipient, amount);
+        return result;
+    }
+
+
+    function transferFrom(address sender, address recipient, uint256 amount) external override nonReentrant() returns (bool) {
+        require(block.timestamp >= started + signatureTimeStamp);
+        
+        uint256 memory claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
+        claimed[sender] = claimed[msg.sender] - claimedNumberTransfer;
+        claimed[recipient] = claimedNumberTransfer;
+        bool result = super.transferFrom(sender, recipient, amount);
+        return result;
+    }
 }
