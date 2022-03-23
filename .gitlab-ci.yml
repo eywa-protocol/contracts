@@ -21,7 +21,7 @@ build:
     - make wrappers
     - cp -r /var/lib/gitlab-runner/contracts/$FOLDER/wrappers ./wrappers
     - docker build -t registry.digiu.ai/${CI_PROJECT_NAME}/${FOLDER}/wrappers:latest -f .ci/Dockerfile-wrappers .
-    - docker push registry.digiu.ai/${CI_PROJECT_NAME}/${FOLDER}/wrappers:latest
+    - docker push registry.digiu.ai/$( echo ${CI_PROJECT_NAME} | tr '[:upper:]' '[:lower:]' )/${FOLDER}/wrappers:latest
   only:
     - tags
   tags:
