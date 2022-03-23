@@ -16,10 +16,12 @@ build:
     - /bin/bash .ci/get-tag.sh
     - source ./tmp_src
     - export WRAPPERS="/var/lib/gitlab-runner/contracts/$FOLDER/wrappers"
-    - mkdir -p /var/lib/gitlab-runner//contracts/$FOLDER/
+    - mkdir -p /var/lib/gitlab-runner/contracts/$FOLDER/
     - cp -n hardhat/helper-hardhat-config.json.example /var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json
     - make wrappers
     - cp -r /var/lib/gitlab-runner/contracts/$FOLDER/wrappers ./wrappers
+    - docker build -t registry.digiu.ai/${CI_PROJECT_NAME}/${FOLDER}/wrappers:latest -f .ci/Dockerfile-wrappers .
+    - docker push registry.digiu.ai/${CI_PROJECT_NAME}/${FOLDER}/wrappers:latest
   only:
     - tags
   tags:
