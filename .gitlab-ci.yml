@@ -20,8 +20,8 @@ build:
     - cp -n hardhat/helper-hardhat-config.json.example /var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json
     - make wrappers
     - cp -r /var/lib/gitlab-runner/contracts/$FOLDER/wrappers ./wrappers
-    - docker build -t registry.digiu.ai/${CI_PROJECT_NAME}/${FOLDER}/wrappers:latest -f .ci/Dockerfile-wrappers .
-    - docker push registry.digiu.ai/$( echo ${CI_PROJECT_NAME} | tr '[:upper:]' '[:lower:]' )/${FOLDER}/wrappers:latest
+    - docker build -t registry.digiu.ai/${CI_PROJECT_NAME}/$( echo ${FOLDER} | tr '[:upper:]' '[:lower:]' )/wrappers:latest -f .ci/Dockerfile-wrappers .
+    - docker push registry.digiu.ai/${CI_PROJECT_NAME}/$( echo ${FOLDER} | tr '[:upper:]' '[:lower:]' )/wrappers:latest
   only:
     - tags
   tags:
