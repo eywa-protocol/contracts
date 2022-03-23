@@ -3,7 +3,6 @@ pragma solidity 0.8.10;
 
 import "./LotteryErrors.sol";
 
-
 contract Lottery {
     /// @dev Ticket is 1 word packet tuple of address and weight 
     struct Ticket {
@@ -14,22 +13,24 @@ contract Lottery {
     /// @dev tidly packet array of candidates
     Ticket[] public candidates;
 
+    // calculated total weight 
+    uint96 public totalWeight;
+
     // Map of already known candidates
-    mapping (address => bool) name;
+    mapping (uint160 => bool) knownCandidates;
 
     constructor() {}
 
-    function totalWeight() public view returns (uint96) {
-        if (candidates.length == 0 ) {
-            return 0;
-        } else {
-            return candidates[candidates.length].weight;
+    function drawTickets(Ticket[] calldata pendingCandidates) public {
+        for (uint256 index = 0; index < pendingCandidates.length; index++) {
+            drawTicket(pendingCandidates[index].weight, pendingCandidates[index].id);
         }
     }
 
     function drawTicket(uint96 weight, uint160 id) public {
         require(weight > 0, LotteryErrors.ZERO_WEIGHT);
-        candidates.push(Ticket(totalWeight() + weight, id));
+        candidates.push(Ticket(totalWeight + weight, id));
+        totalWeight += weight;
     }
 
     function _binarySearch(uint96 weight) internal returns (uint256 mid) {
@@ -51,16 +52,31 @@ contract Lottery {
 			else if (candidates[mid].weight < weight) low = mid + 1;
 
 			// Search in the left half by updating the hi index
-			else top = mid - 1;
+			else if (mid > 0 ) top = mid - 1;
+
+            else top = low;
 
 			// Compute the new mid
-			mid = low + (top - low) / 2;
+			mid = top == low ? low : low + (top - low) / 2;
         }
     } 
 
     function _pickNext(uint256 rand) internal returns (Ticket memory candidate) {
-        uint96 weight = uint96(rand % totalWeight());
-        return candidates[_binarySearch(weight)];
+        uint96 weight = uint96(rand % totalWeight);
+        uint256 index = _binarySearch(weight);
+        candidate = candidates[index];
+
+        uint96 leftWeight = index > 0 ? candidate.weight - candidates[index - 1].weight : candidate.weight;
+
+        for(uint256 i = index; i < candidates.length - 1; i++) {
+            candidates[i] = candidates[i + 1];
+            candidates[i].weight -= leftWeight;
+        }
+
+        totalWeight -= leftWeight;
+        candidates.pop();
+        
+        return candidate;
     }
 
     function getSnapshot(uint256 max, uint256 rand) public returns (address[] memory) {
@@ -74,5 +90,9 @@ contract Lottery {
         }
 
         return winners;
+    }
+
+    function allCandidates() public returns (Ticket[] memory) {
+        return candidates;
     }
 }
