@@ -172,6 +172,57 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
     }
 
+    function solAmount64(uint amount)
+        public pure
+        returns (uint64 solAmount)
+    {
+        solAmount = uint64(amount);
+        // swap bytes
+        solAmount = ((solAmount & 0xFF00FF00FF00FF00) >> 8) | ((solAmount & 0x00FF00FF00FF00FF) << 8);
+        // swap 2-byte long pairs
+        solAmount = ((solAmount & 0xFFFF0000FFFF0000) >> 16) | ((solAmount & 0x0000FFFF0000FFFF) << 16);
+        // swap 4-byte long pairs
+        solAmount = (solAmount >> 32) | (solAmount << 32);
+    }
+
+    function transmitSynthesizeToSolana(
+        address _token,
+        // uint256 _amount,
+        uint64 solAmount,
+        bytes32[] calldata _pubkeys,
+        bytes1 _txStateBump,
+        SolanaAccountMeta[] memory accounts,
+        address sender,
+        uint256 nonce,
+        bytes32 txID
+        // uint256 _chainId
+    ) private {
+        // TODO add payment by token
+        IBridge(bridge).transmitRequestV2ToSolana(
+            serializeSolanaStandaloneInstruction(
+                SolanaStandaloneInstruction(
+                    /* programId: */
+                    _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
+                    /* accounts: */
+                    accounts,
+                    /* data: */
+                    abi.encodePacked(
+                        sighashMintSyntheticToken,
+                        _txStateBump,
+                        uint160(_token),
+                        solAmount
+                    )
+                )
+            ),
+            _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
+            _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
+            SOLANA_CHAIN_ID,
+            txID,
+            sender,
+            nonce
+        );
+    }
+
     /**
      * @dev Synthesize token request with bytes32 support for Solana.
      * @param _token token address to synthesize
@@ -196,13 +247,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
 
         // TODO: fix amount digits for solana (digits 18 -> 6)
         require(_amount < type(uint64).max, "Portal: amount too large");
-        uint64 solAmount = uint64(_amount);
-        // swap bytes
-        solAmount = ((solAmount & 0xFF00FF00FF00FF00) >> 8) | ((solAmount & 0x00FF00FF00FF00FF) << 8);
-        // swap 2-byte long pairs
-        solAmount = ((solAmount & 0xFFFF0000FFFF0000) >> 16) | ((solAmount & 0x0000FFFF0000FFFF) << 16);
-        // swap 4-byte long pairs
-        solAmount = (solAmount >> 32) | (solAmount << 32);
+        uint64 solAmount = solAmount64(_amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
@@ -248,25 +293,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             isWritable: false
         });
 
-        // TODO add payment by token
-        IBridge(bridge).transmitRequestV2ToSolana(
-            serializeSolanaStandaloneInstruction(
-                SolanaStandaloneInstruction(
-                    /* programId: */
-                    _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
-                    /* accounts: */
-                    accounts,
-                    /* data: */
-                    abi.encodePacked(sighashMintSyntheticToken, txID, _txStateBump, solAmount)
-                )
-            ),
-            _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
-            _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
-            SOLANA_CHAIN_ID,
-            txID,
-            _msgSender(),
-            nonce
-        );
+        transmitSynthesizeToSolana(_token, solAmount, _pubkeys, _txStateBump, accounts, _msgSender(), nonce, txID);
 
         TxState storage txState = requests[txID];
         txState.recipient = castToBytes32(_msgSender());

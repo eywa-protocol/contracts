@@ -1,6 +1,6 @@
 {
   "name": "@eywa-fi/eth-solana-wrapper",
-  "version": "0.0.8",
+  "version": "0.0.10",
   "description": "Eywa EVM contracts wrapper for Solana",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

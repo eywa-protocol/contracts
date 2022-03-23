@@ -174,7 +174,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
         return true;
     }
 
-    /**
+    /* *
      * @dev Receive crosschain request v2.
      * @param _blockHeader block header serialization
      * @param _txMerkleProve OracleRequest transaction payload and its Merkle audit path
@@ -183,12 +183,19 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
      * @param _votersMask bitmask of epoch participants, who voted, amoung all participants
      */
     function receiveRequestV2(
+        bytes32 reqId,
+        bytes calldata sel,
+        address receiveSide,
+        bytes32 bridgeFrom,
+        /*
         bytes calldata _blockHeader,
         bytes calldata _txMerkleProve,
+        */
         bytes calldata _votersPubKey,
         bytes calldata _votersSignature,
         uint256 _votersMask
     ) external {
+        /*
         require(epochKey.x[0] != 0 || epochKey.x[1] != 0, "Bridge: epoch not set");
         require(popcnt(_votersMask) >= (uint256(epochParticipantsNum) * 2) / 3, "Bridge: not enough participants"); // TODO configure
         require(epochParticipantsNum == 255 || _votersMask < (1 << epochParticipantsNum), "Bridge: bitmask too big");
@@ -207,6 +214,7 @@ contract Bridge is BridgeCore, RelayRecipient, BlsSignatureVerification, Typecas
         // Make the call
         (address bridgeFrom, bytes32 reqId, bytes memory sel, address receiveSide) = Block.oracleRequestTx(payload);
         require(reqIdFilter.testAndSet(reqId) == false, "Already seen");
+        */
         bytes memory data = receiveSide.functionCall(sel, "Bridge: receiveRequestV2: failed");
         require(
             data.length == 0 || abi.decode(data, (bool)),

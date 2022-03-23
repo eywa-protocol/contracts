@@ -1,4 +1,4 @@
-import { ethers, artifacts } from 'hardhat';
+import { ethers } from 'hardhat';
 import { expect } from 'chai';
 import { PublicKey as SolanaPublicKey } from '@solana/web3.js';
 import {
@@ -7,17 +7,12 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { BigNumber } from '@ethersproject/bignumber';
-// import { EthSolWrapper } from '../../scripts/bridge-ts/eth-sol-wrapper';
-import { EthSolWrapper, hex2buf, addr2buf, bufPadLeftTo } from 'eywa-eth-sol-wrapper';
+import { EthSolWrapper, hex2buf, addr2buf } from '@eywa-fi/eth-solana-wrapper';
 import { deploy } from './utils/deploy';
 
-import type { PopulatedTransaction } from '@ethersproject/contracts';
-import type {
-  Bridge,
-  OracleRequestSolanaEvent,
-} from '../../scripts/bridge-ts/artifacts-types/Bridge';
-import type { Portal } from '../../scripts/bridge-ts/artifacts-types/Portal';
-import type { Synthesis } from '../../scripts/bridge-ts/artifacts-types/Synthesis';
+import type { Bridge, Portal, Synthesis } from '@eywa-fi/eth-solana-wrapper';
+
+import type { OracleRequestSolanaEvent } from '../../scripts/bridge-ts/artifacts-types/Bridge';
 
 
 // uint256 public
@@ -160,10 +155,11 @@ describe("Solana calldata", function () {
       pidRent, pkReadonly,
       dumbOppositeBridgeData.substr(2), pkSigner,
       dumbReceiveSide.substr(2), // pid
-      '31000000', // data.length
+      '25000000', // '31000000', // data.length
       sighashMintSyntheticToken,
-      'e49bdfeca8623673f46d3742d075918c2c0ef558beab0918c344db0aac0a900b', // txId
+      // 'e49bdfeca8623673f46d3742d075918c2c0ef558beab0918c344db0aac0a900b', // txId
       bumpTxState,
+      dumb.substr(2),
       'e067350000000000', // amount
     ].join(''));
   });
@@ -250,10 +246,11 @@ describe("Solana calldata", function () {
       pidRent, pkReadonly,
       pubOppositeBridgeData.toBuffer().toString('hex'), pkSigner,
       dumbReceiveSide.substr(2), // pid
-      '31000000', // data.length
+      '25000000', // '31000000', // data.length
       sighashMintSyntheticToken,
-      reqId.toString('hex'), // txId
+      // reqId.toString('hex'), // txId      
       hexBumpTxState,
+      dumb.substr(2),
       'e067350000000000', // amount
     ].join(''));
   });
@@ -455,7 +452,7 @@ describe("Solana calldata", function () {
       return addrSynt;
     }
 
-    const tx = await synthesis.createRepresentation(realToken, 'TestToken', 'TT');
+    const tx = await synthesis.createRepresentation(realToken, 18, 'TestToken', 'TT', SOLANA_CHAIN_ID, 'GACHE');
     const rec = await tx.wait();
 
     const evCreatedRepresentation = rec.events?.find(ev => ev.event == 'CreatedRepresentation');
@@ -523,7 +520,7 @@ describe("Solana calldata", function () {
     ].join(''));
   });
 
-  it("Should emit OracleRequestSolana event from wrapped Synthesis.burnSyntheticToken_solana", async function () {
+  it("Should emit OracleRequestSolana event from wrapped Synthesis.burnSyntheticTokenToSolana", async function () {
     let rejectEventPromise: (reason?: any) => void = () => undefined;
 
     const pEvent: Promise<OracleRequestSolanaEvent> = new Promise((resolve, reject) => {

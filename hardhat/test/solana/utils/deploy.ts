@@ -4,11 +4,6 @@ import type { Bridge } from '../../../scripts/bridge-ts/artifacts-types/Bridge';
 import type { Portal } from '../../../scripts/bridge-ts/artifacts-types/Portal';
 import type { Synthesis } from '../../../scripts/bridge-ts/artifacts-types/Synthesis';
   
-// {
-//   bridge: '',
-//   portal: '',
-//   synthesis: '',
-// };
 
 export const deploy = async () => {
     const _Forwarder = await ethers.getContractFactory("Forwarder");
@@ -32,10 +27,33 @@ export const deploy = async () => {
     await synthesis.deployed();
     console.log("Synthesis address:", synthesis.address);
   
+    const [deployer] = await ethers.getSigners();
+    console.log("Owner:", deployer.address);
+
+    // this.listFutureTokens =  networkConfig[network.name].token;
+
+    /*
+    const Token = await ethers.getContractFactory("TestToken");
+    let i = 0;
+    for(let tkn of this.listFutureTokens){
+        let token  = await Token.deploy(tkn.name, tkn.symbol);
+        await token.deployed();
+        console.log(`Token ${tkn.name} address: ${token.address} network ${network.name}`);
+        networkConfig[network.name].token[i].address = token.address;
+        i++;
+    }
+    */
+    const _Token = await ethers.getContractFactory("TestToken");
+    const token = await _Token.deploy('TestToken', 'TT');
+    await token.deployed();
+
     return {
       bridge: bridge.address,
       portal: portal.address,
       synthesis: synthesis.address,
+      tokens: [
+        token.address,
+      ]
     };
   };
   

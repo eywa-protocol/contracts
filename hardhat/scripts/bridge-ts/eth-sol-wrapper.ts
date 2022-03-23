@@ -1,4 +1,5 @@
 import sha3 from "js-sha3";
+import { ethers } from "ethers";
 import * as web3 from '@solana/web3.js';
 import {
   Token,
@@ -15,8 +16,18 @@ import type { Bridge } from './artifacts-types/Bridge';
 export const SOLANA_CHAIN_ID = 501501501;
 const ALLOW_OWNER_OFF_CURVE = true;
 
+export type { Bridge } from './artifacts-types/Bridge';
 export type { Portal } from './artifacts-types/Portal';
 export type { Synthesis } from './artifacts-types/Synthesis';
+export type { IERC20 } from './artifacts-types/IERC20';
+export type { TestToken } from './artifacts-types/TestToken';
+
+export { Bridge__factory } from './artifacts-types/factories/Bridge__factory';
+export { Portal__factory } from './artifacts-types/factories/Portal__factory';
+export { Synthesis__factory } from './artifacts-types/factories/Synthesis__factory';
+export { IERC20__factory } from './artifacts-types/factories/IERC20__factory';
+export { TestToken__factory } from './artifacts-types/factories/TestToken__factory';
+
 
 const seedMint = Buffer.from("mint-synt", "utf-8");
 const seedData = Buffer.from("mint-data", "utf-8");
@@ -51,6 +62,12 @@ export const addr2buf = (addr: TAddress): TPubkey =>
 
 
 export class EthSolWrapper {
+  /*
+  static async attachBridge(address: string): Promise<Bridge> {
+    const bridge = await ethers.getContractFactory("Bridge");
+    return bridge
+  }
+  */
   
   constructor(
     private portal: Portal,

@@ -4,7 +4,6 @@
   "description": "Eywa smart-contracts",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "hardhat compile",
     "coverage": "env COVERAGE=true hardhat coverage",
     "gas-report": "env ENABLE_GAS_REPORT=true npm run test",
@@ -16,14 +15,14 @@
     "compile:ts": "hardhat --config ts-hardhat.config.ts compile --force",
     "test:ts": "npm run compile:ts && ts-mocha --exit -p ./tsconfig.json ./test/{,**}/*.test.ts",
     "test:typecast": "hardhat --config ts-hardhat.config.ts test ./test/typecast.test.ts",
-    "test:solana:calldata": "hardhat --config ts-hardhat.config.ts test ./test/solana/solana-calldata.test.ts",
+    "test:solana:calldata": "hardhat --config ts-hardhat.config.ts test --no-compile ./test/solana/solana-calldata.test.ts",
     "test:solana:e2e": "hardhat --config ts-hardhat.config.ts --network local test --no-compile ./test/solana/e2e-runner.ts",
-    "hh:help": "hardhat --config ts-hardhat.config.ts test --help",
     "prettier": "prettier --write 'contracts/**/*.sol'"
   },
   "author": "DigiU team",
   "license": "MIT",
   "devDependencies": {
+    "@eywa-fi/eth-solana-wrapper": "0.0.10",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-ganache": "^2.0.0",
@@ -50,7 +49,6 @@
     "dotenv": "^10.0.0",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.4",
-    "eywa-eth-sol-wrapper": "./scripts/bridge-ts",
     "hardhat": "^2.7.1",
     "hardhat-gas-reporter": "^1.0.4",
     "minimist": "^1.2.5",
