@@ -20,59 +20,59 @@ async function main() {
     console.log("Pool size:", poolSize);
     console.log("Deployment in progress...");
 
-    const ERC20 = await ethers.getContractFactory('SyntERC20')
+    const ERC20 = await ethers.getContractFactory('SyntERC20');
     const CurveProxy = await ethers.getContractFactory('CurveProxy');
-    const LpToken = await ethers.getContractFactory('CurveTokenV5')
-    const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
+    const LpToken = await ethers.getContractFactory('CurveTokenV5');
+    const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool');
 
-    const totalSupply = ethers.utils.parseEther("100000000000.0")
+    const totalSupply = ethers.utils.parseEther("100000000000.0");
 
     if (network.name == "network2" || network.name == 'mumbai') {
 
         // let localToken = deployInfo[network.name].localToken
-        let localCoins = []
-        let localLp
-        let localPool
+        let localCoins = [];
+        let localLp;
+        let localPool;
 
         for (let i = 0; i < poolSize; i++) {
-            localCoins[i] = deployInfo[network.name].localToken[i].address
+            localCoins[i] = deployInfo[network.name].localToken[i].address;
         }
         // empty the array
         // deployInfo[network.name].localToken = []
 
         // // creating local tokens 
         // for (let i = 0; i < poolSize; i++) {
-        //     localToken[i] = await ERC20.deploy(network.name + "Token" + i, "TK" + i)
-        //     await localToken[i].deployed()
-        //     localCoins[i] = localToken[i].address
+        //     localToken[i] = await ERC20.deploy(network.name + "Token" + i, "TK" + i);
+        //     await localToken[i].deployed();
+        //     localCoins[i] = localToken[i].address;
         //     deployInfo[network.name].localToken.push({ address: localToken[i].address, name: await localToken[i].name(), symbol: await localToken[i].symbol() });
         // }
 
         // deploy the LP token
-        localLp = await LpToken.deploy(network.name + "LpLocal", "LP")
-        await localLp.deployed()
+        localLp = await LpToken.deploy(network.name + "LpLocal", "LP");
+        await localLp.deployed();
         deployInfo[network.name].localPool.lp = { address: localLp.address, name: await localLp.name(), symbol: await localLp.symbol() }
 
         // deploy a local pool
         switch (poolSize) {
             case 2:
-                localPool = await StableSwap2Pool.deploy(deployer.address, localCoins, localLp.address, A, fee, admin_fee)
+                localPool = await StableSwap2Pool.deploy(deployer.address, localCoins, localLp.address, A, fee, admin_fee);
                 break;
             case 3:
-                localPool = await StableSwap3Pool.deploy(deployer.address, localCoins, localLp.address, A, fee, admin_fee)
+                localPool = await StableSwap3Pool.deploy(deployer.address, localCoins, localLp.address, A, fee, admin_fee);
                 break;
             case 4:
-                localPool = await StableSwap4Pool.deploy(deployer.address, localCoins, localLp.address, A, fee, admin_fee)
+                localPool = await StableSwap4Pool.deploy(deployer.address, localCoins, localLp.address, A, fee, admin_fee);
                 break;
             case 5:
-                localPool = await StableSwap5Pool.deploy(deployer.address, localCoins, localLp.address, A, fee, admin_fee)
+                localPool = await StableSwap5Pool.deploy(deployer.address, localCoins, localLp.address, A, fee, admin_fee);
                 break;
             case 6:
-                localPool = await StableSwap6Pool.deploy(deployer.address, localCoins, localLp.address, A, fee, admin_fee)
+                localPool = await StableSwap6Pool.deploy(deployer.address, localCoins, localLp.address, A, fee, admin_fee);
                 break;
         }
-        await localPool.deployed()
-        await localLp.set_minter(localPool.address)
+        await localPool.deployed();
+        await localLp.set_minter(localPool.address);
 
         // setting the pool in proxy contract 
         await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(localPool.address, localLp.address, localCoins);
@@ -82,21 +82,21 @@ async function main() {
 
         // add liquidity
         for (let i = 0; i < deployInfo[network.name].localPool.coins.length; i++) {
-            await ERC20.attach(deployInfo[network.name].localToken[i].address).mint(deployer.address, totalSupply)
-            await (await ERC20.attach(deployInfo[network.name].localToken[i].address).approve(deployInfo[network.name].localPool.address, totalSupply)).wait()
+            await ERC20.attach(deployInfo[network.name].localToken[i].address).mint(deployer.address, totalSupply);
+            await (await ERC20.attach(deployInfo[network.name].localToken[i].address).approve(deployInfo[network.name].localPool.address, totalSupply)).wait();
+        }
+        
+        const amounts = new Array(3).fill(ethers.utils.parseEther("100000000.0"));
+        let min_mint_amount = 0;
+        
+        this.tx = await localPool.add_liquidity(
+          amounts,
+          min_mint_amount,
+          {
+            gasLimit: '5000000'
           }
-        
-          const amounts = new Array(3).fill(ethers.utils.parseEther("100000000.0"))
-          let min_mint_amount = 0
-        
-          this.tx = await localPool.add_liquidity(
-            amounts,
-            min_mint_amount,
-            {
-              gasLimit: '5000000'
-            }
-          )
-          console.log("add_liquidity to local pool:", tx.hash)
+        );
+        console.log("add_liquidity to local pool:", tx.hash);
         
 
         // write out the deploy configuration 

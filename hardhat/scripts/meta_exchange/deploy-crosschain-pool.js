@@ -60,18 +60,18 @@ async function main() {
   
   if (bulevo) {    
     //empty the array
-    deployInfo[network.name].localToken = []
+    deployInfo[network.name].localToken = [];
 
     for (let i = 0; i < poolSize; i++) {
       localToken[i] = await ERC20.deploy(network.name + "TokenStable" + i, "TKS" + i)
-      await localToken[i].deployed()
+      await localToken[i].deployed();
       deployInfo[network.name].localToken.push({ address: localToken[i].address, name: await localToken[i].name(), symbol: await localToken[i].symbol() });
       if (network.name == "network1" || network.name == "network3")
       //TODO (realToken, decimals, chainId, netwiker, synthesisAddress)
-        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], "18",  deployInfo[network.name].chainId, deployInfo[network.name].netwiker, deployInfo["network2"].synthesis))
+        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], "18",  deployInfo[network.name].chainId, deployInfo[network.name].netwiker, deployInfo["network2"].synthesis));
       if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
       //TODO
-        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], "18",  deployInfo[network.name].chainId, deployInfo[network.name].netwiker, deployInfo["mumbai"].synthesis))
+        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], "18",  deployInfo[network.name].chainId, deployInfo[network.name].netwiker, deployInfo["mumbai"].synthesis));
     }
     if (network.name == "network1" || network.name == "network3")
       deployInfo["network2"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });
@@ -85,37 +85,37 @@ async function main() {
     // deploy LP token
     for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
 
-      let net = deployInfo[network.name].crosschainPool[i].network
+      let net = deployInfo[network.name].crosschainPool[i].network;
 
-      crosschainPoolLp = await LpToken.deploy(net + "LpPoolCrosschain", "LPC")
-      await crosschainPoolLp.deployed()
+      crosschainPoolLp = await LpToken.deploy(net + "LpPoolCrosschain", "LPC");
+      await crosschainPoolLp.deployed();
       deployInfo[network.name].crosschainPool[i].lp.push({ address: crosschainPoolLp.address, name: await crosschainPoolLp.name(), symbol: await crosschainPoolLp.symbol() });
 
       // deploy crosschain pool
       switch (poolSize) {
         case 2:
-          crosschainPool = await StableSwap2Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee)
+          crosschainPool = await StableSwap2Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee);
           break;
         case 3:
-          crosschainPool = await StableSwap3Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee)
+          crosschainPool = await StableSwap3Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee);
           break;
         case 4:
-          crosschainPool = await StableSwap4Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee)
+          crosschainPool = await StableSwap4Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee);
           break;
         case 5:
-          crosschainPool = await StableSwap5Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee)
+          crosschainPool = await StableSwap5Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee);
           break;
         case 6:
-          crosschainPool = await StableSwap6Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee)
+          crosschainPool = await StableSwap6Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee);
           break;
       }
-      await crosschainPool.deployed()
-      await crosschainPoolLp.set_minter(crosschainPool.address)
+      await crosschainPool.deployed();
+      await crosschainPoolLp.set_minter(crosschainPool.address);
 
       // setting the crosschain pool in proxy contract
       await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(crosschainPool.address, crosschainPoolLp.address, deployInfo[network.name].crosschainPool[i].coins);
 
-      deployInfo[network.name].crosschainPool[i].address = crosschainPool.address
+      deployInfo[network.name].crosschainPool[i].address = crosschainPool.address;
     }
   }
 

@@ -12,16 +12,16 @@ async function main() {
   const balance = await owner.getBalance();
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
-  const ERC20 = await ethers.getContractFactory('ERC20Mock')
-  const Portal = await ethers.getContractFactory('Portal')
-  const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
+  const ERC20 = await ethers.getContractFactory('ERC20Mock');
+  const Portal = await ethers.getContractFactory('Portal');
+  const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool');
 
-  const totalSupply = ethers.utils.parseEther("100000000000.0")
+  const totalSupply = ethers.utils.parseEther("100000000000.0");
 
 
   // add liquidity to CROSSCHAIN pool
   let synthParams, addLiquidityParams;
-  let coinsToSynth = []
+  let coinsToSynth = [];
   selector = web3.eth.abi.encodeFunctionSignature(
     'transit_synth_batch_add_liquidity_3pool((address,address,uint256),address[3],uint256[3],bytes32[3])'
   )
@@ -30,15 +30,15 @@ async function main() {
     // initial approval for portal
     if (network.name == "network1" || network.name == "rinkeby") {
       for (let i = 0; i < deployInfo[network.name].localToken.length; i++) {
-        await ERC20.attach(deployInfo[network.name].localToken[i].address).mint(owner.address, totalSupply)
-        await (await ERC20.attach(deployInfo[network.name].localToken[i].address).approve(deployInfo[network.name].portal, totalSupply)).wait()
-        coinsToSynth.push(deployInfo[network.name].localToken[i].address)
+        await ERC20.attach(deployInfo[network.name].localToken[i].address).mint(owner.address, totalSupply);
+        await (await ERC20.attach(deployInfo[network.name].localToken[i].address).approve(deployInfo[network.name].portal, totalSupply)).wait();
+        coinsToSynth.push(deployInfo[network.name].localToken[i].address);
       }
     }
 
     //add liquidity amount params
-    const amountsEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"))
-    const expected_min_mint_amount = ethers.utils.parseEther("100000000.0")
+    const amountsEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"));
+    const expected_min_mint_amount = ethers.utils.parseEther("100000000.0");
 
     //synth params
     switch (network.name) {
@@ -87,9 +87,9 @@ async function main() {
       {
         gasLimit: '5000000'
       }
-    )
-    await tx.wait()
-    console.log("synthesize_batch_transit", tx.hash)
+    );
+    await tx.wait();
+    console.log("synthesize_batch_transit", tx.hash);
     //=================================================================================
   }
 
@@ -97,10 +97,10 @@ async function main() {
 
   // test proxy
   if (network.name == "network2") {
-    let lp = ERC20.attach(deployInfo["network2"].crosschainPool[0].lp[0].address)
-    let pool = StableSwap3Pool.attach(deployInfo["network2"].crosschainPool[0].address)
-    console.log("pool coin balance:", await pool.balances(0))
-    console.log("user balance:", await lp.balanceOf(owner.address))
+    let lp = ERC20.attach(deployInfo["network2"].crosschainPool[0].lp[0].address);
+    let pool = StableSwap3Pool.attach(deployInfo["network2"].crosschainPool[0].address);
+    console.log("pool coin balance:", await pool.balances(0));
+    console.log("user balance:", await lp.balanceOf(owner.address));
   }
 
 }
