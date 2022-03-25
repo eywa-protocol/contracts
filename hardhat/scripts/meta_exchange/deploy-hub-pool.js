@@ -67,7 +67,7 @@ async function main() {
 
     // setting the hub pool in proxy contract
     let curveProxyInstance = await CurveProxy.attach(deployInfo[network.name].curveProxy);
-    let tx_ = curveProxyInstance.setPool(hubPool.address, hubPoolLp.address, hubPoolCoins);
+    let tx_ = await curveProxyInstance.setPool(hubPool.address, hubPoolLp.address, hubPoolCoins);
     await tx_.wait();
 
     deployInfo[network.name].hubPool.address = hubPool.address;
