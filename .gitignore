@@ -6,7 +6,7 @@ truffle/build/contracts
 #Hardhat files
 **/cache
 **/artifacts
-**/artifacts-types
+# **/artifacts-types
 **/factories
 /hardhat/yarn.lock
 /hardhat/yarn-error.log
