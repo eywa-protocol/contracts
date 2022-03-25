@@ -44,6 +44,7 @@ async function main() {
         // for (let i = 0; i < poolSize; i++) {
         //     localToken[i] = await ERC20.deploy(network.name + "Token" + i, "TK" + i);
         //     await localToken[i].deployed();
+        //     await localToken[i].deployTransaction.wait();
         //     localCoins[i] = localToken[i].address;
         //     deployInfo[network.name].localToken.push({ address: localToken[i].address, name: await localToken[i].name(), symbol: await localToken[i].symbol() });
         // }
@@ -51,6 +52,8 @@ async function main() {
         // deploy the LP token
         localLp = await LpToken.deploy(network.name + "LpLocal", "LP");
         await localLp.deployed();
+        let txLocalLp = await localLp.deployTransaction.wait();
+
         deployInfo[network.name].localPool.lp = { address: localLp.address, name: await localLp.name(), symbol: await localLp.symbol() }
 
         // deploy a local pool
@@ -72,23 +75,30 @@ async function main() {
                 break;
         }
         await localPool.deployed();
-        await localLp.set_minter(localPool.address);
+        let txLp = await localLp.set_minter(localPool.address);
+        await txLp.wait();
 
         // setting the pool in proxy contract 
-        await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(localPool.address, localLp.address, localCoins);
+        let curveProxyInstance = await CurveProxy.attach(deployInfo[network.name].curveProxy);
+        let txSP = await curveProxyInstance.setPool(localPool.address, localLp.address, localCoins);
+        await txSP.wait();
 
         deployInfo[network.name].localPool.address = localPool.address
         deployInfo[network.name].localPool.coins = localCoins
 
         // add liquidity
+        let erc20Instance;
+        let txMint;
         for (let i = 0; i < deployInfo[network.name].localPool.coins.length; i++) {
-            await ERC20.attach(deployInfo[network.name].localToken[i].address).mint(deployer.address, totalSupply);
+            erc20Instance = await ERC20.attach(deployInfo[network.name].localToken[i].address);
+            txMint = await erc20Instance.mint(deployer.address, totalSupply);
+            await txMint.wait();
             await (await ERC20.attach(deployInfo[network.name].localToken[i].address).approve(deployInfo[network.name].localPool.address, totalSupply)).wait();
         }
         
         const amounts = new Array(3).fill(ethers.utils.parseEther("100000000.0"));
         let min_mint_amount = 0;
-        
+
         this.tx = await localPool.add_liquidity(
           amounts,
           min_mint_amount,
@@ -96,7 +106,7 @@ async function main() {
             gasLimit: '5000000'
           }
         );
-        console.log("add_liquidity to local pool:", tx.hash);
+        console.log("add_liquidity to local pool:", this.tx.hash);
         
 
         // write out the deploy configuration 

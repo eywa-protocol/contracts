@@ -41,8 +41,12 @@ async function main() {
   await curveProxy.deployed();
 
   // initial proxy setup
-  await Synthesis.attach(deployInfo[network.name].synthesis).setProxyCurve(curveProxy.address);
-  await Portal.attach(deployInfo[network.name].portal).setProxyCurve(curveProxy.address);
+  let synthesisInstance = await Synthesis.attach(deployInfo[network.name].synthesis);
+  let tx = await synthesisInstance.setProxyCurve(curveProxy.address);
+  await tx.wait();
+  let portalInstance = await Portal.attach(deployInfo[network.name].portal);
+  tx = await portalInstance.setProxyCurve(curveProxy.address);
+  await tx.wait();
 
   deployInfo[network.name].curveProxy = curveProxy.address;
 
@@ -54,7 +58,7 @@ async function main() {
   // creating local stable tokens for specified networks
   if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "mumbai") bulevo = true;
   if (network.name.includes("network")) bulevo = true;
-  
+
   if (bulevo) {    
     //empty the array
     deployInfo[network.name].localToken = [];
@@ -70,15 +74,18 @@ async function main() {
       //TODO
         crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], "18",  deployInfo[network.name].chainId, deployInfo[network.name].netwiker, deployInfo["mumbai"].synthesis));
     }
+
     if (network.name == "network1" || network.name == "network3")
       deployInfo["network2"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });
     if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
       deployInfo["mumbai"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });
-
  }
 
   // creating crosschain pool for specified networks
   if (network.name == "network2" || network.name == "mumbai") {
+
+    console.log('length', deployInfo[network.name].crosschainPool.length);
+
     // deploy LP token
     for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
 
@@ -106,11 +113,16 @@ async function main() {
           crosschainPool = await StableSwap6Pool.deploy(deployer.address, deployInfo[network.name].crosschainPool[i].coins, crosschainPoolLp.address, A, fee, admin_fee);
           break;
       }
+
       await crosschainPool.deployed();
-      await crosschainPoolLp.set_minter(crosschainPool.address);
+      let txCP = await crosschainPool.deployTransaction.wait();
+      let txSM = await crosschainPoolLp.set_minter(crosschainPool.address);
+      await txSM.wait();
 
       // setting the crosschain pool in proxy contract
-      await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(crosschainPool.address, crosschainPoolLp.address, deployInfo[network.name].crosschainPool[i].coins);
+      let curveProxyInstance = await CurveProxy.attach(deployInfo[network.name].curveProxy);
+      let tx_ = await curveProxyInstance.setPool(crosschainPool.address, crosschainPoolLp.address, deployInfo[network.name].crosschainPool[i].coins);
+      await tx_.wait();
 
       deployInfo[network.name].crosschainPool[i].address = crosschainPool.address;
     }

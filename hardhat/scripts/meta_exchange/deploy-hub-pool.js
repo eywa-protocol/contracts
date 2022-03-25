@@ -45,25 +45,30 @@ async function main() {
     }
 
     // deploy LP token
-    hubPoolLp = await LpToken.deploy("Lphub", "LPC");
+    let hubPoolLp = await LpToken.deploy("Lphub", "LPC");
     await hubPoolLp.deployed();
+    await hubPoolLp.deployTransaction.wait();
 
     // deploy hub pool
 
     if (network.name == "network2") {
-      hubPool = await StableSwap3Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee);
+      let hubPool = await StableSwap3Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee);
       await hubPool.deployed();
+      await hubPool.deployTransaction.wait();
       await hubPoolLp.set_minter(hubPool.address);
     }
 
     if (network.name == "mumbai") {
-      hubPool = await StableSwap3Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee)
+      let hubPool = await StableSwap3Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee);
       await hubPool.deployed();
+      await hubPool.deployTransaction.wait();
       await hubPoolLp.set_minter(hubPool.address);
     }
 
     // setting the hub pool in proxy contract
-    await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(hubPool.address, hubPoolLp.address, hubPoolCoins);
+    let curveProxyInstance = await CurveProxy.attach(deployInfo[network.name].curveProxy);
+    let tx_ = curveProxyInstance.setPool(hubPool.address, hubPoolLp.address, hubPoolCoins);
+    await tx_.wait();
 
     deployInfo[network.name].hubPool.address = hubPool.address;
     deployInfo[network.name].hubPool.lp = hubPoolLp.address;
