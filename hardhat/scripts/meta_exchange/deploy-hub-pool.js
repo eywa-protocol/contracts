@@ -50,16 +50,16 @@ async function main() {
     await hubPoolLp.deployTransaction.wait();
 
     // deploy hub pool
-
+    let hubPool;
     if (network.name == "network2") {
-      let hubPool = await StableSwap3Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee);
+      hubPool = await StableSwap3Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee);
       await hubPool.deployed();
       await hubPool.deployTransaction.wait();
       await hubPoolLp.set_minter(hubPool.address);
     }
 
     if (network.name == "mumbai") {
-      let hubPool = await StableSwap3Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee);
+      hubPool = await StableSwap3Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee);
       await hubPool.deployed();
       await hubPool.deployTransaction.wait();
       await hubPoolLp.set_minter(hubPool.address);
