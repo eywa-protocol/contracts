@@ -109,30 +109,33 @@ contract('CurveProxy', () => {
                 { from: userNet1, gas: 1000_000 }
             )
 
+            const _tokenToSynth = tokenToSynth
+            const _executionPrice = ethers.utils.parseEther("0.1")
+            const _from = userNet1
+            const _to = userNet2
+            const _timeout = "1000000"
 
-
-            const resultHash = web3.utils.soliditySha3(
-                { type: 'bytes32', value: TYPE_HASH },
-                { type: 'address', value: miningAddress },
-                { type: 'address', value: spenderAddress },
-                { type: 'uint256', value: value },
-                { type: 'uint256', value: spenderNonce },
-                { type: 'uint256', value: deadline }
+            const msgHash = web3.utils.soliditySha3(
+                { type: 'address', value: _tokenToSynth },
+                { type: 'uint256', value: _executionPrice },
+                { type: 'address', value: _from },
+                { type: 'address', value: _to },
+                { type: 'uint256', value: _timeout }
             );
 
-            const sig = ethers.utils.splitSignature(await web3.eth.sign(resultHash, owner.address))
-            let signature = ethers.utils.splitSignature(await owner.signMessage(ethers.utils.arrayify(resultHash)));
+            const sig = ethers.utils.splitSignature(await web3.eth.sign(resultHash, _from))
+            const signature = ethers.utils.splitSignature(await userNet1.signMessage(ethers.utils.arrayify(msgHash)));
 
             const v = signature.v
             const r = signature.r
             const s = signature.s
 
             const delegatedCallReceipt = {
-                executionPrice = "0"
-                timeout = "1111111"
-                v = signature.v
-                r = signature.r
-                s = signature.s
+                executionPrice: _executionPrice,
+                timeout: _timeout,
+                v: signature.v,
+                r: signature.r,
+                s: signature.s
             }
 
             await this.routerA.delegatedTokenSynthesize(
