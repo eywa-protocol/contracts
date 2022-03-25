@@ -27,7 +27,7 @@ contract SyntERC20 is Ownable, ERC20Permit {
         _decimals = decimals_;
     }
 
-    function getChainId() external returns (uint256) {
+    function getChainId() external view returns (uint256) {
         return _chainID;
     }
 

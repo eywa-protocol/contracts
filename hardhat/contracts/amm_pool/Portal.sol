@@ -22,6 +22,8 @@ interface IERC20 {
         bytes32 r,
         bytes32 s
     ) external;
+
+    function balanceOf(address user) external returns (uint256);
 }
 
 contract Portal is RelayRecipient, SolanaSerialize, Typecast {
@@ -122,11 +124,18 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         _;
     }
 
+    function registerNewBalance(address token, uint256 expectedAmount) internal{
+       uint256 oldBalance = balanceOf[token];
+       require((IERC20(token).balanceOf(address(this)) - oldBalance) >= expectedAmount, "Portal: insufficient balance");
+       balanceOf[token] += expectedAmount;
+    }
+
     /**
      * @dev Synthesize token request.
      * @param _token token address to synthesize
      * @param _amount amount to synthesize
-     * @param _chain2address amount recipient address
+     * @param _from msg sender address
+     * @param _to amount recipient address
      * @param _receiveSide request recipient address
      * @param _oppositeBridge opposite bridge address
      * @param _chainID opposite chain ID
@@ -134,22 +143,24 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     function synthesize(
         address _token,
         uint256 _amount,
-        address _chain2address,
+        address _from,
+        address _to,
         address _receiveSide,
         address _oppositeBridge,
         uint256 _chainID
     ) external returns (bytes32 txID) {
         // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
 
-        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] += _amount;
+        // TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
+        // balanceOf[_token] += _amount;
+        registerNewBalance(_token, _amount);
 
-        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
+        uint256 nonce = IBridge(bridge).getNonce(_from);
         txID = IBridge(bridge).prepareRqId(
             castToBytes32(_oppositeBridge),
             _chainID,
             castToBytes32(_receiveSide),
-            castToBytes32(_msgSender()),
+            castToBytes32(_from),
             nonce
         );
 
@@ -158,18 +169,18 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             txID,
             _token,
             _amount,
-            _chain2address
+            _to
         );
         // TODO add payment by token
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _from, nonce);
         TxState storage txState = requests[txID];
         txState.recipient = castToBytes32(_msgSender());
-        txState.chain2address = castToBytes32(_chain2address);
+        txState.chain2address = castToBytes32(_to);
         txState.rtoken = castToBytes32(_token);
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
-        emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
+        emit SynthesizeRequest(txID, _msgSender(), _to, _amount, _token);
     }
 
     /**
@@ -189,8 +200,9 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     ) external returns (bytes32 txID) {
         // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
 
-        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] += _amount;
+        // TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
+        // balanceOf[_token] += _amount;
+        registerNewBalance(_token, _amount);
 
         require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainID");
 
@@ -289,7 +301,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
      * @param _permitData permit data
      * @param _token token address to synthesize
      * @param _amount amount to synthesize
-     * @param _chain2address amount recipient address
+     * @param _to amount recipient address
      * @param _receiveSide request recipient address
      * @param _oppositeBridge opposite bridge address
      * @param _chainID opposite chain ID
@@ -298,7 +310,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         PermitData memory _permitData,
         address _token,
         uint256 _amount,
-        address _chain2address,
+        address _to,
         address _receiveSide,
         address _oppositeBridge,
         uint256 _chainID
@@ -315,8 +327,9 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             _permitData.s
         );
 
-        TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        balanceOf[_token] += _amount;
+        // TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
+        // balanceOf[_token] += _amount;
+        registerNewBalance(_token, _amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         txID = IBridge(bridge).prepareRqId(
@@ -332,18 +345,18 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             txID,
             _token,
             _amount,
-            _chain2address
+            _to
         );
         // TODO add payment by token
         IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
         TxState storage txState = requests[txID];
         txState.recipient = castToBytes32(_msgSender());
-        txState.chain2address = castToBytes32(_chain2address);
+        txState.chain2address = castToBytes32(_to);
         txState.rtoken = castToBytes32(_token);
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
-        emit SynthesizeRequest(txID, _msgSender(), _chain2address, _amount, _token);
+        emit SynthesizeRequest(txID, _msgSender(), _to, _amount, _token);
     }
 
     /**
@@ -551,9 +564,9 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
                         _permit_data[i].s
                     );
                 }
-                TransferHelper.safeTransferFrom(_tokens[i], _msgSender(), address(this), _amounts[i]);
-
-                balanceOf[_tokens[i]] += _amounts[i];
+                // TransferHelper.safeTransferFrom(_tokens[i], _msgSender(), address(this), _amounts[i]);
+                // balanceOf[_tokens[i]] += _amounts[i];
+                registerNewBalance(_tokens[i], _amounts[i]);
                 uint256 nonce = IBridge(bridge).getNonce(_msgSender());
 
                 txId[i] = keccak256(

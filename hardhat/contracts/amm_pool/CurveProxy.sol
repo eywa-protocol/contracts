@@ -217,6 +217,10 @@ contract CurveProxy is Initializable, RelayRecipient {
         return _setTrustedForwarder(_forwarder);
     }
 
+    function registerNewBalance(address token, uint256 expectedAmount) internal{
+       require(IERC20Upgradeable(token).balanceOf(address(this)) >= expectedAmount, "CurveProxy: insufficient balance");
+    }
+
     /**
      * @dev Set the corresponding pool data to use proxy with
      * @param _pool pool address
@@ -310,7 +314,8 @@ contract CurveProxy is Initializable, RelayRecipient {
                         _permit[i].s
                     );
                 }
-                IERC20Upgradeable(_token[i]).safeTransferFrom(_msgSender(), address(this), _amount[i]);
+                // IERC20Upgradeable(_token[i]).safeTransferFrom(_msgSender(), address(this), _amount[i]);
+                registerNewBalance(_token[i], _amount[i]);
                 IERC20Upgradeable(_token[i]).approve(_params.add_c, _amount[i]);
             }
         }
@@ -458,7 +463,8 @@ contract CurveProxy is Initializable, RelayRecipient {
                             _permit[i].s
                         );
                     }
-                    IERC20Upgradeable(_token[i]).safeTransferFrom(_msgSender(), address(this), _amount[i]);
+                    // IERC20Upgradeable(_token[i]).safeTransferFrom(_msgSender(), address(this), _amount[i]);
+                    registerNewBalance(_token[i], _amount[i]);
                     IERC20Upgradeable(_token[i]).approve(_params.add, _amount[i]);
                 }
             }
@@ -725,7 +731,8 @@ contract CurveProxy is Initializable, RelayRecipient {
             }
 
             //hub pool remove_liquidity_one_coin stage
-            IERC20Upgradeable(hubLpToken).safeTransferFrom(_msgSender(), address(this), _params.token_amount_h);
+            // IERC20Upgradeable(hubLpToken).safeTransferFrom(_msgSender(), address(this), _params.token_amount_h);
+            registerNewBalance(hubLpToken, _params.token_amount_h);
             // IERC20Upgradeable(hubLpToken).approve(_params.remove_h, 0); //CurveV2 token support
             IERC20Upgradeable(hubLpToken).approve(_params.remove_h, _params.token_amount_h);
 

@@ -27,8 +27,14 @@ async function main() {
     networkConfig[network.name].frontHelper = frontHelper.address;
     console.log(`FrontHelper address: ${frontHelper.address}`);
 
+    //Deploy Router
+    const _Router = await ethers.getContractFactory("Router");
+    const router = await _Router.deploy(portal.address);
+    await router.deployed();
+
     networkConfig[network.name].portal    = portal.address;
     networkConfig[network.name].synthesis = synthesis.address;
+    networkConfig[network.name].router = router.address;
 
     fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
         JSON.stringify(networkConfig, undefined, 2));
