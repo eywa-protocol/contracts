@@ -83,9 +83,6 @@ async function main() {
 
   // creating crosschain pool for specified networks
   if (network.name == "network2" || network.name == "mumbai") {
-
-    console.log('length', deployInfo[network.name].crosschainPool.length);
-
     // deploy LP token
     for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
 

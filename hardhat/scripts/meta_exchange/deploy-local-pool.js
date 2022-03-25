@@ -107,15 +107,12 @@ async function main() {
           }
         );
         console.log("add_liquidity to local pool:", this.tx.hash);
-        
 
         // write out the deploy configuration 
         fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
             JSON.stringify(deployInfo, undefined, 2));
         console.log("Local Pool Deployed!\n");
     }
-
-
 
 }
 

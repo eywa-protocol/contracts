@@ -55,14 +55,16 @@ async function main() {
       hubPool = await StableSwap3Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee);
       await hubPool.deployed();
       await hubPool.deployTransaction.wait();
-      await hubPoolLp.set_minter(hubPool.address);
+      let tx_ = await hubPoolLp.set_minter(hubPool.address);
+      await tx_.wait();
     }
 
     if (network.name == "mumbai") {
       hubPool = await StableSwap3Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee);
       await hubPool.deployed();
       await hubPool.deployTransaction.wait();
-      await hubPoolLp.set_minter(hubPool.address);
+      let tx_ = await hubPoolLp.set_minter(hubPool.address);
+      await tx_.wait();
     }
 
     // setting the hub pool in proxy contract

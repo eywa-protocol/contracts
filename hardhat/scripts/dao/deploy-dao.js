@@ -28,6 +28,7 @@ async function main() {
 
         const eywa = await ERC20CRV.deploy("EYWA-TOKEN", "EYWA", 18);
         await eywa.deployed();
+        await eywa.deployTransaction.wait();
         deployInfo[network.name].dao.eywa = eywa.address;
 
         // deploy voting escrow
@@ -37,12 +38,14 @@ async function main() {
         // @param version Contract version - required for Aragon compatibility
         const votingEscrow = await VotingEscrow.deploy(eywa.address, "Vote-escrowed EYWA", "xEYWA", "0.0.1");
         await votingEscrow.deployed();
+        await votingEscrow.deployTransaction.wait();
         deployInfo[network.name].dao.votingEscrow = votingEscrow.address;
 
         // @param _token `ERC20CRV` contract address
         // @param _voting_escrow `VotingEscrow` contract address
         const gaugeController = await GaugeController.deploy(eywa.address, votingEscrow.address);
         await gaugeController.deployed();
+        await gaugeController.deployTransaction.wait();
         deployInfo[network.name].dao.gaugeController = gaugeController.address;
         let tx = await gaugeController.add_type("Liquidity", "1000000000000000000" /* 10**18 */, { gasLimit: 1000000 }); //new web3.utils.BN(10).pow(new web3.utils.BN(18)
         await tx.wait();
@@ -52,8 +55,10 @@ async function main() {
         // @param controller: address
         const minter = await Minter.deploy(eywa.address, gaugeController.address);
         await minter.deployed();
+        await minter.deployTransaction.wait();
         deployInfo[network.name].dao.minter = minter.address;
-        await eywa.set_minter(minter.address);
+        let tx_ = await eywa.set_minter(minter.address);
+        await tx_.wait();
 
         // deploy gauge
         for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
@@ -66,19 +71,22 @@ async function main() {
             // @param admin: address
             let gauge = await LiquidityGauge.deploy(lpToken.address, minter.address, owner);
             await gauge.deployed();
+            await gauge.deployTransaction.wait();
             deployInfo[network.name].crosschainPool[i].gauge = gauge.address;
             // await gauge.self
 
             //register gauge
-            await gaugeController.add_gauge(gauge.address, 0, "10000000000000000000"/*weight*/,{ gasLimit: 1000000 });
+            let tx_ = await gaugeController.add_gauge(gauge.address, 0, "10000000000000000000"/*weight*/,{ gasLimit: 1000000 });
+            await tx_.wait();
         }
 
         //add local gauge
         let gaugeLocal = await LiquidityGauge.deploy(deployInfo[network.name].localPool.lp.address, minter.address, deployer.address);
-        tx = await gaugeLocal.deployed();
-        await tx.wait();
+        await gaugeLocal.deployed();
+        await gaugeLocal.deployTransaction.wait();
 
-        await gaugeController.add_gauge(gaugeLocal.address, 0, "10000000000000000000"/*weight*/,{ gasLimit: 1000000 });
+        let txGC = await gaugeController.add_gauge(gaugeLocal.address, 0, "10000000000000000000"/*weight*/,{ gasLimit: 1000000 });
+        await txGC.wait();
         deployInfo[network.name].localPool.gauge = gaugeLocal.address;
     }
 
