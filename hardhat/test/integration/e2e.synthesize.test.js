@@ -109,23 +109,23 @@ contract('CurveProxy', () => {
                 { from: userNet1, gas: 1000_000 }
             )
 
-            
+
 
             const resultHash = web3.utils.soliditySha3(
-                    { type: 'bytes32', value: TYPE_HASH },
-                    { type: 'address', value: miningAddress },
-                    { type: 'address', value: spenderAddress },
-                    { type: 'uint256', value: value },
-                    { type: 'uint256', value: spenderNonce },
-                    { type: 'uint256', value: deadline }
-                  );
-            
-                  const sig = ethers.utils.splitSignature(await web3.eth.sign(resultHash, owner.address))
-                  let signature = ethers.utils.splitSignature( await owner.signMessage(ethers.utils.arrayify(resultHash)));
-            
-                  const v = signature.v
-                  const r = signature.r
-                  const s = signature.s
+                { type: 'bytes32', value: TYPE_HASH },
+                { type: 'address', value: miningAddress },
+                { type: 'address', value: spenderAddress },
+                { type: 'uint256', value: value },
+                { type: 'uint256', value: spenderNonce },
+                { type: 'uint256', value: deadline }
+            );
+
+            const sig = ethers.utils.splitSignature(await web3.eth.sign(resultHash, owner.address))
+            let signature = ethers.utils.splitSignature(await owner.signMessage(ethers.utils.arrayify(resultHash)));
+
+            const v = signature.v
+            const r = signature.r
+            const s = signature.s
 
             const delegatedCallReceipt = {
                 executionPrice = "0"

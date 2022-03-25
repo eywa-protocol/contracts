@@ -105,7 +105,7 @@ async function main() {
        await this.tx.wait();
 
 
-       
+
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.s),
         addressToBytes32(bridgeB),
@@ -114,13 +114,13 @@ async function main() {
        console.log(`addContractBind for Synthesis  > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
        await this.tx.wait();
 
-       this.tx = await bridgeA.addContractBind(
-        addressToBytes32(synth),
-        addressToBytes32(bridgeB),
-        addressToBytes32(this.s)
-        );
-       console.log(`addContractBind for Synthesis  > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await this.tx.wait();
+      //  this.tx = await bridgeA.addContractBind(
+      //   addressToBytes32(synth),
+      //   addressToBytes32(bridgeB),
+      //   addressToBytes32(this.s)
+      //   );
+      //  console.log(`addContractBind for Synthesis  > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
+      //  await this.tx.wait();
 
      }catch(e){
           const nuLL = '0x0000000000000000000000000000000000000000';
