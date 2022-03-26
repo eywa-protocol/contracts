@@ -20,6 +20,7 @@ async function main() {
   if (ethers.utils.formatEther(recepient_balance) <= limit) {
     const tx = await deployer.sendTransaction({to: addr, value: ethers.utils.parseEther(limit.toString())});
     console.log("Send: ", tx.hash);
+    await tx.wait();
   }
 
   const eywa_addr = networkConfig[name].eywa;
@@ -38,6 +39,7 @@ async function main() {
 
   console.log("Eywa: ", eywa_addr);
   const tx2 = await eywa.mint(addr, "100000000000000000000");
+  await tx2.wait();
   console.log("Mine: ", tx2.hash);
 }
 
