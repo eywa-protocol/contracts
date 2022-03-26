@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.10;
+// pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/utils/math/Math.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-newone/utils/math/Math.sol";
+import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-newone/security/ReentrancyGuard.sol";
 
 contract EywaVesting is ERC20, ReentrancyGuard {
     using SafeMath for uint256;
@@ -29,9 +30,8 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     mapping(bytes32 => bool) private usedNonces;
     uint256 public vEywaInitialSupply;
 
-    constructor(
-        address _adminDeployer
-    ){
+    constructor(address _adminDeployer) ERC20("Vested Eywa", "vEYWA")
+    {
         require(_adminDeployer != address(0), "Zero address");
         adminDeployer = _adminDeployer;
     }
@@ -45,9 +45,9 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         uint256 _stepAmount,
         uint256 _numOfSteps,
         address _signAdmin,
-        uint256 _signatureTimeStamp
-        address[] _initialAddresses,
-        address[] _initialSupplyAddresses,
+        uint256 _signatureTimeStamp,
+        address[] memory _initialAddresses,
+        uint256[] memory _initialSupplyAddresses
     ) external {
         require(adminDeployer == msg.sender, "Msg.sender is not admin");
         require(signAdmin == address(0), "Contract is already initialized");
@@ -63,7 +63,7 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         signAdmin = _signAdmin;
         signatureTimeStamp = _signatureTimeStamp;
 
-        for(i=0; i < len(initialAddresses);i++){
+        for(uint256 i=0; i < _initialAddresses.length;i++){
             _mint(_initialAddresses[i], _initialSupplyAddresses[i]);
             vEywaInitialSupply = vEywaInitialSupply + _initialSupplyAddresses[i];
         }
@@ -81,7 +81,6 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         if (time == 0) {
             return 0;
         }
-        // cliffAmount +  stepAmount * min((time - (started + cliffDuration))/stepDuration, numOfSteps)
         uint256 passedSinceCliff = time.sub(started.add(cliffDuration));
         uint256 stepsPassed = Math.min(numOfSteps, passedSinceCliff.div(stepDuration));
         return cliffAmount.add(
@@ -91,23 +90,27 @@ contract EywaVesting is ERC20, ReentrancyGuard {
 
     function claim(uint256 claimedAmount) external nonReentrant() {
         uint256 claimableAmount = claimable(block.timestamp);
-        if (claimable >= vEywaInitialSupply && balanceOf(msg.sender) >= claimedAmount) {
+        if(claimableAmount >= vEywaInitialSupply && balanceOf(msg.sender) >= claimedAmount) {
             _burn(msg.sender, claimedAmount);
-            SafeERC20.safeTransferFrom(eywaToken, address(this), msg.sender, claimedAmount);
+            // SafeERC20.safeTransferFrom(eywaToken, address(this), msg.sender, claimedAmount);
+            // IERC20(eywaToken).safeTransferFrom(address(this), msg.sender, claimedAmount);
+            IERC20(eywaToken).safeTransfer(msg.sender, claimedAmount);
+            return;
         }
         uint256 availableAmount = available(block.timestamp, msg.sender);
         require(claimedAmount > 0, "available amount is 0");
         require(availableAmount >= claimedAmount, "the amount is not available");
         claimed[msg.sender] = claimed[msg.sender].add(claimedAmount);
         _burn(msg.sender, claimedAmount);
-        IERC20(eywaToken).safeTransferFrom(address(this), msg.sender, claimedAmount);
+        // IERC20(eywaToken).safeTransferFrom(address(this), msg.sender, claimedAmount);
+        IERC20(eywaToken).safeTransfer(msg.sender, claimedAmount);
     }
 
     function isNonceUsed(bytes32 nonce) public view returns (bool) {
         return usedNonces[nonce];
     }
 
-    function transfer(address recipient, uint256 amount,  uint8 v, bytes32 r, bytes32 s, bytes32 nonce) external override returns (bool) {
+    function transfer(address recipient, uint256 amount,  uint8 v, bytes32 r, bytes32 s, bytes32 nonce) public returns (bool) {
         require(usedNonces[nonce] == false, "Nonce was used");
         require(started <= block.timestamp, "It is not started time yet");
         usedNonces[nonce] = true;
@@ -115,24 +118,24 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(msg.sender)), keccak256(abi.encodePacked(recipient)),  keccak256(abi.encodePacked(amount))));
         require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
 
-        uint256 memory claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
+        uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
         claimed[msg.sender] = claimed[msg.sender] - claimedNumberTransfer;
         claimed[recipient] = claimedNumberTransfer;
         bool result = super.transfer(recipient, amount);
         return result;
     }
 
-    function transfer(address recipient, uint256 amount) external override returns (bool) {
+    function transfer(address recipient, uint256 amount) public override returns (bool) {
         require(block.timestamp >= started + signatureTimeStamp);
 
-        uint256 memory claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
+        uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
         claimed[msg.sender] = claimed[msg.sender] - claimedNumberTransfer;
         claimed[recipient] = claimedNumberTransfer;
         bool result = super.transfer(recipient, amount);
         return result;
     }
 
-    function transferFrom(address sender, address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s, bytes32 nonce) external override nonReentrant() returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s, bytes32 nonce) public nonReentrant() returns (bool) {
         require(usedNonces[nonce] == false, "Nonce was used");
         require(started <= block.timestamp, "It is not started time yet");
         usedNonces[nonce] = true;
@@ -140,7 +143,7 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(sender)), keccak256(abi.encodePacked(recipient)),  keccak256(abi.encodePacked(amount))));
         require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
 
-        uint256 memory claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
+        uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
         claimed[sender] = claimed[msg.sender] - claimedNumberTransfer;
         claimed[recipient] = claimedNumberTransfer;
         bool result = super.transferFrom(sender, recipient, amount);
@@ -148,10 +151,10 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     }
 
 
-    function transferFrom(address sender, address recipient, uint256 amount) external override nonReentrant() returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) public override nonReentrant() returns (bool) {
         require(block.timestamp >= started + signatureTimeStamp);
         
-        uint256 memory claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
+        uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
         claimed[sender] = claimed[msg.sender] - claimedNumberTransfer;
         claimed[recipient] = claimedNumberTransfer;
         bool result = super.transferFrom(sender, recipient, amount);
