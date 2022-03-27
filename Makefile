@@ -53,12 +53,20 @@ eth-local-migrate: deps npm wrappers
 eth-testnet-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh mumbai,bsctestnet,avalanchetestnet,hecotestnet,rinkeby
 
-eth-testnet-ci-migrate: deps npm wrappers
+eth-testnet-ci-migrate: debug deps npm wrappers
+	echo "${NETWORKS}";
 	cd hardhat;./scripts/deploy.sh ${NETWORKS}
 
+debug:
+	echo "${NETWORKS}"
 
 copy_configs:
-	cp ./hardhat/helper-hardhat-config.json.example ./hardhat/helper-hardhat-config.json;cp ./hardhat/.env.example ./hardhat/.env;
+	@if [ -z ${NETWORKS} ]; then \
+			cp ./hardhat/helper-hardhat-config.json.example ./hardhat/helper-hardhat-config.json;cp ./hardhat/.env.example ./hardhat/.env; \
+			else \
+			cp ./hardhat/.env.example ./hardhat/.env; \
+			fi;
+
 
 compile:
 	cd hardhat;npx hardhat compile

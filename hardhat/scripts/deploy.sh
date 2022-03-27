@@ -6,6 +6,12 @@ getField(){
  node -pe 'JSON.parse(process.argv[1]).'$1 "$(cat $helper_path)"
 }
 
+echo "-----debug----"
+echo "nets - $nets"
+echo "regnet - $REGNET"
+echo "part - $PART"
+echo "step - $STEP"
+
 nets=${1}
 if [[ ${1} =~ ^('')$ ]]; then
   nets=$(jq 'keys[]' ./helper-hardhat-config.json)
@@ -127,7 +133,8 @@ if [ \( ! -z "$REGNET" -a "$STEP" == "init" \) -o -z "$REGNET" ]; then
   done
 
   if [ ! -z "$REGNET" -a "$STEP" == "init" ]; then
-    npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network ${regnet}
+     echo "NOTE: Temporary disabled 'dao deploy' !"
+#    npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network ${regnet}
   elif [ -z "$STEP" ]; then
     npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network network2
   fi
