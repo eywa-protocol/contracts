@@ -240,7 +240,7 @@ contract Router {
     //     executionPrice = amount - txFee;
     //     return (executionPrice, txFee);
     // }
-    
+
     function _proceedFees(
         address payToken,
         address from,
@@ -422,7 +422,7 @@ contract Router {
         IPortal(_portal).synthesize_batch_transit(token, amount, synth_params, selector, transit_data, permit_data);
     }
 
-    function emergencyUnburnRequest(
+    function delegatedEmergencyUnburnRequest(
         bytes32 txID,
         address from,
         address payToken,
@@ -435,7 +435,7 @@ contract Router {
         IPortal(_portal).emergencyUnburnRequest(txID, receiveSide, oppositeBridge, chainId);
     }
 
-    function emergencyUnburnRequestToSolana(
+    function delegatedEmergencyUnburnRequestToSolana(
         bytes32 txID,
         address from,
         address payToken,
@@ -576,7 +576,7 @@ contract Router {
         ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, receiveSide, oppositeBridge, chainID);
     }
 
-    function emergencyUnsyntesizeRequestToSolana(
+    function delegatedEmergencyUnsyntesizeRequestToSolana(
         address from,
         address payToken,
         bytes32[] calldata pubkeys,
