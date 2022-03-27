@@ -116,31 +116,6 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Mints synthetic token with bytes32 support for Solana. Can be called only by bridge after initiation on a second chain
-     * @param _txID transaction ID
-     * @param _tokenReal real token address
-     * @param _amount amount to mint
-     * @param _to recipient address
-     */
-    function mintSyntheticTokenToSolana(
-        bytes32 _txID,
-        bytes32 _tokenReal,
-        uint256 _amount,
-        address _to
-    ) external onlyBridge {
-        // TODO add check to Default
-        require(
-            synthesizeStates[_txID] == SynthesizeState.Default,
-            "Synthesis: emergencyUnsynthesizedRequest called or tokens have been synthesized"
-        );
-
-        ISyntERC20(representationSynt[_tokenReal]).mint(_to, _amount);
-        synthesizeStates[_txID] = SynthesizeState.Synthesized;
-
-        emit SynthesizeCompletedSolana(_txID, _to, _amount, _tokenReal);
-    }
-
-    /**
      * @dev Transfers synthetic token to another chain
      * @param _tokenReal real token address
      * @param _amount amount to transfer
@@ -158,6 +133,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         address _chain2address
     ) external {
         address synth = representationSynt[_tokenReal];
+        require(synth != address(0),"Synthesis: synth not found");
         require(ISyntERC20(synth).getChainId() != _chainID, "Synthesis: can not synthesize in the intial chain");
         ISyntERC20(synth).burn(_msgSender(), _amount);
 
@@ -303,7 +279,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Burns the original representation of given synthetic token in the destination chain
+     * @dev Burns given synthetic token and unlocks the original one in the destination chain
      * @param _stoken transaction ID
      * @param _amount amount to burn
      * @param _chain2address recipient address
