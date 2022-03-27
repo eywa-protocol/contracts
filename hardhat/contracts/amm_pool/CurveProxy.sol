@@ -217,7 +217,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         return _setTrustedForwarder(_forwarder);
     }
 
-    function registerNewBalance(address token, uint256 expectedAmount) internal{
+    function registerNewBalance(address token, uint256 expectedAmount) internal view{
        require(IERC20Upgradeable(token).balanceOf(address(this)) >= expectedAmount, "CurveProxy: insufficient balance");
     }
 

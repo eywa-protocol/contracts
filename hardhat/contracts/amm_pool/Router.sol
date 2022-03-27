@@ -7,40 +7,174 @@ import "@openzeppelin/contracts-newone/utils/Address.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 
 interface IPortal {
+    struct PermitData {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+        uint256 deadline;
+        bool approveMax;
+    }
+    struct SynthParams {
+        address chain2address;
+        address receiveSide;
+        address oppositeBridge;
+        uint256 chainID;
+    }
+
     function synthesize(
-        address _token,
-        uint256 _amount,
-        address _from,
-        address _to,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID
+        address token,
+        uint256 amount,
+        address from,
+        address to,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID
+    ) external;
+
+    function synthesizeWithPermit(
+        PermitData memory permitData,
+        address token,
+        uint256 amount,
+        address to,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID
+    ) external;
+
+    function synthesizeToSolana(
+        address token,
+        uint256 amount,
+        bytes32[] calldata pubkeys,
+        bytes1 txStateBump,
+        uint256 chainId
+    ) external;
+
+    function synthesize_batch_transit(
+        address[] memory token,
+        uint256[] memory amount, // set a positive amount in order to initiate a synthesize request
+        SynthParams memory synthparams,
+        bytes4 selector,
+        bytes calldata transit_data,
+        PermitData[] memory permit_data
+    ) external;
+}
+
+interface ICurveProxy {
+    struct PermitData {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+        uint256 deadline;
+        bool approveMax;
+    }
+
+    struct MetaMintEUSD {
+        //crosschain pool params
+        address add_c;
+        uint256 expected_min_mintamount_c;
+        //incoming coin index for adding liq to hub pool
+        uint256 lp_index;
+        //hub pool params
+        address add_h;
+        uint256 expected_min_mintamount_h;
+        //recipient address
+        address to;
+        //emergency unsynth params
+        address initialBridge;
+        uint256 initialChainID;
+    }
+
+    struct MetaRedeemEUSD {
+        //crosschain pool params
+        address remove_c;
+        //outcome index
+        int128 x;
+        uint256 expected_minamount_c;
+        //hub pool params
+        address remove_h;
+        uint256 token_amount_h;
+        //lp index
+        int128 y;
+        uint256 expected_minamount_h;
+        //recipient address
+        address to;
+    }
+
+    struct MetaExchangeParams {
+        //pool address
+        address add;
+        address exchange;
+        address remove;
+        //add liquidity params
+        uint256 expected_min_mintamount;
+        //exchange params
+        int128 i; //index value for the coin to send
+        int128 j; //index value of the coin to receive
+        uint256 expected_min_dy;
+        //withdraw one coin params
+        int128 x; //index value of the coin to withdraw
+        uint256 expected_minamount;
+        //transfer to
+        address to;
+        //unsynth params
+        address chain2address;
+        address receiveSide;
+        address oppositeBridge;
+        uint256 chainID;
+        //emergency unsynth params
+        address initialBridge;
+        uint256 initialChainID;
+    }
+
+    function add_liquidity_3pool_mint_eusd(
+        MetaMintEUSD calldata params,
+        PermitData[] calldata permit,
+        address[3] calldata token,
+        uint256[3] calldata amount
+    ) external;
+
+    function meta_exchange(
+        MetaExchangeParams calldata params,
+        PermitData[] calldata permit,
+        address[3] calldata token,
+        uint256[3] calldata amount
+    ) external;
+
+    function redeem_eusd(
+        MetaRedeemEUSD calldata params,
+        PermitData calldata permit,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID
     ) external;
 }
 
 contract Router {
     using Address for address;
 
-    address localTreasury;
-    address portal;
-    mapping(address => bool) public pusher;
+    address _localTreasury;
+    address _curveProxy;
+    address _portal;
+    // mapping(address => bool) public pusher;
 
     event PaymentEvent(address indexed userFrom, address payToken, uint256 executionPrice, address indexed worker);
 
     struct DelegatedCallReceipt {
         uint256 executionPrice;
         uint256 timeout;
-        uint8[2] v;
-        bytes32[2] r;
-        bytes32[2] s;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
     }
 
     constructor(
-        /*address _localTreasury*/
-        address _portal
+        address localTreasury,
+        address portal,
+        address curveProxy
     ) {
-        // localTreasury = _localTreasury;
-        portal = _portal;
+        _localTreasury = localTreasury;
+        _portal = portal;
+        _curveProxy = curveProxy;
     }
 
     // uint256 public basePercent = 1000; //10%
@@ -55,107 +189,212 @@ contract Router {
     //     return (executionPrice, txFee);
     // }
 
-    // function proceedCallWithTokenTransfer(
-    //     bytes memory _callData,
-    //     address _token,
-    //     uint256 _amount,
-    //     address _userFrom,
-    //     address _receiveSide
-    // ) public {
-    //     // proceed amount
-    //     SafeERC20.safeTransferFrom(IERC20(_token), _userFrom, _receiveSide, _amount);
-
-    //     bytes memory data = _receiveSide.functionCall(_callData, "Router: call failed");
-    //     require(data.length == 0 || abi.decode(data, (bool)), "Router: unable to decode returned data");
-    // }
-
-    // function proceedDelegatedCallWithTokenTransfer(
-    //     bytes memory _callData,
-    //     address _payToken,
-    //     uint256 _transferAmount,
-    //     address _userFrom,
-    //     address _receiveSide,
-    //     uint256 _executionPrice,
-    //     uint256 _timeout,
-    //     uint8[2] memory _v,
-    //     bytes32[2] memory _r,
-    //     bytes32[2] memory _s
-    // ) public {
-    //     bytes32 structHash = keccak256(
-    //         abi.encodePacked(_callData, _payToken, _executionPrice, _userFrom, msg.sender, _timeout)
-    //     );
-
-    //     address worker = ECDSA.recover(ECDSA.toEthSignedMessageHash(structHash), _v[0], _r[0], _s[0]);
-    //     address sender = ECDSA.recover(ECDSA.toEthSignedMessageHash(structHash), _v[1], _r[1], _s[1]);
-
-    //     require(pusher[worker], "GateKeeper: invalid signature from worker");
-    //     require(sender == _userFrom, "GateKeeper: invalid signature from sender");
-
-    //     // (uint256 executionPrice, uint256 txFee) = getTxValues(_executionPrice);
-
-    //     // worker fee
-    //     SafeERC20.safeTransferFrom(IERC20(_payToken), _userFrom, msg.sender, _executionPrice);
-    //     // proceed amount
-    //     SafeERC20.safeTransferFrom(IERC20(_payToken), _userFrom, _receiveSide, _transferAmount);
-
-    //     emit PaymentEvent(_userFrom, _payToken, _executionPrice, worker);
-
-    //     bytes memory data = _receiveSide.functionCall(_callData, "Router: call failed");
-    //     require(data.length == 0 || abi.decode(data, (bool)), "Router: unable to decode returned data");
-    // }
-
-    function delegatedTokenSynthesize(
-        address _token,
-        uint256 _amount,
-        address _from,
-        address _to,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID,
-        DelegatedCallReceipt memory _receipt
-    ) external {
+    function proceedFees(
+        address payToken,
+        uint256 generalAmount,
+        address from,
+        DelegatedCallReceipt memory receipt
+    ) internal {
         bytes32 structHash = keccak256(
-            abi.encodePacked(_token, _receipt.executionPrice, _from, msg.sender, _receipt.timeout)
+            abi.encodePacked(payToken, receipt.executionPrice, from, msg.sender, receipt.timeout)
         );
 
-        address worker = ECDSA.recover(
-            ECDSA.toEthSignedMessageHash(structHash),
-            _receipt.v[0],
-            _receipt.r[0],
-            _receipt.s[0]
-        );
-        address sender = ECDSA.recover(
-            ECDSA.toEthSignedMessageHash(structHash),
-            _receipt.v[1],
-            _receipt.r[1],
-            _receipt.s[1]
-        );
+        address sender = ECDSA.recover(ECDSA.toEthSignedMessageHash(structHash), receipt.v, receipt.r, receipt.s);
 
-        require(pusher[worker], "GateKeeper: invalid signature from worker");
-        require(sender == _from, "GateKeeper: invalid signature from sender");
-
-        // (uint256 executionPrice, uint256 txFee) = getTxValues(_executionPrice);   <--
+        require(sender == from, "Router: invalid signature from sender");
 
         // worker fee
-        SafeERC20.safeTransferFrom(IERC20(_token), _from, msg.sender, _receipt.executionPrice);
-        // proceed amount
-        SafeERC20.safeTransferFrom(IERC20(_token), _from, portal, _amount - _receipt.executionPrice);
+        SafeERC20.safeTransferFrom(IERC20(payToken), from, msg.sender, receipt.executionPrice);
+        // proceed remaining amount
+        SafeERC20.safeTransferFrom(IERC20(payToken), from, _portal, generalAmount - receipt.executionPrice);
 
-        emit PaymentEvent(_from, _token, _receipt.executionPrice, worker);
-
-        IPortal(portal).synthesize(_token, _amount, _from, _to, _receiveSide, _oppositeBridge, _chainID);
+        emit PaymentEvent(from, payToken, receipt.executionPrice, msg.sender);
     }
 
-    function delegatedTokenSynthesize1(
-        address _token,
-        uint256 _amount,
-        address _from,
-        address _to,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID
+    /**
+     * @dev Delegated token synthesize request.
+     * @param token token address to synthesize
+     * @param amount amount to synthesize
+     * @param from msg sender address
+     * @param to amount recipient address
+     * @param receiveSide request recipient address
+     * @param oppositeBridge opposite bridge address
+     * @param chainID opposite chain ID
+     * @param receipt delegated call receipt
+     */
+
+    function delegatedTokenSynthesizeRequest(
+        address token,
+        uint256 amount,
+        address from,
+        address to,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID,
+        DelegatedCallReceipt memory receipt
     ) external {
-        SafeERC20.safeTransferFrom(IERC20(_token), _from, portal, _amount);
-        IPortal(portal).synthesize(_token, _amount, _from, _to, _receiveSide, _oppositeBridge, _chainID);
+        proceedFees(token, amount, from, receipt);
+        IPortal(_portal).synthesize(token, amount, from, to, receiveSide, oppositeBridge, chainID);
+    }
+
+    /**
+     * @dev Delegated token synthesize request with permit.
+     * @param token token address to synthesize
+     * @param amount amount to synthesize
+     * @param to amount recipient address
+     * @param receiveSide request recipient address
+     * @param oppositeBridge opposite bridge address
+     * @param chainID opposite chain ID
+     * @param permitData permit data
+     * @param receipt delegated call receipt
+     */
+    function delegatedTokenSynthesizeRequestWithPermit(
+        address token,
+        uint256 amount,
+        address from,
+        address to,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID,
+        IPortal.PermitData memory permitData,
+        DelegatedCallReceipt memory receipt
+    ) external {
+        // SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
+        proceedFees(token, amount, from, receipt);
+        IPortal(_portal).synthesizeWithPermit(permitData, token, amount, to, receiveSide, oppositeBridge, chainID);
+    }
+
+    //----TEST------
+    function delegatedTokenSynthesize1(
+        address token,
+        uint256 amount,
+        address from,
+        address to,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID
+    ) external {
+        SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
+        IPortal(_portal).synthesize(token, amount, from, to, receiveSide, oppositeBridge, chainID);
+    }
+
+    //------------
+
+    /**
+     * @dev  Delegated token synthesize request with bytes32 support for Solana.
+     * @param token token address to synthesize
+     * @param amount amount to synthesize
+     * @param pubkeys synth data for Solana
+     * @param txStateBump transaction state bump
+     * @param chainId opposite chain ID
+     * @param receipt delegated call receipt
+     */
+    function delegatedTokenSynthesizeRequestToSolana(
+        address token,
+        uint256 amount,
+        address from,
+        bytes32[] calldata pubkeys,
+        bytes1 txStateBump,
+        uint256 chainId,
+        DelegatedCallReceipt memory receipt
+    ) external {
+        // SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
+        proceedFees(token, amount, from, receipt);
+        IPortal(_portal).synthesizeToSolana(token, amount, pubkeys, txStateBump, chainId);
+    }
+
+    /**
+     * @dev  Delegated batch synthesize request with data transition.
+     */
+    function delegatedBatchSynthesizeRequestWithDataTransit(
+        address[] memory token,
+        uint256[] memory amount, // set a positive amount in order to initiate a synthesize request
+        address from,
+        bytes4 selector,
+        bytes calldata transit_data,
+        IPortal.SynthParams memory synth_params,
+        IPortal.PermitData[] memory permit_data,
+        DelegatedCallReceipt memory receipt
+    ) external {
+        for (uint256 i = 0; i < token.length; i++) {
+            if (amount[i] > 0) {
+                // SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
+                proceedFees(token[i], amount[i], from, receipt);
+            }
+        }
+        IPortal(_portal).synthesize_batch_transit(token, amount, synth_params, selector, transit_data, permit_data);
+    }
+
+    /**
+     * @dev Delegated local mint EUSD request (hub chain execution only)
+     * @param params MetaMintEUSD params
+     * @param permit permit operation params
+     * @param token token addresses
+     * @param amount amounts to transfer
+     * @param receipt delegated call receipt
+     */
+    function delegatedMintEusdRequestVia3pool(
+        ICurveProxy.MetaMintEUSD calldata params,
+        ICurveProxy.PermitData[] calldata permit,
+        address from,
+        address[3] calldata token,
+        uint256[3] calldata amount,
+        DelegatedCallReceipt memory receipt
+    ) external {
+        for (uint256 i = 0; i < token.length; i++) {
+            if (amount[i] > 0) {
+                // SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
+                proceedFees(token[i], amount[i], from, receipt);
+            }
+        }
+        ICurveProxy(_curveProxy).add_liquidity_3pool_mint_eusd(params, permit, token, amount);
+    }
+
+    /**
+     * @dev Delegated local meta exchange request (hub chain execution only)
+     * @param params meta exchange params
+     * @param permit permit operation params
+     * @param token token addresses to transfer within initial stage
+     * @param amount amounts to transfer within initial stage
+     * @param receipt delegated call receipt
+     */
+    function delegatedMetaExchangeRequestVia3pool(
+        ICurveProxy.MetaExchangeParams calldata params,
+        ICurveProxy.PermitData[] calldata permit,
+        address from,
+        address[3] calldata token,
+        uint256[3] calldata amount,
+        DelegatedCallReceipt memory receipt
+    ) external {
+        for (uint256 i = 0; i < token.length; i++) {
+            if (amount[i] > 0) {
+                // SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
+                proceedFees(token[i], amount[i], from, receipt);
+            }
+        }
+        ICurveProxy(_curveProxy).meta_exchange(params, permit, token, amount);
+    }
+
+    /**
+     * @dev Delegated local EUSD redeem request with unsynth operation (hub chain execution only)
+     * @param params meta redeem EUSD params
+     * @param permit permit params
+     * @param receiveSide calldata recipient address for unsynth operation
+     * @param oppositeBridge opposite bridge contract address
+     * @param chainID opposite chain ID
+     * @param receipt delegated call receipt
+     */
+    function delegatedRedeemEusdRequest(
+        ICurveProxy.MetaRedeemEUSD calldata params,
+        ICurveProxy.PermitData calldata permit,
+        address payToken,
+        address from,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID,
+        DelegatedCallReceipt memory receipt
+    ) external {
+        proceedFees(payToken, params.token_amount_h, from, receipt);
+        ICurveProxy(_curveProxy).redeem_eusd(params, permit, receiveSide, oppositeBridge, chainID);
     }
 }

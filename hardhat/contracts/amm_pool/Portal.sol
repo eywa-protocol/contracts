@@ -124,7 +124,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         _;
     }
 
-    function registerNewBalance(address token, uint256 expectedAmount) internal{
+    function registerNewBalance(address token, uint256 expectedAmount) internal {
        uint256 oldBalance = balanceOf[token];
        require((IERC20(token).balanceOf(address(this)) - oldBalance) >= expectedAmount, "Portal: insufficient balance");
        balanceOf[token] += expectedAmount;

@@ -123,33 +123,28 @@ contract('CurveProxy', () => {
                 { type: 'uint256', value: _timeout }
             );
 
-            const sig = ethers.utils.splitSignature(await web3.eth.sign(resultHash, _from))
-            const signature = ethers.utils.splitSignature(await userNet1.signMessage(ethers.utils.arrayify(msgHash)));
+            // const signature = ethers.utils.splitSignature(await web3.eth.sign(msgHash, userNet1))
+            // const signature = ethers.utils.splitSignature(await userNet1.signMessage(ethers.utils.arrayify(msgHash)));
 
-            const v = signature.v
-            const r = signature.r
-            const s = signature.s
+            // const delegatedCallReceipt = {
+            //     executionPrice: _executionPrice,
+            //     timeout: _timeout,
+            //     v: signature.v,
+            //     r: signature.r,
+            //     s: signature.s
+            // }
 
-            const delegatedCallReceipt = {
-                executionPrice: _executionPrice,
-                timeout: _timeout,
-                v: signature.v,
-                r: signature.r,
-                s: signature.s
-            }
-
-            await this.routerA.delegatedTokenSynthesize(
-                tokenToSynth,
-                amount,
-                userFrom,
-                userTo,
-                receiveSideB,
-                oppositeBridge,
-                chainID,
-                delegatedCallReceipt,
-                { from: userNet1, gas: 1000_000 }
-            )
-
+            // await this.routerA.delegatedTokenSynthesize(
+            //     tokenToSynth,
+            //     amount,
+            //     userFrom,
+            //     userTo,
+            //     receiveSideB,
+            //     oppositeBridge,
+            //     chainID,
+            //     delegatedCallReceipt,
+            //     { from: userNet1, gas: 1000_000 }
+            // )
 
 
             // await timeout(15000)
