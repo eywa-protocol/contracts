@@ -30,6 +30,25 @@ const increaseTime = async (duration) => {
     });
 };
 
+const takeSnapshot = async () => {
+    return await hre.network.provider.request({
+      method: "evm_snapshot",
+      params: [],
+    })
+  };
+  
+const restoreSnapshot = async (id) => {
+await hre.network.provider.request({
+    method: "evm_revert",
+    params: [id],
+});
+};
+
+const useSnapshot = async () => {
+await restoreSnapshot(snapshotId);
+snapshotId = await takeSnapshot();
+};
+
 
 // contract('RelayerPool', function (accounts) {
 describe('Vesting tests', () => {
@@ -111,10 +130,9 @@ describe('Vesting tests', () => {
     it('cannot claim before cliff', async function () {
         await expect(vesting.connect(addr1).claim(1)).to.be.revertedWith('reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)');
     });
-    // it('cannot claim who doesnt have tokens', async function () {
-    //     await expect(vesting.connect(signAdmin).claim(1)).to.be.revertedWith('reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)');
-    // });
+    
     it('cannot claim who doesnt have tokens', async function () {
+        let snapshot0 = await takeSnapshot();
         let blockNumBefore = await ethers.provider.getBlockNumber();
         let blockBefore = await ethers.provider.getBlock(blockNumBefore);
         let timestampBefore = blockBefore.timestamp;
@@ -125,8 +143,11 @@ describe('Vesting tests', () => {
         timestampBefore = blockBefore.timestamp;
         console.log("TimestampBefore = ", timestampBefore);
         await expect(vesting.connect(signAdmin).claim(1)).to.be.revertedWith('the amount is not available');
+        await restoreSnapshot(snapshot0);
     });
+
     it('claim aftercliff is working', async function () {
+        let snapshot0 = await takeSnapshot();
         let blockNumBefore = await ethers.provider.getBlockNumber();
         let blockBefore = await ethers.provider.getBlock(blockNumBefore);
         let timestampBefore = blockBefore.timestamp;
@@ -151,21 +172,73 @@ describe('Vesting tests', () => {
         expect(balanceAfterRealEYWA).to.equal(1);
         console.log("vestingBalance = ", await tokenErc20.balanceOf(vesting.address));
         expect(await tokenErc20.balanceOf(vesting.address)).to.equal(9999999);
+        await restoreSnapshot(snapshot0);
     });
-
     it('Transfer right after cliff', async function () {
+        let snapshot0 = await takeSnapshot();
         let blockNumBefore = await ethers.provider.getBlockNumber();
         let blockBefore = await ethers.provider.getBlock(blockNumBefore);
         let timestampBefore = blockBefore.timestamp;
-        await increaseTime(day_in_seconds * 51);
+        console.log("timestamp = ", timestampBefore);
+        await increaseTime(day_in_seconds * 51); // TODO
         blockNumBefore = await ethers.provider.getBlockNumber();
         blockBefore = await ethers.provider.getBlock(blockNumBefore);
         timestampBefore = blockBefore.timestamp;
+        console.log("timestamp = ", timestampBefore);
+
+        console.log("cliff start = ", parseInt(await vesting.connect(addr1).started()) + parseInt(await vesting.connect(addr1).cliffDuration()));
         await vesting.connect(addr1)['transfer(address,uint256)'](addr2.address, 1000000);
+        let balanceVestingBefore = await tokenErc20.balanceOf(vesting.address);
+        console.log("EEE balance vesting before = ", balanceVestingBefore);
+        console.log("vesting totalSupply() = ", await vesting.connect(addr1).totalSupply());
+        // console.log("available = ", await vesting.connect(addr1).available(timestampBefore, addr1.address));        
+        console.log("balance of addr1 vesting = ", await vesting.connect(addr1).balanceOf(addr1.address));
+        console.log("available addr1 = ", await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address));        
+        console.log("available addr2 = ", await vesting.connect(addr2).available(parseInt(timestampBefore), addr2.address));  
+        console.log("available addr3 = ", await vesting.connect(addr3).available(parseInt(timestampBefore), addr3.address));  
+
+        console.log("E2 available = ", await vesting.connect(addr1).claimable(parseInt(timestampBefore)));   
+        // console.log("available = ", await vesting.connect(addr1).claimable(parseInt(timestampBefore)));        
+        // console.log("available = ", await vesting.connect(addr1).available(6054710126, addr1.address));        
+                                        //   10000000
         await vesting.connect(addr1).claim(2000000);
+        // console.log("xxxxXXXxxxxxxxxXXXXXXxxxxxx 222222");
         await vesting.connect(addr2).claim(1750000);
-        expect(await tokenErc20.balanceOf(addr1.address)).to.equal(2000001);
+        // console.log("xxxxXXXxxxxxxxxXXXXXXxxxxxx 11111");
+        expect(await tokenErc20.balanceOf(addr1.address)).to.equal(2000000);
         expect(await tokenErc20.balanceOf(addr2.address)).to.equal(1750000);
+        expect(await vesting.balanceOf(addr1.address)).to.equal(2000000);
+        expect(await vesting.balanceOf(addr2.address)).to.equal(1750000);
+
+        // expect(await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address)).to.equal(0);
+        // expect(await vesting.connect(addr2).available(parseInt(timestampBefore), addr2.address)).to.equal(0);
+
+        let balanceVestingAfter = await tokenErc20.balanceOf(vesting.address);
+        console.log("balance vesting after = ", balanceVestingAfter);
+        expect(balanceVestingBefore).to.equal(parseInt(balanceVestingAfter) + 2000000 + 1750000);
+        await restoreSnapshot(snapshot0);
+
+        // timestamp =  1648340844
+        // timestamp =  1652747244
+        // cliff start =  1652747241
+        // EEE balance vesting before =  BigNumber { value: "10000000" }
+        // vesting totalSupply() =  BigNumber { value: "10000000" }
+        // balance of addr1 vesting =  BigNumber { value: "4000000" }
+        // available addr1 =  BigNumber { value: "2000000" }
+        // available addr2 =  BigNumber { value: "1750000" }
+        // available addr3 =  BigNumber { value: "1250000" }
+        // E2 available =  BigNumber { value: "5000000" }
+        // balance vesting after =  BigNumber { value: "6250000" }
     });
+
+    // it('can not claim more than available now', async function () {
+    //     let blockNumBefore = await ethers.provider.getBlockNumber();
+    //     let blockBefore = await ethers.provider.getBlock(blockNumBefore);
+    //     let timestampBefore = blockBefore.timestamp;
+    //     await increaseTime(day_in_seconds * 50);
+    //     await vesting.connect(addr1).claim(500000);
+    //     console.log("balance of addr1 = ", await vesting.balanceOf(addr1.address));
+
+    // });
 });
     

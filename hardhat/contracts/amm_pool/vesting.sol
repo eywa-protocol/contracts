@@ -72,7 +72,7 @@ contract EywaVesting is ERC20, ReentrancyGuard {
 
 
     function available(uint256 time, address tokenOwner) public view returns(uint256) {
-        return claimable(time).mul(balanceOf(tokenOwner) / vEywaInitialSupply).sub(claimed[tokenOwner]);
+        return (claimable(time).mul(balanceOf(tokenOwner)).div(vEywaInitialSupply)).sub(claimed[tokenOwner]);
 
     }
 
