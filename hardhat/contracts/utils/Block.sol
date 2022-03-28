@@ -10,19 +10,47 @@ library Block {
         txRootHash = Utils.bytesToBytes32(_payload[72:104]);
     }
 
-    function oracleRequestTx(bytes memory _payload) internal pure returns (address bridgeFrom, bytes32 reqId, bytes memory sel, address receiveSide) {
+    function oracleRequestTx(
+        bytes memory _payload
+    ) internal pure returns (
+        bytes32 reqId,
+        address bridgeFrom,
+        address receiveSide,
+        bytes memory sel
+    ) {
         uint256 off = 0;
-        (bridgeFrom, off) = ZeroCopySource.NextAddress(_payload, off);
         (reqId, off) = ZeroCopySource.NextHash(_payload, off);
-        (sel, off) = ZeroCopySource.NextVarBytes(_payload, off);
+        (bridgeFrom, off) = ZeroCopySource.NextAddress(_payload, off);
         (receiveSide, off) = ZeroCopySource.NextAddress(_payload, off);
+        (sel, off) = ZeroCopySource.NextVarBytes(_payload, off);
     }
 
-    function epochRequestTx(bytes memory _payload) internal pure returns (uint32 txNewEpochNum, bytes memory txNewKey, uint8 txNewEpochParticipantsNum) {
+    function solanaRequestTx(
+        bytes memory _payload
+    ) internal pure returns (
+        bytes32 reqId,
+        bytes32 bridgeFrom,
+        bytes32 oppositeBridge,
+        bytes memory sel
+    ) {
+        uint256 off = 0;
+        (reqId, off) = ZeroCopySource.NextHash(_payload, off);
+        (bridgeFrom, off) = ZeroCopySource.NextHash(_payload, off);
+        (oppositeBridge, off) = ZeroCopySource.NextHash(_payload, off);
+        (sel, off) = ZeroCopySource.NextVarBytes(_payload, off);
+    }
+
+    function epochRequestTx(
+        bytes memory _payload
+    ) internal pure returns (
+        uint32 txNewEpochNum,
+        bytes memory txNewKey,
+        uint8 txNewEpochParticipantsNum
+    ) {
         uint256 off = 0;
         (txNewEpochNum, off) = ZeroCopySource.NextUint32(_payload, off);
+        (txNewEpochParticipantsNum, off) = ZeroCopySource.NextUint8(_payload, off);
         (txNewKey, off) = ZeroCopySource.NextVarBytes(_payload, off);
-        (txNewEpochParticipantsNum, off) = ZeroCopySource.NextUint8(_payload, off + 32);
     }
 
     function verify(

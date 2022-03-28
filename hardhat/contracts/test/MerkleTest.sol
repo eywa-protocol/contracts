@@ -13,10 +13,10 @@ contract MerkleTest {
         bytes memory _auditPath,
         bytes32 _root
     ) public pure returns (
-        address bridgeFrom,
         bytes32 reqId,
-        bytes memory sel,
-        address receiveSide
+        address bridgeFrom,
+        address receiveSide,
+        bytes memory sel
     ) {
         bytes memory payload = Merkle.prove(_auditPath, _root);
         return Block.oracleRequestTx(payload);
