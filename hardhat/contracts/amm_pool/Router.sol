@@ -34,6 +34,7 @@ interface IPortal {
         PermitData memory permitData,
         address token,
         uint256 amount,
+        address from,
         address to,
         address receiveSide,
         address oppositeBridge,
@@ -43,6 +44,7 @@ interface IPortal {
     function synthesizeToSolana(
         address token,
         uint256 amount,
+        address from,
         bytes32[] calldata pubkeys,
         bytes1 txStateBump,
         uint256 chainId
@@ -51,6 +53,7 @@ interface IPortal {
     function synthesize_batch_transit(
         address[] memory token,
         uint256[] memory amount, // set a positive amount in order to initiate a synthesize request
+        address from,
         SynthParams memory synthparams,
         bytes4 selector,
         bytes calldata transit_data,
@@ -59,15 +62,17 @@ interface IPortal {
 
     function emergencyUnburnRequest(
         bytes32 txID,
+        address from,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId
     ) external;
 
     function emergencyUnburnRequestToSolana(
-        bytes32 _txID,
-        bytes32[] calldata _pubkeys,
-        uint256 _chainId
+        bytes32 txID,
+        address from,
+        bytes32[] calldata pubkeys,
+        uint256 chainId
     ) external;
 }
 
@@ -165,6 +170,7 @@ interface ISynthesis {
     function synthTransfer(
         bytes32 tokenReal,
         uint256 amount,
+        address from,
         address oppositeBridge,
         address receiveSide,
         uint256 chainID,
@@ -173,6 +179,7 @@ interface ISynthesis {
 
     function burnSyntheticToken(
         address stoken,
+        address from,
         uint256 amount,
         address chain2address,
         address receiveSide,
@@ -182,6 +189,7 @@ interface ISynthesis {
 
     function burnSyntheticTokenToSolana(
         address stoken,
+        address from,
         bytes32[] calldata pubkeys,
         uint256 amount,
         uint256 chainId
@@ -189,15 +197,29 @@ interface ISynthesis {
 
     function emergencyUnsyntesizeRequest(
         bytes32 txID,
+        address from,
         address receiveSide,
         address oppositeBridge,
         uint256 chainID
     ) external;
 
     function emergencyUnsyntesizeRequestToSolana(
+        address from,
         bytes32[] calldata pubkeys,
         bytes1 bumpSynthesizeRequest,
         uint256 chainId
+    ) external;
+}
+
+interface IERC20Permit {
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
     ) external;
 }
 
@@ -356,11 +378,18 @@ contract Router {
         IPortal.PermitData memory permitData,
         DelegatedCallReceipt memory receipt
     ) external {
-        // SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
+        IERC20Permit(token).permit(
+            from,
+            address(this),
+            permitData.approveMax ? uint256(2**256 - 1) : amount,
+            permitData.deadline,
+            permitData.v,
+            permitData.r,
+            permitData.s
+        );
         _proceedFeesWithTransfer(token, amount, from, receipt);
-        IPortal(_portal).synthesizeWithPermit(permitData, token, amount, to, receiveSide, oppositeBridge, chainID);
+        IPortal(_portal).synthesize(token, amount, from, to, receiveSide, oppositeBridge, chainID);
     }
-
 
     /**
      * @dev  Delegated token synthesize request with bytes32 support for Solana.
@@ -380,9 +409,8 @@ contract Router {
         uint256 chainId,
         DelegatedCallReceipt memory receipt
     ) external {
-        // SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
         _proceedFeesWithTransfer(token, amount, from, receipt);
-        IPortal(_portal).synthesizeToSolana(token, amount, pubkeys, txStateBump, chainId);
+        IPortal(_portal).synthesizeToSolana(token, amount, from, pubkeys, txStateBump, chainId);
     }
 
     /**
@@ -400,11 +428,22 @@ contract Router {
     ) external {
         for (uint256 i = 0; i < token.length; i++) {
             if (amount[i] > 0) {
-                // SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
+                if (permit_data[i].v != 0) {
+                    uint256 approve_value = permit_data[i].approveMax ? uint256(2**256 - 1) : amount[i];
+                    IERC20Permit(token[i]).permit(
+                        from,
+                        address(this),
+                        approve_value,
+                        permit_data[i].deadline,
+                        permit_data[i].v,
+                        permit_data[i].r,
+                        permit_data[i].s
+                    );
+                }
                 _proceedFeesWithTransfer(token[i], amount[i], from, receipt);
             }
         }
-        IPortal(_portal).synthesize_batch_transit(token, amount, synth_params, selector, transit_data, permit_data);
+        IPortal(_portal).synthesize_batch_transit(token, amount, from, synth_params, selector, transit_data, permit_data);
     }
 
     function delegatedEmergencyUnburnRequest(
@@ -416,8 +455,9 @@ contract Router {
         uint256 chainId,
         DelegatedCallReceipt memory receipt
     ) external {
+        // TODO check sig from orig sender
         _proceedFees(payToken, from, receipt);
-        IPortal(_portal).emergencyUnburnRequest(txID, receiveSide, oppositeBridge, chainId);
+        IPortal(_portal).emergencyUnburnRequest(txID, from, receiveSide, oppositeBridge, chainId);
     }
 
     function delegatedEmergencyUnburnRequestToSolana(
@@ -428,8 +468,78 @@ contract Router {
         uint256 chainId,
         DelegatedCallReceipt memory receipt
     ) external {
+        // TODO check sig from orig sender
         _proceedFees(payToken, from, receipt);
-        IPortal(_portal).emergencyUnburnRequestToSolana(txID, pubkeys, chainId);
+        IPortal(_portal).emergencyUnburnRequestToSolana(txID, from, pubkeys, chainId);
+    }
+
+ //==============================SYNTHESIS==============================
+    function delegatedSynthTransferRequest(
+        bytes32 tokenReal,
+        address tokenSynth,
+        uint256 amount,
+        address from,
+        address oppositeBridge,
+        address receiveSide,
+        uint256 chainID,
+        address chain2address,
+        DelegatedCallReceipt memory receipt
+    ) external {
+        _proceedFeesWithApprove(tokenSynth, amount, from, receipt);
+        ISynthesis(_synthesis).synthTransfer(tokenReal, amount, from, oppositeBridge, receiveSide, chainID, chain2address);
+    }
+
+    function delegatedUnsynthesizeRequest(
+        address stoken,
+        uint256 amount,
+        address from,
+        address chain2address,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID,
+        DelegatedCallReceipt memory receipt
+    ) external {
+        _proceedFeesWithApprove(stoken, amount, from, receipt);
+        ISynthesis(_synthesis).burnSyntheticToken(stoken, from, amount, chain2address, receiveSide, oppositeBridge, chainID);
+    }
+
+    function delegatedUnsynthesizeRequestToSolana(
+        address stoken,
+        address from,
+        bytes32[] calldata pubkeys,
+        uint256 amount,
+        uint256 chainId,
+        DelegatedCallReceipt memory receipt
+    ) external {
+        _proceedFeesWithApprove(stoken, amount, from, receipt);
+        ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, from, pubkeys, amount, chainId);
+    }
+
+    function delegatedEmergencyUnsyntesizeRequest(
+        bytes32 txID,
+        address from,
+        address payToken,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID,
+        DelegatedCallReceipt memory receipt
+    ) external {
+        // TODO check sig from orig sender
+        _proceedFees(payToken, from, receipt);
+        ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, from, receiveSide, oppositeBridge, chainID);
+    }
+
+    function delegatedEmergencyUnsyntesizeRequestToSolana(
+        address from,
+        address payToken,
+        bytes32[] calldata pubkeys,
+        bytes1 bumpSynthesizeRequest,
+        uint256 chainId,
+        DelegatedCallReceipt memory receipt
+    ) external {
+        // TODO check sig from orig sender
+        _proceedFees(payToken, from, receipt);
+        ISynthesis(_synthesis).emergencyUnsyntesizeRequestToSolana(from, pubkeys, bumpSynthesizeRequest, chainId);
     }
 
     //==============================CURVE-PROXY==============================
@@ -451,7 +561,6 @@ contract Router {
     ) external {
         for (uint256 i = 0; i < token.length; i++) {
             if (amount[i] > 0) {
-                // SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
                 _proceedFeesWithTransfer(token[i], amount[i], from, receipt);
             }
         }
@@ -476,7 +585,6 @@ contract Router {
     ) external {
         for (uint256 i = 0; i < token.length; i++) {
             if (amount[i] > 0) {
-                // SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
                 _proceedFeesWithTransfer(token[i], amount[i], from, receipt);
             }
         }
@@ -506,76 +614,9 @@ contract Router {
         ICurveProxy(_curveProxy).redeem_eusd(params, permit, receiveSide, oppositeBridge, chainID);
     }
 
-    //==============================SYNTHESIS==============================
-    function delegatedSynthTransferRequest(
-        bytes32 tokenReal,
-        address tokenSynth,
-        uint256 amount,
-        address from,
-        address oppositeBridge,
-        address receiveSide,
-        uint256 chainID,
-        address chain2address,
-        DelegatedCallReceipt memory receipt
-    ) external {
-        _proceedFeesWithApprove(tokenSynth, amount, from, receipt);
-        ISynthesis(_synthesis).synthTransfer(tokenReal, amount, oppositeBridge, receiveSide, chainID, chain2address);
-    }
-
-    function delegatedUnsynthesizeRequest(
-        address stoken,
-        uint256 amount,
-        address from,
-        address chain2address,
-        address receiveSide,
-        address oppositeBridge,
-        uint256 chainID,
-        DelegatedCallReceipt memory receipt
-    ) external {
-        _proceedFeesWithApprove(stoken, amount, from, receipt);
-        ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, chain2address, receiveSide, oppositeBridge, chainID);
-    }
-
-    function delegatedUnsynthesizeRequestToSolana(
-        address stoken,
-        bytes32[] calldata pubkeys,
-        uint256 amount,
-        address from,
-        uint256 chainId,
-        DelegatedCallReceipt memory receipt
-    ) external {
-        _proceedFeesWithApprove(stoken, amount, from, receipt);
-        ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, pubkeys, amount, chainId);
-    }
-
-    function delegatedEmergencyUnsyntesizeRequest(
-        bytes32 txID,
-        address from,
-        address payToken,
-        address receiveSide,
-        address oppositeBridge,
-        uint256 chainID,
-        DelegatedCallReceipt memory receipt
-    ) external {
-        _proceedFees(payToken, from, receipt);
-        ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, receiveSide, oppositeBridge, chainID);
-    }
-
-    function delegatedEmergencyUnsyntesizeRequestToSolana(
-        address from,
-        address payToken,
-        bytes32[] calldata pubkeys,
-        bytes1 bumpSynthesizeRequest,
-        uint256 chainId,
-        DelegatedCallReceipt memory receipt
-    ) external {
-        _proceedFees(payToken, from, receipt);
-        ISynthesis(_synthesis).emergencyUnsyntesizeRequestToSolana(pubkeys, bumpSynthesizeRequest, chainId);
-    }
-
-
-
-    //===================DIRECT-METHODS=======================
+   
+    //.........................DIRECT-METHODS...........................
+    //==============================PORTAL==============================
     /**
      * @dev Delegated token synthesize request.
      * @param token token address to synthesize
@@ -621,7 +662,7 @@ contract Router {
         IPortal.PermitData memory permitData
     ) external {
         SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
-        IPortal(_portal).synthesizeWithPermit(permitData, token, amount, to, receiveSide, oppositeBridge, chainID);
+        IPortal(_portal).synthesizeWithPermit(permitData, token, amount, from, to, receiveSide, oppositeBridge, chainID);
     }
 
     /**
@@ -641,7 +682,7 @@ contract Router {
         uint256 chainId
     ) external {
         SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
-        IPortal(_portal).synthesizeToSolana(token, amount, pubkeys, txStateBump, chainId);
+        IPortal(_portal).synthesizeToSolana(token, amount, from, pubkeys, txStateBump, chainId);
     }
 
     /**
@@ -661,18 +702,18 @@ contract Router {
                 SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
             }
         }
-        IPortal(_portal).synthesize_batch_transit(token, amount, synth_params, selector, transit_data, permit_data);
+        IPortal(_portal).synthesize_batch_transit(token, amount, from, synth_params, selector, transit_data, permit_data);
     }
 
     function emergencyUnburnRequest(
         bytes32 txID,
         address from,
-        address payToken,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId
     ) external {
-        IPortal(_portal).emergencyUnburnRequest(txID, receiveSide, oppositeBridge, chainId);
+        // TODO check sig from orig sender
+        IPortal(_portal).emergencyUnburnRequest(txID, from, receiveSide, oppositeBridge, chainId);
     }
 
     function emergencyUnburnRequestToSolana(
@@ -681,7 +722,8 @@ contract Router {
         bytes32[] calldata pubkeys,
         uint256 chainId
     ) external {
-        IPortal(_portal).emergencyUnburnRequestToSolana(txID, pubkeys, chainId);
+        // TODO check sig from orig sender
+        IPortal(_portal).emergencyUnburnRequestToSolana(txID, from, pubkeys, chainId);
     }
 
     //==============================CURVE-PROXY==============================
@@ -763,7 +805,7 @@ contract Router {
     ) external {
         SafeERC20.safeTransferFrom(IERC20(tokenSynth), from, address(this), amount);
         IERC20(tokenSynth).approve(_synthesis, amount);
-        ISynthesis(_synthesis).synthTransfer(tokenReal, amount, oppositeBridge, receiveSide, chainID, chain2address);
+        ISynthesis(_synthesis).synthTransfer(tokenReal, amount, from, oppositeBridge, receiveSide, chainID, chain2address);
     }
 
     function unsynthesizeRequest(
@@ -777,19 +819,19 @@ contract Router {
     ) external {
         SafeERC20.safeTransferFrom(IERC20(stoken), from, address(this), amount);
         IERC20(stoken).approve(_synthesis, amount);
-        ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, chain2address, receiveSide, oppositeBridge, chainID);
+        ISynthesis(_synthesis).burnSyntheticToken(stoken, from, amount, chain2address, receiveSide, oppositeBridge, chainID);
     }
 
     function unsynthesizeRequestToSolana(
         address stoken,
+        address from,
         bytes32[] calldata pubkeys,
         uint256 amount,
-        address from,
         uint256 chainId
     ) external {
         SafeERC20.safeTransferFrom(IERC20(stoken), from, address(this), amount);
         IERC20(stoken).approve(_synthesis, amount);
-        ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, pubkeys, amount, chainId);
+        ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, from, pubkeys, amount, chainId);
     }
 
     function emergencyUnsyntesizeRequest(
@@ -799,7 +841,7 @@ contract Router {
         address oppositeBridge,
         uint256 chainID
     ) external {
-        ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, receiveSide, oppositeBridge, chainID);
+        ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, from, receiveSide, oppositeBridge, chainID);
     }
 
     function emergencyUnsyntesizeRequestToSolana(
@@ -808,6 +850,6 @@ contract Router {
         bytes1 bumpSynthesizeRequest,
         uint256 chainId
     ) external {
-        ISynthesis(_synthesis).emergencyUnsyntesizeRequestToSolana(pubkeys, bumpSynthesizeRequest, chainId);
+        ISynthesis(_synthesis).emergencyUnsyntesizeRequestToSolana(from, pubkeys, bumpSynthesizeRequest, chainId);
     }
 }
