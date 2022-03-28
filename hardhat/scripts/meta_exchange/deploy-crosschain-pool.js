@@ -32,22 +32,6 @@ async function main() {
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
 
 
-  // deploy Curve Proxy
-  const curveProxy = await upgrades.deployProxy(CurveProxy, [
-    deployInfo[network.name].forwarder,
-    deployInfo[network.name].portal,
-    deployInfo[network.name].synthesis,
-    deployInfo[network.name].bridge
-  ], { initializer: 'initialize' });
-  await curveProxy.deployed()
-
-  // initial proxy setup
-  await Synthesis.attach(deployInfo[network.name].synthesis).setProxyCurve(curveProxy.address);
-  await Portal.attach(deployInfo[network.name].portal).setProxyCurve(curveProxy.address);
-
-  deployInfo[network.name].curveProxy = curveProxy.address
-
-
 
   let localToken = []
   let crosschainPoolCoins = []
@@ -113,7 +97,7 @@ async function main() {
       await crosschainPoolLp.set_minter(crosschainPool.address)
 
       // setting the crosschain pool in proxy contract
-      await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(crosschainPool.address, crosschainPoolLp.address, deployInfo[network.name].crosschainPool[i].coins);
+     await CurveProxy.attach(deployInfo[network.name].curveProxy).setPool(crosschainPool.address, crosschainPoolLp.address, deployInfo[network.name].crosschainPool[i].coins);
 
       deployInfo[network.name].crosschainPool[i].address = crosschainPool.address
     }

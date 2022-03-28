@@ -361,21 +361,6 @@ contract Router {
         IPortal(_portal).synthesizeWithPermit(permitData, token, amount, to, receiveSide, oppositeBridge, chainID);
     }
 
-    //----TEST------
-    function delegatedTokenSynthesize1(
-        address token,
-        uint256 amount,
-        address from,
-        address to,
-        address receiveSide,
-        address oppositeBridge,
-        uint256 chainID
-    ) external {
-        SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
-        IPortal(_portal).synthesize(token, amount, from, to, receiveSide, oppositeBridge, chainID);
-    }
-
-    //------------
 
     /**
      * @dev  Delegated token synthesize request with bytes32 support for Solana.
@@ -585,6 +570,244 @@ contract Router {
         DelegatedCallReceipt memory receipt
     ) external {
         _proceedFees(payToken, from, receipt);
+        ISynthesis(_synthesis).emergencyUnsyntesizeRequestToSolana(pubkeys, bumpSynthesizeRequest, chainId);
+    }
+
+
+
+    //===================DIRECT-METHODS=======================
+    /**
+     * @dev Delegated token synthesize request.
+     * @param token token address to synthesize
+     * @param amount amount to synthesize
+     * @param from msg sender address
+     * @param to amount recipient address
+     * @param receiveSide request recipient address
+     * @param oppositeBridge opposite bridge address
+     * @param chainID opposite chain ID
+     */
+
+    function tokenSynthesizeRequest(
+        address token,
+        uint256 amount,
+        address from,
+        address to,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID
+    ) external {
+        SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
+        IPortal(_portal).synthesize(token, amount, from, to, receiveSide, oppositeBridge, chainID);
+    }
+
+    /**
+     * @dev Delegated token synthesize request with permit.
+     * @param token token address to synthesize
+     * @param amount amount to synthesize
+     * @param to amount recipient address
+     * @param receiveSide request recipient address
+     * @param oppositeBridge opposite bridge address
+     * @param chainID opposite chain ID
+     * @param permitData permit data
+     */
+    function tokenSynthesizeRequestWithPermit(
+        address token,
+        uint256 amount,
+        address from,
+        address to,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID,
+        IPortal.PermitData memory permitData
+    ) external {
+        SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
+        IPortal(_portal).synthesizeWithPermit(permitData, token, amount, to, receiveSide, oppositeBridge, chainID);
+    }
+
+    /**
+     * @dev  Delegated token synthesize request with bytes32 support for Solana.
+     * @param token token address to synthesize
+     * @param amount amount to synthesize
+     * @param pubkeys synth data for Solana
+     * @param txStateBump transaction state bump
+     * @param chainId opposite chain ID
+     */
+    function tokenSynthesizeRequestToSolana(
+        address token,
+        uint256 amount,
+        address from,
+        bytes32[] calldata pubkeys,
+        bytes1 txStateBump,
+        uint256 chainId
+    ) external {
+        SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
+        IPortal(_portal).synthesizeToSolana(token, amount, pubkeys, txStateBump, chainId);
+    }
+
+    /**
+     * @dev  Delegated batch synthesize request with data transition.
+     */
+    function batchSynthesizeRequestWithDataTransit(
+        address[] memory token,
+        uint256[] memory amount, // set a positive amount in order to initiate a synthesize request
+        address from,
+        bytes4 selector,
+        bytes calldata transit_data,
+        IPortal.SynthParams memory synth_params,
+        IPortal.PermitData[] memory permit_data
+    ) external {
+        for (uint256 i = 0; i < token.length; i++) {
+            if (amount[i] > 0) {
+                SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
+            }
+        }
+        IPortal(_portal).synthesize_batch_transit(token, amount, synth_params, selector, transit_data, permit_data);
+    }
+
+    function emergencyUnburnRequest(
+        bytes32 txID,
+        address from,
+        address payToken,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainId
+    ) external {
+        IPortal(_portal).emergencyUnburnRequest(txID, receiveSide, oppositeBridge, chainId);
+    }
+
+    function emergencyUnburnRequestToSolana(
+        bytes32 txID,
+        address from,
+        bytes32[] calldata pubkeys,
+        uint256 chainId
+    ) external {
+        IPortal(_portal).emergencyUnburnRequestToSolana(txID, pubkeys, chainId);
+    }
+
+    //==============================CURVE-PROXY==============================
+    /**
+     * @dev Delegated local mint EUSD request (hub chain execution only)
+     * @param params MetaMintEUSD params
+     * @param permit permit operation params
+     * @param token token addresses
+     * @param amount amounts to transfer
+     */
+    function mintEusdRequestVia3pool(
+        ICurveProxy.MetaMintEUSD calldata params,
+        ICurveProxy.PermitData[] calldata permit,
+        address from,
+        address[3] calldata token,
+        uint256[3] calldata amount
+    ) external {
+        for (uint256 i = 0; i < token.length; i++) {
+            if (amount[i] > 0) {
+                SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
+            }
+        }
+        ICurveProxy(_curveProxy).add_liquidity_3pool_mint_eusd(params, permit, token, amount);
+    }
+
+    /**
+     * @dev Delegated local meta exchange request (hub chain execution only)
+     * @param params meta exchange params
+     * @param permit permit operation params
+     * @param token token addresses to transfer within initial stage
+     * @param amount amounts to transfer within initial stage
+     */
+    function metaExchangeRequestVia3pool(
+        ICurveProxy.MetaExchangeParams calldata params,
+        ICurveProxy.PermitData[] calldata permit,
+        address from,
+        address[3] calldata token,
+        uint256[3] calldata amount
+    ) external {
+        for (uint256 i = 0; i < token.length; i++) {
+            if (amount[i] > 0) {
+                SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
+            }
+        }
+        ICurveProxy(_curveProxy).meta_exchange(params, permit, token, amount);
+    }
+
+    /**
+     * @dev Delegated local EUSD redeem request with unsynth operation (hub chain execution only)
+     * @param params meta redeem EUSD params
+     * @param permit permit params
+     * @param receiveSide calldata recipient address for unsynth operation
+     * @param oppositeBridge opposite bridge contract address
+     * @param chainID opposite chain ID
+     */
+    function redeemEusdRequest(
+        ICurveProxy.MetaRedeemEUSD calldata params,
+        ICurveProxy.PermitData calldata permit,
+        address payToken,
+        address from,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID
+    ) external {
+        SafeERC20.safeTransferFrom(IERC20(payToken), from, _curveProxy, params.token_amount_h);
+        ICurveProxy(_curveProxy).redeem_eusd(params, permit, receiveSide, oppositeBridge, chainID);
+    }
+
+    //==============================SYNTHESIS==============================
+    function synthTransferRequest(
+        bytes32 tokenReal,
+        address tokenSynth,
+        uint256 amount,
+        address from,
+        address oppositeBridge,
+        address receiveSide,
+        uint256 chainID,
+        address chain2address
+    ) external {
+        SafeERC20.safeTransferFrom(IERC20(tokenSynth), from, address(this), amount);
+        IERC20(tokenSynth).approve(_synthesis, amount);
+        ISynthesis(_synthesis).synthTransfer(tokenReal, amount, oppositeBridge, receiveSide, chainID, chain2address);
+    }
+
+    function unsynthesizeRequest(
+        address stoken,
+        uint256 amount,
+        address from,
+        address chain2address,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID
+    ) external {
+        SafeERC20.safeTransferFrom(IERC20(stoken), from, address(this), amount);
+        IERC20(stoken).approve(_synthesis, amount);
+        ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, chain2address, receiveSide, oppositeBridge, chainID);
+    }
+
+    function unsynthesizeRequestToSolana(
+        address stoken,
+        bytes32[] calldata pubkeys,
+        uint256 amount,
+        address from,
+        uint256 chainId
+    ) external {
+        SafeERC20.safeTransferFrom(IERC20(stoken), from, address(this), amount);
+        IERC20(stoken).approve(_synthesis, amount);
+        ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, pubkeys, amount, chainId);
+    }
+
+    function emergencyUnsyntesizeRequest(
+        bytes32 txID,
+        address from,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID
+    ) external {
+        ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, receiveSide, oppositeBridge, chainID);
+    }
+
+    function emergencyUnsyntesizeRequestToSolana(
+        address from,
+        bytes32[] calldata pubkeys,
+        bytes1 bumpSynthesizeRequest,
+        uint256 chainId
+    ) external {
         ISynthesis(_synthesis).emergencyUnsyntesizeRequestToSolana(pubkeys, bumpSynthesizeRequest, chainId);
     }
 }
