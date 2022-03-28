@@ -216,19 +216,22 @@ describe('Vesting tests', () => {
         let balanceVestingAfter = await tokenErc20.balanceOf(vesting.address);
         console.log("balance vesting after = ", balanceVestingAfter);
         expect(balanceVestingBefore).to.equal(parseInt(balanceVestingAfter) + 2000000 + 1750000);
-        await restoreSnapshot(snapshot0);
+        // 
+        // 5500000 6000000
+        await increaseTime(day_in_seconds * 10);
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore = blockBefore.timestamp;
+        console.log("E3 available = ", await vesting.connect(addr1).claimable(parseInt(timestampBefore)));   
+        console.log("bal of addr1 = ", await vesting.connect(addr1).balanceOf(addr1.address)); 
+        console.log("vEywaInitialSupply = ", await vesting.connect(addr1).vEywaInitialSupply());
+        console.log("claimed = ", await vesting.connect(addr1).claimed(addr1.address));  
 
-        // timestamp =  1648340844
-        // timestamp =  1652747244
-        // cliff start =  1652747241
-        // EEE balance vesting before =  BigNumber { value: "10000000" }
-        // vesting totalSupply() =  BigNumber { value: "10000000" }
-        // balance of addr1 vesting =  BigNumber { value: "4000000" }
-        // available addr1 =  BigNumber { value: "2000000" }
-        // available addr2 =  BigNumber { value: "1750000" }
-        // available addr3 =  BigNumber { value: "1250000" }
-        // E2 available =  BigNumber { value: "5000000" }
-        // balance vesting after =  BigNumber { value: "6250000" }
+        console.log("available addr1 = ", await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address));        
+        console.log("available addr2 = ", await vesting.connect(addr2).available(parseInt(timestampBefore), addr2.address));  
+        console.log("available addr3 = ", await vesting.connect(addr3).available(parseInt(timestampBefore), addr3.address));  
+        
+        await restoreSnapshot(snapshot0);
     });
 
     // it('can not claim more than available now', async function () {
