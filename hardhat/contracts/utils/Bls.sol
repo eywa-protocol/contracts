@@ -9,7 +9,7 @@ import "./ModUtils.sol";
  * Much of the code in this file is derived from here:
  * https://github.com/ConsenSys/gpact/blob/main/common/common/src/main/solidity/BlsSignatureVerification.sol
  */
-contract BlsSignatureVerification {
+library Bls {
     using ModUtils for uint256;
 
     struct E1Point {
@@ -262,5 +262,31 @@ contract BlsSignatureVerification {
             success := staticcall(sub(gas(), 2000), 6, input, 0x80, res, 0x40)
         }
         require(success, "Add points failed");
+    }
+
+    function decodeE2Point(bytes memory _pubKey) internal pure returns (E2Point memory pubKey) {
+        uint256[] memory output = new uint256[](4);
+        for (uint256 i = 32; i <= output.length * 32; i += 32) {
+            assembly {
+                mstore(add(output, i), mload(add(_pubKey, i)))
+            }
+        }
+
+        pubKey.x[0] = output[0];
+        pubKey.x[1] = output[1];
+        pubKey.y[0] = output[2];
+        pubKey.y[1] = output[3];
+    }
+
+    function decodeE1Point(bytes memory _sig) internal pure returns (E1Point memory signature) {
+        uint256[] memory output = new uint256[](2);
+        for (uint256 i = 32; i <= output.length * 32; i += 32) {
+            assembly {
+                mstore(add(output, i), mload(add(_sig, i)))
+            }
+        }
+
+        signature.x = output[0];
+        signature.y = output[1];
     }
 }
