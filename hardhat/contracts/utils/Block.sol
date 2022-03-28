@@ -14,13 +14,13 @@ library Block {
         bytes memory _payload
     ) internal pure returns (
         bytes32 reqId,
-        address bridgeFrom,
+        bytes32 bridgeFrom,
         address receiveSide,
         bytes memory sel
     ) {
         uint256 off = 0;
         (reqId, off) = ZeroCopySource.NextHash(_payload, off);
-        (bridgeFrom, off) = ZeroCopySource.NextAddress(_payload, off);
+        (bridgeFrom, off) = ZeroCopySource.NextHash(_payload, off);
         (receiveSide, off) = ZeroCopySource.NextAddress(_payload, off);
         (sel, off) = ZeroCopySource.NextVarBytes(_payload, off);
     }

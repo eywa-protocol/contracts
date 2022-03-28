@@ -14,7 +14,7 @@ contract MerkleTest {
         bytes32 _root
     ) public pure returns (
         bytes32 reqId,
-        address bridgeFrom,
+        bytes32 bridgeFrom,
         address receiveSide,
         bytes memory sel
     ) {

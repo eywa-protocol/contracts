@@ -27,7 +27,7 @@ contract BlockTest {
     ) public pure returns (
         bytes32 txHash,
         bytes32 reqId,
-        address bridgeFrom,
+        bytes32 bridgeFrom,
         address receiveSide,
         bytes memory sel
     ) {

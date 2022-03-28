@@ -187,14 +187,14 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         bytes memory payload = Merkle.prove(_txMerkleProve, Block.transactionsRoot(_blockHeader));
 
         // Make the call
-        (bytes32 reqId, address bridgeFrom, address receiveSide, bytes memory sel) = Block.oracleRequestTx(payload);
+        (bytes32 reqId, bytes32 bridgeFrom, address receiveSide, bytes memory sel) = Block.oracleRequestTx(payload);
         require(reqIdFilter.testAndSet(reqId) == false, "Already seen");
         bytes memory data = receiveSide.functionCall(sel, "Bridge: receiveRequestV2: failed");
         require(
             data.length == 0 || abi.decode(data, (bool)),
             "Bridge: receiveRequestV2: unable to decode returned data"
         );
-        emit ReceiveRequest(reqId, receiveSide, bytes32(bytes20(bridgeFrom)));
+        emit ReceiveRequest(reqId, receiveSide, bridgeFrom);
     }
     
     /**
