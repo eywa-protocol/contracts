@@ -60,7 +60,7 @@ contract('CurveProxy', () => {
             // // this.bridgeB = await SynthesisB.at(deployInfo["network2"].synthesis)
 
             const testAmount = Math.floor((Math.random() * 100) + 1);
-            const amount = ethers.utils.parseEther(testAmount + ".0")
+            const amount = ethers.utils.parseEther("0.5")
             const tokenToSynth = this.tokenA1.address
             const receiveSideB = deployInfo["network2"].synthesis
             const oppositeBridge = deployInfo["network2"].bridge
@@ -84,57 +84,21 @@ contract('CurveProxy', () => {
                 chainID
             ])
 
-            const checkPortalA = new web3.eth.Contract(this.portalA.abi, this.portalA.address)
+            // const checkPortalA = new web3.eth.Contract(this.portalA.abi, this.portalA.address)
 
-            const callData1 = await checkPortalA.methods.synthesize(tokenToSynth,
-                amount,
-                userFrom,
-                userTo,
-                receiveSideB,
-                oppositeBridge,
-                chainID
-            ).encodeABI()
+            // const callData1 = await checkPortalA.methods.synthesize(tokenToSynth,
+            //     amount,
+            //     userFrom,
+            //     userTo,
+            //     receiveSideB,
+            //     oppositeBridge,
+            //     chainID
+            // ).encodeABI()
 
-            console.log(callData1)
-            console.log(callData)
+            // console.log(callData1)
+            // console.log(callData)
 
-            await this.routerA.delegatedTokenSynthesize1(
-                tokenToSynth,
-                amount,
-                userFrom,
-                userTo,
-                receiveSideB,
-                oppositeBridge,
-                chainID,
-                { from: userNet1, gas: 1000_000 }
-            )
-
-            const _tokenToSynth = tokenToSynth
-            const _executionPrice = ethers.utils.parseEther("0.1")
-            const _from = userNet1
-            const _to = userNet2
-            const _timeout = "1000000"
-
-            const msgHash = web3.utils.soliditySha3(
-                { type: 'address', value: _tokenToSynth },
-                { type: 'uint256', value: _executionPrice },
-                { type: 'address', value: _from },
-                { type: 'address', value: _to },
-                { type: 'uint256', value: _timeout }
-            );
-
-            // const signature = ethers.utils.splitSignature(await web3.eth.sign(msgHash, userNet1))
-            // const signature = ethers.utils.splitSignature(await userNet1.signMessage(ethers.utils.arrayify(msgHash)));
-
-            // const delegatedCallReceipt = {
-            //     executionPrice: _executionPrice,
-            //     timeout: _timeout,
-            //     v: signature.v,
-            //     r: signature.r,
-            //     s: signature.s
-            // }
-
-            // await this.routerA.delegatedTokenSynthesize(
+            // await this.routerA.delegatedTokenSynthesizeRequest(
             //     tokenToSynth,
             //     amount,
             //     userFrom,
@@ -142,9 +106,45 @@ contract('CurveProxy', () => {
             //     receiveSideB,
             //     oppositeBridge,
             //     chainID,
-            //     delegatedCallReceipt,
             //     { from: userNet1, gas: 1000_000 }
             // )
+
+            const _tokenToSynth = tokenToSynth
+            const _executionPrice = ethers.utils.parseEther("0.1")
+            const _from = userNet1
+            const _to = userNet2
+            const _deadline = "10000000000000"
+            // payToken, receipt.executionPrice, from, msg.sender, receipt.deadline
+            const msgHash = web3.utils.soliditySha3(
+                { type: 'address', value: _tokenToSynth },
+                { type: 'uint256', value: _executionPrice },
+                { type: 'address', value: _from },
+                { type: 'address', value: _to },
+                { type: 'uint256', value: _deadline }
+            );
+
+            // const signature = ethers.utils.splitSignature(await web3.eth.sign(msgHash, userNet1))
+            const signature = ethers.utils.splitSignature(await userNet1.signMessage(ethers.utils.arrayify(msgHash)));
+
+            const delegatedCallReceipt = {
+                executionPrice: _executionPrice,
+                timeout: _timeout,
+                v: signature.v,
+                r: signature.r,
+                s: signature.s
+            }
+
+            await this.routerA.delegatedTokenSynthesizeRequest(
+                tokenToSynth,
+                amount,
+                userFrom,
+                userTo,
+                receiveSideB,
+                oppositeBridge,
+                chainID,
+                delegatedCallReceipt,
+                { from: userNet1, gas: 1000_000 }
+            )
 
 
             // await timeout(15000)

@@ -495,22 +495,9 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             if (_amounts[i] > 0) {
                 // require(tokenDecimals[castToBytes32(_token)[i]] > 0, "Portal: token must be verified");
 
-                // if (_permit_data[i].v != 0) {
-                //     uint256 approve_value = _permit_data[i].approveMax ? uint256(2**256 - 1) : _amounts[i];
-                //     IERC20(_tokens[i]).permit(
-                //         _from,
-                //         address(this),
-                //         approve_value,
-                //         _permit_data[i].deadline,
-                //         _permit_data[i].v,
-                //         _permit_data[i].r,
-                //         _permit_data[i].s
-                //     );
-                // }
-
                 registerNewBalance(_tokens[i], _amounts[i]);
 
-                txId[i] = general_txId; 
+                txId[i] = keccak256(abi.encodePacked(general_txId, i));
                 TxState storage txState = requests[txId[i]];
                 txState.from = castToBytes32(_from); //change!
                 txState.to = castToBytes32(_synth_params.to);
@@ -520,7 +507,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
 
                 emit SynthesizeRequest(txId[i], _from, _synth_params.to, _amounts[i], _tokens[i]);
                 
-                break;
+                // break;
             }
         }
 
