@@ -12,14 +12,11 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    string constant prefix = "\x19Ethereum Signed Message:\n32";  
+    string constant prefix = "\x19Ethereum Signed Message:\n32"; 
 
-    address private immutable adminDeployer;
-
-    address private signAdmin; // address which can sign early transfer
-
+    address public immutable adminDeployer;
+    address public signAdmin; // address which can sign early transfer
     uint256 public signatureTimeStamp;
-    
     uint256 public started; 
     IERC20 public eywaToken;
     uint256 public cliffDuration; // timestamp cliff duration
@@ -31,7 +28,6 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     mapping (address => uint256) public claimed; // how much already claimed
     mapping(uint256 => bool) private usedNonces;
     uint256 public vEywaInitialSupply;
-
     mapping (address => uint256) public unburnBalanceOf;
 
     event ReleasedAfterClaim(address indexed from, uint256 indexed amount);
@@ -113,7 +109,14 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         return usedNonces[nonce];
     }
 
-    function transfer(address recipient, uint256 amount,  uint8 v, bytes32 r, bytes32 s, uint256 nonce) public nonReentrant() returns (bool) {
+    function transfer(
+        address recipient, 
+        uint256 amount,  
+        uint8 v, 
+        bytes32 r, 
+        bytes32 s, 
+        uint256 nonce
+    ) public nonReentrant() returns (bool) {
         require(usedNonces[nonce] == false, "Nonce was used");
         require(started <= block.timestamp, "It is not started time yet");
         usedNonces[nonce] = true;
@@ -137,7 +140,10 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         return result;
     }
 
-    function transfer(address recipient, uint256 amount) public override nonReentrant() returns (bool) {
+    function transfer(
+        address recipient, 
+        uint256 amount
+    ) public override nonReentrant() returns (bool) {
         require(block.timestamp >= started + signatureTimeStamp);
 
         uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(unburnBalanceOf[msg.sender]);
@@ -150,7 +156,15 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         return result;
     }
     
-    function transferFrom(address sender, address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s, uint256 nonce) public nonReentrant() returns (bool) {
+    function transferFrom(
+        address sender, 
+        address recipient, 
+        uint256 amount, 
+        uint8 v, 
+        bytes32 r, 
+        bytes32 s, 
+        uint256 nonce
+    ) public nonReentrant() returns (bool) {
 
         require(usedNonces[nonce] == false, "Nonce was used");
         require(started <= block.timestamp, "It is not started time yet");
@@ -176,7 +190,11 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     }
 
 
-    function transferFrom(address sender, address recipient, uint256 amount) public override nonReentrant() returns (bool) {
+    function transferFrom(
+        address sender, 
+        address recipient, 
+        uint256 amount
+    ) public override nonReentrant() returns (bool) {
         require(block.timestamp >= started + signatureTimeStamp);
 
         uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(unburnBalanceOf[sender]);
