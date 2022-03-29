@@ -13,6 +13,8 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
+    string constant prefix = "\x19Ethereum Signed Message:\n32";  
+
     address private immutable adminDeployer;
 
     address private signAdmin; // address which can sign early transfer
@@ -118,17 +120,20 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         require(usedNonces[nonce] == false, "Nonce was used");
         require(started <= block.timestamp, "It is not started time yet");
         usedNonces[nonce] = true;
-        string memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(msg.sender)), keccak256(abi.encodePacked(recipient)),  keccak256(abi.encodePacked(amount))));
+        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(msg.sender)), keccak256(abi.encodePacked(recipient)), keccak256(abi.encodePacked(nonce)),  keccak256(abi.encodePacked(amount))));
         require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
 
-        // TODO: unburnBalanceOf
+        
+
+        // TODO:
+        // claimed[msg.sender] * amount  / balanceOf(msg.sender)
+        // uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
+        uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(unburnBalanceOf[msg.sender]);
         unburnBalanceOf[msg.sender] = unburnBalanceOf[msg.sender] - amount; 
         unburnBalanceOf[recipient] = unburnBalanceOf[recipient] + amount;
 
-        uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
         claimed[msg.sender] = claimed[msg.sender] - claimedNumberTransfer;
-        claimed[recipient] = claimedNumberTransfer;
+        claimed[recipient] = claimed[recipient] + claimedNumberTransfer;
         bool result = super.transfer(recipient, amount);
         return result;
     }
@@ -136,30 +141,32 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     function transfer(address recipient, uint256 amount) public override returns (bool) {
         require(block.timestamp >= started + signatureTimeStamp);
 
+        // uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
+        uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(unburnBalanceOf[msg.sender]);
         unburnBalanceOf[msg.sender] = unburnBalanceOf[msg.sender] - amount; 
         unburnBalanceOf[recipient] = unburnBalanceOf[recipient] + amount;
 
-        uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
         claimed[msg.sender] = claimed[msg.sender] - claimedNumberTransfer;
-        claimed[recipient] = claimedNumberTransfer;
+        claimed[recipient] = claimed[recipient] + claimedNumberTransfer;
         bool result = super.transfer(recipient, amount);
         return result;
     }
-
+    // function transferFrom(address sender, address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s, bytes32 nonce) public nonReentrant() returns (bool) {
     function transferFrom(address sender, address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s, bytes32 nonce) public nonReentrant() returns (bool) {
+
         require(usedNonces[nonce] == false, "Nonce was used");
         require(started <= block.timestamp, "It is not started time yet");
         usedNonces[nonce] = true;
-        string memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(sender)), keccak256(abi.encodePacked(recipient)),  keccak256(abi.encodePacked(amount))));
+        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(sender)), keccak256(abi.encodePacked(recipient)), keccak256(abi.encodePacked(nonce)),  keccak256(abi.encodePacked(amount))));
         require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
 
+        // uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(balanceOf(sender));
+        uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(unburnBalanceOf[sender]);
         unburnBalanceOf[sender] = unburnBalanceOf[sender] - amount; 
         unburnBalanceOf[recipient] = unburnBalanceOf[recipient] + amount;
 
-        uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
-        claimed[sender] = claimed[msg.sender] - claimedNumberTransfer;
-        claimed[recipient] = claimedNumberTransfer;
+        claimed[sender] = claimed[sender] - claimedNumberTransfer;
+        claimed[recipient] = claimed[recipient] + claimedNumberTransfer;
         bool result = super.transferFrom(sender, recipient, amount);
         return result;
     }
@@ -168,12 +175,13 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     function transferFrom(address sender, address recipient, uint256 amount) public override nonReentrant() returns (bool) {
         require(block.timestamp >= started + signatureTimeStamp);
 
+        // uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(balanceOf(sender));
+        uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(unburnBalanceOf[sender]);
         unburnBalanceOf[sender] = unburnBalanceOf[sender] - amount; 
         unburnBalanceOf[recipient] = unburnBalanceOf[recipient] + amount;
-        
-        uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
-        claimed[sender] = claimed[msg.sender] - claimedNumberTransfer;
-        claimed[recipient] = claimedNumberTransfer;
+
+        claimed[sender] = claimed[sender] - claimedNumberTransfer;
+        claimed[recipient] = claimed[recipient] + claimedNumberTransfer;
         bool result = super.transferFrom(sender, recipient, amount);
         return result;
     }
