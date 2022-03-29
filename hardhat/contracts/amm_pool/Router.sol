@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-newone/access/Ownable.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
 
 interface IPortal {
     struct PermitData {
@@ -225,7 +226,7 @@ interface IERC20Permit {
     ) external;
 }
 
-contract Router is Ownable{
+contract Router is Ownable {
     address _localTreasury;
     address _curveProxy;
     address _portal;
@@ -233,7 +234,12 @@ contract Router is Ownable{
 
     mapping(address => bool) public _trustedWorker;
 
-    event CrosschainPaymentEvent(address indexed userFrom, address payToken, uint256 executionPrice, address indexed worker);
+    event CrosschainPaymentEvent(
+        address indexed userFrom,
+        address payToken,
+        uint256 executionPrice,
+        address indexed worker
+    );
 
     struct DelegatedCallReceipt {
         uint256 executionPrice;
@@ -255,11 +261,11 @@ contract Router is Ownable{
         _localTreasury = localTreasury;
     }
 
-    function setWorker(address worker) public onlyOwner{
+    function setTrustedWorker(address worker) public onlyOwner {
         _trustedWorker[worker] = true;
     }
 
-    function removeWorker(address worker) public onlyOwner{
+    function removeTrustedWorker(address worker) public onlyOwner {
         _trustedWorker[worker] = false;
     }
 
@@ -281,7 +287,6 @@ contract Router is Ownable{
                 receipt.deadline
             )
         );
-
         bytes32 workerStructHash = keccak256(
             abi.encodePacked(
                 //TYPEHASH
@@ -314,7 +319,7 @@ contract Router is Ownable{
         address from,
         DelegatedCallReceipt memory receipt
     ) internal {
-       _checkSignatures(payToken, from, receipt);
+        _checkSignatures(payToken, from, receipt);
         // worker fee
         SafeERC20.safeTransferFrom(IERC20(payToken), from, msg.sender, receipt.executionPrice);
 
@@ -344,7 +349,7 @@ contract Router is Ownable{
         address to,
         DelegatedCallReceipt memory receipt
     ) internal {
-         _checkSignatures(payToken, from, receipt);
+        _checkSignatures(payToken, from, receipt);
         // worker fee
         SafeERC20.safeTransferFrom(IERC20(payToken), from, msg.sender, receipt.executionPrice);
         // approve remaining amount
@@ -471,35 +476,35 @@ contract Router is Ownable{
             permit_data
         );
     }
+    //TODO:emergency?
+    // // TODO check payToken
+    // function delegatedEmergencyUnburnRequest(
+    //     bytes32 txID,
+    //     address from,
+    //     address payToken,
+    //     address receiveSide,
+    //     address oppositeBridge,
+    //     uint256 chainId,
+    //     DelegatedCallReceipt memory receipt
+    // ) external {
+    //     // TODO check sig from orig sender
+    //     _proceedFees(payToken, from, receipt);
+    //     IPortal(_portal).emergencyUnburnRequest(txID, from, receiveSide, oppositeBridge, chainId);
+    // }
 
-    // TODO check payToken
-    function delegatedEmergencyUnburnRequest(
-        bytes32 txID,
-        address from,
-        address payToken,
-        address receiveSide,
-        address oppositeBridge,
-        uint256 chainId,
-        DelegatedCallReceipt memory receipt
-    ) external {
-        // TODO check sig from orig sender
-        _proceedFees(payToken, from, receipt);
-        IPortal(_portal).emergencyUnburnRequest(txID, from, receiveSide, oppositeBridge, chainId);
-    }
-
-    // TODO check payToken
-    function delegatedEmergencyUnburnRequestToSolana(
-        bytes32 txID,
-        address from,
-        address payToken,
-        bytes32[] calldata pubkeys,
-        uint256 chainId,
-        DelegatedCallReceipt memory receipt
-    ) external {
-        // TODO check sig from orig sender
-        _proceedFees(payToken, from, receipt);
-        IPortal(_portal).emergencyUnburnRequestToSolana(txID, from, pubkeys, chainId);
-    }
+    // // TODO check payToken
+    // function delegatedEmergencyUnburnRequestToSolana(
+    //     bytes32 txID,
+    //     address from,
+    //     address payToken,
+    //     bytes32[] calldata pubkeys,
+    //     uint256 chainId,
+    //     DelegatedCallReceipt memory receipt
+    // ) external {
+    //     // TODO check sig from orig sender
+    //     _proceedFees(payToken, from, receipt);
+    //     IPortal(_portal).emergencyUnburnRequestToSolana(txID, from, pubkeys, chainId);
+    // }
 
     //==============================SYNTHESIS==============================
     function delegatedSynthTransferRequest(
@@ -549,32 +554,35 @@ contract Router is Ownable{
         ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, from, pubkeys, amount, chainId);
     }
 
-    function delegatedEmergencyUnsyntesizeRequest(
-        bytes32 txID,
-        address from,
-        address payToken,
-        address receiveSide,
-        address oppositeBridge,
-        uint256 chainID,
-        DelegatedCallReceipt memory receipt
-    ) external {
-        // TODO check sig from orig sender
-        _proceedFees(payToken, from, receipt);
-        ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, from, receiveSide, oppositeBridge, chainID);
-    }
+    //TODO:emergency?
+    // function delegatedEmergencyUnsyntesizeRequest(
+    //     bytes32 txID,
+    //     address from,
+    //     address payToken,
+    //     address receiveSide,
+    //     address oppositeBridge,
+    //     uint256 chainID,
+    //     DelegatedCallReceipt memory receipt
+    // ) external {
+    //     // TODO check sig from orig sender
+    //     // TODO check payToken
+    //     _proceedFees(payToken, from, receipt);
+    //     ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, from, receiveSide, oppositeBridge, chainID);
+    // }
 
-    function delegatedEmergencyUnsyntesizeRequestToSolana(
-        address from,
-        address payToken,
-        bytes32[] calldata pubkeys,
-        bytes1 bumpSynthesizeRequest,
-        uint256 chainId,
-        DelegatedCallReceipt memory receipt
-    ) external {
-        // TODO check sig from orig sender
-        _proceedFees(payToken, from, receipt);
-        ISynthesis(_synthesis).emergencyUnsyntesizeRequestToSolana(from, pubkeys, bumpSynthesizeRequest, chainId);
-    }
+    // function delegatedEmergencyUnsyntesizeRequestToSolana(
+    //     address from,
+    //     address payToken,
+    //     bytes32[] calldata pubkeys,
+    //     bytes1 bumpSynthesizeRequest,
+    //     uint256 chainId,
+    //     DelegatedCallReceipt memory receipt
+    // ) external {
+    //     // TODO check sig from orig sender
+    //     // TODO check payToken
+    //     _proceedFees(payToken, from, receipt);
+    //     ISynthesis(_synthesis).emergencyUnsyntesizeRequestToSolana(from, pubkeys, bumpSynthesizeRequest, chainId);
+    // }
 
     //==============================CURVE-PROXY==============================
     /* *
@@ -748,28 +756,27 @@ contract Router is Ownable{
             permit_data
         );
     }
+    //TODO:emergency?
+    // function emergencyUnburnRequest(
+    //     bytes32 txID,
+    //     address from,
+    //     address receiveSide,
+    //     address oppositeBridge,
+    //     uint256 chainId
+    // ) external {
+    //     // TODO check sig from orig sender
+    //     IPortal(_portal).emergencyUnburnRequest(txID, from, receiveSide, oppositeBridge, chainId);
+    // }
 
-    // TODO: check worker
-    function emergencyUnburnRequest(
-        bytes32 txID,
-        address from,
-        address receiveSide,
-        address oppositeBridge,
-        uint256 chainId
-    ) external {
-        // TODO check sig from orig sender
-        IPortal(_portal).emergencyUnburnRequest(txID, from, receiveSide, oppositeBridge, chainId);
-    }
-
-    function emergencyUnburnRequestToSolana(
-        bytes32 txID,
-        address from,
-        bytes32[] calldata pubkeys,
-        uint256 chainId
-    ) external {
-        // TODO check sig from orig sender
-        IPortal(_portal).emergencyUnburnRequestToSolana(txID, from, pubkeys, chainId);
-    }
+    // function emergencyUnburnRequestToSolana(
+    //     bytes32 txID,
+    //     address from,
+    //     bytes32[] calldata pubkeys,
+    //     uint256 chainId
+    // ) external {
+    //     // TODO check sig from orig sender
+    //     IPortal(_portal).emergencyUnburnRequestToSolana(txID, from, pubkeys, chainId);
+    // }
 
     //==============================CURVE-PROXY==============================
     /* *
@@ -884,23 +891,24 @@ contract Router is Ownable{
         IERC20(stoken).approve(_synthesis, amount);
         ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, from, pubkeys, amount, chainId);
     }
+    
+    //TODO:emergency?
+    // function emergencyUnsyntesizeRequest(
+    //     bytes32 txID,
+    //     address from,
+    //     address receiveSide,
+    //     address oppositeBridge,
+    //     uint256 chainID
+    // ) external {
+    //     ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, from, receiveSide, oppositeBridge, chainID);
+    // }
 
-    function emergencyUnsyntesizeRequest(
-        bytes32 txID,
-        address from,
-        address receiveSide,
-        address oppositeBridge,
-        uint256 chainID
-    ) external {
-        ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, from, receiveSide, oppositeBridge, chainID);
-    }
-
-    function emergencyUnsyntesizeRequestToSolana(
-        address from,
-        bytes32[] calldata pubkeys,
-        bytes1 bumpSynthesizeRequest,
-        uint256 chainId
-    ) external {
-        ISynthesis(_synthesis).emergencyUnsyntesizeRequestToSolana(from, pubkeys, bumpSynthesizeRequest, chainId);
-    }
+    // function emergencyUnsyntesizeRequestToSolana(
+    //     address from,
+    //     bytes32[] calldata pubkeys,
+    //     bytes1 bumpSynthesizeRequest,
+    //     uint256 chainId
+    // ) external {
+    //     ISynthesis(_synthesis).emergencyUnsyntesizeRequestToSolana(from, pubkeys, bumpSynthesizeRequest, chainId);
+    // }
 }

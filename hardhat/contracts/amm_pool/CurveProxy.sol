@@ -7,53 +7,6 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeab
 import "./RelayRecipient.sol";
 import "./IStableSwapPool.sol";
 
-interface IPortal {
-    struct SynthParams {
-        address chain2address;
-        address receiveSide;
-        address oppositeBridge;
-        uint256 chainID;
-    }
-
-    function synthesize(
-        address _token,
-        uint256 _amount,
-        address _chain2address,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID
-    ) external returns (bytes32 txID);
-
-    function unsynthesize(
-        bytes32 _txId,
-        address _token,
-        uint256 _amount,
-        address _to
-    ) external;
-
-    function synthesize_transit(
-        address _token,
-        uint256 _amount,
-        address _chain2address,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainID,
-        bytes memory _out
-    ) external returns (bytes32 txId);
-
-    function synthesize_batch_transit(
-        address[] memory _token,
-        uint256[] memory _amounts,
-        SynthParams memory _synth_params,
-        bytes4 _selector,
-        bytes memory _transit_data
-    ) external;
-
-    function getTxId() external returns (bytes32);
-
-    function getTokenData(address _rtoken) external returns (bytes memory);
-}
-
 interface ISynthesis {
     function mintSyntheticToken(
         bytes32 _txId,
@@ -65,7 +18,8 @@ interface ISynthesis {
     function burnSyntheticToken(
         address _stoken,
         uint256 _amount,
-        address _chain2address,
+        address _from,
+        address _to,
         address _receiveSide,
         address _oppositeBridge,
         uint256 _chainID
@@ -217,8 +171,11 @@ contract CurveProxy is Initializable, RelayRecipient {
         return _setTrustedForwarder(_forwarder);
     }
 
-    function registerNewBalance(address token, uint256 expectedAmount) internal view{
-       require(IERC20Upgradeable(token).balanceOf(address(this)) >= expectedAmount, "CurveProxy: insufficient balance");
+    function registerNewBalance(address token, uint256 expectedAmount) internal view {
+        require(
+            IERC20Upgradeable(token).balanceOf(address(this)) >= expectedAmount,
+            "CurveProxy: insufficient balance"
+        );
     }
 
     /**
@@ -231,7 +188,8 @@ contract CurveProxy is Initializable, RelayRecipient {
         address _pool,
         address _lp_token,
         address[] calldata _coins
-    ) public /**onlyOwner*/{
+    ) public /**onlyOwner*/
+    {
         for (uint256 i = 0; i < _coins.length; i++) {
             pool[_pool].add(_coins[i]);
         }
@@ -269,7 +227,12 @@ contract CurveProxy is Initializable, RelayRecipient {
         if (_params.expected_min_mint_amount > min_mint_amount) {
             for (uint256 i = 0; i < representation.length; i++) {
                 if (_synth_amount[i] > 0) {
-                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+                        _txId[i],
+                        _params.to,
+                        _params.initialBridge,
+                        _params.initialChainID
+                    );
                     emit InconsistencyCallback(_params.add, representation[i], _params.to, _synth_amount[i]);
                 }
             }
@@ -394,7 +357,12 @@ contract CurveProxy is Initializable, RelayRecipient {
         if (_params.expected_min_mint_amount_c > min_mint_amount_c) {
             for (uint256 i = 0; i < representation.length; i++) {
                 if (_synth_amount[i] > 0) {
-                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+                        _txId[i],
+                        _params.to,
+                        _params.initialBridge,
+                        _params.initialChainID
+                    );
                     emit InconsistencyCallback(_params.add_c, representation[i], _params.to, _synth_amount[i]);
                 }
             }
@@ -419,7 +387,12 @@ contract CurveProxy is Initializable, RelayRecipient {
             //TODO: check index
             for (uint256 i = 0; i < _txId.length; i++) {
                 if (_synth_amount[i] > 0) {
-                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+                        _txId[i],
+                        _params.to,
+                        _params.initialBridge,
+                        _params.initialChainID
+                    );
                 }
             }
             emit InconsistencyCallback(_params.add_h, lp_token[_params.add_h], _params.to, amount_h[_params.lp_index]);
@@ -516,25 +489,25 @@ contract CurveProxy is Initializable, RelayRecipient {
             //perform an exhange
             IStableSwapPool(_params.exchange).exchange(_params.i, _params.j, dx, min_dy);
         }
+        {
+            //remove liquidity one coin stage
+            address lpToken = lp_token[_params.remove];
+            // IERC20Upgradeable(lpToken).approve(_params.remove, 0); //CurveV2 token support
+            IERC20Upgradeable(lpToken).approve(_params.remove, IERC20Upgradeable(lpToken).balanceOf(address(this)));
 
-        //remove liquidity one coin stage
-        address lpToken = lp_token[_params.remove];
-        // IERC20Upgradeable(lpToken).approve(_params.remove, 0); //CurveV2 token support
-        IERC20Upgradeable(lpToken).approve(_params.remove, IERC20Upgradeable(lpToken).balanceOf(address(this)));
+            uint256 token_amount = IERC20Upgradeable(lpToken).balanceOf(address(this));
+            uint256 min_amount = IStableSwapPool(_params.remove).calc_withdraw_one_coin(token_amount, _params.x);
 
-        uint256 token_amount = IERC20Upgradeable(lpToken).balanceOf(address(this));
-        uint256 min_amount = IStableSwapPool(_params.remove).calc_withdraw_one_coin(token_amount, _params.x);
+            //inconsistency check
+            if (_params.expected_min_amount > min_amount) {
+                IERC20Upgradeable(lpToken).safeTransfer(_params.to, token_amount);
+                emit InconsistencyCallback(_params.remove, lpToken, _params.to, token_amount);
+                return;
+            }
 
-        //inconsistency check
-        if (_params.expected_min_amount > min_amount) {
-            IERC20Upgradeable(lpToken).safeTransfer(_params.to, token_amount);
-            emit InconsistencyCallback(_params.remove, lpToken, _params.to, token_amount);
-            return;
+            //remove liquidity
+            IStableSwapPool(_params.remove).remove_liquidity_one_coin(token_amount, _params.x, 0);
         }
-
-        //remove liquidity
-        IStableSwapPool(_params.remove).remove_liquidity_one_coin(token_amount, _params.x, 0);
-
         //transfer asset to the recipient (unsynth if mentioned)
         uint256 thisBalance = IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).balanceOf(
             address(this)
@@ -544,6 +517,7 @@ contract CurveProxy is Initializable, RelayRecipient {
             ISynthesis(synthesis).burnSyntheticToken(
                 pool[_params.remove].at(uint256(int256(_params.x))),
                 thisBalance,
+                address(this),
                 _params.to,
                 _params.receiveSide,
                 _params.oppositeBridge,
@@ -593,7 +567,12 @@ contract CurveProxy is Initializable, RelayRecipient {
             if (_params.expected_min_mint_amount > min_mint_amount) {
                 for (uint256 i = 0; i < representation.length; i++) {
                     if (_synth_amount[i] > 0) {
-                        ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
+                        ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+                            _txId[i],
+                            _params.to,
+                            _params.initialBridge,
+                            _params.initialChainID
+                        );
                         emit InconsistencyCallback(_params.add, representation[i], _params.to, _synth_amount[i]);
                     }
                 }
@@ -619,14 +598,21 @@ contract CurveProxy is Initializable, RelayRecipient {
                 if (_params.expected_min_dy > min_dy) {
                     for (uint256 i = 0; i < _txId.length; i++) {
                         if (_synth_amount[i] > 0) {
-                            ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
+                            ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+                                _txId[i],
+                                _params.to,
+                                _params.initialBridge,
+                                _params.initialChainID
+                            );
                         }
                     }
                     emit InconsistencyCallback(
                         _params.exchange,
                         pool[_params.exchange].at(uint256(int256(_params.i))),
                         _params.to,
-                        IERC20Upgradeable(pool[_params.exchange].at(uint256(int256(_params.i)))).balanceOf(address(this))
+                        IERC20Upgradeable(pool[_params.exchange].at(uint256(int256(_params.i)))).balanceOf(
+                            address(this)
+                        )
                     );
                     return;
                 }
@@ -635,7 +621,12 @@ contract CurveProxy is Initializable, RelayRecipient {
             } catch {
                 for (uint256 i = 0; i < _txId.length; i++) {
                     if (_synth_amount[i] > 0) {
-                        ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
+                        ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+                            _txId[i],
+                            _params.to,
+                            _params.initialBridge,
+                            _params.initialChainID
+                        );
                     }
                 }
                 return;
@@ -648,21 +639,33 @@ contract CurveProxy is Initializable, RelayRecipient {
         IERC20Upgradeable(lpToken).approve(_params.remove, IERC20Upgradeable(lpToken).balanceOf(address(this)));
 
         uint256 token_amount = IERC20Upgradeable(lpToken).balanceOf(address(this));
-        try IStableSwapPool(_params.remove).calc_withdraw_one_coin(token_amount, _params.x) returns (uint256 min_amount) {
+        try IStableSwapPool(_params.remove).calc_withdraw_one_coin(token_amount, _params.x) returns (
+            uint256 min_amount
+        ) {
             //inconsistency check
             if (_params.expected_min_amount > min_amount) {
                 for (uint256 i = 0; i < _txId.length; i++) {
-                        if (_synth_amount[i] > 0) {
-                            ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
-                        }
+                    if (_synth_amount[i] > 0) {
+                        ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+                            _txId[i],
+                            _params.to,
+                            _params.initialBridge,
+                            _params.initialChainID
+                        );
                     }
+                }
                 emit InconsistencyCallback(_params.remove, lpToken, _params.to, token_amount);
                 return;
             }
         } catch {
             for (uint256 i = 0; i < _txId.length; i++) {
                 if (_synth_amount[i] > 0) {
-                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+                        _txId[i],
+                        _params.to,
+                        _params.initialBridge,
+                        _params.initialChainID
+                    );
                 }
             }
         }
@@ -678,6 +681,7 @@ contract CurveProxy is Initializable, RelayRecipient {
                 ISynthesis(synthesis).burnSyntheticToken(
                     pool[_params.remove].at(uint256(int256(_params.x))),
                     thisBalance,
+                    address(this),
                     _params.to,
                     _params.receiveSide,
                     _params.oppositeBridge,
@@ -692,7 +696,12 @@ contract CurveProxy is Initializable, RelayRecipient {
         } catch {
             for (uint256 i = 0; i < _txId.length; i++) {
                 if (_synth_amount[i] > 0) {
-                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(_txId[i], _params.to, _params.initialBridge, _params.initialChainID);
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+                        _txId[i],
+                        _params.to,
+                        _params.initialBridge,
+                        _params.initialChainID
+                    );
                 }
             }
         }
@@ -792,6 +801,7 @@ contract CurveProxy is Initializable, RelayRecipient {
                 ISynthesis(synthesis).burnSyntheticToken(
                     pool[_params.remove_c].at(uint256(int256(_params.x))),
                     thisBalance,
+                    address(this),
                     _params.to,
                     _receiveSide,
                     _oppositeBridge,

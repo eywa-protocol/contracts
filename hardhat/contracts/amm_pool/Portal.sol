@@ -125,9 +125,12 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     function registerNewBalance(address token, uint256 expectedAmount) internal {
-       uint256 oldBalance = balanceOf[token];
-       require((IERC20(token).balanceOf(address(this)) - oldBalance) >= expectedAmount, "Portal: insufficient balance");
-       balanceOf[token] += expectedAmount;
+        uint256 oldBalance = balanceOf[token];
+        require(
+            (IERC20(token).balanceOf(address(this)) - oldBalance) >= expectedAmount,
+            "Portal: insufficient balance"
+        );
+        balanceOf[token] += expectedAmount;
     }
 
     /**
@@ -165,8 +168,16 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             _amount,
             _synthParams.to
         );
-        
-        IBridge(bridge).transmitRequestV2(out, _synthParams.receiveSide, _synthParams.oppositeBridge, _synthParams.chainID, txID, _from, nonce);
+
+        IBridge(bridge).transmitRequestV2(
+            out,
+            _synthParams.receiveSide,
+            _synthParams.oppositeBridge,
+            _synthParams.chainID,
+            txID,
+            _from,
+            nonce
+        );
         TxState storage txState = requests[txID];
         txState.from = castToBytes32(_from);
         txState.to = castToBytes32(_synthParams.to);
@@ -281,13 +292,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
-        emit SynthesizeRequestSolana(
-            txID,
-            _from,
-            _pubkeys[uint256(SynthesizePubkeys.to)],
-            _amount,
-            _token
-        );
+        emit SynthesizeRequestSolana(txID, _from, _pubkeys[uint256(SynthesizePubkeys.to)], _amount, _token);
     }
 
     /**
@@ -297,7 +302,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     function emergencyUnsynthesize(bytes32 _txID) external onlyBridge {
         TxState storage txState = requests[_txID];
         require(txState.state == RequestState.Sent, "Portal: state not open or tx does not exist");
-
+        // require(txState.from == _txOwner, "Portal: invalid tx owner");
         txState.state = RequestState.Reverted;
         TransferHelper.safeTransfer(castToAddress(txState.rtoken), castToAddress(txState.from), txState.amount);
 
@@ -336,30 +341,31 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
      * @param _oppositeBridge opposite bridge address
      * @param _chainId opposite chain ID
      */
-     // TODO check sig from orig sender
+    // TODO check sig from orig sender
     function emergencyUnburnRequest(
         bytes32 _txID,
-        address _from,
         address _receiveSide,
         address _oppositeBridge,
         uint256 _chainId
     ) external {
-        require(unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized, "Portal: real tokens already transferred");
+        require(
+            unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized,
+            "Portal: real tokens already transferred"
+        );
         unsynthesizeStates[_txID] = UnsynthesizeState.RevertRequest;
 
         bytes memory out = abi.encodeWithSelector(bytes4(keccak256(bytes("emergencyUnburn(bytes32)"))), _txID);
-        
-        uint256 nonce = IBridge(bridge).getNonce(_from);
+
+        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 txID = IBridge(bridge).prepareRqId(
             castToBytes32(_oppositeBridge),
             _chainId,
             castToBytes32(_receiveSide),
-            castToBytes32(_from),
+            castToBytes32(_msgSender()),
             nonce
         );
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainId, txID, _from, nonce);
-
-        emit RevertBurnRequest(txID, _from);
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainId, txID, _msgSender(), nonce);
+        emit RevertBurnRequest(txID, _msgSender());
     }
 
     /**
@@ -368,24 +374,26 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
      * @param _pubkeys unsynth data for Solana
      * @param _chainId opposite chain ID
      */
-     // TODO check sig from orig sender
+    // TODO check sig from orig sender
     function emergencyUnburnRequestToSolana(
         bytes32 _txID,
-        address _from,
         bytes32[] calldata _pubkeys,
         uint256 _chainId
     ) external {
         require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainID");
-        require(unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized, "Portal: real tokens already transferred");
+        require(
+            unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized,
+            "Portal: real tokens already transferred"
+        );
 
         unsynthesizeStates[_txID] = UnsynthesizeState.RevertRequest;
 
-        uint256 nonce = IBridge(bridge).getNonce(_from);
+        uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 txID = IBridge(bridge).prepareRqId(
             _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
-            castToBytes32(_from),
+            castToBytes32(_msgSender()),
             nonce
         );
 
@@ -437,11 +445,11 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             txID,
-            _from,
+            _msgSender(),
             nonce
         );
 
-        emit RevertBurnRequest(txID, _from);
+        emit RevertBurnRequest(txID, _msgSender());
     }
 
     // should be restricted in mainnets (test only)
@@ -506,7 +514,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
                 txState.state = RequestState.Sent;
 
                 emit SynthesizeRequest(txId[i], _from, _synth_params.to, _amounts[i], _tokens[i]);
-                
+
                 // break;
             }
         }
@@ -520,8 +528,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             _amounts,
             txId
         );
-
-
 
         IBridge(bridge).transmitRequestV2(
             out,
