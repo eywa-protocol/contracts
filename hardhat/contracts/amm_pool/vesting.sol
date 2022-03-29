@@ -20,7 +20,7 @@ contract EywaVesting is ERC20, ReentrancyGuard {
 
     uint256 public signatureTimeStamp;
     
-    uint256 public started; // timestamp start
+    uint256 public started; 
     IERC20 public eywaToken;
     uint256 public cliffDuration; // timestamp cliff duration
     uint256 public stepDuration; // linear step duration
@@ -80,10 +80,8 @@ contract EywaVesting is ERC20, ReentrancyGuard {
 
     function available(uint256 time, address tokenOwner) public view returns(uint256) {
         return (claimable(time).mul(unburnBalanceOf[tokenOwner]).div(vEywaInitialSupply)).sub(claimed[tokenOwner]);
-        // return (claimable(time).mul(balanceOf(tokenOwner)).div(vEywaInitialSupply)).sub(claimed[tokenOwner]);
     }
 
-    // returns number of claimable tokens by this time
     function claimable(uint256 time) public view returns(uint256) {
         if (time == 0) {
             return 0;
@@ -99,8 +97,6 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         uint256 claimableAmount = claimable(block.timestamp);
         if(claimableAmount >= vEywaInitialSupply && balanceOf(msg.sender) >= claimedAmount) {
             _burn(msg.sender, claimedAmount);
-            // SafeERC20.safeTransferFrom(eywaToken, address(this), msg.sender, claimedAmount);
-            // IERC20(eywaToken).safeTransferFrom(address(this), msg.sender, claimedAmount);
             IERC20(eywaToken).safeTransfer(msg.sender, claimedAmount);
             return;
         }
@@ -109,7 +105,6 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         require(availableAmount >= claimedAmount, "the amount is not available");
         claimed[msg.sender] = claimed[msg.sender].add(claimedAmount);
         _burn(msg.sender, claimedAmount);
-        // IERC20(eywaToken).safeTransferFrom(address(this), msg.sender, claimedAmount);
         IERC20(eywaToken).safeTransfer(msg.sender, claimedAmount);
         emit ReleasedAfterClaim(msg.sender, claimedAmount);
     }
@@ -118,7 +113,7 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         return usedNonces[nonce];
     }
 
-    function transfer(address recipient, uint256 amount,  uint8 v, bytes32 r, bytes32 s, uint256 nonce) public returns (bool) {
+    function transfer(address recipient, uint256 amount,  uint8 v, bytes32 r, bytes32 s, uint256 nonce) public nonReentrant() returns (bool) {
         require(usedNonces[nonce] == false, "Nonce was used");
         require(started <= block.timestamp, "It is not started time yet");
         usedNonces[nonce] = true;
@@ -132,11 +127,6 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         ));
         require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
 
-        
-
-        // TODO:
-        // claimed[msg.sender] * amount  / balanceOf(msg.sender)
-        // uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
         uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(unburnBalanceOf[msg.sender]);
         unburnBalanceOf[msg.sender] = unburnBalanceOf[msg.sender] - amount; 
         unburnBalanceOf[recipient] = unburnBalanceOf[recipient] + amount;
@@ -147,10 +137,9 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         return result;
     }
 
-    function transfer(address recipient, uint256 amount) public override returns (bool) {
+    function transfer(address recipient, uint256 amount) public override nonReentrant() returns (bool) {
         require(block.timestamp >= started + signatureTimeStamp);
 
-        // uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(balanceOf(msg.sender));
         uint256 claimedNumberTransfer = claimed[msg.sender].mul(amount).div(unburnBalanceOf[msg.sender]);
         unburnBalanceOf[msg.sender] = unburnBalanceOf[msg.sender] - amount; 
         unburnBalanceOf[recipient] = unburnBalanceOf[recipient] + amount;
@@ -160,7 +149,7 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         bool result = super.transfer(recipient, amount);
         return result;
     }
-    // function transferFrom(address sender, address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s, bytes32 nonce) public nonReentrant() returns (bool) {
+    
     function transferFrom(address sender, address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s, uint256 nonce) public nonReentrant() returns (bool) {
 
         require(usedNonces[nonce] == false, "Nonce was used");
@@ -176,7 +165,6 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         ));
         require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
 
-        // uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(balanceOf(sender));
         uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(unburnBalanceOf[sender]);
         unburnBalanceOf[sender] = unburnBalanceOf[sender] - amount; 
         unburnBalanceOf[recipient] = unburnBalanceOf[recipient] + amount;
@@ -191,7 +179,6 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     function transferFrom(address sender, address recipient, uint256 amount) public override nonReentrant() returns (bool) {
         require(block.timestamp >= started + signatureTimeStamp);
 
-        // uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(balanceOf(sender));
         uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(unburnBalanceOf[sender]);
         unburnBalanceOf[sender] = unburnBalanceOf[sender] - amount; 
         unburnBalanceOf[recipient] = unburnBalanceOf[recipient] + amount;
