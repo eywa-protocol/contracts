@@ -225,20 +225,22 @@ interface IERC20Permit {
     ) external;
 }
 
-contract Router {
+contract Router is Ownable{
     address _localTreasury;
     address _curveProxy;
     address _portal;
     address _synthesis;
 
-    event PaymentEvent(address indexed userFrom, address payToken, uint256 executionPrice, address indexed worker);
+    mapping(address => bool) public _trustedWorker;
+
+    event CrosschainPaymentEvent(address indexed userFrom, address payToken, uint256 executionPrice, address indexed worker);
 
     struct DelegatedCallReceipt {
         uint256 executionPrice;
         uint256 deadline;
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
+        uint8[2] v;
+        bytes32[2] r;
+        bytes32[2] s;
     }
 
     constructor(
@@ -253,40 +255,72 @@ contract Router {
         _localTreasury = localTreasury;
     }
 
-    // uint256 public basePercent = 1000; //10%
-    // function setFee(uint256 _bp) public onlyOwner{
-    //     basePercent = _bp;
-    // }
+    function setWorker(address worker) public onlyOwner{
+        _trustedWorker[worker] = true;
+    }
 
-    // function getTxValues(uint256 amount) public view returns (uint256 executionPrice, uint256 txFee) {
-    //     // require(amount >= 10, "transfer amount is too small");
-    //     txFee = (amount * basePercent) / 10000;
-    //     executionPrice = amount - txFee;
-    //     return (executionPrice, txFee);
-    // }
+    function removeWorker(address worker) public onlyOwner{
+        _trustedWorker[worker] = false;
+    }
 
-    //TODO add worker address
+    //TODO: add useNonce
+    function _checkSignatures(
+        address payToken,
+        address from,
+        DelegatedCallReceipt memory receipt
+    ) internal view {
+        bytes32 senderStructHash = keccak256(
+            abi.encodePacked(
+                //TYPEHASH
+                //useNonce(from)
+                block.chainid,
+                payToken,
+                receipt.executionPrice,
+                from,
+                msg.sender, /* worker */
+                receipt.deadline
+            )
+        );
+
+        bytes32 workerStructHash = keccak256(
+            abi.encodePacked(
+                //TYPEHASH
+                receipt.v[0],
+                receipt.r[0],
+                receipt.s[0]
+            )
+        );
+
+        address sender = ECDSA.recover(
+            ECDSA.toEthSignedMessageHash(senderStructHash),
+            receipt.v[0],
+            receipt.r[0],
+            receipt.s[0]
+        );
+        address worker = ECDSA.recover(
+            ECDSA.toEthSignedMessageHash(workerStructHash),
+            receipt.v[1],
+            receipt.r[1],
+            receipt.s[1]
+        );
+
+        require(_trustedWorker[worker], "Router: invalid worker");
+        require(sender == from, "Router: invalid signature from sender");
+        require(block.timestamp <= receipt.deadline, "Router: deadline");
+    }
+
     function _proceedFees(
         address payToken,
         address from,
         DelegatedCallReceipt memory receipt
     ) internal {
-        bytes32 structHash = keccak256(
-            abi.encodePacked(payToken, receipt.executionPrice, from, msg.sender, receipt.deadline)
-        );
-
-        address sender = ECDSA.recover(ECDSA.toEthSignedMessageHash(structHash), receipt.v, receipt.r, receipt.s);
-
-        require(sender == from, "Router: invalid signature from sender");
-        require(block.timestamp <= receipt.deadline, "Router: deadline");
-
+       _checkSignatures(payToken, from, receipt);
         // worker fee
         SafeERC20.safeTransferFrom(IERC20(payToken), from, msg.sender, receipt.executionPrice);
 
-        emit PaymentEvent(from, payToken, receipt.executionPrice, msg.sender);
+        emit CrosschainPaymentEvent(from, payToken, receipt.executionPrice, msg.sender);
     }
 
-    //TODO add worker
     function _proceedFeesWithTransfer(
         address payToken,
         uint256 generalAmount,
@@ -294,30 +328,15 @@ contract Router {
         address to,
         DelegatedCallReceipt memory receipt
     ) internal {
-        bytes32 structHash = keccak256(
-            abi.encodePacked(
-                payToken,
-                receipt.executionPrice,
-                from,
-                msg.sender, /* *worker */
-                receipt.deadline
-            )
-        );
-
-        address sender = ECDSA.recover(ECDSA.toEthSignedMessageHash(structHash), receipt.v, receipt.r, receipt.s);
-
-        require(sender == from, "Router: invalid signature from sender");
-        require(block.timestamp <= receipt.deadline, "Router: deadline");
-
+        _checkSignatures(payToken, from, receipt);
         // worker fee
         SafeERC20.safeTransferFrom(IERC20(payToken), from, msg.sender, receipt.executionPrice);
         // proceed remaining amount
         SafeERC20.safeTransferFrom(IERC20(payToken), from, to, generalAmount - receipt.executionPrice);
 
-        emit PaymentEvent(from, payToken, receipt.executionPrice, msg.sender);
+        emit CrosschainPaymentEvent(from, payToken, receipt.executionPrice, msg.sender);
     }
 
-    //TODO add worker
     function _proceedFeesWithApprove(
         address payToken,
         uint256 generalAmount,
@@ -325,21 +344,13 @@ contract Router {
         address to,
         DelegatedCallReceipt memory receipt
     ) internal {
-        bytes32 structHash = keccak256(
-            abi.encodePacked(payToken, receipt.executionPrice, from, msg.sender, receipt.deadline)
-        );
-
-        address sender = ECDSA.recover(ECDSA.toEthSignedMessageHash(structHash), receipt.v, receipt.r, receipt.s);
-
-        require(sender == from, "Router: invalid signature from sender");
-        require(block.timestamp <= receipt.deadline, "Router: deadline");
-
+         _checkSignatures(payToken, from, receipt);
         // worker fee
         SafeERC20.safeTransferFrom(IERC20(payToken), from, msg.sender, receipt.executionPrice);
-        // approve to burn remaining amount
+        // approve remaining amount
         IERC20(payToken).approve(to, generalAmount - receipt.executionPrice);
 
-        emit PaymentEvent(from, payToken, receipt.executionPrice, msg.sender);
+        emit CrosschainPaymentEvent(from, payToken, receipt.executionPrice, msg.sender);
     }
 
     //==============================PORTAL==============================
@@ -476,6 +487,7 @@ contract Router {
         IPortal(_portal).emergencyUnburnRequest(txID, from, receiveSide, oppositeBridge, chainId);
     }
 
+    // TODO check payToken
     function delegatedEmergencyUnburnRequestToSolana(
         bytes32 txID,
         address from,
@@ -737,6 +749,7 @@ contract Router {
         );
     }
 
+    // TODO: check worker
     function emergencyUnburnRequest(
         bytes32 txID,
         address from,
