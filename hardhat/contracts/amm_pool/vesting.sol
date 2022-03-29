@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.10;
-// pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-newone/utils/math/Math.sol";
 import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
@@ -18,6 +17,7 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     address private immutable adminDeployer;
 
     address private signAdmin; // address which can sign early transfer
+
     uint256 public signatureTimeStamp;
     
     uint256 public started; // timestamp start
@@ -29,11 +29,12 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     uint256 public numOfSteps; // number of linear steps
 
     mapping (address => uint256) public claimed; // how much already claimed
-    mapping(bytes32 => bool) private usedNonces;
+    mapping(uint256 => bool) private usedNonces;
     uint256 public vEywaInitialSupply;
 
-    // new
     mapping (address => uint256) public unburnBalanceOf;
+
+    event ReleasedAfterClaim(address indexed from, uint256 indexed amount);
 
     constructor(address _adminDeployer) ERC20("Vested Eywa", "vEYWA")
     {
@@ -110,17 +111,25 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         _burn(msg.sender, claimedAmount);
         // IERC20(eywaToken).safeTransferFrom(address(this), msg.sender, claimedAmount);
         IERC20(eywaToken).safeTransfer(msg.sender, claimedAmount);
+        emit ReleasedAfterClaim(msg.sender, claimedAmount);
     }
 
-    function isNonceUsed(bytes32 nonce) public view returns (bool) {
+    function isNonceUsed(uint256 nonce) public view returns (bool) {
         return usedNonces[nonce];
     }
 
-    function transfer(address recipient, uint256 amount,  uint8 v, bytes32 r, bytes32 s, bytes32 nonce) public returns (bool) {
+    function transfer(address recipient, uint256 amount,  uint8 v, bytes32 r, bytes32 s, uint256 nonce) public returns (bool) {
         require(usedNonces[nonce] == false, "Nonce was used");
         require(started <= block.timestamp, "It is not started time yet");
         usedNonces[nonce] = true;
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(msg.sender)), keccak256(abi.encodePacked(recipient)), keccak256(abi.encodePacked(nonce)),  keccak256(abi.encodePacked(amount))));
+        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, 
+            keccak256(abi.encodePacked(
+                keccak256(abi.encodePacked(msg.sender)), 
+                keccak256(abi.encodePacked(recipient)),
+                keccak256(abi.encodePacked(nonce)), 
+                keccak256(abi.encodePacked(amount)) 
+            ))
+        ));
         require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
 
         
@@ -152,12 +161,19 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         return result;
     }
     // function transferFrom(address sender, address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s, bytes32 nonce) public nonReentrant() returns (bool) {
-    function transferFrom(address sender, address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s, bytes32 nonce) public nonReentrant() returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s, uint256 nonce) public nonReentrant() returns (bool) {
 
         require(usedNonces[nonce] == false, "Nonce was used");
         require(started <= block.timestamp, "It is not started time yet");
         usedNonces[nonce] = true;
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, keccak256(abi.encodePacked(sender)), keccak256(abi.encodePacked(recipient)), keccak256(abi.encodePacked(nonce)),  keccak256(abi.encodePacked(amount))));
+        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, 
+            keccak256(abi.encodePacked(
+                keccak256(abi.encodePacked(sender)), 
+                keccak256(abi.encodePacked(recipient)),
+                keccak256(abi.encodePacked(nonce)), 
+                keccak256(abi.encodePacked(amount)) 
+            ))
+        ));
         require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
 
         // uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(balanceOf(sender));

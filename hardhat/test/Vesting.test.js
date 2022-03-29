@@ -88,7 +88,7 @@ describe('Vesting tests', () => {
             10000000 / 2,
             (10000000 / 2) / 10,
             10,
-            signAdmin.address,
+            "0x0175dde0072E8383c98DdD4E82305327EB9F0BA5",
             day_in_seconds * 10,
             [addr1.address, addr2.address, addr3.address],
             [10000000 / 2, 10000000 / 4, 10000000 / 4],
@@ -235,8 +235,154 @@ describe('Vesting tests', () => {
         expect(parseInt(summa) - parseInt(summa2)).to.be.lessThan(2);
         
         let av2 = await vesting.connect(addr2).available(parseInt(timestampBefore), addr2.address);
-        
+        let summaOf3by1stIteration = parseInt(av3) + parseInt(av2) + parseInt(av1);
 
+        await increaseTime(day_in_seconds * 20);
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore = blockBefore.timestamp;
+        av3 = await vesting.connect(addr3).available(parseInt(timestampBefore), addr3.address);
+        av1 = await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address);
+        av2 = await vesting.connect(addr2).available(parseInt(timestampBefore), addr2.address);
+        let summaOf3by2ndIteration = parseInt(av3) + parseInt(av2) + parseInt(av1);
+
+        expect(parseInt(summaOf3by2ndIteration) - parseInt(summaOf3by1stIteration)).to.be.equal(1000000);
+        await restoreSnapshot(snapshot0);
+    });
+
+    // it('transferFrom', async function () {
+    //     let snapshot0 = await takeSnapshot();
+    //     await increaseTime(day_in_seconds * 51);
+    //     console.log("balanceOF addr1 = ", await vesting.connect(addr1).balanceOf(addr1.address));
+    //     console.log("balanceOF addr2 = ", await vesting.connect(addr1).balanceOf(addr2.address));
+    //     await vesting.connect(addr1).approve(addr2.address, 1000000);
+    //     await vesting.connect(addr2)['transferFrom(address,address,uint256)'](addr1.address, addr2.address, 1000000);
+    //     console.log("balanceOF addr1 = ", await vesting.connect(addr1).balanceOf(addr1.address));
+    //     console.log("balanceOF addr2 = ", await vesting.connect(addr1).balanceOf(addr2.address));
+    //     await restoreSnapshot(snapshot0);
+    // });
+
+    it('signature', async function () {
+        let snapshot0 = await takeSnapshot();
+        await increaseTime(day_in_seconds * 1);
+        let privateKey = "cd8d534aba76e93c7d71be1b6937d9813dc3db86284e9dabfc895a1b559bdcab"
+        // address is:
+        // 0x0175dde0072E8383c98DdD4E82305327EB9F0BA5   
+        let sender = addr1.address;
+        let recepient = addr2.address;
+        let nonce = 777;
+        let amount = 9911;
+
+        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(nonce), web3.utils.soliditySha3(amount));
+
+
+        let sigObj = web3.eth.accounts.sign(msg, privateKey);
+        let signa = sigObj.signature;
+        signature = signa.substr(2);
+        let r = '0x' + signature.slice(0, 64);
+        let s = '0x' + signature.slice(64, 128);
+        let v = '0x' + signature.slice(128, 130);
+
+        let balanceAddr1Before = await vesting.connect(addr1).balanceOf(addr1.address);
+        let balanceAddr2Before = await vesting.connect(addr1).balanceOf(addr2.address);
+
+        await vesting.connect(addr1)['transfer(address,uint256,uint8,bytes32,bytes32,uint256)'](addr2.address, amount, v, r, s, nonce);
+        let balanceAddr1After = await vesting.connect(addr1).balanceOf(addr1.address);
+        let balanceAddr2After = await vesting.connect(addr1).balanceOf(addr2.address);
+
+        expect(balanceAddr2After - balanceAddr2Before).to.be.equal(amount);
+        expect(balanceAddr1Before - balanceAddr1After).to.be.equal(amount);
+        await restoreSnapshot(snapshot0);
+    });
+
+    it('signature wrong', async function () {
+        let snapshot0 = await takeSnapshot();
+        await increaseTime(day_in_seconds * 1);
+        let privateKey = "cd8d534aba76e93c7d71be1b6937d9813dc3db86284e9dabfc895a1b559bdcab"
+        // address is:
+        // 0x0175dde0072E8383c98DdD4E82305327EB9F0BA5   
+        let sender = addr1.address;
+        let recepient = addr2.address;
+        let nonce = 777;
+        let amount = 9911;
+
+        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(nonce), web3.utils.soliditySha3(amount));
+
+
+        let sigObj = web3.eth.accounts.sign(msg, privateKey);
+        let signa = sigObj.signature;
+        signature = signa.substr(2);
+        let r = '0x' + signature.slice(0, 64);
+        let s = '0x' + signature.slice(64, 128);
+        let v = '0x' + signature.slice(128, 130);
+
+        let fakeR = '0x468dc65fc3d1f1b1e283392c2ef3da995279f36e940c31ce1319b2d47f8e98c6';
+
+
+        await expect(vesting.connect(addr1)['transfer(address,uint256,uint8,bytes32,bytes32,uint256)'](addr2.address, amount, v, fakeR, s, nonce)).to.be.revertedWith('ERROR: Verifying signature failed');
+
+        await restoreSnapshot(snapshot0);
+    });
+
+    it('no double nonce usage', async function () {
+        let snapshot0 = await takeSnapshot();
+        await increaseTime(day_in_seconds * 1);
+        let privateKey = "cd8d534aba76e93c7d71be1b6937d9813dc3db86284e9dabfc895a1b559bdcab"
+        // address is:
+        // 0x0175dde0072E8383c98DdD4E82305327EB9F0BA5   
+        let sender = addr1.address;
+        let recepient = addr2.address;
+        let nonce = 777;
+        let amount = 9911;
+
+        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(nonce), web3.utils.soliditySha3(amount));
+
+
+        let sigObj = web3.eth.accounts.sign(msg, privateKey);
+        let signa = sigObj.signature;
+        signature = signa.substr(2);
+        let r = '0x' + signature.slice(0, 64);
+        let s = '0x' + signature.slice(64, 128);
+        let v = '0x' + signature.slice(128, 130);
+
+        let fakeR = '0x468dc65fc3d1f1b1e283392c2ef3da995279f36e940c31ce1319b2d47f8e98c6';
+
+        await vesting.connect(addr1)['transfer(address,uint256,uint8,bytes32,bytes32,uint256)'](addr2.address, amount, v, r, s, nonce);
+        await expect(vesting.connect(addr1)['transfer(address,uint256,uint8,bytes32,bytes32,uint256)'](addr2.address, amount, v, fakeR, s, nonce)).to.be.revertedWith('Nonce was used');
+
+        await restoreSnapshot(snapshot0);
+    });
+
+    it('signature transferFrom', async function () {
+        let snapshot0 = await takeSnapshot();
+        await increaseTime(day_in_seconds * 1);
+        let privateKey = "cd8d534aba76e93c7d71be1b6937d9813dc3db86284e9dabfc895a1b559bdcab"
+        // address is:
+        // 0x0175dde0072E8383c98DdD4E82305327EB9F0BA5   
+        let sender = addr1.address;
+        let recepient = addr2.address;
+        let nonce = 777;
+        let amount = 9911;
+
+        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(nonce), web3.utils.soliditySha3(amount));
+
+
+        let sigObj = web3.eth.accounts.sign(msg, privateKey);
+        let signa = sigObj.signature;
+        signature = signa.substr(2);
+        let r = '0x' + signature.slice(0, 64);
+        let s = '0x' + signature.slice(64, 128);
+        let v = '0x' + signature.slice(128, 130);
+
+        let balanceAddr1Before = await vesting.connect(addr1).balanceOf(addr1.address);
+        let balanceAddr2Before = await vesting.connect(addr1).balanceOf(addr2.address);
+        await vesting.connect(addr1).approve(addr3.address,amount);
+        await vesting.connect(addr3)['transferFrom(address,address,uint256,uint8,bytes32,bytes32,uint256)'](addr1.address, addr2.address, amount, v, r, s, nonce);
+        let balanceAddr1After = await vesting.connect(addr1).balanceOf(addr1.address);
+        let balanceAddr2After = await vesting.connect(addr1).balanceOf(addr2.address);
+
+        expect(balanceAddr2After - balanceAddr2Before).to.be.equal(amount);
+        expect(balanceAddr1Before - balanceAddr1After).to.be.equal(amount);
         await restoreSnapshot(snapshot0);
     });
 });
