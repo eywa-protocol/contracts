@@ -297,13 +297,13 @@ contract Router is Ownable {
         );
 
         address worker = ECDSA.recover(
-            ECDSA.toEthSignedMessageHash(senderStructHash),
+            ECDSA.toEthSignedMessageHash(workerStructHash),
             receipt.v[0],
             receipt.r[0],
             receipt.s[0]
         );
         address sender = ECDSA.recover(
-            ECDSA.toEthSignedMessageHash(workerStructHash),
+            ECDSA.toEthSignedMessageHash(senderStructHash),
             receipt.v[1],
             receipt.r[1],
             receipt.s[1]
