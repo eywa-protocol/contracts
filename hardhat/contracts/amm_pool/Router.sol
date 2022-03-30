@@ -19,7 +19,7 @@ interface IPortal {
         address to;
         address receiveSide;
         address oppositeBridge;
-        uint256 chainID;
+        uint256 chainId;
     }
 
     function synthesize(
@@ -37,7 +37,7 @@ interface IPortal {
         address to,
         address receiveSide,
         address oppositeBridge,
-        uint256 chainID
+        uint256 chainId
     ) external;
 
     function synthesizeToSolana(
@@ -61,10 +61,12 @@ interface IPortal {
 
     function emergencyUnburnRequest(
         bytes32 txID,
-        address from,
         address receiveSide,
         address oppositeBridge,
-        uint256 chainId
+        uint256 chainId,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
     ) external;
 
     function emergencyUnburnRequestToSolana(
@@ -79,7 +81,7 @@ interface ISynthesis {
     struct SynthParams {
         address receiveSide;
         address oppositeBridge;
-        uint256 chainID;
+        uint256 chainId;
     }
 
     function synthTransfer(
@@ -97,7 +99,7 @@ interface ISynthesis {
         address chain2address,
         address receiveSide,
         address oppositeBridge,
-        uint256 chainID
+        uint256 chainId
     ) external;
 
     function burnSyntheticTokenToSolana(
@@ -110,10 +112,12 @@ interface ISynthesis {
 
     function emergencyUnsyntesizeRequest(
         bytes32 txID,
-        address from,
         address receiveSide,
         address oppositeBridge,
-        uint256 chainID
+        uint256 chainId,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
     ) external;
 
     function emergencyUnsyntesizeRequestToSolana(
@@ -185,7 +189,7 @@ interface ICurveProxy {
         address chain2address;
         address receiveSide;
         address oppositeBridge;
-        uint256 chainID;
+        uint256 chainId;
         //emergency unsynth params
         address initialBridge;
         uint256 initialChainID;
@@ -210,7 +214,7 @@ interface ICurveProxy {
         PermitData calldata permit,
         address receiveSide,
         address oppositeBridge,
-        uint256 chainID
+        uint256 chainId
     ) external;
 }
 
@@ -367,7 +371,7 @@ contract Router is Ownable {
      * @param to amount recipient address
      * @param receiveSide request recipient address
      * @param oppositeBridge opposite bridge address
-     * @param chainID opposite chain ID
+     * @param chainId opposite chain ID
      * @param receipt delegated call receipt
      */
 
@@ -389,7 +393,7 @@ contract Router is Ownable {
      * @param to amount recipient address
      * @param receiveSide request recipient address
      * @param oppositeBridge opposite bridge address
-     * @param chainID opposite chain ID
+     * @param chainId opposite chain ID
      * @param permitData permit data
      * @param receipt delegated call receipt
      */
@@ -527,7 +531,7 @@ contract Router is Ownable {
         address chain2address,
         address receiveSide,
         address oppositeBridge,
-        uint256 chainID,
+        uint256 chainId,
         DelegatedCallReceipt memory receipt
     ) external {
         _proceedFeesWithApprove(stoken, amount, from, _synthesis, receipt);
@@ -538,7 +542,7 @@ contract Router is Ownable {
             chain2address,
             receiveSide,
             oppositeBridge,
-            chainID
+            chainId
         );
     }
 
@@ -561,13 +565,13 @@ contract Router is Ownable {
     //     address payToken,
     //     address receiveSide,
     //     address oppositeBridge,
-    //     uint256 chainID,
+    //     uint256 chainId,
     //     DelegatedCallReceipt memory receipt
     // ) external {
     //     // TODO check sig from orig sender
     //     // TODO check payToken
     //     _proceedFees(payToken, from, receipt);
-    //     ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, from, receiveSide, oppositeBridge, chainID);
+    //     ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, from, receiveSide, oppositeBridge, chainId);
     // }
 
     // function delegatedEmergencyUnsyntesizeRequestToSolana(
@@ -639,7 +643,7 @@ contract Router is Ownable {
      * @param permit permit params
      * @param receiveSide calldata recipient address for unsynth operation
      * @param oppositeBridge opposite bridge contract address
-     * @param chainID opposite chain ID
+     * @param chainId opposite chain ID
      * @param receipt delegated call receipt
      */
     function delegatedRedeemEusdRequest(
@@ -649,11 +653,11 @@ contract Router is Ownable {
         address from,
         address receiveSide,
         address oppositeBridge,
-        uint256 chainID,
+        uint256 chainId,
         DelegatedCallReceipt memory receipt
     ) external {
         _proceedFeesWithTransfer(payToken, params.token_amount_h, from, _curveProxy, receipt);
-        ICurveProxy(_curveProxy).redeem_eusd(params, permit, receiveSide, oppositeBridge, chainID);
+        ICurveProxy(_curveProxy).redeem_eusd(params, permit, receiveSide, oppositeBridge, chainId);
     }
 
     //.........................DIRECT-METHODS...........................
@@ -666,7 +670,7 @@ contract Router is Ownable {
      * @param to amount recipient address
      * @param receiveSide request recipient address
      * @param oppositeBridge opposite bridge address
-     * @param chainID opposite chain ID
+     * @param chainId opposite chain ID
      */
 
     function tokenSynthesizeRequest(
@@ -686,7 +690,7 @@ contract Router is Ownable {
      * @param to amount recipient address
      * @param receiveSide request recipient address
      * @param oppositeBridge opposite bridge address
-     * @param chainID opposite chain ID
+     * @param chainId opposite chain ID
      * @param permitData permit data
      */
     function tokenSynthesizeRequestWithPermit(
@@ -828,7 +832,7 @@ contract Router is Ownable {
      * @param permit permit params
      * @param receiveSide calldata recipient address for unsynth operation
      * @param oppositeBridge opposite bridge contract address
-     * @param chainID opposite chain ID
+     * @param chainId opposite chain ID
      */
     function redeemEusdRequest(
         ICurveProxy.MetaRedeemEUSD calldata params,
@@ -837,10 +841,10 @@ contract Router is Ownable {
         address from,
         address receiveSide,
         address oppositeBridge,
-        uint256 chainID
+        uint256 chainId
     ) external {
         SafeERC20.safeTransferFrom(IERC20(payToken), from, _curveProxy, params.token_amount_h);
-        ICurveProxy(_curveProxy).redeem_eusd(params, permit, receiveSide, oppositeBridge, chainID);
+        ICurveProxy(_curveProxy).redeem_eusd(params, permit, receiveSide, oppositeBridge, chainId);
     }
 
     //==============================SYNTHESIS==============================
@@ -864,7 +868,7 @@ contract Router is Ownable {
         address chain2address,
         address receiveSide,
         address oppositeBridge,
-        uint256 chainID
+        uint256 chainId
     ) external {
         SafeERC20.safeTransferFrom(IERC20(stoken), from, address(this), amount);
         IERC20(stoken).approve(_synthesis, amount);
@@ -875,7 +879,7 @@ contract Router is Ownable {
             chain2address,
             receiveSide,
             oppositeBridge,
-            chainID
+            chainId
         );
     }
 
@@ -895,12 +899,12 @@ contract Router is Ownable {
         bytes32 txID,
         address receiveSide,
         address oppositeBridge,
-        uint256 chainID,
+        uint256 chainId,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) external {
-        ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, receiveSide, oppositeBridge, chainID, v, r, s);
+        ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, receiveSide, oppositeBridge, chainId, v, r, s);
     }
 
     // function emergencyUnsyntesizeRequestToSolana(

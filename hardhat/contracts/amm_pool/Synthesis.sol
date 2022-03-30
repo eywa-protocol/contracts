@@ -101,7 +101,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     struct SynthParams {
         address receiveSide;
         address oppositeBridge;
-        uint256 chainID;
+        uint256 chainId;
     }
 
     /**
@@ -146,7 +146,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         address synth = representationSynt[_tokenReal];
         require(synth != address(0), "Synthesis: synth not found");
         require(
-            ISyntERC20(synth).getChainId() != _synthParams.chainID,
+            ISyntERC20(synth).getChainId() != _synthParams.chainId,
             "Synthesis: can not synthesize in the intial chain"
         );
         ISyntERC20(synth).burn(_from, _amount);
@@ -154,7 +154,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         uint256 nonce = IBridge(bridge).getNonce(_from);
         bytes32 txID = IBridge(bridge).prepareRqId(
             castToBytes32(_synthParams.oppositeBridge),
-            _synthParams.chainID,
+            _synthParams.chainId,
             castToBytes32(_synthParams.receiveSide),
             castToBytes32(_from),
             nonce
@@ -172,7 +172,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             out,
             _synthParams.receiveSide,
             _synthParams.oppositeBridge,
-            _synthParams.chainID,
+            _synthParams.chainId,
             txID,
             _from,
             nonce

@@ -47,7 +47,7 @@ async function main() {
           chain2address: deployInfo["network2"].curveProxy,
           receiveSide: deployInfo["network2"].curveProxy,
           oppositeBridge: deployInfo["network2"].bridge,
-          chainID: deployInfo["network2"].chainId
+          chainId: deployInfo["network2"].chainId
         }
         addLiquidityParams = {
           add: deployInfo["network2"].crosschainPool[0].address,
@@ -60,7 +60,7 @@ async function main() {
           chain2address: deployInfo["mumbai"].curveProxy,
           receiveSide: deployInfo["mumbai"].curveProxy,
           oppositeBridge: deployInfo["mumbai"].bridge,
-          chainID: deployInfo["mumbai"].chainId
+          chainId: deployInfo["mumbai"].chainId
         }
         addLiquidityParams = {
           add: deployInfo["mumbai"].crosschainPool,

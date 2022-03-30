@@ -37,7 +37,7 @@ async function main() {
       let hubChainName = network.name.includes("network") ? 'network2' : 'mumbai';
       let receiveSide = deployInfo[hubChainName].synthesis;
       let oppositeBridge = deployInfo[hubChainName].bridge;
-      let chainID = deployInfo[hubChainName].chainId;
+      let chainId = deployInfo[hubChainName].chainId;
       tx = await Router.attach(deployInfo[network.name].router).tokenSynthesizeRequest(
         coinToSynth,
         amount,
@@ -46,7 +46,7 @@ async function main() {
           to: to,
           receiveSide: receiveSide,
           oppositeBridge: oppositeBridge,
-          chainID: chainID
+          chainId: chainId
         },
         {
           gasLimit: '5000000'

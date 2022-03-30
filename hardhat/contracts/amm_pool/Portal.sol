@@ -72,7 +72,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address to;
         address receiveSide;
         address oppositeBridge;
-        uint256 chainID;
+        uint256 chainId;
     }
 
     struct PermitData {
@@ -153,7 +153,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         uint256 nonce = IBridge(bridge).getNonce(_from);
         txID = IBridge(bridge).prepareRqId(
             castToBytes32(_synthParams.oppositeBridge),
-            _synthParams.chainID,
+            _synthParams.chainId,
             castToBytes32(_synthParams.receiveSide),
             castToBytes32(_from),
             nonce
@@ -171,7 +171,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             out,
             _synthParams.receiveSide,
             _synthParams.oppositeBridge,
-            _synthParams.chainID,
+            _synthParams.chainId,
             txID,
             _from,
             nonce
@@ -205,7 +205,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified"); //TODO
         registerNewBalance(_token, _amount);
 
-        require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainID");
+        require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainId");
 
         // TODO: fix amount digits for solana (digits 18 -> 6)
         require(_amount < type(uint64).max, "Portal: amount too large");
@@ -386,7 +386,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bytes32[] calldata _pubkeys,
         uint256 _chainId
     ) external {
-        require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainID");
+        require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainId");
         require(
             unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized,
             "Portal: real tokens already transferred"
@@ -498,7 +498,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         uint256 general_nonce = IBridge(bridge).getNonce(_from);
         bytes32 general_txId = IBridge(bridge).prepareRqId(
             castToBytes32(_synth_params.oppositeBridge),
-            _synth_params.chainID,
+            _synth_params.chainId,
             castToBytes32(_synth_params.receiveSide),
             castToBytes32(_from),
             general_nonce
@@ -539,7 +539,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             out,
             _synth_params.receiveSide,
             _synth_params.oppositeBridge,
-            _synth_params.chainID,
+            _synth_params.chainId,
             general_txId,
             _from,
             general_nonce

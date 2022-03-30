@@ -90,7 +90,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         address chain2address;
         address receiveSide;
         address oppositeBridge;
-        uint256 chainID;
+        uint256 chainId;
     }
 
     struct AddLiquidity {
@@ -154,7 +154,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         address chain2address;
         address receiveSide;
         address oppositeBridge;
-        uint256 chainID;
+        uint256 chainId;
         //emergency unsynth params
         address initialBridge;
         uint256 initialChainID;
@@ -512,7 +512,7 @@ contract CurveProxy is Initializable, RelayRecipient {
         uint256 thisBalance = IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).balanceOf(
             address(this)
         );
-        if (_params.chainID != 0) {
+        if (_params.chainId != 0) {
             IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).approve(synthesis, thisBalance);
             ISynthesis(synthesis).burnSyntheticToken(
                 pool[_params.remove].at(uint256(int256(_params.x))),
@@ -521,7 +521,7 @@ contract CurveProxy is Initializable, RelayRecipient {
                 _params.to,
                 _params.receiveSide,
                 _params.oppositeBridge,
-                _params.chainID
+                _params.chainId
             );
         } else {
             IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).safeTransfer(
@@ -676,7 +676,7 @@ contract CurveProxy is Initializable, RelayRecipient {
             uint256 thisBalance = IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).balanceOf(
                 address(this)
             );
-            if (_params.chainID != 0) {
+            if (_params.chainId != 0) {
                 IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).approve(synthesis, thisBalance);
                 ISynthesis(synthesis).burnSyntheticToken(
                     pool[_params.remove].at(uint256(int256(_params.x))),
@@ -685,7 +685,7 @@ contract CurveProxy is Initializable, RelayRecipient {
                     _params.to,
                     _params.receiveSide,
                     _params.oppositeBridge,
-                    _params.chainID
+                    _params.chainId
                 );
             } else {
                 IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).safeTransfer(

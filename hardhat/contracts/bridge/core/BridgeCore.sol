@@ -15,7 +15,7 @@ abstract contract BridgeCore {
         bytes selector,
         address receiveSide,
         address oppositeBridge,
-        uint256 chainid
+        uint256 chainId
     );
 
     event OracleRequestSolana(
@@ -24,7 +24,7 @@ abstract contract BridgeCore {
         bytes32 requestId,
         bytes selector,
         bytes32 oppositeBridge,
-        uint256 chainid
+        uint256 chainId
     );
 
     event ReceiveRequest(bytes32 reqId, address receiveSide, bytes32 bridgeFrom);

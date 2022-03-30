@@ -69,7 +69,7 @@ describe("E2E CurveProxy local test", () => {
             chain2address: deployInfo["network2"].curveProxy,
             receiveSide: deployInfo["network2"].curveProxy,
             oppositeBridge: deployInfo["network2"].bridge,
-            chainID: deployInfo["network2"].chainId
+            chainId: deployInfo["network2"].chainId
         }
 
         const metaExchangeParams = {
@@ -91,7 +91,7 @@ describe("E2E CurveProxy local test", () => {
             chain2address: deployInfo["network1"].portal,
             receiveSide: deployInfo["network1"].portal,
             oppositeBridge: deployInfo["network1"].bridge,
-            chainID: deployInfo["network1"].chainId,
+            chainId: deployInfo["network1"].chainId,
             initialBridge:deployInfo["network3"].bridge,
             initialChainID:deployInfo["network3"].chainId
         }
@@ -117,7 +117,7 @@ describe("E2E CurveProxy local test", () => {
             metaExchangeParams.chain2address,
             metaExchangeParams.receiveSide,
             metaExchangeParams.oppositeBridge,
-            metaExchangeParams.chainID,
+            metaExchangeParams.chainId,
             metaExchangeParams.initialBridge,
             metaExchangeParams.initialChainID
             ]
@@ -161,7 +161,7 @@ describe("E2E CurveProxy local test", () => {
             chain2address: deployInfo["network2"].curveProxy,
             receiveSide: deployInfo["network2"].curveProxy,
             oppositeBridge: deployInfo["network2"].bridge,
-            chainID: deployInfo["network2"].chainId
+            chainId: deployInfo["network2"].chainId
         }
 
         const metaExchangeParams = {
@@ -183,7 +183,7 @@ describe("E2E CurveProxy local test", () => {
             chain2address: deployInfo["network1"].portal,
             receiveSide: deployInfo["network1"].portal,
             oppositeBridge: deployInfo["network1"].bridge,
-            chainID: deployInfo["network1"].chainId,
+            chainId: deployInfo["network1"].chainId,
             initialBridge:deployInfo["network3"].bridge,
             initialChainID:deployInfo["network3"].chainId
         }
@@ -209,7 +209,7 @@ describe("E2E CurveProxy local test", () => {
             metaExchangeParams.chain2address,
             metaExchangeParams.receiveSide,
             metaExchangeParams.oppositeBridge,
-            metaExchangeParams.chainID,
+            metaExchangeParams.chainId,
             metaExchangeParams.initialBridge,
             metaExchangeParams.initialChainID
             ]
@@ -253,7 +253,7 @@ describe("E2E CurveProxy local test", () => {
             chain2address: deployInfo["network2"].curveProxy,
             receiveSide: deployInfo["network2"].curveProxy,
             oppositeBridge: deployInfo["network2"].bridge,
-            chainID: deployInfo["network2"].chainId
+            chainId: deployInfo["network2"].chainId
         }
 
         const metaExchangeParams = {
@@ -275,7 +275,7 @@ describe("E2E CurveProxy local test", () => {
             chain2address: deployInfo["network1"].portal,
             receiveSide: deployInfo["network1"].portal,
             oppositeBridge: deployInfo["network1"].bridge,
-            chainID: deployInfo["network1"].chainId,
+            chainId: deployInfo["network1"].chainId,
             initialBridge:deployInfo["network3"].bridge,
             initialChainID:deployInfo["network3"].chainId
         }
@@ -301,7 +301,7 @@ describe("E2E CurveProxy local test", () => {
             metaExchangeParams.chain2address,
             metaExchangeParams.receiveSide,
             metaExchangeParams.oppositeBridge,
-            metaExchangeParams.chainID,
+            metaExchangeParams.chainId,
             metaExchangeParams.initialBridge,
             metaExchangeParams.initialChainID
             ]
@@ -345,7 +345,7 @@ describe("E2E CurveProxy local test", () => {
             chain2address: deployInfo["network2"].curveProxy,
             receiveSide: deployInfo["network2"].curveProxy,
             oppositeBridge: deployInfo["network2"].bridge,
-            chainID: deployInfo["network2"].chainId
+            chainId: deployInfo["network2"].chainId
         }
 
         const mintEUSDparams = {
@@ -417,7 +417,7 @@ describe("E2E CurveProxy local test", () => {
             chain2address: deployInfo["network2"].curveProxy,
             receiveSide: deployInfo["network2"].curveProxy,
             oppositeBridge: deployInfo["network2"].bridge,
-            chainID: deployInfo["network2"].chainId,
+            chainId: deployInfo["network2"].chainId,
             initialBridge:deployInfo["network2"].bridge,
             initialChainID:deployInfo["network2"].chainId
         }
@@ -486,7 +486,7 @@ describe("E2E CurveProxy local test", () => {
         const unsynthParams = {
             receiveSide: deployInfo["network1"].portal,
             oppositeBridge: deployInfo["network1"].bridge,
-            chainID: deployInfo["network1"].chainId
+            chainId: deployInfo["network1"].chainId
         }
 
         const redeemEUSDParams = {
@@ -520,7 +520,7 @@ describe("E2E CurveProxy local test", () => {
             permitParams,
             unsynthParams.receiveSide,
             unsynthParams.oppositeBridge,
-            unsynthParams.chainID,
+            unsynthParams.chainId,
             { from: userNet2, gas: 1000_000 }
         )
 
@@ -536,7 +536,7 @@ describe("E2E CurveProxy local test", () => {
         const unsynthParams = {
             receiveSide: deployInfo["network1"].portal,
             oppositeBridge: deployInfo["network1"].bridge,
-            chainID: deployInfo["network1"].chainId
+            chainId: deployInfo["network1"].chainId
         }
 
         const redeemEUSDParams = {
@@ -569,7 +569,7 @@ describe("E2E CurveProxy local test", () => {
             permitParams,
             unsynthParams.receiveSide,
             unsynthParams.oppositeBridge,
-            unsynthParams.chainID,
+            unsynthParams.chainId,
             { from: userNet2, gas: 1000_000 }
         )
 

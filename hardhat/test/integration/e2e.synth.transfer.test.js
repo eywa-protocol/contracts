@@ -97,7 +97,7 @@ contract('Syntesis', () => {
                 {
                     receiveSide :deployInfo['network2'].synthesis,
                     oppositeBridge: deployInfo['network2'].bridge,
-                    chainID :deployInfo['network2'].chainId,
+                    chainId :deployInfo['network2'].chainId,
                 },
                 { from: userNet1, gas: 300_000 }
             )
@@ -114,7 +114,7 @@ contract('Syntesis', () => {
                 {
                     receiveSide :deployInfo['network3'].synthesis,
                     oppositeBridge: deployInfo['network3'].bridge,
-                    chainID :deployInfo['network3'].chainId,
+                    chainId :deployInfo['network3'].chainId,
                 },
                 { from: userNet2, gas: 300_000 }
             )
@@ -152,7 +152,7 @@ contract('Syntesis', () => {
                 {
                     receiveSide :deployInfo['network2'].synthesis,
                     oppositeBridge: deployInfo['network2'].bridge,
-                    chainID :deployInfo['network2'].chainId,
+                    chainId :deployInfo['network2'].chainId,
                 },
                 { from: userNet3, gas: 300_000 }
             )
@@ -169,7 +169,7 @@ contract('Syntesis', () => {
                 {
                     receiveSide :deployInfo['network1'].synthesis,
                     oppositeBridge: deployInfo['network1'].bridge,
-                    chainID :deployInfo['network1'].chainId,
+                    chainId :deployInfo['network1'].chainId,
                 },
                 { from: userNet2, gas: 300_000 }
             )
@@ -207,7 +207,7 @@ contract('Syntesis', () => {
                 {
                     receiveSide :deployInfo['network1'].synthesis,
                     oppositeBridge: deployInfo['network1'].bridge,
-                    chainID :deployInfo['network1'].chainId,
+                    chainId :deployInfo['network1'].chainId,
                 },
                 { from: userNet3, gas: 300_000 }
             )
@@ -224,7 +224,7 @@ contract('Syntesis', () => {
                 {
                     receiveSide :deployInfo['network2'].synthesis,
                     oppositeBridge: deployInfo['network2'].bridge,
-                    chainID :deployInfo['network2'].chainId,
+                    chainId :deployInfo['network2'].chainId,
                 },
                 { from: userNet1, gas: 300_000 }
             )
@@ -262,7 +262,7 @@ contract('Syntesis', () => {
                 {
                     receiveSide :deployInfo['network3'].synthesis,
                     oppositeBridge: deployInfo['network3'].bridge,
-                    chainID :deployInfo['network3'].chainId,
+                    chainId :deployInfo['network3'].chainId,
                 },
                 { from: userNet1, gas: 300_000 }
             )
@@ -279,7 +279,7 @@ contract('Syntesis', () => {
                 {
                     receiveSide :deployInfo['network2'].synthesis,
                     oppositeBridge: deployInfo['network2'].bridge,
-                    chainID :deployInfo['network2'].chainId,
+                    chainId :deployInfo['network2'].chainId,
                 },
                 { from: userNet3, gas: 300_000 }
             )
@@ -317,7 +317,7 @@ contract('Syntesis', () => {
                 {
                     receiveSide :deployInfo['network3'].synthesis,
                     oppositeBridge: deployInfo['network3'].bridge,
-                    chainID :deployInfo['network3'].chainId,
+                    chainId :deployInfo['network3'].chainId,
                 },
                 { from: userNet2, gas: 300_000 }
             )
@@ -334,7 +334,7 @@ contract('Syntesis', () => {
                 {
                     receiveSide :deployInfo['network1'].synthesis,
                     oppositeBridge: deployInfo['network1'].bridge,
-                    chainID :deployInfo['network1'].chainId,
+                    chainId :deployInfo['network1'].chainId,
                 },
                 { from: userNet3, gas: 300_000 }
             )
@@ -372,7 +372,7 @@ contract('Syntesis', () => {
                 {
                     receiveSide :deployInfo['network1'].synthesis,
                     oppositeBridge: deployInfo['network1'].bridge,
-                    chainID :deployInfo['network1'].chainId,
+                    chainId :deployInfo['network1'].chainId,
                 },
                 { from: userNet3, gas: 300_000 }
             )
@@ -389,7 +389,7 @@ contract('Syntesis', () => {
                 {
                     receiveSide :deployInfo['network3'].synthesis,
                     oppositeBridge: deployInfo['network3'].bridge,
-                    chainID :deployInfo['network3'].chainId,
+                    chainId :deployInfo['network3'].chainId,
                 },
                 { from: userNet1, gas: 300_000 }
             )
