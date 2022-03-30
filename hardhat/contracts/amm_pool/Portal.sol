@@ -345,7 +345,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
      * @param _oppositeBridge opposite bridge address
      * @param _chainId opposite chain ID
      */
-    // TODO check sig from orig sender
     function emergencyUnburnRequest(
         bytes32 _txID,
         address _receiveSide,

@@ -194,7 +194,6 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
      * @param _oppositeBridge opposite bridge address
      * @param _chainID opposite chain ID
      */
-    // TODO check sig from orig sender
     function emergencyUnsyntesizeRequest(
         bytes32 _txID,
         address _receiveSide,
@@ -206,7 +205,13 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     ) external {
         require(synthesizeStates[_txID] != SynthesizeState.Synthesized, "Synthesis: synthetic tokens already minted");
         synthesizeStates[_txID] = SynthesizeState.RevertRequest; // close
-        bytes memory out = abi.encodeWithSelector(bytes4(keccak256(bytes("emergencyUnsynthesize(bytes32,uint8,bytes32,bytes32)"))), _txID, _v, _r, _s);
+        bytes memory out = abi.encodeWithSelector(
+            bytes4(keccak256(bytes("emergencyUnsynthesize(bytes32,uint8,bytes32,bytes32)"))),
+            _txID,
+            _v,
+            _r,
+            _s
+        );
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 txID = IBridge(bridge).prepareRqId(
@@ -456,9 +461,14 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
      * @dev Emergency unburn request. Can be called only by bridge after initiation on a second chain
      * @param _txID transaction ID to use unburn on
      */
-    function emergencyUnburn(bytes32 _txID, uint8 _v, bytes32 _r, bytes32 _s) external onlyBridge {
+    function emergencyUnburn(
+        bytes32 _txID,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) external onlyBridge {
         TxState storage txState = requests[_txID];
-         bytes32 emergencyStructHash = keccak256(
+        bytes32 emergencyStructHash = keccak256(
             abi.encodePacked(_txID, block.chainid, "emergencyUnburn(bytes32 _txID, uint8 _v, bytes32 _r, bytes32 _s)")
         );
         address txOwner = ECDSA.recover(ECDSA.toEthSignedMessageHash(emergencyStructHash), _v, _r, _s);

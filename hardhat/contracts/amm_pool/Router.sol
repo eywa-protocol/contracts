@@ -757,25 +757,24 @@ contract Router is Ownable {
         );
     }
     //TODO:emergency?
-    // function emergencyUnburnRequest(
-    //     bytes32 txID,
-    //     address from,
-    //     address receiveSide,
-    //     address oppositeBridge,
-    //     uint256 chainId
-    // ) external {
-    //     // TODO check sig from orig sender
-    //     IPortal(_portal).emergencyUnburnRequest(txID, from, receiveSide, oppositeBridge, chainId);
-    // }
+    function emergencyUnburnRequest(
+        bytes32 txID,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainId,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
+        IPortal(_portal).emergencyUnburnRequest(txID, receiveSide, oppositeBridge, chainId, v, r, s);
+    }
 
     // function emergencyUnburnRequestToSolana(
     //     bytes32 txID,
-    //     address from,
     //     bytes32[] calldata pubkeys,
     //     uint256 chainId
     // ) external {
-    //     // TODO check sig from orig sender
-    //     IPortal(_portal).emergencyUnburnRequestToSolana(txID, from, pubkeys, chainId);
+    //     IPortal(_portal).emergencyUnburnRequestToSolana(txID, pubkeys, chainId);
     // }
 
     //==============================CURVE-PROXY==============================
@@ -892,16 +891,17 @@ contract Router is Ownable {
         ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, from, pubkeys, amount, chainId);
     }
     
-    //TODO:emergency?
-    // function emergencyUnsyntesizeRequest(
-    //     bytes32 txID,
-    //     address from,
-    //     address receiveSide,
-    //     address oppositeBridge,
-    //     uint256 chainID
-    // ) external {
-    //     ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, from, receiveSide, oppositeBridge, chainID);
-    // }
+    function emergencyUnsyntesizeRequest(
+        bytes32 txID,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainID,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
+        ISynthesis(_synthesis).emergencyUnsyntesizeRequest(txID, receiveSide, oppositeBridge, chainID, v, r, s);
+    }
 
     // function emergencyUnsyntesizeRequestToSolana(
     //     address from,
