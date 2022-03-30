@@ -8,27 +8,27 @@ import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.
 contract SyntERC20 is Ownable, ERC20Permit {
     string public _tokenName;
     bytes32 public _realTokenAddress;
-    uint256 public _chainID;
+    uint256 public _chainId;
     string public _chainSymbol;
     uint8 public _decimals;
 
     constructor(
-        string memory name_,
-        string memory symbol_,
-        uint8 decimals_,
-        uint256 chainID_,
-        bytes32 realTokenAddress_,
-        string memory chainSymbol_
-    ) ERC20Permit("SymbiosisGSN") ERC20(name_, symbol_) {
-        _tokenName = name_;
-        _realTokenAddress = realTokenAddress_;
-        _chainID = chainID_;
-        _chainSymbol = chainSymbol_;
-        _decimals = decimals_;
+        string memory name,
+        string memory symbol,
+        uint8 decimal,
+        uint256 chainId,
+        bytes32 realTokenAddress,
+        string memory chainSymbol
+    ) ERC20Permit("SymbiosisGSN") ERC20(name, symbol) {
+        _tokenName = name;
+        _realTokenAddress = realTokenAddress;
+        _chainId = chainId;
+        _chainSymbol = chainSymbol;
+        _decimals = decimal;
     }
 
     function getChainId() external view returns (uint256) {
-        return _chainID;
+        return _chainId;
     }
 
     function mint(address account, uint256 amount) external onlyOwner {

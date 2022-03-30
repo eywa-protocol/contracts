@@ -22,14 +22,14 @@ interface ISynthesis {
         address _to,
         address _receiveSide,
         address _oppositeBridge,
-        uint256 _chainID
+        uint256 _chainId
     ) external returns (bytes32 txID);
 
     function emergencyUnsyntesizeRequest(
         bytes32 _txID,
         address _receiveSide,
         address _oppositeBridge,
-        uint256 _chainID
+        uint256 _chainId
     ) external;
 
     function getRepresentation(bytes32 _rtoken) external view returns (address);
@@ -713,14 +713,14 @@ contract CurveProxy is Initializable, RelayRecipient {
      * @param _permit permit params
      * @param _receiveSide calldata recipient address for unsynth operation
      * @param _oppositeBridge opposite bridge contract address
-     * @param _chainID opposite chain ID
+     * @param _chainId opposite chain ID
      */
     function redeem_eusd(
         MetaRedeemEUSD calldata _params,
         PermitData calldata _permit,
         address _receiveSide,
         address _oppositeBridge,
-        uint256 _chainID
+        uint256 _chainId
     ) external {
         {
             address hubLpToken = lp_token[_params.remove_h];
@@ -793,7 +793,7 @@ contract CurveProxy is Initializable, RelayRecipient {
             uint256 thisBalance = IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).balanceOf(
                 address(this)
             );
-            if (_chainID != 0) {
+            if (_chainId != 0) {
                 IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).approve(
                     synthesis,
                     thisBalance
@@ -805,7 +805,7 @@ contract CurveProxy is Initializable, RelayRecipient {
                     _params.to,
                     _receiveSide,
                     _oppositeBridge,
-                    _chainID
+                    _chainId
                 );
             } else {
                 IERC20Upgradeable(pool[_params.remove_c].at(uint256(int256(_params.x)))).safeTransfer(

@@ -192,13 +192,13 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
      * @param _txID transaction ID
      * @param _receiveSide request recipient address
      * @param _oppositeBridge opposite bridge address
-     * @param _chainID opposite chain ID
+     * @param _chainId opposite chain ID
      */
     function emergencyUnsyntesizeRequest(
         bytes32 _txID,
         address _receiveSide,
         address _oppositeBridge,
-        uint256 _chainID,
+        uint256 _chainId,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
@@ -216,12 +216,12 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 txID = IBridge(bridge).prepareRqId(
             castToBytes32(_oppositeBridge),
-            _chainID,
+            _chainId,
             castToBytes32(_receiveSide),
             castToBytes32(_msgSender()),
             nonce
         );
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _msgSender(), nonce);
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainId, txID, _msgSender(), nonce);
 
         emit RevertSynthesizeRequest(txID, _msgSender());
     }
@@ -314,7 +314,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
      * @param _to recipient address
      * @param _receiveSide request recipient address
      * @param _oppositeBridge opposite bridge address
-     * @param _chainID opposite chain ID
+     * @param _chainId opposite chain ID
      */
     function burnSyntheticToken(
         address _stoken,
@@ -323,13 +323,13 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         address _to,
         address _receiveSide,
         address _oppositeBridge,
-        uint256 _chainID
+        uint256 _chainId
     ) external returns (bytes32 txID) {
         ISyntERC20(_stoken).burn(_from, _amount);
         uint256 nonce = IBridge(bridge).getNonce(_from);
         txID = IBridge(bridge).prepareRqId(
             castToBytes32(_oppositeBridge),
-            _chainID,
+            _chainId,
             castToBytes32(_receiveSide),
             castToBytes32(_from),
             nonce
@@ -343,7 +343,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             _to
         );
 
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainID, txID, _from, nonce);
+        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainId, txID, _from, nonce);
         TxState storage txState = requests[txID];
         txState.from = castToBytes32(_from);
         txState.to = castToBytes32(_to);
@@ -486,7 +486,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
      * @param _name real token name
      * @param _decimals real token decimals number
      * @param _symbol real token symbol
-     * @param _chainID real token chain id
+     * @param _chainId real token chain id
      * @param _chainSymbol real token chain symbol
      */
     function createRepresentation(
@@ -494,7 +494,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         uint8 _decimals,
         string memory _name,
         string memory _symbol,
-        uint256 _chainID,
+        uint256 _chainId,
         string memory _chainSymbol
     ) external onlyOwner {
         require(representationSynt[_rtoken] == address(0), "Synthesis: representation already exists");
@@ -508,7 +508,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
                     string(abi.encodePacked("e", _name)),
                     string(abi.encodePacked("e", _symbol)),
                     _decimals,
-                    _chainID,
+                    _chainId,
                     _rtoken,
                     _chainSymbol
                 )

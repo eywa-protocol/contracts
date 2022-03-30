@@ -83,7 +83,7 @@ contract MockDexPool is SolanaSerialize {
     function sendTestRequestToSolana(bytes32 testStubPID_, bytes32 solBridgePID_, bytes32 dataAcc_, bytes32 bridgePDASigner_, uint256 testData_, uint chainId) external {
         testData_; // silence warning
 
-        require(chainId == SOLANA_CHAIN_ID, "incorrect chainID");
+        require(chainId == SOLANA_CHAIN_ID, "incorrect chainId");
         uint256 nonce = Bridge(bridge).getNonce(msg.sender);
 
         bytes32 requestId = Bridge(bridge).prepareRqId( testStubPID_, chainId, dataAcc_, bytes32(uint256(uint160(msg.sender))) , nonce);

@@ -72,7 +72,7 @@ contract('CurveProxy', () => {
 
 
 
-            let ABI = ["function synthesize(address _token, uint256 _amount, address _from, address _to, address _receiveSide, address _oppositeBridge, uint256 _chainID)"];
+            let ABI = ["function synthesize(address _token, uint256 _amount, address _from, address _to, address _receiveSide, address _oppositeBridge, uint256 _chainId)"];
             let iface = new ethers.utils.Interface(ABI);
             const callData = iface.encodeFunctionData("synthesize", [
                 tokenToSynth,
