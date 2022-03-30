@@ -12,14 +12,14 @@ async function main() {
   const balance = await owner.getBalance();
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
-  const ERC20 = await ethers.getContractFactory('ERC20Mock')
-  const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool')
-  const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool')
+  const ERC20 = await ethers.getContractFactory('ERC20Mock');
+  const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool');
+  const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool');
   // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
   // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
 
-  const totalSupply = ethers.utils.parseEther("100000000000.0")
+  const totalSupply = ethers.utils.parseEther("100000000000.0");
 
 
 
@@ -43,11 +43,11 @@ async function main() {
 
     for (let hubLp of this.hubPoolCoins) {
       const lp = ERC20.attach(hubLp);
-      const localLpBalance = await lp.balanceOf(owner.address)
-      console.log(localLpBalance)
-      amounts.push(localLpBalance)
-      // await (await lp.approve(hubPool.address, 0)).wait()
-      await (await lp.approve(hubPool.address, totalSupply)).wait()
+      const localLpBalance = await lp.balanceOf(owner.address);
+      console.log(localLpBalance);
+      amounts.push(localLpBalance);
+      // await (await lp.approve(hubPool.address, 0)).wait();
+      await (await lp.approve(hubPool.address, totalSupply)).wait();
     }
 
     this.tx = await hubPool.add_liquidity(
@@ -56,10 +56,10 @@ async function main() {
       {
         gasLimit: '5000000'
       }
-    )
-    await this.tx.wait()
+    );
+    await this.tx.wait();
     console.log(`add liquidity to hub pool on ${network.name}: ${this.tx.hash}`);
-  } else { console.log("NO ACTIVITY") }
+  } else { console.log("NO ACTIVITY"); }
   //=================================================================================
 }
 

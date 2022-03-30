@@ -2,6 +2,7 @@
 pragma solidity 0.8.10;
 
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
+import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "./IBridge.sol";
 import "./RelayRecipient.sol";
 import "./SolanaSerialize.sol";
@@ -146,10 +147,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _from,
         SynthParams memory _synthParams
     ) external returns (bytes32 txID) {
-        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
-
-        // TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        // balanceOf[_token] += _amount;
+        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified"); //TODO
         registerNewBalance(_token, _amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_from);
@@ -204,10 +202,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bytes1 _txStateBump,
         uint256 _chainId
     ) external returns (bytes32 txID) {
-        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
-
-        // TransferHelper.safeTransferFrom(_token, _msgSender(), address(this), _amount);
-        // balanceOf[_token] += _amount;
+        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified"); //TODO
         registerNewBalance(_token, _amount);
 
         require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainID");
@@ -299,10 +294,19 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
      * @dev Emergency unsynthesize request. Can be called only by bridge after initiation on a second chain
      * @param _txID transaction ID to unsynth
      */
-    function emergencyUnsynthesize(bytes32 _txID) external onlyBridge {
+    function emergencyUnsynthesize(
+        bytes32 _txID,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) external onlyBridge {
         TxState storage txState = requests[_txID];
+        bytes32 emergencyStructHash = keccak256(
+            abi.encodePacked(_txID, block.chainid, "emergencyUnsynthesize(bytes32 _txID, uint8 _v, bytes32 _r, bytes32 _s)")
+        );
+        address txOwner = ECDSA.recover(ECDSA.toEthSignedMessageHash(emergencyStructHash), _v, _r, _s);
         require(txState.state == RequestState.Sent, "Portal: state not open or tx does not exist");
-        // require(txState.from == _txOwner, "Portal: invalid tx owner");
+        require(txState.from == castToBytes32(txOwner), "Portal: invalid tx owner");
         txState.state = RequestState.Reverted;
         TransferHelper.safeTransfer(castToAddress(txState.rtoken), castToAddress(txState.from), txState.amount);
 
@@ -346,7 +350,10 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bytes32 _txID,
         address _receiveSide,
         address _oppositeBridge,
-        uint256 _chainId
+        uint256 _chainId,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
     ) external {
         require(
             unsynthesizeStates[_txID] != UnsynthesizeState.Unsynthesized,
@@ -354,7 +361,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         );
         unsynthesizeStates[_txID] = UnsynthesizeState.RevertRequest;
 
-        bytes memory out = abi.encodeWithSelector(bytes4(keccak256(bytes("emergencyUnburn(bytes32)"))), _txID);
+        bytes memory out = abi.encodeWithSelector(bytes4(keccak256(bytes("emergencyUnburn(bytes32,uint8,bytes32,bytes32)"))), _txID, _v, _r, _s);
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 txID = IBridge(bridge).prepareRqId(
