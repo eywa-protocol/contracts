@@ -268,7 +268,13 @@ func bindBasicTypeGo(kind abi.Type) string {
 		}
 		return "*big.Int"
 	case abi.FixedBytesTy:
-		return fmt.Sprintf("[%d]byte", kind.Size)
+		switch kind.Size {
+		case 32:
+			return "common.Hash"
+		default:
+			return fmt.Sprintf("[%d]byte", kind.Size)
+		}
+
 	case abi.BytesTy:
 		return "[]byte"
 	case abi.FunctionTy:
