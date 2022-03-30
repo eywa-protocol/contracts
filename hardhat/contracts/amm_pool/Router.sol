@@ -275,7 +275,7 @@ contract Router is Ownable {
         address from,
         DelegatedCallReceipt memory receipt
     ) internal view {
-        bytes32 senderStructHash = keccak256(
+        bytes32 workerStructHash = keccak256(
             abi.encodePacked(
                 //TYPEHASH
                 //useNonce(from)
@@ -287,7 +287,7 @@ contract Router is Ownable {
                 receipt.deadline
             )
         );
-        bytes32 workerStructHash = keccak256(
+        bytes32 senderStructHash = keccak256(
             abi.encodePacked(
                 //TYPEHASH
                 receipt.v[0],
@@ -296,13 +296,13 @@ contract Router is Ownable {
             )
         );
 
-        address sender = ECDSA.recover(
+        address worker = ECDSA.recover(
             ECDSA.toEthSignedMessageHash(senderStructHash),
             receipt.v[0],
             receipt.r[0],
             receipt.s[0]
         );
-        address worker = ECDSA.recover(
+        address sender = ECDSA.recover(
             ECDSA.toEthSignedMessageHash(workerStructHash),
             receipt.v[1],
             receipt.r[1],
