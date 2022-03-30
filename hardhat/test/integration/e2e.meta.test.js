@@ -15,6 +15,10 @@ contract('CurveProxy', () => {
             PortalB = artifacts.require('Portal')
             PortalC = artifacts.require('Portal')
 
+            RouterA = artifacts.require('Router')
+            RouterB = artifacts.require('Router')
+            RouterC = artifacts.require('Router')
+
             CurveProxyA = artifacts.require('CurveProxy');
             CurveProxyB = artifacts.require('CurveProxy');
             CurveProxyC = artifacts.require('CurveProxy');
@@ -28,6 +32,10 @@ contract('CurveProxy', () => {
             CurveProxyA.setProvider(factoryProvider.web3Net1)
             CurveProxyB.setProvider(factoryProvider.web3Net2)
             CurveProxyC.setProvider(factoryProvider.web3Net3)
+
+            RouterA.setProvider(factoryProvider.web3Net1)
+            RouterB.setProvider(factoryProvider.web3Net2)
+            RouterC.setProvider(factoryProvider.web3Net3)
 
             ERC20A.setProvider(factoryProvider.web3Net1)
             ERC20B.setProvider(factoryProvider.web3Net2)
@@ -52,7 +60,9 @@ contract('CurveProxy', () => {
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
             this.tokenA3 = await ERC20A.at(deployInfo["network1"].localToken[2].address)
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -105,18 +115,19 @@ contract('CurveProxy', () => {
                 approveMax: false
             })
 
-            await this.tokenA1.approve(this.portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+            await this.tokenA1.approve(this.routerA.address, totalSupply, { from: userNet1, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount + ".0")
             const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
 
-            await this.portalA.synthesize_batch_transit(
+            await this.routerA.batchSynthesizeRequestWithDataTransit(
                 tokensToSynth,
                 amounts,
-                synthParams,
+                userNet1,
                 selectorMintEUSD,
                 encodedTransitData,
+                synthParams,
                 permitParams,
                 { from: userNet1, gas: 1000_000 }
             )
@@ -134,7 +145,9 @@ contract('CurveProxy', () => {
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
             this.tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
             this.tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
-            this.portalC = await PortalC.at(deployInfo["network3"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -187,18 +200,19 @@ contract('CurveProxy', () => {
                 approveMax: false
             })
 
-            await this.tokenC1.approve(this.portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
+            await this.tokenC1.approve(this.routerC.address, totalSupply, { from: userNet3, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount + ".0")
             const tokensToSynth = [this.tokenC1.address, this.tokenC2.address, this.tokenC3.address]
 
-            await this.portalC.synthesize_batch_transit(
+            await this.routerC.synthesize_batch_transit(
                 tokensToSynth,
                 amounts,
-                synthParams,
+                userNet3,
                 selectorMintEUSD,
                 encodedTransitData,
+                synthParams,
                 permitParams,
                 { from: userNet3, gas: 1000_000 }
             )
@@ -210,7 +224,9 @@ contract('CurveProxy', () => {
 
         it("Mint EUSD: network2(hub) -> network2(hub)", async function () {
 
-            this.curveproxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -240,16 +256,17 @@ contract('CurveProxy', () => {
                 approveMax: false
             })
 
-            await this.tokenB1.approve(this.curveproxyB.address, 0, { from: userNet2, gas: 300_000 });
-            await this.tokenB1.approve(this.curveproxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
+            await this.tokenB1.approve(this.routerB.address, 0, { from: userNet2, gas: 300_000 });
+            await this.tokenB1.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 });
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1).toString();
             amounts[0] = ethers.utils.parseEther(testAmount + ".0")
             const tokensToTransfer = [this.tokenB1.address, this.tokenB2.address, this.tokenB3.address]
 
-            await this.curveproxyB.add_liquidity_3pool_mint_eusd(
+            await this.routerB.delegatedMintEusdRequestVia3pool(
                 mintEUSDparams,
                 permitParams,
+                userNet2,
                 tokensToTransfer,
                 amounts,
                 { from: userNet2, gas: 1000_000 }
@@ -263,7 +280,9 @@ contract('CurveProxy', () => {
 
         it("Redeem EUSD: network2(hub) -> network1", async function () {
 
-            this.curveProxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
             this.tokenA3 = await ERC20A.at(deployInfo["network1"].localToken[2].address)
@@ -301,12 +320,14 @@ contract('CurveProxy', () => {
                 approveMax: false
             }
 
-            await this.EUSD.approve(this.curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
-            await this.EUSD.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
+            await this.EUSD.approve(this.routerB.address, 0, { from: userNet2, gas: 300_000 });
+            await this.EUSD.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
-            await this.curveProxyB.redeem_eusd(
+            await this.routerB.redeemEusdRequest(
                 redeemEUSDParams,
                 permitParams,
+                this.EUSD.address,
+                userNet2,
                 unsynthParams.receiveSide,
                 unsynthParams.oppositeBridge,
                 unsynthParams.chainID,
@@ -318,7 +339,9 @@ contract('CurveProxy', () => {
         })
 
         it("Redeem EUSD: network2(hub) -> network3", async function () {
-            this.curveProxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
             this.tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
             this.tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
@@ -356,12 +379,14 @@ contract('CurveProxy', () => {
                 approveMax: false
             }
 
-            await this.EUSD.approve(this.curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
-            await this.EUSD.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
+            await this.EUSD.approve(this.routerB.address, 0, { from: userNet2, gas: 300_000 });
+            await this.EUSD.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
-            await this.curveProxyB.redeem_eusd(
+            await this.routerB.redeemEusdRequest(
                 redeemEUSDParams,
                 permitParams,
+                this.EUSD.address,
+                userNet2,
                 unsynthParams.receiveSide,
                 unsynthParams.oppositeBridge,
                 unsynthParams.chainID,
@@ -373,7 +398,9 @@ contract('CurveProxy', () => {
         })
 
         it("Redeem EUSD: network2(hub) -> network2(hub)", async function () {
-            this.curveProxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -411,12 +438,14 @@ contract('CurveProxy', () => {
                 to: userNet2
             }
 
-            await this.EUSD.approve(this.curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
-            await this.EUSD.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
+            await this.EUSD.approve(this.routerB.address, 0, { from: userNet2, gas: 300_000 });
+            await this.EUSD.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
-            await this.curveProxyB.redeem_eusd(
+            await this.routerB.redeem_eusd(
                 redeemEUSDParams,
                 permitParams,
+                this.EUSD.address,
+                userNet2,
                 unsynthParams.receiveSide,
                 unsynthParams.oppositeBridge,
                 unsynthParams.chainID,
@@ -436,7 +465,9 @@ contract('CurveProxy', () => {
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
             this.tokenA3 = await ERC20A.at(deployInfo["network1"].localToken[2].address)
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
             this.tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
             this.tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
@@ -511,18 +542,19 @@ contract('CurveProxy', () => {
                 approveMax: false
             })
 
-            await this.tokenA1.approve(this.portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+            await this.tokenA1.approve(this.routerA.address, totalSupply, { from: userNet1, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
             const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
 
-            await this.portalA.synthesize_batch_transit(
+            await this.routerA.batchSynthesizeRequestWithDataTransit(
                 tokensToSynth,
                 amounts,
-                synthParams,
+                userNet1,
                 selectorMetaExchange,
                 encodedTransitData,
+                synthParams,
                 permitParams,
                 { from: userNet1, gas: 1000_000 }
             )
@@ -540,7 +572,9 @@ contract('CurveProxy', () => {
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
             this.tokenA3 = await ERC20A.at(deployInfo["network1"].localToken[2].address)
-            this.portalC = await PortalC.at(deployInfo["network3"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
             this.tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
             this.tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
@@ -615,18 +649,19 @@ contract('CurveProxy', () => {
                 ]
             )
 
-            await this.tokenC1.approve(this.portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
+            await this.tokenC1.approve(this.routerC.address, totalSupply, { from: userNet3, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
             const tokensToSynth = [this.tokenC1.address, this.tokenC2.address, this.tokenC3.address]
 
-            await this.portalC.synthesize_batch_transit(
+            await this.routerC.batchSynthesizeRequestWithDataTransit(
                 tokensToSynth,
                 amounts,
-                synthParams,
+                userNet3,
                 selectorMetaExchange,
                 encodedTransitData,
+                synthParams,
                 permitParams,
                 { from: userNet3, gas: 1000_000 }
             )
@@ -644,7 +679,9 @@ contract('CurveProxy', () => {
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
-            this.curveProxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
 
             this.balanceA2 = (await this.tokenA2.balanceOf(userNet1))
 
@@ -681,15 +718,16 @@ contract('CurveProxy', () => {
                 approveMax: false
             })
 
-            await this.tokenB1.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 })
+            await this.tokenB1.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount + ".0")
             const tokens = [this.tokenB1.address, this.tokenB2.address, this.tokenB3.address]
 
-            await this.curveProxyB.meta_exchange(
+            await this.routerB.metaExchangeRequestVia3pool(
                 metaExchangeParams,
                 permitParams,
+                userNet2,
                 tokens,
                 amounts,
                 { from: userNet2, gas: 1000_000 }
@@ -705,7 +743,9 @@ contract('CurveProxy', () => {
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
-            this.curveProxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
 
             this.balanceC2 = (await this.tokenC2.balanceOf(userNet3))
 
@@ -742,15 +782,16 @@ contract('CurveProxy', () => {
                 approveMax: false
             })
 
-            await this.tokenB1.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 })
+            await this.tokenB1.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount + ".0")
             const tokens = [this.tokenB1.address, this.tokenB2.address, this.tokenB3.address]
 
-            await this.curveProxyB.meta_exchange(
+            await this.routerB.metaExchangeRequestVia3pool(
                 metaExchangeParams,
                 permitParams,
+                userNet2,
                 tokens,
                 amounts,
                 { from: userNet2, gas: 1000_000 }
@@ -767,7 +808,9 @@ contract('CurveProxy', () => {
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
             this.tokenA3 = await ERC20A.at(deployInfo["network1"].localToken[2].address)
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -842,18 +885,19 @@ contract('CurveProxy', () => {
                 ]
             )
 
-            await this.tokenA1.approve(this.portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+            await this.tokenA1.approve(this.routerA.address, totalSupply, { from: userNet1, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
             const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
 
-            await this.portalA.synthesize_batch_transit(
+            await this.routerA.batchSynthesizeRequestWithDataTransit(
                 tokensToSynth,
                 amounts,
-                synthParams,
+                userNet1,
                 selectorMetaExchange,
                 encodedTransitData,
+                synthParams,
                 permitParams,
                 { from: userNet1, gas: 1000_000 }
             )
@@ -871,7 +915,9 @@ contract('CurveProxy', () => {
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
             this.tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
             this.tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -946,18 +992,19 @@ contract('CurveProxy', () => {
                 ]
             )
 
-            await this.tokenA1.approve(this.portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+            await this.tokenA1.approve(this.routerA.address, totalSupply, { from: userNet1, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
             const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
 
-            await this.portalA.synthesize_batch_transit(
+            await this.routerA.batchSynthesizeRequestWithDataTransit(
                 tokensToSynth,
                 amounts,
-                synthParams,
+                userNet1,
                 selectorMetaExchange,
                 encodedTransitData,
+                synthParams,
                 permitParams,
                 { from: userNet1, gas: 1000_000 }
             )

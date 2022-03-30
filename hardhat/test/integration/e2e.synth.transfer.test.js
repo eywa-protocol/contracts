@@ -6,7 +6,7 @@ const { expect } = require("chai");
 
 contract('Syntesis', () => {
 
-    describe("SynthTransfer local test", () => {
+    describe("synthTransferRequest local test", () => {
 
         before(async () => {
             ERC20A = artifacts.require('SyntERC20')
@@ -21,6 +21,10 @@ contract('Syntesis', () => {
             SynthesisB = artifacts.require('Synthesis')
             SynthesisC = artifacts.require('Synthesis')
 
+            RouterA = artifacts.require('Router')
+            RouterB = artifacts.require('Router')
+            RouterC = artifacts.require('Router')
+
             PortalA = artifacts.require('Portal')
             PortalB = artifacts.require('Portal')
             PortalC = artifacts.require('Portal')
@@ -28,6 +32,10 @@ contract('Syntesis', () => {
             factoryProvider = checkoutProvider({ 'typenet': 'devstand', 'net1': 'network1', 'net2': 'network2', 'net3': 'network3' })
 
             totalSupply = ethers.constants.MaxUint256
+
+            RouterA.setProvider(factoryProvider.web3Net1)
+            RouterB.setProvider(factoryProvider.web3Net2)
+            RouterC.setProvider(factoryProvider.web3Net3)
 
             SynthesisA.setProvider(factoryProvider.web3Net1)
             SynthesisB.setProvider(factoryProvider.web3Net2)
@@ -69,38 +77,45 @@ contract('Syntesis', () => {
             this.synthesisB = await SynthesisB.at(deployInfo["network2"].synthesis)
             this.synthesisC = await SynthesisC.at(deployInfo["network3"].synthesis)
 
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
-            this.portalB = await PortalB.at(deployInfo["network2"].portal)
-            this.portalC = await PortalC.at(deployInfo["network3"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
 
             const synthAddress = await this.synthesisC.getRepresentation(addressToBytes32(deployInfo["network1"].localToken[0].address))
             this.synthTokenC1 = await ERC20C.at(synthAddress)
             synthBalance = await this.synthTokenC1.balanceOf(userNet3)
             
 
-            await tokenA1.approve(this.portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+            await tokenA1.approve(this.routerA.address, totalSupply, { from: userNet1, gas: 300_000 })
 
            //A->B
-            await this.portalA.synthesize(
+            await this.routerA.tokenSynthesizeRequest(
                 deployInfo['network1'].localToken[0].address,
                 amount,
+                userNet1,
                 userNet2,
-                deployInfo['network2'].synthesis,
-                deployInfo['network2'].bridge,
-                deployInfo['network2'].chainId,
+                {
+                    receiveSide :deployInfo['network2'].synthesis,
+                    oppositeBridge: deployInfo['network2'].bridge,
+                    chainID :deployInfo['network2'].chainId,
+                },
                 { from: userNet1, gas: 300_000 }
             )
 
             await timeout(15000)
 
             //B->C
-            await this.synthesisB.synthTransfer(
+            await this.routerB.synthTransferRequest(
                 addressToBytes32(deployInfo["network1"].localToken[0].address),
+                synthAddress.address,
                 amount,
-                deployInfo["network3"].bridge,
-                deployInfo["network3"].synthesis,
-                deployInfo["network3"].chainId,
+                userNet2,
                 userNet3,
+                {
+                    receiveSide :deployInfo['network3'].synthesis,
+                    oppositeBridge: deployInfo['network3'].bridge,
+                    chainID :deployInfo['network3'].chainId,
+                },
                 { from: userNet2, gas: 300_000 }
             )
 
@@ -117,38 +132,45 @@ contract('Syntesis', () => {
             this.synthesisB = await SynthesisB.at(deployInfo["network2"].synthesis)
             this.synthesisC = await SynthesisC.at(deployInfo["network3"].synthesis)
 
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
-            this.portalB = await PortalB.at(deployInfo["network2"].portal)
-            this.portalC = await PortalC.at(deployInfo["network3"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
 
             const synthAddress = await this.synthesisA.getRepresentation(addressToBytes32(deployInfo["network3"].localToken[0].address))
             this.synthTokenA1 = await ERC20A.at(synthAddress)
             synthBalance = await this.synthTokenA1.balanceOf(userNet1)
             
 
-            await tokenC1.approve(this.portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
+            await tokenC1.approve(this.routerC.address, totalSupply, { from: userNet3, gas: 300_000 })
 
            //C->B
-            await this.portalC.synthesize(
+            await this.routerC.tokenSynthesizeRequest(
                 deployInfo['network3'].localToken[0].address,
                 amount,
+                userNet3,
                 userNet2,
-                deployInfo['network2'].synthesis,
-                deployInfo['network2'].bridge,
-                deployInfo['network2'].chainId,
+                {
+                    receiveSide :deployInfo['network2'].synthesis,
+                    oppositeBridge: deployInfo['network2'].bridge,
+                    chainID :deployInfo['network2'].chainId,
+                },
                 { from: userNet3, gas: 300_000 }
             )
 
             await timeout(15000)
 
             //B->A
-            await this.synthesisB.synthTransfer(
+            await this.routerB.synthTransferRequest(
                 addressToBytes32(deployInfo["network3"].localToken[0].address),
+                synthAddress.address,
                 amount,
-                deployInfo["network1"].bridge,
-                deployInfo["network1"].synthesis,
-                deployInfo["network1"].chainId,
+                userNet2,
                 userNet1,
+                {
+                    receiveSide :deployInfo['network1'].synthesis,
+                    oppositeBridge: deployInfo['network1'].bridge,
+                    chainID :deployInfo['network1'].chainId,
+                },
                 { from: userNet2, gas: 300_000 }
             )
 
@@ -165,38 +187,45 @@ contract('Syntesis', () => {
             this.synthesisB = await SynthesisB.at(deployInfo["network2"].synthesis)
             this.synthesisC = await SynthesisC.at(deployInfo["network3"].synthesis)
 
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
-            this.portalB = await PortalB.at(deployInfo["network2"].portal)
-            this.portalC = await PortalC.at(deployInfo["network3"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
 
             const synthAddress = await this.synthesisB.getRepresentation(addressToBytes32(deployInfo["network3"].localToken[0].address))
             this.synthTokenB1 = await ERC20B.at(synthAddress)
             synthBalance = await this.synthTokenB1.balanceOf(userNet2)
             
 
-            await tokenC1.approve(this.portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
+            await tokenC1.approve(this.routerC.address, totalSupply, { from: userNet3, gas: 300_000 })
 
            //C->A
-            await this.portalC.synthesize(
+            await this.routerC.tokenSynthesizeRequest(
                 deployInfo['network3'].localToken[0].address,
                 amount,
+                userNet3,
                 userNet1,
-                deployInfo['network1'].synthesis,
-                deployInfo['network1'].bridge,
-                deployInfo['network1'].chainId,
+                {
+                    receiveSide :deployInfo['network1'].synthesis,
+                    oppositeBridge: deployInfo['network1'].bridge,
+                    chainID :deployInfo['network1'].chainId,
+                },
                 { from: userNet3, gas: 300_000 }
             )
 
             await timeout(15000)
 
             //A->B
-            await this.synthesisA.synthTransfer(
+            await this.routerA.synthTransferRequest(
                 addressToBytes32(deployInfo["network3"].localToken[0].address),
+                synthAddress.address,
                 amount,
-                deployInfo["network2"].bridge,
-                deployInfo["network2"].synthesis,
-                deployInfo["network2"].chainId,
+                userNet1,
                 userNet2,
+                {
+                    receiveSide :deployInfo['network2'].synthesis,
+                    oppositeBridge: deployInfo['network2'].bridge,
+                    chainID :deployInfo['network2'].chainId,
+                },
                 { from: userNet1, gas: 300_000 }
             )
 
@@ -213,38 +242,45 @@ contract('Syntesis', () => {
             this.synthesisB = await SynthesisB.at(deployInfo["network2"].synthesis)
             this.synthesisC = await SynthesisC.at(deployInfo["network3"].synthesis)
 
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
-            this.portalB = await PortalB.at(deployInfo["network2"].portal)
-            this.portalC = await PortalC.at(deployInfo["network3"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
 
             const synthAddress = await this.synthesisB.getRepresentation(addressToBytes32(deployInfo["network1"].localToken[0].address))
             this.synthTokenB1 = await ERC20B.at(synthAddress)
             synthBalance = await this.synthTokenB1.balanceOf(userNet2)
             
 
-            await tokenA1.approve(this.portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+            await tokenA1.approve(this.routerA.address, totalSupply, { from: userNet1, gas: 300_000 })
 
            //A->C
-            await this.portalA.synthesize(
+            await this.routerA.tokenSynthesizeRequest(
                 deployInfo['network1'].localToken[0].address,
                 amount,
+                userNet1,
                 userNet3,
-                deployInfo['network3'].synthesis,
-                deployInfo['network3'].bridge,
-                deployInfo['network3'].chainId,
+                {
+                    receiveSide :deployInfo['network3'].synthesis,
+                    oppositeBridge: deployInfo['network3'].bridge,
+                    chainID :deployInfo['network3'].chainId,
+                },
                 { from: userNet1, gas: 300_000 }
             )
 
             await timeout(15000)
 
             //C->B
-            await this.synthesisC.synthTransfer(
+            await this.routerC.synthTransferRequest(
                 addressToBytes32(deployInfo["network1"].localToken[0].address),
+                synthAddress.address,
                 amount,
-                deployInfo["network2"].bridge,
-                deployInfo["network2"].synthesis,
-                deployInfo["network2"].chainId,
+                userNet3,
                 userNet2,
+                {
+                    receiveSide :deployInfo['network2'].synthesis,
+                    oppositeBridge: deployInfo['network2'].bridge,
+                    chainID :deployInfo['network2'].chainId,
+                },
                 { from: userNet3, gas: 300_000 }
             )
 
@@ -261,38 +297,45 @@ contract('Syntesis', () => {
             this.synthesisB = await SynthesisB.at(deployInfo["network2"].synthesis)
             this.synthesisC = await SynthesisC.at(deployInfo["network3"].synthesis)
 
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
-            this.portalB = await PortalB.at(deployInfo["network2"].portal)
-            this.portalC = await PortalC.at(deployInfo["network3"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
 
             const synthAddress = await this.synthesisA.getRepresentation(addressToBytes32(deployInfo["network2"].localToken[0].address))
             this.synthTokenA1 = await ERC20A.at(synthAddress)
             synthBalance = await this.synthTokenA1.balanceOf(userNet1)
             
 
-            await tokenB1.approve(this.portalB.address, totalSupply, { from: userNet2, gas: 300_000 })
+            await tokenB1.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 })
 
            //B->C
-            await this.portalB.synthesize(
+            await this.routerB.tokenSynthesizeRequest(
                 deployInfo['network2'].localToken[0].address,
                 amount,
+                userNet2,
                 userNet3,
-                deployInfo['network3'].synthesis,
-                deployInfo['network3'].bridge,
-                deployInfo['network3'].chainId,
+                {
+                    receiveSide :deployInfo['network3'].synthesis,
+                    oppositeBridge: deployInfo['network3'].bridge,
+                    chainID :deployInfo['network3'].chainId,
+                },
                 { from: userNet2, gas: 300_000 }
             )
 
             await timeout(15000)
 
             //C->A
-            await this.synthesisC.synthTransfer(
+            await this.routerC.synthTransferRequest(
                 addressToBytes32(deployInfo["network2"].localToken[0].address),
+                synthAddress.address,
                 amount,
-                deployInfo["network1"].bridge,
-                deployInfo["network1"].synthesis,
-                deployInfo["network1"].chainId,
+                userNet3,
                 userNet1,
+                {
+                    receiveSide :deployInfo['network1'].synthesis,
+                    oppositeBridge: deployInfo['network1'].bridge,
+                    chainID :deployInfo['network1'].chainId,
+                },
                 { from: userNet3, gas: 300_000 }
             )
 
@@ -309,38 +352,45 @@ contract('Syntesis', () => {
             this.synthesisB = await SynthesisB.at(deployInfo["network2"].synthesis)
             this.synthesisC = await SynthesisC.at(deployInfo["network3"].synthesis)
 
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
-            this.portalB = await PortalB.at(deployInfo["network2"].portal)
-            this.portalC = await PortalC.at(deployInfo["network3"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
 
             const synthAddress = await this.synthesisC.getRepresentation(addressToBytes32(deployInfo["network3"].localToken[0].address))
             this.synthTokenC1 = await ERC20C.at(synthAddress)
             synthBalance = await this.synthTokenC1.balanceOf(userNet3)
             
 
-            await tokenC1.approve(this.portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
+            await tokenC1.approve(this.routerC.address, totalSupply, { from: userNet3, gas: 300_000 })
 
            //C->A
-            await this.portalC.synthesize(
+            await this.routerC.tokenSynthesizeRequest(
                 deployInfo['network3'].localToken[0].address,
                 amount,
+                userNet3,
                 userNet1,
-                deployInfo['network1'].synthesis,
-                deployInfo['network1'].bridge,
-                deployInfo['network1'].chainId,
+                {
+                    receiveSide :deployInfo['network1'].synthesis,
+                    oppositeBridge: deployInfo['network1'].bridge,
+                    chainID :deployInfo['network1'].chainId,
+                },
                 { from: userNet3, gas: 300_000 }
             )
 
             await timeout(15000)
 
             //A->C
-            await this.synthesisA.synthTransfer(
+            await this.routerA.synthTransferRequest(
                 addressToBytes32(deployInfo["network3"].localToken[0].address),
+                synthAddress.address,
                 amount,
-                deployInfo["network3"].bridge,
-                deployInfo["network3"].synthesis,
-                deployInfo["network3"].chainId,
+                userNet1,
                 userNet3,
+                {
+                    receiveSide :deployInfo['network3'].synthesis,
+                    oppositeBridge: deployInfo['network3'].bridge,
+                    chainID :deployInfo['network3'].chainId,
+                },
                 { from: userNet1, gas: 300_000 }
             )
 
