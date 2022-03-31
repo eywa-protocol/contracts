@@ -381,11 +381,11 @@ contract Router is Ownable {
         address token,
         uint256 amount,
         address from,
-        IPortal.SynthParams memory params,
+        IPortal.SynthParams memory synthParams,
         DelegatedCallReceipt memory receipt
     ) external {
         uint256 proceedAmount = _proceedFeesWithTransfer(token, amount, from, _portal, receipt);
-        IPortal(_portal).synthesize(token, proceedAmount, from, params);
+        IPortal(_portal).synthesize(token, proceedAmount, from, synthParams);
     }
 
     /* *
@@ -403,7 +403,7 @@ contract Router is Ownable {
         address token,
         uint256 amount,
         address from,
-        IPortal.SynthParams memory params,
+        IPortal.SynthParams memory synthParams,
         IPortal.PermitData memory permitData,
         DelegatedCallReceipt memory receipt
     ) external {
@@ -417,7 +417,7 @@ contract Router is Ownable {
             permitData.s
         );
         uint256 proceedAmount = _proceedFeesWithTransfer(token, amount, from, _portal, receipt);
-        IPortal(_portal).synthesize(token, proceedAmount, from, params);
+        IPortal(_portal).synthesize(token, proceedAmount, from, synthParams);
     }
 
     /* *
@@ -522,11 +522,11 @@ contract Router is Ownable {
         uint256 amount,
         address from,
         address to,
-        ISynthesis.SynthParams memory params,
+        ISynthesis.SynthParams memory synthParams,
         DelegatedCallReceipt memory receipt
     ) external {
         uint256 proceedAmount = _proceedFeesWithApprove(tokenSynth, amount, from, _synthesis, receipt);
-        ISynthesis(_synthesis).synthTransfer(tokenReal, proceedAmount, from, to, params);
+        ISynthesis(_synthesis).synthTransfer(tokenReal, proceedAmount, from, to, synthParams);
     }
 
     function delegatedUnsynthesizeRequest(
@@ -684,10 +684,10 @@ contract Router is Ownable {
         address token,
         uint256 amount,
         address from,
-        IPortal.SynthParams memory params
+        IPortal.SynthParams memory synthParams
     ) external {
         SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
-        IPortal(_portal).synthesize(token, amount, from, params);
+        IPortal(_portal).synthesize(token, amount, from, synthParams);
     }
 
     /* *
@@ -704,7 +704,7 @@ contract Router is Ownable {
         address token,
         uint256 amount,
         address from,
-        IPortal.SynthParams memory params,
+        IPortal.SynthParams memory synthParams,
         IPortal.PermitData memory permitData
     ) external {
         IERC20Permit(token).permit(
@@ -717,7 +717,7 @@ contract Router is Ownable {
             permitData.s
         );
         SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
-        IPortal(_portal).synthesize(token, amount, from, params);
+        IPortal(_portal).synthesize(token, amount, from, synthParams);
     }
 
     /* *
@@ -854,11 +854,11 @@ contract Router is Ownable {
         uint256 amount,
         address from,
         address to,
-        ISynthesis.SynthParams memory params
+        ISynthesis.SynthParams memory synthParams
     ) external {
         SafeERC20.safeTransferFrom(IERC20(tokenSynth), from, address(this), amount);
         IERC20(tokenSynth).approve(_synthesis, amount);
-        ISynthesis(_synthesis).synthTransfer(tokenReal, amount, from, to, params);
+        ISynthesis(_synthesis).synthTransfer(tokenReal, amount, from, to, synthParams);
     }
 
     function unsynthesizeRequest(

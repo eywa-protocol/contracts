@@ -104,7 +104,6 @@ contract('Synthesis', () => {
 
             await timeout(15000)
 
-            console.log(synthAddressB1)
             //B->C
             await routerB.synthTransferRequest(
                 addressToBytes32(deployInfo["network1"].localToken[0].address),
@@ -128,7 +127,7 @@ contract('Synthesis', () => {
         })
 
         // it("Synt Transfer: network3 -> network1", async function () {
-            
+
         //     const synthAddress = await synthesisA.getRepresentation(addressToBytes32(deployInfo["network3"].localToken[0].address))
         //     this.synthTokenA1 = await ERC20A.at(synthAddress)
         //     synthBalance = await this.synthTokenA1.balanceOf(userNet1)
