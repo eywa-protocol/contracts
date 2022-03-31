@@ -540,7 +540,15 @@ contract Router is Ownable {
         DelegatedCallReceipt memory receipt
     ) external {
         uint256 proceedAmount = _proceedFeesWithApprove(stoken, amount, from, _synthesis, receipt);
-        ISynthesis(_synthesis).burnSyntheticToken(stoken, proceedAmount, from, to, receiveSide, oppositeBridge, chainId);
+        ISynthesis(_synthesis).burnSyntheticToken(
+            stoken,
+            proceedAmount,
+            from,
+            to,
+            receiveSide,
+            oppositeBridge,
+            chainId
+        );
     }
 
     function delegatedUnsynthesizeRequestToSolana(
@@ -551,8 +559,8 @@ contract Router is Ownable {
         uint256 chainId,
         DelegatedCallReceipt memory receipt
     ) external {
-         uint256 proceedAmount = _proceedFeesWithApprove(stoken, amount, from, _synthesis, receipt);
-        ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, from, pubkeys,  proceedAmount , chainId);
+        uint256 proceedAmount = _proceedFeesWithApprove(stoken, amount, from, _synthesis, receipt);
+        ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, from, pubkeys, proceedAmount, chainId);
     }
 
     //TODO:emergency?
@@ -749,15 +757,7 @@ contract Router is Ownable {
                 SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
             }
         }
-        IPortal(_portal).synthesize_batch_transit(
-            token,
-            amount,
-            from,
-            synthParams,
-            selector,
-            transitData,
-            permitData
-        );
+        IPortal(_portal).synthesize_batch_transit(token, amount, from, synthParams, selector, transitData, permitData);
     }
 
     //TODO:emergency?

@@ -302,7 +302,11 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     ) external onlyBridge {
         TxState storage txState = requests[_txID];
         bytes32 emergencyStructHash = keccak256(
-            abi.encodePacked(_txID, block.chainid, "emergencyUnsynthesize(bytes32 _txID, uint8 _v, bytes32 _r, bytes32 _s)")
+            abi.encodePacked(
+                _txID,
+                block.chainid,
+                "emergencyUnsynthesize(bytes32 _txID, uint8 _v, bytes32 _r, bytes32 _s)"
+            )
         );
         address txOwner = ECDSA.recover(ECDSA.toEthSignedMessageHash(emergencyStructHash), _v, _r, _s);
         require(txState.state == RequestState.Sent, "Portal: state not open or tx does not exist");
@@ -360,7 +364,13 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         );
         unsynthesizeStates[_txID] = UnsynthesizeState.RevertRequest;
 
-        bytes memory out = abi.encodeWithSelector(bytes4(keccak256(bytes("emergencyUnburn(bytes32,uint8,bytes32,bytes32)"))), _txID, _v, _r, _s);
+        bytes memory out = abi.encodeWithSelector(
+            bytes4(keccak256(bytes("emergencyUnburn(bytes32,uint8,bytes32,bytes32)"))),
+            _txID,
+            _v,
+            _r,
+            _s
+        );
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
         bytes32 txID = IBridge(bridge).prepareRqId(

@@ -12,7 +12,7 @@ import "../../amm_pool/SolanaSerialize.sol";
  */
 contract MockDexPool is SolanaSerialize {
     bytes8 private SET_VALUE_SIGHASH = sigHash("global:set_value");
-    string constant private SET_REQUEST_TYPE = "setRequest";
+    string private constant SET_REQUEST_TYPE = "setRequest";
     uint256 public testData = 0;
     address public bridge;
     mapping(bytes32 => uint256) public requests;
@@ -35,7 +35,12 @@ contract MockDexPool is SolanaSerialize {
      * @dev ${this func} ->  bridge#transmitRequest -> node -> adpater#receiveRequest -> mockDexPool_2#receiveRequestTest -> bridge#transmitResponse(reqId) -> node -> adpater#receiveResponse -> mockDexPool_1#setPendingRequestsDone
      *
      */
-    function sendRequestTestV2(uint256 testData_, address secondPartPool, address oppBridge, uint chainId) external {
+    function sendRequestTestV2(
+        uint256 testData_,
+        address secondPartPool,
+        address oppBridge,
+        uint256 chainId
+    ) external {
         require(secondPartPool != address(0), "BAD ADDRESS");
         // todo some stuff on this part pool
         // ...
@@ -49,12 +54,11 @@ contract MockDexPool is SolanaSerialize {
             nonce
         );
         bytes memory output = abi.encodeWithSelector(
-            bytes4(keccak256(bytes('receiveRequestTest(uint256,bytes32)'))),
+            bytes4(keccak256(bytes("receiveRequestTest(uint256,bytes32)"))),
             testData_,
             requestId
         );
-        Bridge(bridge).transmitRequestV2(
-            output, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
+        Bridge(bridge).transmitRequestV2(output, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
 
         emit RequestSent(requestId);
     }
@@ -80,41 +84,46 @@ contract MockDexPool is SolanaSerialize {
         emit RequestReceivedV2(_reqId, _testData);
     }
 
-    function sendTestRequestToSolana(bytes32 testStubPID_, bytes32 solBridgePID_, bytes32 dataAcc_, bytes32 bridgePDASigner_, uint256 testData_, uint chainId) external {
+    function sendTestRequestToSolana(
+        bytes32 testStubPID_,
+        bytes32 solBridgePID_,
+        bytes32 dataAcc_,
+        bytes32 bridgePDASigner_,
+        uint256 testData_,
+        uint256 chainId
+    ) external {
         testData_; // silence warning
 
         require(chainId == SOLANA_CHAIN_ID, "incorrect chainId");
         uint256 nonce = Bridge(bridge).getNonce(msg.sender);
 
-        bytes32 requestId = Bridge(bridge).prepareRqId( testStubPID_, chainId, dataAcc_, bytes32(uint256(uint160(msg.sender))) , nonce);
-//                        bool success = Bridge(bridge).transmitSolanaRequest(out, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
+        bytes32 requestId = Bridge(bridge).prepareRqId(
+            testStubPID_,
+            chainId,
+            dataAcc_,
+            bytes32(uint256(uint160(msg.sender))),
+            nonce
+        );
+        //                        bool success = Bridge(bridge).transmitSolanaRequest(out, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
         SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](2);
 
-        accounts[0] = SolanaAccountMeta({
-        pubkey: dataAcc_,
-        isSigner: false,
-        isWritable: true
-        });
+        accounts[0] = SolanaAccountMeta({ pubkey: dataAcc_, isSigner: false, isWritable: true });
 
-        accounts[1] = SolanaAccountMeta({
-        pubkey: bridgePDASigner_,
-        isSigner: true,
-        isWritable: true
-        });
+        accounts[1] = SolanaAccountMeta({ pubkey: bridgePDASigner_, isSigner: true, isWritable: true });
 
         Bridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
                 SolanaStandaloneInstruction(
-                /* programId: */
+                    /* programId: */
                     testStubPID_,
-                /* accounts: */
+                    /* accounts: */
                     accounts,
-                /* data: */
+                    /* data: */
                     abi.encodePacked(SET_VALUE_SIGHASH, testData_)
                 )
             ),
-                testStubPID_,
-                solBridgePID_,
+            testStubPID_,
+            solBridgePID_,
             SOLANA_CHAIN_ID,
             requestId,
             msg.sender,
@@ -128,11 +137,11 @@ contract MockDexPool is SolanaSerialize {
         return bytes8(sha256(bytes(_data)));
     }
 
-    function doubles() public view returns(bytes32[] memory) {
+    function doubles() public view returns (bytes32[] memory) {
         return doubleRequestIds;
     }
 
-    function doubleRequestError() public view returns(uint256) {
+    function doubleRequestError() public view returns (uint256) {
         return doubleRequestIds.length;
     }
 
