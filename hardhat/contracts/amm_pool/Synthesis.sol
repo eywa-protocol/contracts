@@ -206,8 +206,9 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         require(synthesizeStates[_txID] != SynthesizeState.Synthesized, "Synthesis: synthetic tokens already minted");
         synthesizeStates[_txID] = SynthesizeState.RevertRequest; // close
         bytes memory out = abi.encodeWithSelector(
-            bytes4(keccak256(bytes("emergencyUnsynthesize(bytes32,uint8,bytes32,bytes32)"))),
+            bytes4(keccak256(bytes("emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32"))),
             _txID,
+            _msgSender(),
             _v,
             _r,
             _s
@@ -463,13 +464,19 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
      */
     function emergencyUnburn(
         bytes32 _txID,
+        address _trustedEmergencyExecuter,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
     ) external onlyBridge {
         TxState storage txState = requests[_txID];
         bytes32 emergencyStructHash = keccak256(
-            abi.encodePacked(_txID, block.chainid, "emergencyUnburn(bytes32 _txID, uint8 _v, bytes32 _r, bytes32 _s)")
+            abi.encodePacked(
+                _txID,
+                _trustedEmergencyExecuter,
+                block.chainid,
+                "emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"
+            )
         );
         address txOwner = ECDSA.recover(ECDSA.toEthSignedMessageHash(emergencyStructHash), _v, _r, _s);
         require(txState.state == RequestState.Sent, "Synthesis: state not open or tx does not exist");

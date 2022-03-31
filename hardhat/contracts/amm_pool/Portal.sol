@@ -296,6 +296,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
      */
     function emergencyUnsynthesize(
         bytes32 _txID,
+        address _trustedEmergencyExecuter,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
@@ -304,8 +305,9 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bytes32 emergencyStructHash = keccak256(
             abi.encodePacked(
                 _txID,
+                _trustedEmergencyExecuter,
                 block.chainid,
-                "emergencyUnsynthesize(bytes32 _txID, uint8 _v, bytes32 _r, bytes32 _s)"
+                "emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"
             )
         );
         address txOwner = ECDSA.recover(ECDSA.toEthSignedMessageHash(emergencyStructHash), _v, _r, _s);
@@ -365,8 +367,9 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         unsynthesizeStates[_txID] = UnsynthesizeState.RevertRequest;
 
         bytes memory out = abi.encodeWithSelector(
-            bytes4(keccak256(bytes("emergencyUnburn(bytes32,uint8,bytes32,bytes32)"))),
+            bytes4(keccak256(bytes("emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"))),
             _txID,
+            _msgSender(),
             _v,
             _r,
             _s

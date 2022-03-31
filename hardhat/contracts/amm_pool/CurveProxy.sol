@@ -29,7 +29,10 @@ interface ISynthesis {
         bytes32 _txID,
         address _receiveSide,
         address _oppositeBridge,
-        uint256 _chainId
+        uint256 _chainId,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
     ) external;
 
     function getRepresentation(bytes32 _rtoken) external view returns (address);
@@ -78,6 +81,15 @@ contract CurveProxy is Initializable, RelayRecipient {
         versionRecipient = "2.2.3";
     }
 
+    struct EmergencyUnsynthParams{
+        address initialPortal;
+        address initialBridge;
+        uint256 initialChainID;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
     struct PermitData {
         uint8 v;
         bytes32 r;
@@ -113,9 +125,6 @@ contract CurveProxy is Initializable, RelayRecipient {
         uint256 expectedMinMintAmountH;
         //recipient address
         address to;
-        //emergency unsynth params
-        address initialBridge;
-        uint256 initialChainID;
     }
 
     struct MetaRedeemEUSD {
@@ -155,9 +164,6 @@ contract CurveProxy is Initializable, RelayRecipient {
         address receiveSide;
         address oppositeBridge;
         uint256 chainId;
-        //emergency unsynth params
-        address initialBridge;
-        uint256 initialChainID;
     }
 
     event InconsistencyCallback(address pool, address token, address to, uint256 amount);
@@ -204,6 +210,7 @@ contract CurveProxy is Initializable, RelayRecipient {
      */
     function transitSynthBatchAddLiquidity3Pool(
         AddLiquidity calldata _params,
+        EmergencyUnsynthParams calldata _emergencyParams,
         address[3] calldata _synthToken,
         uint256[3] calldata _synthAmount,
         bytes32[3] calldata _txId
@@ -228,9 +235,12 @@ contract CurveProxy is Initializable, RelayRecipient {
                 if (_synthAmount[i] > 0) {
                     ISynthesis(synthesis).emergencyUnsyntesizeRequest(
                         _txId[i],
-                        _params.to,
-                        _params.initialBridge,
-                        _params.initialChainID
+                        _emergencyParams.initialPortal,
+                        _emergencyParams.initialBridge,
+                        _emergencyParams.initialChainID,
+                        _emergencyParams.v,
+                        _emergencyParams.r,
+                        _emergencyParams.s
                     );
                     emit InconsistencyCallback(_params.add, representation[i], _params.to, _synthAmount[i]);
                 }
@@ -339,10 +349,12 @@ contract CurveProxy is Initializable, RelayRecipient {
      */
     function transitSynthBatchAddLiquidity3PoolMintEUSD(
         MetaMintEUSD calldata _params,
+        EmergencyUnsynthParams calldata _emergencyParams,
         address[3] calldata _synthToken,
         uint256[3] calldata _synthAmount,
         bytes32[3] calldata _txId
     ) external onlyBridge {
+    {
         address[3] memory representation;
 
         //synthesize stage
@@ -363,9 +375,12 @@ contract CurveProxy is Initializable, RelayRecipient {
                 if (_synthAmount[i] > 0) {
                     ISynthesis(synthesis).emergencyUnsyntesizeRequest(
                         _txId[i],
-                        _params.to,
-                        _params.initialBridge,
-                        _params.initialChainID
+                        _emergencyParams.initialPortal,
+                        _emergencyParams.initialBridge,
+                        _emergencyParams.initialChainID,
+                        _emergencyParams.v,
+                        _emergencyParams.r,
+                        _emergencyParams.s
                     );
                     emit InconsistencyCallback(
                         _params.addAtCrosschainPool,
@@ -380,7 +395,7 @@ contract CurveProxy is Initializable, RelayRecipient {
 
         //add liquidity to the crosschain pool
         IStableSwapPool(_params.addAtCrosschainPool).add_liquidity(_synthAmount, 0);
-
+    }
         //HUB STAGE (3pool only)
         IERC20Upgradeable(lpToken[_params.addAtCrosschainPool]).approve(
             _params.addAtHubPool,
@@ -398,9 +413,12 @@ contract CurveProxy is Initializable, RelayRecipient {
                 if (_synthAmount[i] > 0) {
                     ISynthesis(synthesis).emergencyUnsyntesizeRequest(
                         _txId[i],
-                        _params.to,
-                        _params.initialBridge,
-                        _params.initialChainID
+                        _emergencyParams.initialPortal,
+                        _emergencyParams.initialBridge,
+                        _emergencyParams.initialChainID,
+                        _emergencyParams.v,
+                        _emergencyParams.r,
+                        _emergencyParams.s
                     );
                 }
             }
@@ -557,6 +575,7 @@ contract CurveProxy is Initializable, RelayRecipient {
      */
     function transiSynthBatchMetaExchange(
         MetaExchangeParams calldata _params,
+        EmergencyUnsynthParams calldata _emergencyParams,
         address[3] calldata _synthToken,
         uint256[3] calldata _synthAmount,
         bytes32[3] calldata _txId
@@ -581,9 +600,12 @@ contract CurveProxy is Initializable, RelayRecipient {
                     if (_synthAmount[i] > 0) {
                         ISynthesis(synthesis).emergencyUnsyntesizeRequest(
                             _txId[i],
-                            _params.to,
-                            _params.initialBridge,
-                            _params.initialChainID
+                        _emergencyParams.initialPortal,
+                        _emergencyParams.initialBridge,
+                        _emergencyParams.initialChainID,
+                        _emergencyParams.v,
+                        _emergencyParams.r,
+                        _emergencyParams.s
                         );
                         emit InconsistencyCallback(_params.add, representation[i], _params.to, _synthAmount[i]);
                     }
@@ -612,9 +634,12 @@ contract CurveProxy is Initializable, RelayRecipient {
                         if (_synthAmount[i] > 0) {
                             ISynthesis(synthesis).emergencyUnsyntesizeRequest(
                                 _txId[i],
-                                _params.to,
-                                _params.initialBridge,
-                                _params.initialChainID
+                        _emergencyParams.initialPortal,
+                        _emergencyParams.initialBridge,
+                        _emergencyParams.initialChainID,
+                        _emergencyParams.v,
+                        _emergencyParams.r,
+                        _emergencyParams.s
                             );
                         }
                     }
@@ -635,9 +660,12 @@ contract CurveProxy is Initializable, RelayRecipient {
                     if (_synthAmount[i] > 0) {
                         ISynthesis(synthesis).emergencyUnsyntesizeRequest(
                             _txId[i],
-                            _params.to,
-                            _params.initialBridge,
-                            _params.initialChainID
+                        _emergencyParams.initialPortal,
+                        _emergencyParams.initialBridge,
+                        _emergencyParams.initialChainID,
+                        _emergencyParams.v,
+                        _emergencyParams.r,
+                        _emergencyParams.s
                         );
                     }
                 }
@@ -660,9 +688,12 @@ contract CurveProxy is Initializable, RelayRecipient {
                     if (_synthAmount[i] > 0) {
                         ISynthesis(synthesis).emergencyUnsyntesizeRequest(
                             _txId[i],
-                            _params.to,
-                            _params.initialBridge,
-                            _params.initialChainID
+                        _emergencyParams.initialPortal,
+                        _emergencyParams.initialBridge,
+                        _emergencyParams.initialChainID,
+                        _emergencyParams.v,
+                        _emergencyParams.r,
+                        _emergencyParams.s
                         );
                     }
                 }
@@ -674,9 +705,12 @@ contract CurveProxy is Initializable, RelayRecipient {
                 if (_synthAmount[i] > 0) {
                     ISynthesis(synthesis).emergencyUnsyntesizeRequest(
                         _txId[i],
-                        _params.to,
-                        _params.initialBridge,
-                        _params.initialChainID
+                        _emergencyParams.initialPortal,
+                        _emergencyParams.initialBridge,
+                        _emergencyParams.initialChainID,
+                        _emergencyParams.v,
+                        _emergencyParams.r,
+                        _emergencyParams.s
                     );
                 }
             }
@@ -710,9 +744,12 @@ contract CurveProxy is Initializable, RelayRecipient {
                 if (_synthAmount[i] > 0) {
                     ISynthesis(synthesis).emergencyUnsyntesizeRequest(
                         _txId[i],
-                        _params.to,
-                        _params.initialBridge,
-                        _params.initialChainID
+                        _emergencyParams.initialPortal,
+                        _emergencyParams.initialBridge,
+                        _emergencyParams.initialChainID,
+                        _emergencyParams.v,
+                        _emergencyParams.r,
+                        _emergencyParams.s
                     );
                 }
             }
