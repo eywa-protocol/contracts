@@ -52,6 +52,11 @@ snapshotId = await takeSnapshot();
 
 // contract('RelayerPool', function (accounts) {
 describe('Vesting tests', () => {
+    let snapshot0;
+    let blockNumBefore;
+    let blockBefore;
+    let timestampBefore;
+
     let tokenErc20;
     let vesting;
     let adminDeployer;
@@ -62,6 +67,21 @@ describe('Vesting tests', () => {
     let addrs;
     let day_in_seconds = 86400;
 
+    let accForSing = web3.eth.accounts.create();
+
+    let startTimeStamp;
+    let cliffDuration;
+    let stepDuration;
+    let cliffAmount;
+    let stepAmount;
+    let numOfSteps;
+    let signAdminAddress = accForSing.address;
+    let signAdminPrKey = accForSing.privateKey;
+    
+    let signatureTimeStamp;
+    let vestingSupply;
+
+
     before(async () => {
         const ERC20 = await ethers.getContractFactory('PermitERC20');
         tokenErc20 = await ERC20.deploy("PermitERC20 token", "prmt20t");
@@ -69,48 +89,64 @@ describe('Vesting tests', () => {
         [adminDeployer, signAdmin, addr1, addr2, addr3, addr4, ...addrs] = await ethers.getSigners();
         const Vesting = await ethers.getContractFactory('EywaVesting');
         vesting = await Vesting.deploy(
-            adminDeployer.address
+            adminDeployer.address,
+            tokenErc20.address
         );
         await vesting.deployed();
+
+        vestingSupply = 10000000;
         
-        await tokenErc20.mint(adminDeployer.address, 10000000, {from: adminDeployer.address});
-        expect(await tokenErc20.balanceOf(adminDeployer.address, {from: adminDeployer.address})).to.equal(10000000);
-        await tokenErc20.approve(vesting.address, 10000000, {from: adminDeployer.address});
-        expect(await tokenErc20.allowance(adminDeployer.address, vesting.address, {from: adminDeployer.address})).to.equal(10000000);
+        await tokenErc20.mint(adminDeployer.address, vestingSupply, {from: adminDeployer.address});
+        expect(await tokenErc20.balanceOf(adminDeployer.address, {from: adminDeployer.address})).to.equal(vestingSupply);
+        await tokenErc20.approve(vesting.address, vestingSupply, {from: adminDeployer.address});
+        expect(await tokenErc20.allowance(adminDeployer.address, vesting.address, {from: adminDeployer.address})).to.equal(vestingSupply);
         let blockNumBefore = await ethers.provider.getBlockNumber();
         let blockBefore = await ethers.provider.getBlock(blockNumBefore);
         let timestampBefore = blockBefore.timestamp;
+
+        startTimeStamp = timestampBefore + day_in_seconds;
+        cliffDuration = day_in_seconds * 50;
+        stepDuration = day_in_seconds * 10;
+        cliffAmount = vestingSupply / 2;
+        numOfSteps = 10;
+        stepAmount = (vestingSupply / 2) / numOfSteps;
+        signatureTimeStamp = day_in_seconds * 10;
+
         await vesting.initialize(
-            tokenErc20.address, 
-            timestampBefore + day_in_seconds, 
-            day_in_seconds * 50,
-            day_in_seconds * 10,
-            10000000 / 2,
-            (10000000 / 2) / 10,
-            10,
-            "0x0175dde0072E8383c98DdD4E82305327EB9F0BA5",
-            day_in_seconds * 10,
+            startTimeStamp, 
+            cliffDuration,
+            stepDuration,
+            cliffAmount,
+            stepAmount,
+            numOfSteps,
+            signAdminAddress,
+            signatureTimeStamp,
             [addr1.address, addr2.address, addr3.address],
-            [10000000 / 2, 10000000 / 4, 10000000 / 4],
+            [vestingSupply / 2, vestingSupply / 4, vestingSupply / 4],
             {from: adminDeployer.address}
         );
-        expect(await vesting.cliffAmount()).to.equal(10000000 / 2);
-        expect(await vesting.stepAmount()).to.equal((10000000 / 2)/10);
+        expect(await vesting.cliffAmount()).to.equal(cliffAmount);
+        expect(await vesting.stepAmount()).to.equal(stepAmount);
         });
+    beforeEach(async () => {
+        snapshot0 = await takeSnapshot();
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore = blockBefore.timestamp;
+    });
+    afterEach(async () => {
+        await restoreSnapshot(snapshot0);
+    });
     it('cannot be reInitialize', async function () {
-        let blockNumBefore = await ethers.provider.getBlockNumber();
-        let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-        let timestampBefore = blockBefore.timestamp;
         await expect(vesting.initialize(
-            tokenErc20.address, 
-            timestampBefore + day_in_seconds, 
-            day_in_seconds * 100,
-            day_in_seconds * 14,
-            400 / 2,
-            (400 / 2) / 10,
-            8,
-            signAdmin.address,
-            day_in_seconds * 10,
+            startTimeStamp, 
+            cliffDuration,
+            stepDuration,
+            cliffAmount,
+            stepAmount,
+            numOfSteps,
+            signAdminAddress,
+            signatureTimeStamp,
             [addr1.address, addr2.address, addr3.address],
             [400 / 2, 400 / 4, 400 / 4],
             {from: adminDeployer.address}
@@ -124,27 +160,18 @@ describe('Vesting tests', () => {
     });
 
     it('cannot claim before cliff', async function () {
-        await expect(vesting.connect(addr1).claim(1)).to.be.revertedWith('reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)');
+        await expect(vesting.connect(addr1).claim(1)).to.be.revertedWith('the amount is not available');
     });
     
     it('cannot claim who doesnt have tokens', async function () {
-        let snapshot0 = await takeSnapshot();
-        let blockNumBefore = await ethers.provider.getBlockNumber();
-        let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-        let timestampBefore = blockBefore.timestamp;
         await increaseTime(day_in_seconds * 51);
         blockNumBefore = await ethers.provider.getBlockNumber();
         blockBefore = await ethers.provider.getBlock(blockNumBefore);
         timestampBefore = blockBefore.timestamp;
         await expect(vesting.connect(signAdmin).claim(1)).to.be.revertedWith('the amount is not available');
-        await restoreSnapshot(snapshot0);
     });
 
     it('claim aftercliff is working', async function () {
-        let snapshot0 = await takeSnapshot();
-        let blockNumBefore = await ethers.provider.getBlockNumber();
-        let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-        let timestampBefore = blockBefore.timestamp;
         await increaseTime(day_in_seconds * 51000);
         blockNumBefore = await ethers.provider.getBlockNumber();
         blockBefore = await ethers.provider.getBlock(blockNumBefore);
@@ -158,22 +185,15 @@ describe('Vesting tests', () => {
         expect(balanceAfterVESTED).to.equal(4999999);
         expect(balanceBeforeRealEYWA).to.equal(0);
         expect(balanceAfterRealEYWA).to.equal(1);
-        console.log("vestingBalance = ", await tokenErc20.balanceOf(vesting.address));
-        expect(await tokenErc20.balanceOf(vesting.address)).to.equal(9999999);
-        await restoreSnapshot(snapshot0);
+        expect(await tokenErc20.balanceOf(vesting.address)).to.equal(vestingSupply - 1);
     });
     it('Transfer right after cliff', async function () {
-        let snapshot0 = await takeSnapshot();
-        let blockNumBefore = await ethers.provider.getBlockNumber();
-        let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-        let timestampBefore = blockBefore.timestamp;
-        await increaseTime(day_in_seconds * 51); // TODO
+        await increaseTime(day_in_seconds * 51); 
         blockNumBefore = await ethers.provider.getBlockNumber();
         blockBefore = await ethers.provider.getBlock(blockNumBefore);
         timestampBefore = blockBefore.timestamp;
 
-        console.log("cliff start = ", parseInt(await vesting.connect(addr1).started()) + parseInt(await vesting.connect(addr1).cliffDuration()));
-        await vesting.connect(addr1)['transfer(address,uint256)'](addr2.address, 1000000);
+        await vesting.connect(addr1).transfer(addr2.address, 1000000);
         let balanceVestingBefore = await tokenErc20.balanceOf(vesting.address);
 
         await vesting.connect(addr1).claim(2000000);
@@ -188,7 +208,7 @@ describe('Vesting tests', () => {
 
         let balanceVestingAfter = await tokenErc20.balanceOf(vesting.address);
         expect(balanceVestingBefore).to.equal(parseInt(balanceVestingAfter) + 2000000 + 1750000);
-        // 
+
         await increaseTime(day_in_seconds * 10);
         blockNumBefore = await ethers.provider.getBlockNumber();
         blockBefore = await ethers.provider.getBlock(blockNumBefore);
@@ -196,32 +216,24 @@ describe('Vesting tests', () => {
         expect(await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address)).to.equal(200000);
         expect(await vesting.connect(addr2).available(parseInt(timestampBefore), addr2.address)).to.equal(175000);
         expect(await vesting.connect(addr3).available(parseInt(timestampBefore), addr3.address)).to.equal(1375000);
-
-        await restoreSnapshot(snapshot0);
     });
 
     it('can not claim more than available now', async function () {
-        let snapshot0 = await takeSnapshot();
-        let blockNumBefore = await ethers.provider.getBlockNumber();
-        let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-        let timestampBefore = blockBefore.timestamp;
         await increaseTime(day_in_seconds * 71);
         await expect(vesting.connect(addr1).claim(3000001)).to.be.revertedWith('the amount is not available');
-        await restoreSnapshot(snapshot0);
     });
 
     it('another linear unlock check', async function () {
-        let snapshot0 = await takeSnapshot();
         await increaseTime(day_in_seconds * 51);
         await vesting.connect(addr3).claim(403006);
-        let blockNumBefore = await ethers.provider.getBlockNumber();
-        let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-        let timestampBefore = blockBefore.timestamp;
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore = blockBefore.timestamp;
         let av33 = await vesting.connect(addr3).available(parseInt(timestampBefore), addr3.address);
         let av11 = await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address);
         let summa = parseInt(av33) + parseInt(av11);
 
-        await vesting.connect(addr3)['transfer(address,uint256)'](addr1.address, 7777);
+        await vesting.connect(addr3).transfer(addr1.address, 7777);
         blockNumBefore = await ethers.provider.getBlockNumber();
         blockBefore = await ethers.provider.getBlock(blockNumBefore);
         timestampBefore = blockBefore.timestamp;
@@ -245,29 +257,13 @@ describe('Vesting tests', () => {
         av1 = await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address);
         av2 = await vesting.connect(addr2).available(parseInt(timestampBefore), addr2.address);
         let summaOf3by2ndIteration = parseInt(av3) + parseInt(av2) + parseInt(av1);
-
-        expect(parseInt(summaOf3by2ndIteration) - parseInt(summaOf3by1stIteration)).to.be.equal(1000000);
-        await restoreSnapshot(snapshot0);
+                                                                                                
+        expect(parseInt(summaOf3by2ndIteration) - parseInt(summaOf3by1stIteration)).to.be.equal(vestingSupply/10);
     });
 
-    // it('transferFrom', async function () {
-    //     let snapshot0 = await takeSnapshot();
-    //     await increaseTime(day_in_seconds * 51);
-    //     console.log("balanceOF addr1 = ", await vesting.connect(addr1).balanceOf(addr1.address));
-    //     console.log("balanceOF addr2 = ", await vesting.connect(addr1).balanceOf(addr2.address));
-    //     await vesting.connect(addr1).approve(addr2.address, 1000000);
-    //     await vesting.connect(addr2)['transferFrom(address,address,uint256)'](addr1.address, addr2.address, 1000000);
-    //     console.log("balanceOF addr1 = ", await vesting.connect(addr1).balanceOf(addr1.address));
-    //     console.log("balanceOF addr2 = ", await vesting.connect(addr1).balanceOf(addr2.address));
-    //     await restoreSnapshot(snapshot0);
-    // });
-
     it('signature', async function () {
-        let snapshot0 = await takeSnapshot();
         await increaseTime(day_in_seconds * 1);
-        let privateKey = "cd8d534aba76e93c7d71be1b6937d9813dc3db86284e9dabfc895a1b559bdcab"
-        // address is:
-        // 0x0175dde0072E8383c98DdD4E82305327EB9F0BA5   
+   
         let sender = addr1.address;
         let recepient = addr2.address;
         let nonce = 777;
@@ -276,7 +272,7 @@ describe('Vesting tests', () => {
         let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(nonce), web3.utils.soliditySha3(amount));
 
 
-        let sigObj = web3.eth.accounts.sign(msg, privateKey);
+        let sigObj = web3.eth.accounts.sign(msg, signAdminPrKey);
         let signa = sigObj.signature;
         signature = signa.substr(2);
         let r = '0x' + signature.slice(0, 64);
@@ -286,21 +282,16 @@ describe('Vesting tests', () => {
         let balanceAddr1Before = await vesting.connect(addr1).balanceOf(addr1.address);
         let balanceAddr2Before = await vesting.connect(addr1).balanceOf(addr2.address);
 
-        await vesting.connect(addr1)['transfer(address,uint256,uint8,bytes32,bytes32,uint256)'](addr2.address, amount, v, r, s, nonce);
+        await vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, r, s, nonce);
         let balanceAddr1After = await vesting.connect(addr1).balanceOf(addr1.address);
         let balanceAddr2After = await vesting.connect(addr1).balanceOf(addr2.address);
 
         expect(balanceAddr2After - balanceAddr2Before).to.be.equal(amount);
         expect(balanceAddr1Before - balanceAddr1After).to.be.equal(amount);
-        await restoreSnapshot(snapshot0);
     });
 
     it('signature wrong', async function () {
-        let snapshot0 = await takeSnapshot();
         await increaseTime(day_in_seconds * 1);
-        let privateKey = "cd8d534aba76e93c7d71be1b6937d9813dc3db86284e9dabfc895a1b559bdcab"
-        // address is:
-        // 0x0175dde0072E8383c98DdD4E82305327EB9F0BA5   
         let sender = addr1.address;
         let recepient = addr2.address;
         let nonce = 777;
@@ -308,8 +299,7 @@ describe('Vesting tests', () => {
 
         let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(nonce), web3.utils.soliditySha3(amount));
 
-
-        let sigObj = web3.eth.accounts.sign(msg, privateKey);
+        let sigObj = web3.eth.accounts.sign(msg, signAdminPrKey);
         let signa = sigObj.signature;
         signature = signa.substr(2);
         let r = '0x' + signature.slice(0, 64);
@@ -318,18 +308,11 @@ describe('Vesting tests', () => {
 
         let fakeR = '0x468dc65fc3d1f1b1e283392c2ef3da995279f36e940c31ce1319b2d47f8e98c6';
 
-
-        await expect(vesting.connect(addr1)['transfer(address,uint256,uint8,bytes32,bytes32,uint256)'](addr2.address, amount, v, fakeR, s, nonce)).to.be.revertedWith('ERROR: Verifying signature failed');
-
-        await restoreSnapshot(snapshot0);
+        await expect(vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, fakeR, s, nonce)).to.be.revertedWith('ERROR: Verifying signature failed');
     });
 
     it('no double nonce usage', async function () {
-        let snapshot0 = await takeSnapshot();
         await increaseTime(day_in_seconds * 1);
-        let privateKey = "cd8d534aba76e93c7d71be1b6937d9813dc3db86284e9dabfc895a1b559bdcab"
-        // address is:
-        // 0x0175dde0072E8383c98DdD4E82305327EB9F0BA5   
         let sender = addr1.address;
         let recepient = addr2.address;
         let nonce = 777;
@@ -337,8 +320,7 @@ describe('Vesting tests', () => {
 
         let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(nonce), web3.utils.soliditySha3(amount));
 
-
-        let sigObj = web3.eth.accounts.sign(msg, privateKey);
+        let sigObj = web3.eth.accounts.sign(msg, signAdminPrKey);
         let signa = sigObj.signature;
         signature = signa.substr(2);
         let r = '0x' + signature.slice(0, 64);
@@ -347,18 +329,12 @@ describe('Vesting tests', () => {
 
         let fakeR = '0x468dc65fc3d1f1b1e283392c2ef3da995279f36e940c31ce1319b2d47f8e98c6';
 
-        await vesting.connect(addr1)['transfer(address,uint256,uint8,bytes32,bytes32,uint256)'](addr2.address, amount, v, r, s, nonce);
-        await expect(vesting.connect(addr1)['transfer(address,uint256,uint8,bytes32,bytes32,uint256)'](addr2.address, amount, v, fakeR, s, nonce)).to.be.revertedWith('Nonce was used');
-
-        await restoreSnapshot(snapshot0);
+        await vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, r, s, nonce);
+        await expect(vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, fakeR, s, nonce)).to.be.revertedWith('Nonce was used');
     });
 
     it('signature transferFrom', async function () {
-        let snapshot0 = await takeSnapshot();
         await increaseTime(day_in_seconds * 1);
-        let privateKey = "cd8d534aba76e93c7d71be1b6937d9813dc3db86284e9dabfc895a1b559bdcab"
-        // address is:
-        // 0x0175dde0072E8383c98DdD4E82305327EB9F0BA5   
         let sender = addr1.address;
         let recepient = addr2.address;
         let nonce = 777;
@@ -366,8 +342,7 @@ describe('Vesting tests', () => {
 
         let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(nonce), web3.utils.soliditySha3(amount));
 
-
-        let sigObj = web3.eth.accounts.sign(msg, privateKey);
+        let sigObj = web3.eth.accounts.sign(msg, signAdminPrKey);
         let signa = sigObj.signature;
         signature = signa.substr(2);
         let r = '0x' + signature.slice(0, 64);
@@ -377,13 +352,12 @@ describe('Vesting tests', () => {
         let balanceAddr1Before = await vesting.connect(addr1).balanceOf(addr1.address);
         let balanceAddr2Before = await vesting.connect(addr1).balanceOf(addr2.address);
         await vesting.connect(addr1).approve(addr3.address,amount);
-        await vesting.connect(addr3)['transferFrom(address,address,uint256,uint8,bytes32,bytes32,uint256)'](addr1.address, addr2.address, amount, v, r, s, nonce);
+        await vesting.connect(addr3).transferFromWithSignature(addr1.address, addr2.address, amount, v, r, s, nonce);
         let balanceAddr1After = await vesting.connect(addr1).balanceOf(addr1.address);
         let balanceAddr2After = await vesting.connect(addr1).balanceOf(addr2.address);
 
         expect(balanceAddr2After - balanceAddr2Before).to.be.equal(amount);
         expect(balanceAddr1Before - balanceAddr1After).to.be.equal(amount);
-        await restoreSnapshot(snapshot0);
     });
 });
     
