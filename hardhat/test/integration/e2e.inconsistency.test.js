@@ -134,7 +134,7 @@ describe("E2E CurveProxy local test", () => {
         await tokenC1.approve(portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
         const tokensToSynth = [tokenC1.address, tokenC2.address, tokenC3.address]
         
-        await portalC.synthesize_batch_transit(
+        await portalC.synthesizeBatchWithDataTransit(
             tokensToSynth,
             amounts,
             synthParams,
@@ -226,7 +226,7 @@ describe("E2E CurveProxy local test", () => {
         await tokenC1.approve(portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
         const tokensToSynth = [tokenC1.address, tokenC2.address, tokenC3.address]
 
-        await portalC.synthesize_batch_transit(
+        await portalC.synthesizeBatchWithDataTransit(
             tokensToSynth,
             amounts,
             synthParams,
@@ -318,7 +318,7 @@ describe("E2E CurveProxy local test", () => {
         await tokenC1.approve(portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
         const tokensToSynth = [tokenC1.address, tokenC2.address, tokenC3.address]
 
-        await portalC.synthesize_batch_transit(
+        await portalC.synthesizeBatchWithDataTransit(
             tokensToSynth,
             amounts,
             synthParams,
@@ -390,7 +390,7 @@ describe("E2E CurveProxy local test", () => {
         amounts[0] = ethers.utils.parseEther(testAmount + ".0")
         const tokensToSynth = [tokenA1.address, tokenA2.address, tokenA3.address]
 
-        await portalA.synthesize_batch_transit(
+        await portalA.synthesizeBatchWithDataTransit(
             tokensToSynth,
             amounts,
             synthParams,
@@ -464,7 +464,7 @@ describe("E2E CurveProxy local test", () => {
         amounts[0] = ethers.utils.parseEther(testAmount + ".0")
         const tokensToSynth = [tokenA1.address, tokenA2.address, tokenA3.address]
 
-        await portalA.synthesize_batch_transit(
+        await portalA.synthesizeBatchWithDataTransit(
             tokensToSynth,
             amounts,
             synthParams,

@@ -206,7 +206,7 @@ contract('CurveProxy', () => {
             amounts[0] = ethers.utils.parseEther(testAmount + ".0")
             const tokensToSynth = [this.tokenC1.address, this.tokenC2.address, this.tokenC3.address]
 
-            await this.routerC.synthesize_batch_transit(
+            await this.routerC.synthesizeBatchWithDataTransit(
                 tokensToSynth,
                 amounts,
                 userNet3,

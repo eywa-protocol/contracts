@@ -499,7 +499,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     //TODO: revisit memory location and logic in general (may need to use a single case scenario only)
-    function synthesize_batch_transit(
+    function synthesizeBatchWithDataTransit(
         address[] memory _tokens,
         uint256[] memory _amounts, // set a positive amount in order to initiate a synthesize request
         address _from,

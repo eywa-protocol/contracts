@@ -525,7 +525,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         emit CreatedRepresentation(_rtoken, stoken);
     }
 
-    // should be restricted in mainnets
+    // TODO should be restricted in mainnets
     function changeBridge(address _bridge) external onlyOwner {
         bridge = _bridge;
     }
@@ -557,11 +557,6 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
 
     function setProxyCurve(address _proxy) external onlyOwner {
         proxy = _proxy;
-    }
-
-    //TODO remove
-    function getTxId() external view returns (bytes32) {
-        return keccak256(abi.encodePacked(this, block.timestamp));
     }
 
     function setTrustedForwarder(address _forwarder) external onlyOwner {

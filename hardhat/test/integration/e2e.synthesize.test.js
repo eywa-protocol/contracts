@@ -239,7 +239,7 @@ contract('CurveProxy', () => {
         //     amounts[0] = ethers.utils.parseEther(testAmount + ".0")
         //     const tokensToSynth = [this.tokenC1.address, this.tokenC2.address, this.tokenC3.address]
 
-        //     await this.portalC.synthesize_batch_transit(
+        //     await this.portalC.synthesizeBatchWithDataTransit(
         //         tokensToSynth,
         //         amounts,
         //         synthParams,
@@ -563,7 +563,7 @@ contract('CurveProxy', () => {
         //     amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
         //     const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
 
-        //     await this.portalA.synthesize_batch_transit(
+        //     await this.portalA.synthesizeBatchWithDataTransit(
         //         tokensToSynth,
         //         amounts,
         //         synthParams,
@@ -667,7 +667,7 @@ contract('CurveProxy', () => {
         //     amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
         //     const tokensToSynth = [this.tokenC1.address, this.tokenC2.address, this.tokenC3.address]
 
-        //     await this.portalC.synthesize_batch_transit(
+        //     await this.portalC.synthesizeBatchWithDataTransit(
         //         tokensToSynth,
         //         amounts,
         //         synthParams,
@@ -894,7 +894,7 @@ contract('CurveProxy', () => {
         //     amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
         //     const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
 
-        //     await this.portalA.synthesize_batch_transit(
+        //     await this.portalA.synthesizeBatchWithDataTransit(
         //         tokensToSynth,
         //         amounts,
         //         synthParams,
@@ -998,7 +998,7 @@ contract('CurveProxy', () => {
         //     amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
         //     const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
 
-        //     await this.portalA.synthesize_batch_transit(
+        //     await this.portalA.synthesizeBatchWithDataTransit(
         //         tokensToSynth,
         //         amounts,
         //         synthParams,

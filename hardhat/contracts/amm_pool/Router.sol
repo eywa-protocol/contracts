@@ -49,7 +49,7 @@ interface IPortal {
         uint256 chainId
     ) external;
 
-    function synthesize_batch_transit(
+    function synthesizeBatchWithDataTransit(
         address[] memory token,
         uint256[] memory amount, // set a positive amount in order to initiate a synthesize request
         address from,
@@ -474,7 +474,7 @@ contract Router is Ownable {
                 //break;
             }
         }
-        IPortal(_portal).synthesize_batch_transit(
+        IPortal(_portal).synthesizeBatchWithDataTransit(
             token,
             proceedAmount,
             from,
@@ -757,7 +757,7 @@ contract Router is Ownable {
                 SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
             }
         }
-        IPortal(_portal).synthesize_batch_transit(token, amount, from, synthParams, selector, transitData, permitData);
+        IPortal(_portal).synthesizeBatchWithDataTransit(token, amount, from, synthParams, selector, transitData, permitData);
     }
 
     //TODO:emergency?

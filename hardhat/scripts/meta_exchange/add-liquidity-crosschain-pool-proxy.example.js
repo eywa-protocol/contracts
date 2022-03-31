@@ -78,7 +78,7 @@ async function main() {
       ]
     )
 
-    tx = await Portal.attach(deployInfo[network.name].portal).synthesize_batch_transit(
+    tx = await Portal.attach(deployInfo[network.name].portal).synthesizeBatchWithDataTransit(
       coinsToSynth,
       amountsEth,
       synthParams,
@@ -89,7 +89,7 @@ async function main() {
       }
     );
     await tx.wait();
-    console.log("synthesize_batch_transit", tx.hash);
+    console.log("synthesizeBatchWithDataTransit", tx.hash);
     //=================================================================================
   }
 
