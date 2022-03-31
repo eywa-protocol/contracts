@@ -23,7 +23,7 @@ async function main() {
   let synthParams, addLiquidityParams;
   let coinsToSynth = [];
   selector = web3.eth.abi.encodeFunctionSignature(
-    'transit_synth_batch_add_liquidity_3pool((address,address,uint256),address[3],uint256[3],bytes32[3])'
+    'transitSynthBatchAddLiquidity3Pool((address,address,uint256),address[3],uint256[3],bytes32[3])'
   )
 
   if (network.name == "network1" || network.name == "rinkeby") {
@@ -38,7 +38,7 @@ async function main() {
 
     //add liquidity amount params
     const amountsEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"));
-    const expected_min_mint_amount = ethers.utils.parseEther("100000000.0");
+    const expectedMinMintAmount = ethers.utils.parseEther("100000000.0");
 
     //synth params
     switch (network.name) {
@@ -52,7 +52,7 @@ async function main() {
         addLiquidityParams = {
           add: deployInfo["network2"].crosschainPool[0].address,
           to: owner.address,
-          expected_min_mint_amount: expected_min_mint_amount
+          expectedMinMintAmount: expectedMinMintAmount
         }
         break;
       case "rinkeby":
@@ -65,7 +65,7 @@ async function main() {
         addLiquidityParams = {
           add: deployInfo["mumbai"].crosschainPool,
           to: owner.address,
-          expected_min_mint_amount: expected_min_mint_amount
+          expectedMinMintAmount: expectedMinMintAmount
         }
         break;
     }
@@ -74,7 +74,7 @@ async function main() {
       ['address', 'address', 'uint256'],
       [addLiquidityParams.add,
       addLiquidityParams.to,
-      addLiquidityParams.expected_min_mint_amount
+      addLiquidityParams.expectedMinMintAmount
       ]
     )
 

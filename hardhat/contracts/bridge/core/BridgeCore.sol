@@ -6,7 +6,7 @@ abstract contract BridgeCore {
 
     mapping(address => uint256) internal nonces;
     mapping(bytes32 => mapping(bytes32 => mapping(bytes32 => bool))) internal contractBind;
-    mapping(bytes32 => bool) private is_in;
+    mapping(bytes32 => bool) private isIn;
 
     event OracleRequest(
         string requestType,

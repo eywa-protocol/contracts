@@ -490,18 +490,18 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address[] memory _tokens,
         uint256[] memory _amounts, // set a positive amount in order to initiate a synthesize request
         address _from,
-        SynthParams memory _synth_params,
+        SynthParams memory _synthParams,
         bytes4 _selector,
-        bytes memory _transit_data
+        bytes memory _transitData
     ) external {
         bytes32[] memory txId = new bytes32[](_tokens.length);
-        uint256 general_nonce = IBridge(bridge).getNonce(_from);
-        bytes32 general_txId = IBridge(bridge).prepareRqId(
-            castToBytes32(_synth_params.oppositeBridge),
-            _synth_params.chainId,
-            castToBytes32(_synth_params.receiveSide),
+        uint256 generalNonce = IBridge(bridge).getNonce(_from);
+        bytes32 generalTxId = IBridge(bridge).prepareRqId(
+            castToBytes32(_synthParams.oppositeBridge),
+            _synthParams.chainId,
+            castToBytes32(_synthParams.receiveSide),
             castToBytes32(_from),
-            general_nonce
+            generalNonce
         );
 
         //synthesize request
@@ -511,15 +511,15 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
 
                 registerNewBalance(_tokens[i], _amounts[i]);
 
-                txId[i] = keccak256(abi.encodePacked(general_txId, i));
+                txId[i] = keccak256(abi.encodePacked(generalTxId, i));
                 TxState storage txState = requests[txId[i]];
                 txState.from = castToBytes32(_from); //change!
-                txState.to = castToBytes32(_synth_params.to);
+                txState.to = castToBytes32(_synthParams.to);
                 txState.rtoken = castToBytes32(_tokens[i]);
                 txState.amount = _amounts[i];
                 txState.state = RequestState.Sent;
 
-                emit SynthesizeRequest(txId[i], _from, _synth_params.to, _amounts[i], _tokens[i]);
+                emit SynthesizeRequest(txId[i], _from, _synthParams.to, _amounts[i], _tokens[i]);
 
                 // break;
             }
@@ -528,7 +528,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         // encode call
         bytes memory out = abi.encodePacked(
             _selector,
-            _transit_data,
+            _transitData,
             //////////////
             _tokens,
             _amounts,
@@ -537,12 +537,12 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
 
         IBridge(bridge).transmitRequestV2(
             out,
-            _synth_params.receiveSide,
-            _synth_params.oppositeBridge,
-            _synth_params.chainId,
-            general_txId,
+            _synthParams.receiveSide,
+            _synthParams.oppositeBridge,
+            _synthParams.chainId,
+            generalTxId,
             _from,
-            general_nonce
+            generalNonce
         );
     }
 }

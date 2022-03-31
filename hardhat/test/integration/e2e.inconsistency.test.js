@@ -59,7 +59,7 @@ describe("E2E CurveProxy local test", () => {
 
  it("Exchange: Inconsistency - min_mint_amount", async function () {
         selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-            'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
+            'transiSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
         )
         
         this.balanceA2 = (await tokenA2.balanceOf(userNet1))
@@ -77,7 +77,7 @@ describe("E2E CurveProxy local test", () => {
             exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
             remove: deployInfo["network2"].crosschainPool[0].address,         //remove pool address
             //add liquidity params
-            expected_min_mint_amount: ethers.constants.MaxUint256,
+            expectedMinMintAmount: ethers.constants.MaxUint256,
             //exchange params
             i: 1,                                             //index value for the coin to send
             j: 0,                                             //index value of the coin to receive
@@ -103,7 +103,7 @@ describe("E2E CurveProxy local test", () => {
             metaExchangeParams.exchange,
             metaExchangeParams.remove,
             /////
-            metaExchangeParams.expected_min_mint_amount,
+            metaExchangeParams.expectedMinMintAmount,
             /////
             metaExchangeParams.i,
             metaExchangeParams.j,
@@ -151,7 +151,7 @@ describe("E2E CurveProxy local test", () => {
 
     it("Exchange: Inconsistency - min_dy", async function () {
         selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-            'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
+            'transiSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
         )
 
         this.balanceA2 = (await tokenA2.balanceOf(userNet1))
@@ -169,7 +169,7 @@ describe("E2E CurveProxy local test", () => {
             exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
             remove: deployInfo["network2"].crosschainPool[0].address,         //remove pool address
             //add liquidity params
-            expected_min_mint_amount: 0,
+            expectedMinMintAmount: 0,
             //exchange params
             i: 1,                                             //index value for the coin to send
             j: 0,                                             //index value of the coin to receive
@@ -195,7 +195,7 @@ describe("E2E CurveProxy local test", () => {
             metaExchangeParams.exchange,
             metaExchangeParams.remove,
             /////
-            metaExchangeParams.expected_min_mint_amount,
+            metaExchangeParams.expectedMinMintAmount,
             /////
             metaExchangeParams.i,
             metaExchangeParams.j,
@@ -243,7 +243,7 @@ describe("E2E CurveProxy local test", () => {
 
     it("Exchange: Inconsistency - min_amount", async function () {
         selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-            'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
+            'transiSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
         )
 
         this.balanceA2 = (await tokenA2.balanceOf(userNet1))
@@ -261,7 +261,7 @@ describe("E2E CurveProxy local test", () => {
             exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
             remove: deployInfo["network2"].crosschainPool[0].address,         //remove pool address
             //add liquidity params
-            expected_min_mint_amount: 0,
+            expectedMinMintAmount: 0,
             //exchange params
             i: 1,                                             //index value for the coin to send
             j: 0,                                             //index value of the coin to receive
@@ -287,7 +287,7 @@ describe("E2E CurveProxy local test", () => {
             metaExchangeParams.exchange,
             metaExchangeParams.remove,
             /////
-            metaExchangeParams.expected_min_mint_amount,
+            metaExchangeParams.expectedMinMintAmount,
             /////
             metaExchangeParams.i,
             metaExchangeParams.j,
@@ -333,9 +333,9 @@ describe("E2E CurveProxy local test", () => {
         assert(this.balanceA2.eq(await tokenA2.balanceOf(userNet1)))
     })
 
-    it("Mint EUSD: Inconsistency - expected_min_mint_amount_c", async function () {
+    it("Mint EUSD: Inconsistency - expectedMinMintAmountC", async function () {
         selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
-            'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
+            'transitSynthBatchAddLiquidity3PoolMintEUSD((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
         )
 
         this.balanceEUSD = (await EUSD.balanceOf(userNet2))
@@ -349,13 +349,13 @@ describe("E2E CurveProxy local test", () => {
         }
 
         const mintEUSDparams = {
-            add_c: deployInfo["network2"].crosschainPool[0].address,
+            addAtCrosschainPool: deployInfo["network2"].crosschainPool[0].address,
             //add liquidity params
-            expected_min_mint_amount_c: ethers.constants.MaxUint256,
+            expectedMinMintAmountC: ethers.constants.MaxUint256,
             //exchange params
-            lp_index: 0,
-            add_h: deployInfo["network2"].hubPool.address,
-            expected_min_mint_amount_h: 0,
+            lpIndex: 0,
+            addAtHubPool: deployInfo["network2"].hubPool.address,
+            expectedMinMintAmountH: 0,
             to: userNet2,
             initialBridge:deployInfo["network2"].bridge,
             initialChainID:deployInfo["network2"].chainId
@@ -363,13 +363,13 @@ describe("E2E CurveProxy local test", () => {
 
         const encodedTransitData = web3.eth.abi.encodeParameters(
             ["address", "uint256", "uint256", "address", "uint256", "address", "address", "uint256"],
-            [mintEUSDparams.add_c,
-            mintEUSDparams.expected_min_mint_amount_c,
-            mintEUSDparams.lp_index,
+            [mintEUSDparams.addAtCrosschainPool,
+            mintEUSDparams.expectedMinMintAmountC,
+            mintEUSDparams.lpIndex,
             /////
-            mintEUSDparams.add_h,
+            mintEUSDparams.addAtHubPool,
             /////
-            mintEUSDparams.expected_min_mint_amount_h,
+            mintEUSDparams.expectedMinMintAmountH,
             mintEUSDparams.to,
             mintEUSDparams.initialBridge,
             mintEUSDparams.initialChainID
@@ -405,9 +405,9 @@ describe("E2E CurveProxy local test", () => {
     })
 
 
-    it("Mint EUSD: Inconsistency - expected_min_mint_amount_h", async function () {
+    it("Mint EUSD: Inconsistency - expectedMinMintAmountH", async function () {
         selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
-            'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
+            'transitSynthBatchAddLiquidity3PoolMintEUSD((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
         )
 
         this.balanceEUSD = (await EUSD.balanceOf(userNet2))
@@ -423,13 +423,13 @@ describe("E2E CurveProxy local test", () => {
         }
 
         const mintEUSDparams = {
-            add_c: deployInfo["network2"].crosschainPool[0].address,
+            addAtCrosschainPool: deployInfo["network2"].crosschainPool[0].address,
             //add liquidity params
-            expected_min_mint_amount_c: 0,
+            expectedMinMintAmountC: 0,
             //exchange params
-            lp_index: 0,
-            add_h: deployInfo["network2"].hubPool.address,
-            expected_min_mint_amount_h: ethers.constants.MaxUint256,
+            lpIndex: 0,
+            addAtHubPool: deployInfo["network2"].hubPool.address,
+            expectedMinMintAmountH: ethers.constants.MaxUint256,
             to: userNet2,
             initialBridge:deployInfo["network2"].bridge,
             initialChainID:deployInfo["network2"].chainId
@@ -437,8 +437,8 @@ describe("E2E CurveProxy local test", () => {
 
         const encodedTransitData = web3.eth.abi.encodeParameters(
             ["address", "uint256", "uint256", "address", "uint256", "address", "address", "uint256"],
-            [mintEUSDparams.add_c,
-            mintEUSDparams.expected_min_mint_amount_c,
+            [mintEUSDparams.addAtCrosschainPool,
+            mintEUSDparams.expectedMinMintAmountC,
             mintEUSDparams.lp_index,
             /////
             mintEUSDparams.add_h,
@@ -478,7 +478,7 @@ describe("E2E CurveProxy local test", () => {
         assert(this.balanceEUSD.eq(await EUSD.balanceOf(userNet2)))
     })
 
-    it("Redeem EUSD: Inconsistecny - expected_min_amount_c", async function () {
+    it("Redeem EUSD: Inconsistecny - expectedMinAmountC", async function () {
 
         this.balanceA3 = (await tokenA3.balanceOf(userNet1))
 
@@ -490,16 +490,16 @@ describe("E2E CurveProxy local test", () => {
         }
 
         const redeemEUSDParams = {
-            remove_c: deployInfo["network2"].crosschainPool[0].address,
+            removeAtCrosschainPool: deployInfo["network2"].crosschainPool[0].address,
             x: 2,
-            expected_min_amount_c: ethers.constants.MaxUint256,
-            //expected_min_amount_c: 0,
+            expectedMinAmountC: ethers.constants.MaxUint256,
+            //expectedMinAmountC: 0,
             //hub pool params
-            remove_h: deployInfo["network2"].hubPool.address,
+            removeAtHubPool: deployInfo["network2"].hubPool.address,
             //amount to transfer
-            token_amount_h: 1, //test amount
+            tokenAmountH: 1, //test amount
             y: 0,
-            expected_min_amount_h: 0,
+            expectedMinAmountH: 0,
             //recipient address
             to: userNet1
         }
@@ -515,7 +515,7 @@ describe("E2E CurveProxy local test", () => {
         await EUSD.approve(curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
         await EUSD.approve(curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
-        await curveProxyB.redeem_eusd(
+        await curveProxyB.redeemEUSD(
             redeemEUSDParams,
             permitParams,
             unsynthParams.receiveSide,
@@ -528,7 +528,7 @@ describe("E2E CurveProxy local test", () => {
         assert(this.balanceA3.eq(await tokenA3.balanceOf(userNet1)))
     })
 
-    it("Redeem EUSD: Inconsistecny - expected_min_amount_h", async function () {
+    it("Redeem EUSD: Inconsistecny - expectedMinAmountH", async function () {
 
         this.balanceA3 = (await tokenA3.balanceOf(userNet1))
 
@@ -540,7 +540,7 @@ describe("E2E CurveProxy local test", () => {
         }
 
         const redeemEUSDParams = {
-            remove_c: deployInfo["network2"].crosschainPool[0].address,
+            removeAtCrosschainPool: deployInfo["network2"].crosschainPool[0].address,
             x: 2,
             expected_min_amount_c: 0,
             //hub pool params
@@ -564,7 +564,7 @@ describe("E2E CurveProxy local test", () => {
         await EUSD.approve(curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
         await EUSD.approve(curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
-        await curveProxyB.redeem_eusd(
+        await curveProxyB.redeemEUSD(
             redeemEUSDParams,
             permitParams,
             unsynthParams.receiveSide,

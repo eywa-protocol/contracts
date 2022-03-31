@@ -60,21 +60,23 @@ contract('CurveProxy', () => {
             // // this.bridgeB = await SynthesisB.at(deployInfo["network2"].synthesis)
 
             // const testAmount = Math.floor((Math.random() * 100) + 1);
-            const amount = ethers.utils.parseEther("0.5")
-            const executionPrice = ethers.utils.parseEther("0.1")
+            const amount = 1000//ethers.utils.parseEther("0.5")
+            const executionPrice = 100//ethers.utils.parseEther("0.1")
             const tokenToSynth = this.tokenA1.address
             const receiveSideB = deployInfo["network2"].synthesis
             const oppositeBridge = deployInfo["network2"].bridge
-            const chainId = deployInfo["network2"].chainId
+            const chainIdA = deployInfo["network1"].chainId
+            const chainIdB = deployInfo["network2"].chainId
             const userFrom = userNet1
             const userTo = userNet2
             const deadline = "10000000000000"
 
             await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
             await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
+            await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
 
             const workerMsgHash = web3.utils.soliditySha3(
-                { type: 'uint256', value: chainId },
+                { type: 'uint256', value: chainIdA },
                 { type: 'address', value: tokenToSynth },
                 { type: 'uint256', value: executionPrice },
                 { type: 'address', value: userFrom },
@@ -82,9 +84,22 @@ contract('CurveProxy', () => {
                 { type: 'uint256', value: deadline }
             );
 
+            const workerMsgHash1 = ethers.utils.solidityKeccak256(
+                ['uint256','address','uint256','address','address','uint256'],
+                [chainIdA, tokenToSynth, executionPrice, userFrom, userFrom, deadline]
+            );
+            console.log(await this.routerA._trustedWorker(userNet1))
+            // console.log(workerMsgHash)
+            // console.log(workerMsgHash1)
 
-            // const signature = ethers.utils.splitSignature(await web3.eth.sign(msgHash, userNet1))
-            const workerSignature = ethers.utils.splitSignature(await userNet1.signMessage(ethers.utils.arrayify(workerMsgHash)));
+            // const provider = new providers.Web3Provider(userNet1);
+            // [signerUserNet1] = await ethers.getSigners()
+            // console.log(signerUserNet1)
+            // console.log(userNet1)
+            signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
+            // [signerUserNet1] = await userNet1.connect(factoryProvider.web3Net1)
+            // const workerSignature = ethers.utils.splitSignature(await web3.eth.sign(workerMsgHash, userNet1))
+            const workerSignature = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(workerMsgHash)));
 
             const senderMsgHash = web3.utils.soliditySha3(
                 { type: 'uint8', value: workerSignature.v },
@@ -93,7 +108,7 @@ contract('CurveProxy', () => {
 
             );
 
-            const senderSignature = ethers.utils.splitSignature(await userNet1.signMessage(ethers.utils.arrayify(senderMsgHash)));
+            const senderSignature = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(senderMsgHash)));
 
             const delegatedCallReceipt = {
                 executionPrice: executionPrice,
@@ -111,12 +126,32 @@ contract('CurveProxy', () => {
                     to: userTo,
                     receiveSide: receiveSideB,
                     oppositeBridge: oppositeBridge,
-                    chainId: chainId,
+                    chainId: chainIdB,
                 },
                 delegatedCallReceipt,
                 { from: userNet1, gas: 1000_000 }
             )
 
+            
+            // const recoveredAddress = ethers.utils.recoverAddress(ethers.utils.arrayify(workerMsgHash), workerSignature)
+            //     console.log(userNet1)
+            //     console.log(recoveredAddress)
+
+            //     let recovered = ethers.utils.verifyMessage(ethers.utils.arrayify(workerMsgHash), workerSignature);
+            //     console.log(recovered === userNet1);
+
+            // await this.routerA.tokenSynthesizeRequest(
+            //     tokenToSynth,
+            //     amount,
+            //     userFrom,
+            //     {
+            //         to: userTo,
+            //         receiveSide: receiveSideB,
+            //         oppositeBridge: oppositeBridge,
+            //         chainId: chainIdB,
+            //     },
+            //     { from: userNet1, gas: 1000_000 }
+            // )
 
             // await timeout(15000)
             // this.newBalanceEUSD = await this.EUSD.balanceOf(userNet2)
@@ -139,7 +174,7 @@ contract('CurveProxy', () => {
 
         // it("Mint EUSD: network3 -> network2(hub)", async function () {
         //     selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
-        //         'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
+        //         'transitSynthBatchAddLiquidity3PoolMintEUSD((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
         //     )
 
         //     this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
@@ -162,13 +197,13 @@ contract('CurveProxy', () => {
         //     }
 
         //     const mintEUSDparams = {
-        //         add_c: deployInfo["network2"].crosschainPool[1].address,
+        //         addAtCrosschainPool: deployInfo["network2"].crosschainPool[1].address,
         //         //add liquidity params
-        //         expected_min_mint_amount_c: 0,
+        //         expectedMinMintAmountC: 0,
         //         //exchange params
-        //         lp_index: 1,
-        //         add_h: deployInfo["network2"].hubPool.address,
-        //         expected_min_mint_amount_h: 0,
+        //         lpIndex: 1,
+        //         addAtHubPool: deployInfo["network2"].hubPool.address,
+        //         expectedMinMintAmountH: 0,
         //         to: userNet2,
         //         initialBridge:deployInfo["network3"].bridge,
         //         initialChainID:deployInfo["network3"].chainId
@@ -176,13 +211,13 @@ contract('CurveProxy', () => {
 
         //     const encodedTransitData = web3.eth.abi.encodeParameters(
         //         ["address", "uint256", "uint256", "address", "uint256", "address","address","uint256"],
-        //         [mintEUSDparams.add_c,
-        //         mintEUSDparams.expected_min_mint_amount_c,
-        //         mintEUSDparams.lp_index,
+        //         [mintEUSDparams.addAtCrosschainPool,
+        //         mintEUSDparams.expectedMinMintAmountC,
+        //         mintEUSDparams.lpIndex,
         //         /////
-        //         mintEUSDparams.add_h,
+        //         mintEUSDparams.addAtHubPool,
         //         /////
-        //         mintEUSDparams.expected_min_mint_amount_h,
+        //         mintEUSDparams.expectedMinMintAmountH,
         //         mintEUSDparams.to,
         //         mintEUSDparams.initialBridge,
         //         mintEUSDparams.initialChainID
@@ -230,13 +265,13 @@ contract('CurveProxy', () => {
         //     this.balanceEUSD = await this.EUSD.balanceOf(userNet2)
 
         //     const mintEUSDparams = {
-        //         add_c: deployInfo["network2"].localPool.address,
+        //         addAtCrosschainPool: deployInfo["network2"].localPool.address,
         //         //add liquidity params
-        //         expected_min_mint_amount_c: 0,
+        //         expectedMinMintAmountC: 0,
         //         //exchange params
-        //         lp_index: 2,
-        //         add_h: deployInfo["network2"].hubPool.address,
-        //         expected_min_mint_amount_h: 0,
+        //         lpIndex: 2,
+        //         addAtHubPool: deployInfo["network2"].hubPool.address,
+        //         expectedMinMintAmountH: 0,
         //         to: userNet2,
         //         initialBridge:deployInfo["network2"].bridge,
         //         initialChainID:deployInfo["network2"].chainId
@@ -258,7 +293,7 @@ contract('CurveProxy', () => {
         //     amounts[0] = ethers.utils.parseEther(testAmount + ".0")
         //     const tokensToTransfer = [this.tokenB1.address, this.tokenB2.address, this.tokenB3.address]
 
-        //     await this.curveproxyB.add_liquidity_3pool_mint_eusd(
+        //     await this.curveproxyB.addLiquidity3PoolMintEUSD(
         //         mintEUSDparams,
         //         permitParams,
         //         tokensToTransfer,
@@ -290,15 +325,15 @@ contract('CurveProxy', () => {
         //     }
 
         //     const redeemEUSDParams = {
-        //         remove_c: deployInfo["network2"].crosschainPool[0].address,
+        //         removeAtCrosschainPool: deployInfo["network2"].crosschainPool[0].address,
         //         x: 2,
-        //         expected_min_amount_c: 0,
+        //         expectedMinAmountC: 0,
         //         //hub pool params
-        //         remove_h: deployInfo["network2"].hubPool.address,
+        //         removeAtHubPool: deployInfo["network2"].hubPool.address,
         //         //amount to transfer
-        //         token_amount_h: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
+        //         tokenAmountH: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
         //         y: 0,
-        //         expected_min_amount_h: 0,
+        //         expectedMinAmountH: 0,
         //         //recipient address
         //         to: userNet1
         //     }
@@ -315,7 +350,7 @@ contract('CurveProxy', () => {
         //     await this.EUSD.approve(this.curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
         //     await this.EUSD.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
-        //     await this.curveProxyB.redeem_eusd(
+        //     await this.curveProxyB.redeemEUSD(
         //         redeemEUSDParams,
         //         permitParams,
         //         unsynthParams.receiveSide,
@@ -345,15 +380,15 @@ contract('CurveProxy', () => {
         //     }
 
         //     const redeemEUSDParams = {
-        //         remove_c: deployInfo["network2"].crosschainPool[1].address,
+        //         removeAtCrosschainPool: deployInfo["network2"].crosschainPool[1].address,
         //         x: 2,
-        //         expected_min_amount_c: 0,
+        //         expectedMinAmountC: 0,
         //         //hub pool params
-        //         remove_h: deployInfo["network2"].hubPool.address,
+        //         removeAtHubPool: deployInfo["network2"].hubPool.address,
         //         //amount to transfer
-        //         token_amount_h: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
+        //         tokenAmountH: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
         //         y: 1,
-        //         expected_min_amount_h: 0,
+        //         expectedMinAmountH: 0,
         //         //recipient address
         //         to: userNet3
         //     }
@@ -370,7 +405,7 @@ contract('CurveProxy', () => {
         //     await this.EUSD.approve(this.curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
         //     await this.EUSD.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
-        //     await this.curveProxyB.redeem_eusd(
+        //     await this.curveProxyB.redeemEUSD(
         //         redeemEUSDParams,
         //         permitParams,
         //         unsynthParams.receiveSide,
@@ -409,15 +444,15 @@ contract('CurveProxy', () => {
         //     }
 
         //     const redeemEUSDParams = {
-        //         remove_c: deployInfo["network2"].localPool.address,
+        //         removeAtCrosschainPool: deployInfo["network2"].localPool.address,
         //         x: 2,
-        //         expected_min_amount_c: 0,
+        //         expectedMinAmountC: 0,
         //         //hub pool params
-        //         remove_h: deployInfo["network2"].hubPool.address,
+        //         removeAtHubPool: deployInfo["network2"].hubPool.address,
         //         //amount to transfer
-        //         token_amount_h: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
+        //         tokenAmountH: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
         //         y: 2,
-        //         expected_min_amount_h: 0,
+        //         expectedMinAmountH: 0,
         //         //recipient address
         //         to: userNet2
         //     }
@@ -425,7 +460,7 @@ contract('CurveProxy', () => {
         //     await this.EUSD.approve(this.curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
         //     await this.EUSD.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
-        //     await this.curveProxyB.redeem_eusd(
+        //     await this.curveProxyB.redeemEUSD(
         //         redeemEUSDParams,
         //         permitParams,
         //         unsynthParams.receiveSide,
@@ -440,7 +475,7 @@ contract('CurveProxy', () => {
 
         // it("Exchange: network1 -> network3", async function () {
         //     selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-        //         'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
+        //         'transiSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
         //     )
 
         //     this.curveProxyA = await CurveProxyA.at(deployInfo["network1"].curveProxy)
@@ -467,7 +502,7 @@ contract('CurveProxy', () => {
         //         exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
         //         remove: deployInfo["network2"].crosschainPool[1].address,         //remove pool address
         //         //add liquidity params
-        //         expected_min_mint_amount: 0,
+        //         expectedMinMintAmount: 0,
         //         //exchange params
         //         i: 0,                                             //index value for the coin to send
         //         j: 1,                                             //index value of the coin to receive
@@ -493,7 +528,7 @@ contract('CurveProxy', () => {
         //         metaExchangeParams.exchange,
         //         metaExchangeParams.remove,
         //         /////
-        //         metaExchangeParams.expected_min_mint_amount,
+        //         metaExchangeParams.expectedMinMintAmount,
         //         /////
         //         metaExchangeParams.i,
         //         metaExchangeParams.j,
@@ -545,7 +580,7 @@ contract('CurveProxy', () => {
 
         // it("Exchange: network3 -> network1", async function () {
         //     selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-        //         'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
+        //         'transiSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
         //     )
 
         //     this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
@@ -571,7 +606,7 @@ contract('CurveProxy', () => {
         //         exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
         //         remove: deployInfo["network2"].crosschainPool[0].address,         //remove pool address
         //         //add liquidity params
-        //         expected_min_mint_amount: 0,
+        //         expectedMinMintAmount: 0,
         //         //exchange params
         //         i: 1,                                             //index value for the coin to send
         //         j: 0,                                             //index value of the coin to receive
@@ -606,7 +641,7 @@ contract('CurveProxy', () => {
         //         metaExchangeParams.exchange,
         //         metaExchangeParams.remove,
         //         /////
-        //         metaExchangeParams.expected_min_mint_amount,
+        //         metaExchangeParams.expectedMinMintAmount,
         //         /////
         //         metaExchangeParams.i,
         //         metaExchangeParams.j,
@@ -664,7 +699,7 @@ contract('CurveProxy', () => {
         //         exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
         //         remove: deployInfo["network2"].crosschainPool[0].address,         //remove pool address
         //         //add liquidity params
-        //         expected_min_mint_amount: 0,
+        //         expectedMinMintAmount: 0,
         //         //exchange params
         //         i: 2,                                             //index value for the coin to send
         //         j: 0,                                             //index value of the coin to receive
@@ -698,7 +733,7 @@ contract('CurveProxy', () => {
         //     amounts[0] = ethers.utils.parseEther(testAmount + ".0")
         //     const tokens = [this.tokenB1.address, this.tokenB2.address, this.tokenB3.address]
 
-        //     await this.curveProxyB.meta_exchange(
+        //     await this.curveProxyB.metaExchange(
         //         metaExchangeParams,
         //         permitParams,
         //         tokens,
@@ -725,7 +760,7 @@ contract('CurveProxy', () => {
         //         exchange: deployInfo["network2"].hubPool.address,           //exchange pool address
         //         remove: deployInfo["network2"].crosschainPool[1].address,   //remove pool address
         //         //add liquidity params
-        //         expected_min_mint_amount: 0,
+        //         expectedMinMintAmount: 0,
         //         //exchange params
         //         i: 2,                                             //index value for the coin to send
         //         j: 1,                                             //index value of the coin to receive
@@ -759,7 +794,7 @@ contract('CurveProxy', () => {
         //     amounts[0] = ethers.utils.parseEther(testAmount + ".0")
         //     const tokens = [this.tokenB1.address, this.tokenB2.address, this.tokenB3.address]
 
-        //     await this.curveProxyB.meta_exchange(
+        //     await this.curveProxyB.metaExchange(
         //         metaExchangeParams,
         //         permitParams,
         //         tokens,
@@ -772,7 +807,7 @@ contract('CurveProxy', () => {
 
         // it("Exchange: network1 -> network2(hub)", async function () {
         //     selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-        //         'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
+        //         'transiSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
         //     )
 
         //     this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
@@ -798,7 +833,7 @@ contract('CurveProxy', () => {
         //         exchange: deployInfo["network2"].hubPool.address,         //exchange pool address
         //         remove: deployInfo["network2"].localPool.address,         //remove pool address
         //         //add liquidity params
-        //         expected_min_mint_amount: 0,
+        //         expectedMinMintAmount: 0,
         //         //exchange params
         //         i: 0,                                             //index value for the coin to send
         //         j: 2,                                             //index value of the coin to receive
@@ -833,7 +868,7 @@ contract('CurveProxy', () => {
         //         metaExchangeParams.exchange,
         //         metaExchangeParams.remove,
         //         /////
-        //         metaExchangeParams.expected_min_mint_amount,
+        //         metaExchangeParams.expectedMinMintAmount,
         //         /////
         //         metaExchangeParams.i,
         //         metaExchangeParams.j,
@@ -876,7 +911,7 @@ contract('CurveProxy', () => {
 
         // it("Exchange: network3 -> network2(hub)", async function () {
         //     selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-        //         'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
+        //         'transiSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
         //     )
 
         //     this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
@@ -902,7 +937,7 @@ contract('CurveProxy', () => {
         //         exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
         //         remove: deployInfo["network2"].localPool.address,         //remove pool address
         //         //add liquidity params
-        //         expected_min_mint_amount: 0,
+        //         expectedMinMintAmount: 0,
         //         //exchange params
         //         i: 0,                                             //index value for the coin to send
         //         j: 2,                                             //index value of the coin to receive
@@ -937,7 +972,7 @@ contract('CurveProxy', () => {
         //         metaExchangeParams.exchange,
         //         metaExchangeParams.remove,
         //         /////
-        //         metaExchangeParams.expected_min_mint_amount,
+        //         metaExchangeParams.expectedMinMintAmount,
         //         /////
         //         metaExchangeParams.i,
         //         metaExchangeParams.j,
