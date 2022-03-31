@@ -43,6 +43,9 @@ if [[ ${1} =~ ^('')$ ]]; then
       EYWA_TOKEN_$(getField ${net}.n)=$(getField ${net}.eywa) \
       FORWARDER_$(getField ${net}.n)=$(getField ${net}.forwarder) \
     && echo $(getField ${net}.env_file[1])
+
+    ./scripts/env2json_adapter.sh $(getField ${net}.env_file[0])
+    ./scripts/env2json_adapter.sh $(getField ${net}.env_file[1])
   done
   exit 0
  fi
@@ -93,6 +96,9 @@ npx hardhat balanceDeployer --network ${net}
         EYWA_TOKEN_$(getField ${net}.n)=$(getField ${net}.eywa) \
         FORWARDER_$(getField ${net}.n)=$(getField ${net}.forwarder) \
       && echo $(getField ${net}.env_file[1])
+
+      ./scripts/env2json_adapter.sh $(getField ${net}.env_file[0])
+      ./scripts/env2json_adapter.sh $(getField ${net}.env_file[1])
     fi
   fi
 done
