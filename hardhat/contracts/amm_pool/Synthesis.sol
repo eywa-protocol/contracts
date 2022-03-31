@@ -149,7 +149,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             ISyntERC20(synth).getChainId() != _synthParams.chainId,
             "Synthesis: can not synthesize in the intial chain"
         );
-        ISyntERC20(synth).burn(_from, _amount);
+        ISyntERC20(synth).burn(_msgSender(), _amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_from);
         bytes32 txID = IBridge(bridge).prepareRqId(
@@ -325,7 +325,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         address _oppositeBridge,
         uint256 _chainId
     ) external returns (bytes32 txID) {
-        ISyntERC20(_stoken).burn(_from, _amount);
+        ISyntERC20(_stoken).burn(_msgSender(), _amount);
         uint256 nonce = IBridge(bridge).getNonce(_from);
         txID = IBridge(bridge).prepareRqId(
             castToBytes32(_oppositeBridge),
@@ -382,7 +382,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         // swap 4-byte long pairs
         solAmount = (solAmount >> 32) | (solAmount << 32);
 
-        ISyntERC20(_stoken).burn(_from, _amount);
+        ISyntERC20(_stoken).burn(_msgSender(), _amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_from);
         txID = IBridge(bridge).prepareRqId(

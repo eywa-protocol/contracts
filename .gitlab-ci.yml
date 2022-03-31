@@ -16,10 +16,12 @@ build:
     - /bin/bash .ci/get-tag.sh
     - source ./tmp_src
     - export WRAPPERS="/var/lib/gitlab-runner/contracts/$FOLDER/wrappers"
-    - mkdir -p /var/lib/gitlab-runner//contracts/$FOLDER/
+    - mkdir -p /var/lib/gitlab-runner/contracts/$FOLDER/
     - cp -n hardhat/helper-hardhat-config.json.example /var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json
     - make wrappers
     - cp -r /var/lib/gitlab-runner/contracts/$FOLDER/wrappers ./wrappers
+    - docker build -t registry.digiu.ai/${CI_PROJECT_NAME}/$( echo ${FOLDER} | tr '[:upper:]' '[:lower:]' )/wrappers:latest -f .ci/Dockerfile-wrappers .
+    - docker push registry.digiu.ai/${CI_PROJECT_NAME}/$( echo ${FOLDER} | tr '[:upper:]' '[:lower:]' )/wrappers:latest
   only:
     - tags
   tags:
@@ -56,6 +58,7 @@ deploy:cross_pool:
   stage: deploy
   script:
     - source ./tmp_src
+    - export NETWORKS=$NETWORKS
     - export HHC_PATH="/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
     - cp ${HHC_PATH} ./hardhat/helper-hardhat-config.json
     - make eth-testnet-ci-migrate
@@ -76,6 +79,7 @@ init:
   stage: init
   script:
     - source ./tmp_src
+    - export NETWORKS=$NETWORKS
     - export HHC_PATH="/var/lib/gitlab-runner/contracts/$FOLDER/helper-hardhat-config.json"
     - cp ${HHC_PATH} ./hardhat/helper-hardhat-config.json
     - make eth-testnet-ci-migrate

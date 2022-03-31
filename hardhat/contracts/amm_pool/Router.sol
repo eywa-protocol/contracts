@@ -94,9 +94,9 @@ interface ISynthesis {
 
     function burnSyntheticToken(
         address stoken,
-        address from,
         uint256 amount,
-        address chain2address,
+        address from,
+        address to,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId
@@ -140,12 +140,12 @@ interface ICurveProxy {
     struct MetaMintEUSD {
         //crosschain pool params
         address add_c;
-        uint256 expected_min_mintamount_c;
+        uint256 expected_min_mint_amount_c;
         //incoming coin index for adding liq to hub pool
         uint256 lp_index;
         //hub pool params
         address add_h;
-        uint256 expected_min_mintamount_h;
+        uint256 expected_min_mint_amount_h;
         //recipient address
         address to;
         //emergency unsynth params
@@ -158,13 +158,13 @@ interface ICurveProxy {
         address remove_c;
         //outcome index
         int128 x;
-        uint256 expected_minamount_c;
+        uint256 expected_min_amount_c;
         //hub pool params
         address remove_h;
         uint256 token_amount_h;
         //lp index
         int128 y;
-        uint256 expected_minamount_h;
+        uint256 expected_min_amount_h;
         //recipient address
         address to;
     }
@@ -175,14 +175,14 @@ interface ICurveProxy {
         address exchange;
         address remove;
         //add liquidity params
-        uint256 expected_min_mintamount;
+        uint256 expected_min_mint_amount;
         //exchange params
         int128 i; //index value for the coin to send
         int128 j; //index value of the coin to receive
         uint256 expected_min_dy;
         //withdraw one coin params
         int128 x; //index value of the coin to withdraw
-        uint256 expected_minamount;
+        uint256 expected_min_amount;
         //transfer to
         address to;
         //unsynth params
@@ -341,7 +341,8 @@ contract Router is Ownable {
         // worker fee
         SafeERC20.safeTransferFrom(IERC20(payToken), from, msg.sender, receipt.executionPrice);
         // proceed remaining amount
-        SafeERC20.safeTransferFrom(IERC20(payToken), from, to, generalAmount - receipt.executionPrice);
+        uint256 proceedAmount = generalAmount - receipt.executionPrice;
+        SafeERC20.safeTransferFrom(IERC20(payToken), from, to, proceedAmount);
 
         emit CrosschainPaymentEvent(from, payToken, receipt.executionPrice, msg.sender);
     }
@@ -528,7 +529,7 @@ contract Router is Ownable {
         address stoken,
         uint256 amount,
         address from,
-        address chain2address,
+        address to,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId,
@@ -537,9 +538,9 @@ contract Router is Ownable {
         _proceedFeesWithApprove(stoken, amount, from, _synthesis, receipt);
         ISynthesis(_synthesis).burnSyntheticToken(
             stoken,
-            from,
             amount,
-            chain2address,
+            from,
+            to,
             receiveSide,
             oppositeBridge,
             chainId
@@ -865,7 +866,7 @@ contract Router is Ownable {
         address stoken,
         uint256 amount,
         address from,
-        address chain2address,
+        address to,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId
@@ -874,9 +875,9 @@ contract Router is Ownable {
         IERC20(stoken).approve(_synthesis, amount);
         ISynthesis(_synthesis).burnSyntheticToken(
             stoken,
-            from,
             amount,
-            chain2address,
+            from,
+            to,
             receiveSide,
             oppositeBridge,
             chainId
