@@ -23,6 +23,10 @@ task("balanceDeployer", "Print info about balance deployer", async () => {
   console.log("Deployer balance: ",ethers.utils.formatEther(balance));
 
 });
+task("getBlockNum", "", async () => {
+  console.log(`crutch=${await ethers.provider.getBlockNumber()}`);
+});
+
 
 module.exports = {
   defaultNetwork: "hardhat",

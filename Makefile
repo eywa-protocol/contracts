@@ -70,3 +70,6 @@ copy_configs:
 
 compile:
 	cd hardhat;npx hardhat compile
+
+get-block:
+	cd hardhat;npx hardhat getBlockNum --network $(NET)
