@@ -126,6 +126,8 @@ interface ISynthesis {
         bytes1 bumpSynthesizeRequest,
         uint256 chainId
     ) external;
+
+    function getRepresentation(bytes32 _rtoken) external view returns (address);
 }
 
 interface ICurveProxy {
@@ -485,7 +487,7 @@ contract Router is Ownable {
         );
     }
 
-    //TODO:emergency?
+    //TODO:emergency? (add OG token to check with sig)
     // // TODO check payToken
     // function delegatedEmergencyUnburnRequest(
     //     bytes32 txID,
@@ -850,12 +852,12 @@ contract Router is Ownable {
     //==============================SYNTHESIS==============================
     function synthTransferRequest(
         bytes32 tokenReal,
-        address tokenSynth,
         uint256 amount,
         address from,
         address to,
         ISynthesis.SynthParams memory synthParams
     ) external {
+        address tokenSynth = ISynthesis(_synthesis).getRepresentation(tokenReal);
         SafeERC20.safeTransferFrom(IERC20(tokenSynth), from, address(this), amount);
         IERC20(tokenSynth).approve(_synthesis, amount);
         ISynthesis(_synthesis).synthTransfer(tokenReal, amount, from, to, synthParams);
