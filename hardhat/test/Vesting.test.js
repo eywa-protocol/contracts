@@ -266,10 +266,10 @@ describe('Vesting tests', () => {
    
         let sender = addr1.address;
         let recepient = addr2.address;
-        let nonce = 777;
+        let nonce = await vesting.connect(addr1).nonces(addr1.address);
         let amount = 9911;
 
-        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(nonce), web3.utils.soliditySha3(amount));
+        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(parseInt(nonce)), web3.utils.soliditySha3(amount));
 
 
         let sigObj = web3.eth.accounts.sign(msg, signAdminPrKey);
@@ -282,7 +282,7 @@ describe('Vesting tests', () => {
         let balanceAddr1Before = await vesting.connect(addr1).balanceOf(addr1.address);
         let balanceAddr2Before = await vesting.connect(addr1).balanceOf(addr2.address);
 
-        await vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, r, s, nonce);
+        await vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, r, s);
         let balanceAddr1After = await vesting.connect(addr1).balanceOf(addr1.address);
         let balanceAddr2After = await vesting.connect(addr1).balanceOf(addr2.address);
 
@@ -294,10 +294,10 @@ describe('Vesting tests', () => {
         await increaseTime(day_in_seconds * 1);
         let sender = addr1.address;
         let recepient = addr2.address;
-        let nonce = 777;
+        let nonce = await vesting.connect(addr1).nonces(addr1.address);
         let amount = 9911;
 
-        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(nonce), web3.utils.soliditySha3(amount));
+        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(parseInt(nonce)), web3.utils.soliditySha3(amount));
 
         let sigObj = web3.eth.accounts.sign(msg, signAdminPrKey);
         let signa = sigObj.signature;
@@ -308,17 +308,17 @@ describe('Vesting tests', () => {
 
         let fakeR = '0x468dc65fc3d1f1b1e283392c2ef3da995279f36e940c31ce1319b2d47f8e98c6';
 
-        await expect(vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, fakeR, s, nonce)).to.be.revertedWith('ERROR: Verifying signature failed');
+        await expect(vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, fakeR, s)).to.be.revertedWith('ERROR: Verifying signature failed');
     });
 
-    it('no double nonce usage', async function () {
+    it('Wrong signature suppose to not work', async function () {
         await increaseTime(day_in_seconds * 1);
         let sender = addr1.address;
         let recepient = addr2.address;
-        let nonce = 777;
+        let nonce = await vesting.connect(addr1).nonces(addr1.address);
         let amount = 9911;
 
-        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(nonce), web3.utils.soliditySha3(amount));
+        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(parseInt(nonce)), web3.utils.soliditySha3(amount));
 
         let sigObj = web3.eth.accounts.sign(msg, signAdminPrKey);
         let signa = sigObj.signature;
@@ -329,18 +329,17 @@ describe('Vesting tests', () => {
 
         let fakeR = '0x468dc65fc3d1f1b1e283392c2ef3da995279f36e940c31ce1319b2d47f8e98c6';
 
-        await vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, r, s, nonce);
-        await expect(vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, fakeR, s, nonce)).to.be.revertedWith('Nonce was used');
+        await expect(vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, fakeR, s)).to.be.revertedWith('ERROR: Verifying signature failed');
     });
 
     it('signature transferFrom', async function () {
         await increaseTime(day_in_seconds * 1);
         let sender = addr1.address;
         let recepient = addr2.address;
-        let nonce = 777;
+        let nonce = await vesting.connect(addr1).nonces(addr1.address);
         let amount = 9911;
 
-        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(nonce), web3.utils.soliditySha3(amount));
+        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(parseInt(nonce)), web3.utils.soliditySha3(amount));
 
         let sigObj = web3.eth.accounts.sign(msg, signAdminPrKey);
         let signa = sigObj.signature;
@@ -352,7 +351,7 @@ describe('Vesting tests', () => {
         let balanceAddr1Before = await vesting.connect(addr1).balanceOf(addr1.address);
         let balanceAddr2Before = await vesting.connect(addr1).balanceOf(addr2.address);
         await vesting.connect(addr1).approve(addr3.address,amount);
-        await vesting.connect(addr3).transferFromWithSignature(addr1.address, addr2.address, amount, v, r, s, nonce);
+        await vesting.connect(addr3).transferFromWithSignature(addr1.address, addr2.address, amount, v, r, s);
         let balanceAddr1After = await vesting.connect(addr1).balanceOf(addr1.address);
         let balanceAddr2After = await vesting.connect(addr1).balanceOf(addr2.address);
 

@@ -7,10 +7,12 @@ import "@openzeppelin/contracts-newone/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-newone/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-newone/utils/Counters.sol";
 
 contract EywaVesting is ERC20, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
+    using Counters for Counters.Counter;
 
     string constant prefix = "\x19Ethereum Signed Message:\n32"; 
 
@@ -18,15 +20,15 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     address public signAdmin; // address which can sign early transfer
     uint256 public signatureTimeStamp;
     uint256 public started; 
-    IERC20 public eywaToken;
+    IERC20 public immutable eywaToken;
     uint256 public cliffDuration; // timestamp cliff duration
     uint256 public stepDuration; // linear step duration
     uint256 public cliffAmount; // realeseble number of tokens after cliff
     uint256 public stepAmount; // realeseble number of tokens after 1 step
     uint256 public numOfSteps; // number of linear steps
 
+    mapping(address => Counters.Counter) private _nonces;
     mapping (address => uint256) public claimed; // how much already claimed
-    mapping(uint256 => bool) private usedNonces;
     uint256 public vEywaInitialSupply;
     mapping (address => uint256) public unburnBalanceOf;
 
@@ -70,8 +72,17 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         IERC20(eywaToken).safeTransferFrom(msg.sender, address(this), vEywaInitialSupply);
     }
 
+    function nonces(address owner) public view returns (uint256) {
+        return _nonces[owner].current();
+    }
+
+    function _useNonce(address owner) internal returns (uint256 current) {
+        Counters.Counter storage nonce = _nonces[owner];
+        current = nonce.current();
+        nonce.increment();
+    }
+
     function checkSignature(
-        uint256 nonce, 
         address sender, 
         address recipient, 
         uint256 amount,
@@ -79,13 +90,11 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         bytes32 r, 
         bytes32 s
         ) private {
-        require(usedNonces[nonce] == false, "Nonce was used");
-        usedNonces[nonce] = true;
         bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, 
             keccak256(abi.encodePacked(
                 keccak256(abi.encodePacked(sender)), 
                 keccak256(abi.encodePacked(recipient)),
-                keccak256(abi.encodePacked(nonce)), 
+                keccak256(abi.encodePacked(_useNonce(sender))), 
                 keccak256(abi.encodePacked(amount)) 
             ))
         ));
@@ -126,10 +135,6 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         emit ReleasedAfterClaim(msg.sender, claimedAmount);
     }
 
-    function isNonceUsed(uint256 nonce) public view returns (bool) {
-        return usedNonces[nonce];
-    }
-
     function updateUnburnBalanceAndClaimed(address sender, address recipient, uint256 amount) private {
         uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(unburnBalanceOf[sender]);
         unburnBalanceOf[sender] = unburnBalanceOf[sender] - amount; 
@@ -143,11 +148,10 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         uint256 amount,  
         uint8 v, 
         bytes32 r, 
-        bytes32 s, 
-        uint256 nonce
+        bytes32 s 
     ) public nonReentrant() returns (bool) {
         require(started <= block.timestamp, "It is not started time yet");
-        checkSignature(nonce, msg.sender, recipient, amount, v, r, s);
+        checkSignature(msg.sender, recipient, amount, v, r, s);
         updateUnburnBalanceAndClaimed(msg.sender, recipient, amount);
         bool result = super.transfer(recipient, amount);
         return result;
@@ -169,10 +173,9 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         uint256 amount, 
         uint8 v, 
         bytes32 r, 
-        bytes32 s, 
-        uint256 nonce
+        bytes32 s
     ) public nonReentrant() returns (bool) {
-        checkSignature(nonce, sender, recipient, amount, v, r, s);
+        checkSignature(sender, recipient, amount, v, r, s);
         updateUnburnBalanceAndClaimed(sender, recipient,  amount);
         bool result = super.transferFrom(sender, recipient, amount);
         return result;
