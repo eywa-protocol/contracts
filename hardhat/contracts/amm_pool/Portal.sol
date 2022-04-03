@@ -31,7 +31,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     mapping(address => uint256) public balanceOf;
     string public versionRecipient;
     address public bridge;
-    address public proxy;
 
     bytes public constant sighashMintSyntheticToken =
         abi.encodePacked(uint8(44), uint8(253), uint8(1), uint8(101), uint8(130), uint8(139), uint8(18), uint8(78));
@@ -120,11 +119,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         _;
     }
 
-    modifier onlyTrusted() {
-        require(bridge == msg.sender || proxy == msg.sender, "Portal: only trusted contract");
-        _;
-    }
-
     function registerNewBalance(address token, uint256 expectedAmount) internal {
         uint256 oldBalance = balanceOf[token];
         require(
@@ -145,9 +139,10 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _token,
         uint256 _amount,
         address _from,
-        SynthParams memory _synthParams
+        SynthParams calldata _synthParams
     ) external returns (bytes32 txID) {
-        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified"); //TODO
+        //TODO: check token to be verified
+        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
         registerNewBalance(_token, _amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_from);
@@ -202,7 +197,8 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bytes1 _txStateBump,
         uint256 _chainId
     ) external returns (bytes32 txID) {
-        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified"); //TODO
+        //TODO: check token to be verified
+        // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
         registerNewBalance(_token, _amount);
 
         require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainId");
@@ -487,11 +483,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     ) external {
         tokenDecimals[_rtoken] = _decimals;
         emit ApprovedRepresentationRequest(_rtoken);
-    }
-
-    //TODO
-    function setProxyCurve(address _proxy) external onlyOwner {
-        proxy = _proxy;
     }
 
     function setTrustedForwarder(address _forwarder) external onlyOwner {

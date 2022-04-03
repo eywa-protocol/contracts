@@ -38,8 +38,7 @@ async function main() {
     await curveProxy.deployed()
     console.log(`CurveProxy address: ${curveProxy.address}`);
     // initial Curve proxy setup
-    await synthesis.setProxyCurve(curveProxy.address);
-    await portal.setProxyCurve(curveProxy.address);
+    await synthesis.setCurveProxy(curveProxy.address);
 
 
 

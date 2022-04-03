@@ -1,7 +1,7 @@
 let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
-const { checkoutProvider, timeout } = require("../../utils/helper");
+const { checkoutProvider, addressToBytes32, timeout } = require("../../utils/helper"); 
 const { ethers } = require("hardhat");
-const { userNet2 } = require("./e2e.test");
+// const { userNet2 } = require("./e2e.test");
 
 contract('CurveProxy', () => {
 
@@ -65,9 +65,9 @@ contract('CurveProxy', () => {
         it("Synthesize: network1 -> network2(hub)", async function () {
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.routerA = await RouterA.at(deployInfo["network1"].router)
-            const synthAddress = await synthesisB.getRepresentation(addressToBytes32(tokenA1.address))
-            this.Synth = await SynthB.at(synthAddress)
-            const oldBalance = this.Synth.balanceOf(userNet2)
+            const synthAddress = await synthesisB.getRepresentation(addressToBytes32(this.tokenA1.address))
+            this.synthB = await SynthB.at(synthAddress)
+            this.oldBalance = await this.synthB.balanceOf(userNet2)
 
             // const testAmount = Math.floor((Math.random() * 100) + 1);
             const amount = ethers.utils.parseEther("0.5")
@@ -125,8 +125,8 @@ contract('CurveProxy', () => {
                 { from: userNet1, gas: 1000_000 }
             )
             
-            const newBalance = this.Synth.balanceOf(userNet2)
-            assert(oldBalance.lt(newBalance))    
+            const newBalance = await this.synthB.balanceOf(userNet2)
+            assert(this.oldBalance.lt(newBalance))    
             // await this.routerA.tokenSynthesizeRequest(
             //     tokenToSynth,
             //     amount,

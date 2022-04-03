@@ -141,7 +141,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         uint256 _amount,
         address _from,
         address _to,
-        SynthParams memory _synthParams
+        SynthParams calldata _synthParams
     ) external {
         address synth = representationSynt[_tokenReal];
         require(synth != address(0), "Synthesis: synth not found");
@@ -555,7 +555,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         return (keys, sToken);
     }
 
-    function setProxyCurve(address _proxy) external onlyOwner {
+    function setCurveProxy(address _proxy) external onlyOwner {
         proxy = _proxy;
     }
 

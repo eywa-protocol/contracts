@@ -26,11 +26,11 @@ interface IPortal {
         address token,
         uint256 amount,
         address from,
-        SynthParams memory params
+        SynthParams calldata params
     ) external;
 
     function synthesizeWithPermit(
-        PermitData memory permitData,
+        PermitData calldata permitData,
         address token,
         uint256 amount,
         address from,
@@ -50,13 +50,13 @@ interface IPortal {
     ) external;
 
     function synthesizeBatchWithDataTransit(
-        address[] memory token,
-        uint256[] memory amount, // set a positive amount in order to initiate a synthesize request
+        address[] calldata token,
+        uint256[] calldata amount, // set a positive amount in order to initiate a synthesize request
         address from,
-        SynthParams memory synthparams,
+        SynthParams calldata synthparams,
         bytes4 selector,
         bytes calldata transitData,
-        PermitData[] memory permitData
+        PermitData[] calldata permitData
     ) external;
 
     function emergencyUnburnRequest(
@@ -89,7 +89,7 @@ interface ISynthesis {
         uint256 amount,
         address from,
         address to,
-        SynthParams memory params
+        SynthParams calldata params
     ) external;
 
     function burnSyntheticToken(
@@ -279,7 +279,7 @@ contract Router is Ownable {
     function _checkSignatures(
         address payToken,
         address from,
-        DelegatedCallReceipt memory receipt
+        DelegatedCallReceipt calldata receipt
     ) internal view {
         bytes32 workerStructHash = keccak256(
             abi.encodePacked(
@@ -323,7 +323,7 @@ contract Router is Ownable {
     function _proceedFees(
         address payToken,
         address from,
-        DelegatedCallReceipt memory receipt
+        DelegatedCallReceipt calldata receipt
     ) internal {
         _checkSignatures(payToken, from, receipt);
         // worker fee
@@ -337,7 +337,7 @@ contract Router is Ownable {
         uint256 generalAmount,
         address from,
         address to,
-        DelegatedCallReceipt memory receipt
+        DelegatedCallReceipt calldata receipt
     ) internal returns (uint256 proceedAmount) {
         _checkSignatures(payToken, from, receipt);
         // worker fee
@@ -354,7 +354,7 @@ contract Router is Ownable {
         uint256 generalAmount,
         address from,
         address to,
-        DelegatedCallReceipt memory receipt
+        DelegatedCallReceipt calldata receipt
     ) internal returns (uint256 proceedAmount) {
         _checkSignatures(payToken, from, receipt);
         // worker fee
@@ -383,8 +383,8 @@ contract Router is Ownable {
         address token,
         uint256 amount,
         address from,
-        IPortal.SynthParams memory synthParams,
-        DelegatedCallReceipt memory receipt
+        IPortal.SynthParams calldata synthParams,
+        DelegatedCallReceipt calldata receipt
     ) external {
         uint256 proceedAmount = _proceedFeesWithTransfer(token, amount, from, _portal, receipt);
         IPortal(_portal).synthesize(token, proceedAmount, from, synthParams);
@@ -405,9 +405,9 @@ contract Router is Ownable {
         address token,
         uint256 amount,
         address from,
-        IPortal.SynthParams memory synthParams,
-        IPortal.PermitData memory permitData,
-        DelegatedCallReceipt memory receipt
+        IPortal.SynthParams calldata synthParams,
+        IPortal.PermitData calldata permitData,
+        DelegatedCallReceipt calldata receipt
     ) external {
         IERC20Permit(token).permit(
             from,
@@ -438,7 +438,7 @@ contract Router is Ownable {
         bytes32[] calldata pubkeys,
         bytes1 txStateBump,
         uint256 chainId,
-        DelegatedCallReceipt memory receipt
+        DelegatedCallReceipt calldata receipt
     ) external {
         uint256 proceedAmount = _proceedFeesWithTransfer(token, amount, from, _portal, receipt);
         IPortal(_portal).synthesizeToSolana(token, proceedAmount, from, pubkeys, txStateBump, chainId);
@@ -448,14 +448,14 @@ contract Router is Ownable {
      * @dev  Delegated batch synthesize request with data transition.
      */
     function delegatedBatchSynthesizeRequestWithDataTransit(
-        address[] memory token,
-        uint256[] memory amount, // set a positive amount in order to initiate a synthesize request
+        address[] calldata token,
+        uint256[] calldata amount, // set a positive amount in order to initiate a synthesize request
         address from,
         bytes4 selector,
         bytes calldata transitData,
-        IPortal.SynthParams memory synthParams,
-        IPortal.PermitData[] memory permitData,
-        DelegatedCallReceipt memory receipt
+        IPortal.SynthParams calldata synthParams,
+        IPortal.PermitData[] calldata permitData,
+        DelegatedCallReceipt calldata receipt
     ) external {
         uint256[] memory proceedAmount = new uint256[](amount.length);
         for (uint256 i = 0; i < token.length; i++) {
@@ -496,7 +496,7 @@ contract Router is Ownable {
     //     address receiveSide,
     //     address oppositeBridge,
     //     uint256 chainId,
-    //     DelegatedCallReceipt memory receipt
+    //     DelegatedCallReceipt calldata receipt
     // ) external {
     //     // TODO check sig from orig sender
     //     _proceedFees(payToken, from, receipt);
@@ -510,7 +510,7 @@ contract Router is Ownable {
     //     address payToken,
     //     bytes32[] calldata pubkeys,
     //     uint256 chainId,
-    //     DelegatedCallReceipt memory receipt
+    //     DelegatedCallReceipt calldata receipt
     // ) external {
     //     // TODO check sig from orig sender
     //     _proceedFees(payToken, from, receipt);
@@ -524,8 +524,8 @@ contract Router is Ownable {
         uint256 amount,
         address from,
         address to,
-        ISynthesis.SynthParams memory synthParams,
-        DelegatedCallReceipt memory receipt
+        ISynthesis.SynthParams calldata synthParams,
+        DelegatedCallReceipt calldata receipt
     ) external {
         uint256 proceedAmount = _proceedFeesWithApprove(tokenSynth, amount, from, _synthesis, receipt);
         ISynthesis(_synthesis).synthTransfer(tokenReal, proceedAmount, from, to, synthParams);
@@ -539,7 +539,7 @@ contract Router is Ownable {
         address receiveSide,
         address oppositeBridge,
         uint256 chainId,
-        DelegatedCallReceipt memory receipt
+        DelegatedCallReceipt calldata receipt
     ) external {
         uint256 proceedAmount = _proceedFeesWithApprove(stoken, amount, from, _synthesis, receipt);
         ISynthesis(_synthesis).burnSyntheticToken(
@@ -559,7 +559,7 @@ contract Router is Ownable {
         bytes32[] calldata pubkeys,
         uint256 amount,
         uint256 chainId,
-        DelegatedCallReceipt memory receipt
+        DelegatedCallReceipt calldata receipt
     ) external {
         uint256 proceedAmount = _proceedFeesWithApprove(stoken, amount, from, _synthesis, receipt);
         ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, from, pubkeys, proceedAmount, chainId);
@@ -573,7 +573,7 @@ contract Router is Ownable {
     //     address receiveSide,
     //     address oppositeBridge,
     //     uint256 chainId,
-    //     DelegatedCallReceipt memory receipt
+    //     DelegatedCallReceipt calldata receipt
     // ) external {
     //     // TODO check sig from orig sender
     //     // TODO check payToken
@@ -587,7 +587,7 @@ contract Router is Ownable {
     //     bytes32[] calldata pubkeys,
     //     bytes1 bumpSynthesizeRequest,
     //     uint256 chainId,
-    //     DelegatedCallReceipt memory receipt
+    //     DelegatedCallReceipt calldata receipt
     // ) external {
     //     // TODO check sig from orig sender
     //     // TODO check payToken
@@ -605,12 +605,12 @@ contract Router is Ownable {
      * @param receipt delegated call receipt
      */
     function delegatedMintEusdRequestVia3pool(
-        ICurveProxy.MetaMintEUSD calldata params,
+        ICurveProxy.MetaMintEUSD memory params,
         ICurveProxy.PermitData[] calldata permit,
         address from,
         address[3] calldata token,
         uint256[3] memory amount,
-        DelegatedCallReceipt memory receipt
+        DelegatedCallReceipt calldata receipt
     ) external {
         for (uint256 i = 0; i < token.length; i++) {
             if (amount[i] > 0) {
@@ -635,7 +635,7 @@ contract Router is Ownable {
         address from,
         address[3] calldata token,
         uint256[3] memory amount,
-        DelegatedCallReceipt memory receipt
+        DelegatedCallReceipt calldata receipt
     ) external {
         for (uint256 i = 0; i < token.length; i++) {
             if (amount[i] > 0) {
@@ -662,7 +662,7 @@ contract Router is Ownable {
         address receiveSide,
         address oppositeBridge,
         uint256 chainId,
-        DelegatedCallReceipt memory receipt
+        DelegatedCallReceipt calldata receipt
     ) external {
         uint256 proceedAmount = _proceedFeesWithTransfer(payToken, params.tokenAmountH, from, _curveProxy, receipt);
         params.tokenAmountH = proceedAmount;
@@ -686,7 +686,7 @@ contract Router is Ownable {
         address token,
         uint256 amount,
         address from,
-        IPortal.SynthParams memory synthParams
+        IPortal.SynthParams calldata synthParams
     ) external {
         SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
         IPortal(_portal).synthesize(token, amount, from, synthParams);
@@ -706,8 +706,8 @@ contract Router is Ownable {
         address token,
         uint256 amount,
         address from,
-        IPortal.SynthParams memory synthParams,
-        IPortal.PermitData memory permitData
+        IPortal.SynthParams calldata synthParams,
+        IPortal.PermitData calldata permitData
     ) external {
         IERC20Permit(token).permit(
             from,
@@ -746,13 +746,13 @@ contract Router is Ownable {
      * @dev  Delegated batch synthesize request with data transition.
      */
     function batchSynthesizeRequestWithDataTransit(
-        address[] memory token,
-        uint256[] memory amount, // set a positive amount in order to initiate a synthesize request
+        address[] calldata token,
+        uint256[] calldata amount, // set a positive amount in order to initiate a synthesize request
         address from,
         bytes4 selector,
         bytes calldata transitData,
-        IPortal.SynthParams memory synthParams,
-        IPortal.PermitData[] memory permitData
+        IPortal.SynthParams calldata synthParams,
+        IPortal.PermitData[] calldata permitData
     ) external {
         for (uint256 i = 0; i < token.length; i++) {
             if (amount[i] > 0) {
@@ -855,7 +855,7 @@ contract Router is Ownable {
         uint256 amount,
         address from,
         address to,
-        ISynthesis.SynthParams memory synthParams
+        ISynthesis.SynthParams calldata synthParams
     ) external {
         address tokenSynth = ISynthesis(_synthesis).getRepresentation(tokenReal);
         SafeERC20.safeTransferFrom(IERC20(tokenSynth), from, address(this), amount);
