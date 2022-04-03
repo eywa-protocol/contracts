@@ -477,10 +477,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     // implies manual verification point
-    function approveRepresentationRequest(
-        bytes32 _rtoken,
-        uint8 _decimals 
-    ) external onlyOwner {
+    function approveRepresentationRequest(bytes32 _rtoken, uint8 _decimals) external onlyOwner {
         tokenDecimals[_rtoken] = _decimals;
         emit ApprovedRepresentationRequest(_rtoken);
     }
