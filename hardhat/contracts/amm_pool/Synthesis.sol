@@ -49,26 +49,26 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         RevertRequest
     }
 
-    event BurnRequest(bytes32 indexed _id, address indexed _from, address indexed _to, uint256 _amount, address _token);
+    event BurnRequest(bytes32 indexed id, address indexed from, address indexed to, uint256 amount, address token);
     event BurnRequestSolana(
-        bytes32 indexed _id,
-        address indexed _from,
-        bytes32 indexed _to,
-        uint256 _amount,
-        address _token
+        bytes32 indexed id,
+        address indexed from,
+        bytes32 indexed to,
+        uint256 amount,
+        address token
     );
-    event RevertSynthesizeRequest(bytes32 indexed _id, address indexed _to);
-    event SynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
-    event SynthesizeCompletedSolana(bytes32 indexed _id, address indexed _to, uint256 _amount, bytes32 _token);
+    event RevertSynthesizeRequest(bytes32 indexed id, address indexed to);
+    event SynthesizeCompleted(bytes32 indexed id, address indexed to, uint256 amount, address token);
+    event SynthesizeCompletedSolana(bytes32 indexed id, address indexed to, uint256 amount, bytes32 token);
     event SynthTransfer(
-        bytes32 indexed _id,
-        address indexed _from,
-        address indexed _to,
-        uint256 _amount,
-        bytes32 _realToken
+        bytes32 indexed id,
+        address indexed from,
+        address indexed to,
+        uint256 amount,
+        bytes32 realToken
     );
-    event RevertBurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
-    event CreatedRepresentation(bytes32 indexed _rtoken, address indexed _stoken);
+    event RevertBurnCompleted(bytes32 indexed id, address indexed to, uint256 amount, address token);
+    event CreatedRepresentation(bytes32 indexed rtoken, address indexed stoken);
 
     function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
         __Context_init_unchained();

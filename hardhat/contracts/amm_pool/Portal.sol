@@ -87,24 +87,24 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     mapping(bytes32 => uint8) public tokenDecimals;
 
     event SynthesizeRequest(
-        bytes32 indexed _id,
-        address indexed _from,
-        address indexed _to,
-        uint256 _amount,
-        address _token
+        bytes32 indexed id,
+        address indexed from,
+        address indexed to,
+        uint256 amount,
+        address token
     );
     event SynthesizeRequestSolana(
-        bytes32 indexed _id,
-        address indexed _from,
-        bytes32 indexed _to,
-        uint256 _amount,
-        address _token
+        bytes32 indexed id,
+        address indexed from,
+        bytes32 indexed to,
+        uint256 amount,
+        address token
     );
-    event RevertBurnRequest(bytes32 indexed _id, address indexed _to);
-    event BurnCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
-    event RevertSynthesizeCompleted(bytes32 indexed _id, address indexed _to, uint256 _amount, address _token);
-    event RepresentationRequest(address indexed _rtoken);
-    event ApprovedRepresentationRequest(bytes32 indexed _rtoken);
+    event RevertBurnRequest(bytes32 indexed id, address indexed to);
+    event BurnCompleted(bytes32 indexed id, address indexed to, uint256 amount, address token);
+    event RevertSynthesizeCompleted(bytes32 indexed id, address indexed to, uint256 amount, address token);
+    event RepresentationRequest(address indexed rtoken);
+    event ApprovedRepresentationRequest(bytes32 indexed rtoken);
 
     function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
         __Context_init_unchained();
@@ -479,8 +479,8 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     // implies manual verification point
     function approveRepresentationRequest(
         bytes32 _rtoken,
-        uint8 _decimals /**onlyOwner */
-    ) external {
+        uint8 _decimals 
+    ) external onlyOwner {
         tokenDecimals[_rtoken] = _decimals;
         emit ApprovedRepresentationRequest(_rtoken);
     }
