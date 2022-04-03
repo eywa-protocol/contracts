@@ -181,6 +181,47 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         emit SynthesizeRequest(txID, _from, _synthParams.to, _amount, _token);
     }
 
+    function solAmount64(uint256 amount) public pure returns (uint64 solAmount) {
+        solAmount = uint64(amount);
+        // swap bytes
+        solAmount = ((solAmount & 0xFF00FF00FF00FF00) >> 8) | ((solAmount & 0x00FF00FF00FF00FF) << 8);
+        // swap 2-byte long pairs
+        solAmount = ((solAmount & 0xFFFF0000FFFF0000) >> 16) | ((solAmount & 0x0000FFFF0000FFFF) << 16);
+        // swap 4-byte long pairs
+        solAmount = (solAmount >> 32) | (solAmount << 32);
+    }
+
+    function transmitSynthesizeToSolana(
+        address _token,
+        uint64 solAmount,
+        bytes32[] calldata _pubkeys,
+        bytes1 _txStateBump,
+        SolanaAccountMeta[] memory accounts,
+        address sender,
+        uint256 nonce,
+        bytes32 txID
+    ) private {
+        // TODO add payment by token
+        IBridge(bridge).transmitRequestV2ToSolana(
+            serializeSolanaStandaloneInstruction(
+                SolanaStandaloneInstruction(
+                    /* programId: */
+                    _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
+                    /* accounts: */
+                    accounts,
+                    /* data: */
+                    abi.encodePacked(sighashMintSyntheticToken, _txStateBump, uint160(_token), solAmount)
+                )
+            ),
+            _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
+            _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
+            SOLANA_CHAIN_ID,
+            txID,
+            sender,
+            nonce
+        );
+    }
+
     /**
      * @dev Synthesize token request with bytes32 support for Solana.
      * @param _token token address to synthesize
@@ -193,7 +234,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _token,
         uint256 _amount,
         address _from,
-        bytes32[] memory _pubkeys,
+        bytes32[] calldata _pubkeys,
         bytes1 _txStateBump,
         uint256 _chainId
     ) external returns (bytes32 txID) {
@@ -201,17 +242,11 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         // require(tokenDecimals[castToBytes32(_token)] > 0, "Portal: token must be verified");
         registerNewBalance(_token, _amount);
 
-        require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainId");
+        require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainID");
 
         // TODO: fix amount digits for solana (digits 18 -> 6)
         require(_amount < type(uint64).max, "Portal: amount too large");
-        uint64 solAmount = uint64(_amount);
-        // swap bytes
-        solAmount = ((solAmount & 0xFF00FF00FF00FF00) >> 8) | ((solAmount & 0x00FF00FF00FF00FF) << 8);
-        // swap 2-byte long pairs
-        solAmount = ((solAmount & 0xFFFF0000FFFF0000) >> 16) | ((solAmount & 0x0000FFFF0000FFFF) << 16);
-        // swap 4-byte long pairs
-        solAmount = (solAmount >> 32) | (solAmount << 32);
+        uint64 solAmount = solAmount64(_amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_from);
         txID = IBridge(bridge).prepareRqId(
@@ -221,61 +256,44 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             castToBytes32(_from),
             nonce
         );
+        {
+            SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](9);
+            accounts[0] = SolanaAccountMeta({
+                pubkey: _pubkeys[uint256(SynthesizePubkeys.receiveSideData)],
+                isSigner: false,
+                isWritable: true
+            });
+            accounts[1] = SolanaAccountMeta({
+                pubkey: _pubkeys[uint256(SynthesizePubkeys.syntToken)],
+                isSigner: false,
+                isWritable: true
+            });
+            accounts[2] = SolanaAccountMeta({
+                pubkey: _pubkeys[uint256(SynthesizePubkeys.syntTokenData)],
+                isSigner: false,
+                isWritable: false
+            });
+            accounts[3] = SolanaAccountMeta({
+                pubkey: _pubkeys[uint256(SynthesizePubkeys.txState)],
+                isSigner: false,
+                isWritable: true
+            });
+            accounts[4] = SolanaAccountMeta({
+                pubkey: _pubkeys[uint256(SynthesizePubkeys.to)],
+                isSigner: false,
+                isWritable: true
+            });
+            accounts[5] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
+            accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_SYSTEM_PROGRAM, isSigner: false, isWritable: false });
+            accounts[7] = SolanaAccountMeta({ pubkey: SOLANA_RENT, isSigner: false, isWritable: false });
+            accounts[8] = SolanaAccountMeta({
+                pubkey: _pubkeys[uint256(SynthesizePubkeys.oppositeBridgeData)],
+                isSigner: true,
+                isWritable: false
+            });
 
-        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](9);
-        accounts[0] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.receiveSideData)],
-            isSigner: false,
-            isWritable: true
-        });
-        accounts[1] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.syntToken)],
-            isSigner: false,
-            isWritable: true
-        });
-        accounts[2] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.syntTokenData)],
-            isSigner: false,
-            isWritable: false
-        });
-        accounts[3] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.txState)],
-            isSigner: false,
-            isWritable: true
-        });
-        accounts[4] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.to)],
-            isSigner: false,
-            isWritable: true
-        });
-        accounts[5] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
-        accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_SYSTEM_PROGRAM, isSigner: false, isWritable: false });
-        accounts[7] = SolanaAccountMeta({ pubkey: SOLANA_RENT, isSigner: false, isWritable: false });
-        accounts[8] = SolanaAccountMeta({
-            pubkey: _pubkeys[uint256(SynthesizePubkeys.oppositeBridgeData)],
-            isSigner: true,
-            isWritable: false
-        });
-
-        IBridge(bridge).transmitRequestV2ToSolana(
-            serializeSolanaStandaloneInstruction(
-                SolanaStandaloneInstruction(
-                    /* programId: */
-                    _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
-                    /* accounts: */
-                    accounts,
-                    /* data: */
-                    abi.encodePacked(sighashMintSyntheticToken, txID, _txStateBump, solAmount)
-                )
-            ),
-            _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
-            _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
-            SOLANA_CHAIN_ID,
-            txID,
-            _from,
-            nonce
-        );
-
+            transmitSynthesizeToSolana(_token, solAmount, _pubkeys, _txStateBump, accounts, _from, nonce, txID);
+        }
         TxState storage txState = requests[txID];
         txState.from = castToBytes32(_from);
         txState.to = _pubkeys[uint256(SynthesizePubkeys.to)];
