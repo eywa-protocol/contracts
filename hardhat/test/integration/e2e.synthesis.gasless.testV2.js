@@ -102,7 +102,7 @@ contract('Simple e2e test', (deployer, accounts) => {
     describe('simple end-to-end test', async () => {
         it('Simple. ERC20 without permit (through approve)', async () => {
             let token_amt = await portal1.web3.utils.toWei('100','ether');
-            let chainID   = await portal2.web3.eth.net.getId();
+            let chainId   = await portal2.web3.eth.net.getId();
             // APPOVE for pay fee through ERC20 token (in this case fee gets from owner1)
             // TODO: calculate amount with fee
             // TODO: if erc20 != permit => swap on permit
@@ -118,7 +118,7 @@ contract('Simple e2e test', (deployer, accounts) => {
 
             let _userBalanceBefore  = await this.token1.balanceOf(this.owner1, {from: this.owner1});
             // transaction through gsn provider
-            let tx1 = await this.p1.synthesize(this.token1.address, token_amt, this.owner2, this.s2.address, this.b2.address, chainID, {from: this.owner1, useGSN: true});
+            let tx1 = await this.p1.synthesize(this.token1.address, token_amt, this.owner2, this.s2.address, this.b2.address, chainId, {from: this.owner1, useGSN: true});
 
             console.log('tx1: ', tx1.tx);
             console.log('gasUsed1: ', tx1.receipt.gasUsed);

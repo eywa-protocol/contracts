@@ -55,36 +55,37 @@ async function main() {
         // gauge
         for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
             
-            let lp = LpToken.attach(deployInfo[network.name].crosschainPool[i].lp[0].address)
+            let lp = LpToken.attach(deployInfo[network.name].crosschainPool[i].lp[0].address);
+            console.log("lp:",ethers.utils.formatEther(await lp.balanceOf(user.address)))
             let gauge = await LiquidityGauge.attach(deployInfo[network.name].crosschainPool[i].gauge)
-            // console.log(await lp.balanceOf(user.address))
+            // console.log(gauge)
 
-            await lp.approve(gauge.address, ethers.utils.parseEther("100.0"))
-            await gauge.deposit(ethers.utils.parseEther("1.0"), user.address)
+            await lp.approve(gauge.address, ethers.utils.parseEther("111121500.0"))
+            await gauge.deposit(ethers.utils.parseEther("111121500.0"), user.address)
             // await gauge.withdraw(ethers.utils.parseEther("100.0")) 
 
-            console.log(parseInt(await gauge.claimable_tokens(user.address)))
+            // console.log(parseInt(await gauge.claimable_tokens(user.address)))
             // //mint
 
             // await minter.mint(gauge.address)
 
         }
 
-        //local gauge
+        // //local gauge
       
-        let lpForLocal = LpToken.attach(deployInfo[network.name].localPool.lp.address)
-        let gaugeLocal = await LiquidityGauge.attach(deployInfo[network.name].localPool.gauge)
-        // console.log(await lp.balanceOf(user.address))
+        // let lpForLocal = LpToken.attach(deployInfo[network.name].localPool.lp.address)
+        // let gaugeLocal = await LiquidityGauge.attach(deployInfo[network.name].localPool.gauge)
+        // // console.log(await lp.balanceOf(user.address))
 
-        await lpForLocal.approve(gaugeLocal.address, ethers.utils.parseEther("100.0"))
-        await gaugeLocal.deposit(ethers.utils.parseEther("1.0"), user.address)
-        console.log(parseInt(await gaugeLocal.claimable_tokens(user.address)))
+        // await lpForLocal.approve(gaugeLocal.address, ethers.utils.parseEther("100.0"))
+        // await gaugeLocal.deposit(ethers.utils.parseEther("1.0"), user.address)
+        // console.log(parseInt(await gaugeLocal.claimable_tokens(user.address)))
 
 
 
         // await minter.toggle_approve_mint(user.address)
         await increaseTime(604800)
-        await minter.mint(gaugeLocal.address)
+        // await minter.mint(gaugeLocal.address)
         // console.log( await eywa.start_epoch_time_write())
 
         console.log(await eywa.balanceOf(user.address))

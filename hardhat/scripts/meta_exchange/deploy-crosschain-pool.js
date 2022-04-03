@@ -31,24 +31,7 @@ async function main() {
   // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool');
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool');
 
-  // deploy Curve Proxy
-  const curveProxy = await upgrades.deployProxy(CurveProxy, [
-    deployInfo[network.name].forwarder,
-    deployInfo[network.name].portal,
-    deployInfo[network.name].synthesis,
-    deployInfo[network.name].bridge
-  ], { initializer: 'initialize' });
-  await curveProxy.deployed();
 
-  // initial proxy setup
-  let synthesisInstance = await Synthesis.attach(deployInfo[network.name].synthesis);
-  let tx = await synthesisInstance.setProxyCurve(curveProxy.address);
-  await tx.wait();
-  let portalInstance = await Portal.attach(deployInfo[network.name].portal);
-  tx = await portalInstance.setProxyCurve(curveProxy.address);
-  await tx.wait();
-
-  deployInfo[network.name].curveProxy = curveProxy.address;
 
   let localToken = [];
   let crosschainPoolCoins = [];

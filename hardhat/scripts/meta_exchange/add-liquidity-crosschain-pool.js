@@ -15,6 +15,7 @@ async function main() {
 
   const ERC20 = await ethers.getContractFactory('ERC20Mock');
   const Portal = await ethers.getContractFactory('Portal');
+  const Router = await ethers.getContractFactory('Router');
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool');
   // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool');
   // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool');
@@ -26,24 +27,27 @@ async function main() {
   if (network.name != "network2" && network.name != "mumbai") {
     for (let i = 0; i < deployInfo[network.name].localToken.length; i++) {
       await ERC20.attach(deployInfo[network.name].localToken[i].address).mint(owner.address, totalSupply);
-      await (await ERC20.attach(deployInfo[network.name].localToken[i].address).approve(deployInfo[network.name].portal, totalSupply)).wait();
+      await (await ERC20.attach(deployInfo[network.name].localToken[i].address).approve(deployInfo[network.name].router, totalSupply)).wait();
 
       let coinToSynth = deployInfo[network.name].localToken[i].address;
       let amount = ethers.utils.parseEther("100000000.0");
       let chain2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK2);
-      let chain2address = chain2.address;
-      let hubChainName   = network.name.includes("network") ? 'network2' : 'mumbai';
-      let receiveSide    = deployInfo[hubChainName].synthesis;
+      let to = chain2.address;
+      let from = owner.address;
+      let hubChainName = network.name.includes("network") ? 'network2' : 'mumbai';
+      let receiveSide = deployInfo[hubChainName].synthesis;
       let oppositeBridge = deployInfo[hubChainName].bridge;
-      let chainID        = deployInfo[hubChainName].chainId;
-      tx = await Portal.attach(deployInfo[network.name].portal).synthesize(
+      let chainId = deployInfo[hubChainName].chainId;
+      tx = await Router.attach(deployInfo[network.name].router).tokenSynthesizeRequest(
         coinToSynth,
         amount,
-        chain2address,
-        // owner.address,
-        receiveSide,
-        oppositeBridge,
-        chainID,
+        from,
+        {
+          to: to,
+          receiveSide: receiveSide,
+          oppositeBridge: oppositeBridge,
+          chainId: chainId
+        },
         {
           gasLimit: '5000000'
         }

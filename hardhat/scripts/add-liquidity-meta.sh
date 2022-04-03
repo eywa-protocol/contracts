@@ -18,7 +18,7 @@ for net in ${nets//\,/ }
 done
 
 # # get LP from CC pools for deposit to gauge
-# for net in ${nets//\,/ }
-#   do
-#   npx hardhat run --no-compile ./scripts/meta_exchange/add-liquidity-crosschain-pool.js  --network ${net}
-# done
+for net in ${nets//\,/ }
+  do
+  npx hardhat run --no-compile ./scripts/meta_exchange/add-liquidity-crosschain-pool.js  --network ${net}
+done

@@ -27,8 +27,31 @@ async function main() {
     networkConfig[network.name].frontHelper = frontHelper.address;
     console.log(`FrontHelper address: ${frontHelper.address}`);
 
-    networkConfig[network.name].portal    = portal.address;
+    // deploy Curve Proxy
+    const CurveProxy = await ethers.getContractFactory('CurveProxy');
+    const curveProxy = await upgrades.deployProxy(CurveProxy, [
+        networkConfig[network.name].forwarder,
+        networkConfig[network.name].portal,
+        networkConfig[network.name].synthesis,
+        networkConfig[network.name].bridge
+    ], { initializer: 'initialize' });
+    await curveProxy.deployed()
+    console.log(`CurveProxy address: ${curveProxy.address}`);
+    // initial Curve proxy setup
+    await synthesis.setCurveProxy(curveProxy.address);
+
+
+
+    //Deploy Router
+    const _Router = await ethers.getContractFactory("Router");
+    const router = await _Router.deploy(portal.address, synthesis.address, curveProxy.address, ethers.constants.AddressZero /*local treasury*/);
+    await router.deployed();
+    console.log(`Router address: ${router.address}`);
+
+    networkConfig[network.name].portal = portal.address;
     networkConfig[network.name].synthesis = synthesis.address;
+    networkConfig[network.name].curveProxy = curveProxy.address
+    networkConfig[network.name].router = router.address;
 
     fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
         JSON.stringify(networkConfig, undefined, 2));

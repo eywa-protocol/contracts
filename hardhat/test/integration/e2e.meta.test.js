@@ -15,6 +15,10 @@ contract('CurveProxy', () => {
             PortalB = artifacts.require('Portal')
             PortalC = artifacts.require('Portal')
 
+            RouterA = artifacts.require('Router')
+            RouterB = artifacts.require('Router')
+            RouterC = artifacts.require('Router')
+
             CurveProxyA = artifacts.require('CurveProxy');
             CurveProxyB = artifacts.require('CurveProxy');
             CurveProxyC = artifacts.require('CurveProxy');
@@ -28,6 +32,10 @@ contract('CurveProxy', () => {
             CurveProxyA.setProvider(factoryProvider.web3Net1)
             CurveProxyB.setProvider(factoryProvider.web3Net2)
             CurveProxyC.setProvider(factoryProvider.web3Net3)
+
+            RouterA.setProvider(factoryProvider.web3Net1)
+            RouterB.setProvider(factoryProvider.web3Net2)
+            RouterC.setProvider(factoryProvider.web3Net3)
 
             ERC20A.setProvider(factoryProvider.web3Net1)
             ERC20B.setProvider(factoryProvider.web3Net2)
@@ -46,13 +54,15 @@ contract('CurveProxy', () => {
 
         it("Mint EUSD: network1 -> network2(hub)", async function () {
             selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
-                'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
+                'transitSynthBatchAddLiquidity3PoolMintEUSD((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
             )
 
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
             this.tokenA3 = await ERC20A.at(deployInfo["network1"].localToken[2].address)
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -65,17 +75,17 @@ contract('CurveProxy', () => {
                 chain2address: deployInfo["network2"].curveProxy,
                 receiveSide: deployInfo["network2"].curveProxy,
                 oppositeBridge: deployInfo["network2"].bridge,
-                chainID: deployInfo["network2"].chainId
+                chainId: deployInfo["network2"].chainId
             }
 
             const mintEUSDparams = {
-                add_c: deployInfo["network2"].crosschainPool[0].address,
+                addAtCrosschainPool: deployInfo["network2"].crosschainPool[0].address,
                 //add liquidity params
-                expected_min_mint_amount_c: 0,
+                expectedMinMintAmountC: 0,
                 //exchange params
-                lp_index: 0,
-                add_h: deployInfo["network2"].hubPool.address,
-                expected_min_mint_amount_h: 0,
+                lpIndex: 0,
+                addAtHubPool: deployInfo["network2"].hubPool.address,
+                expectedMinMintAmountH: 0,
                 to: userNet2,
                 initialBridge:deployInfo["network2"].bridge,
                 initialChainID:deployInfo["network2"].chainId
@@ -83,13 +93,13 @@ contract('CurveProxy', () => {
 
             const encodedTransitData = web3.eth.abi.encodeParameters(
                 ["address", "uint256", "uint256", "address", "uint256", "address","address","uint256"],
-                [mintEUSDparams.add_c,
-                mintEUSDparams.expected_min_mint_amount_c,
-                mintEUSDparams.lp_index,
+                [mintEUSDparams.addAtCrosschainPool,
+                mintEUSDparams.expectedMinMintAmountC,
+                mintEUSDparams.lpIndex,
                 /////
-                mintEUSDparams.add_h,
+                mintEUSDparams.addAtHubPool,
                 /////
-                mintEUSDparams.expected_min_mint_amount_h,
+                mintEUSDparams.expectedMinMintAmountH,
                 mintEUSDparams.to,
                 mintEUSDparams.initialBridge,
                 mintEUSDparams.initialChainID
@@ -105,18 +115,19 @@ contract('CurveProxy', () => {
                 approveMax: false
             })
 
-            await this.tokenA1.approve(this.portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+            await this.tokenA1.approve(this.routerA.address, totalSupply, { from: userNet1, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount + ".0")
             const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
 
-            await this.portalA.synthesize_batch_transit(
+            await this.routerA.batchSynthesizeRequestWithDataTransit(
                 tokensToSynth,
                 amounts,
-                synthParams,
+                userNet1,
                 selectorMintEUSD,
                 encodedTransitData,
+                synthParams,
                 permitParams,
                 { from: userNet1, gas: 1000_000 }
             )
@@ -128,13 +139,15 @@ contract('CurveProxy', () => {
 
         it("Mint EUSD: network3 -> network2(hub)", async function () {
             selectorMintEUSD = web3.eth.abi.encodeFunctionSignature(
-                'transit_synth_batch_add_liquidity_3pool_mint_eusd((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
+                'transitSynthBatchAddLiquidity3PoolMintEUSD((address,uint256,uint256,address,uint256,address,address,uint256),address[3],uint256[3],bytes32[3])'
             )
 
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
             this.tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
             this.tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
-            this.portalC = await PortalC.at(deployInfo["network3"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -147,17 +160,17 @@ contract('CurveProxy', () => {
                 chain2address: deployInfo["network2"].curveProxy,
                 receiveSide: deployInfo["network2"].curveProxy,
                 oppositeBridge: deployInfo["network2"].bridge,
-                chainID: deployInfo["network2"].chainId
+                chainId: deployInfo["network2"].chainId
             }
 
             const mintEUSDparams = {
-                add_c: deployInfo["network2"].crosschainPool[1].address,
+                addAtCrosschainPool: deployInfo["network2"].crosschainPool[1].address,
                 //add liquidity params
-                expected_min_mint_amount_c: 0,
+                expectedMinMintAmountC: 0,
                 //exchange params
-                lp_index: 1,
-                add_h: deployInfo["network2"].hubPool.address,
-                expected_min_mint_amount_h: 0,
+                lpIndex: 1,
+                addAtHubPool: deployInfo["network2"].hubPool.address,
+                expectedMinMintAmountH: 0,
                 to: userNet2,
                 initialBridge:deployInfo["network3"].bridge,
                 initialChainID:deployInfo["network3"].chainId
@@ -165,13 +178,13 @@ contract('CurveProxy', () => {
 
             const encodedTransitData = web3.eth.abi.encodeParameters(
                 ["address", "uint256", "uint256", "address", "uint256", "address","address","uint256"],
-                [mintEUSDparams.add_c,
-                mintEUSDparams.expected_min_mint_amount_c,
-                mintEUSDparams.lp_index,
+                [mintEUSDparams.addAtCrosschainPool,
+                mintEUSDparams.expectedMinMintAmountC,
+                mintEUSDparams.lpIndex,
                 /////
-                mintEUSDparams.add_h,
+                mintEUSDparams.addAtHubPool,
                 /////
-                mintEUSDparams.expected_min_mint_amount_h,
+                mintEUSDparams.expectedMinMintAmountH,
                 mintEUSDparams.to,
                 mintEUSDparams.initialBridge,
                 mintEUSDparams.initialChainID
@@ -187,18 +200,19 @@ contract('CurveProxy', () => {
                 approveMax: false
             })
 
-            await this.tokenC1.approve(this.portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
+            await this.tokenC1.approve(this.routerC.address, totalSupply, { from: userNet3, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount + ".0")
             const tokensToSynth = [this.tokenC1.address, this.tokenC2.address, this.tokenC3.address]
 
-            await this.portalC.synthesize_batch_transit(
+            await this.routerC.synthesizeBatchWithDataTransit(
                 tokensToSynth,
                 amounts,
-                synthParams,
+                userNet3,
                 selectorMintEUSD,
                 encodedTransitData,
+                synthParams,
                 permitParams,
                 { from: userNet3, gas: 1000_000 }
             )
@@ -210,7 +224,9 @@ contract('CurveProxy', () => {
 
         it("Mint EUSD: network2(hub) -> network2(hub)", async function () {
 
-            this.curveproxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -221,11 +237,11 @@ contract('CurveProxy', () => {
             const mintEUSDparams = {
                 add_c: deployInfo["network2"].localPool.address,
                 //add liquidity params
-                expected_min_mint_amount_c: 0,
+                expectedMinMintAmountC: 0,
                 //exchange params
-                lp_index: 2,
-                add_h: deployInfo["network2"].hubPool.address,
-                expected_min_mint_amount_h: 0,
+                lpIndex: 2,
+                addAtHubPool: deployInfo["network2"].hubPool.address,
+                expectedMinMintAmountH: 0,
                 to: userNet2,
                 initialBridge:deployInfo["network2"].bridge,
                 initialChainID:deployInfo["network2"].chainId
@@ -240,16 +256,17 @@ contract('CurveProxy', () => {
                 approveMax: false
             })
 
-            await this.tokenB1.approve(this.curveproxyB.address, 0, { from: userNet2, gas: 300_000 });
-            await this.tokenB1.approve(this.curveproxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
+            await this.tokenB1.approve(this.routerB.address, 0, { from: userNet2, gas: 300_000 });
+            await this.tokenB1.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 });
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1).toString();
             amounts[0] = ethers.utils.parseEther(testAmount + ".0")
             const tokensToTransfer = [this.tokenB1.address, this.tokenB2.address, this.tokenB3.address]
 
-            await this.curveproxyB.add_liquidity_3pool_mint_eusd(
+            await this.routerB.delegatedMintEusdRequestVia3pool(
                 mintEUSDparams,
                 permitParams,
+                userNet2,
                 tokensToTransfer,
                 amounts,
                 { from: userNet2, gas: 1000_000 }
@@ -263,7 +280,9 @@ contract('CurveProxy', () => {
 
         it("Redeem EUSD: network2(hub) -> network1", async function () {
 
-            this.curveProxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
             this.tokenA3 = await ERC20A.at(deployInfo["network1"].localToken[2].address)
@@ -275,19 +294,19 @@ contract('CurveProxy', () => {
             const unsynthParams = {
                 receiveSide: deployInfo["network1"].portal,
                 oppositeBridge: deployInfo["network1"].bridge,
-                chainID: deployInfo["network1"].chainId
+                chainId: deployInfo["network1"].chainId
             }
 
             const redeemEUSDParams = {
-                remove_c: deployInfo["network2"].crosschainPool[0].address,
+                removeAtCrosschainPool: deployInfo["network2"].crosschainPool[0].address,
                 x: 2,
-                expected_min_amount_c: 0,
+                expectedMinAmountC: 0,
                 //hub pool params
-                remove_h: deployInfo["network2"].hubPool.address,
+                removeAtHubPool: deployInfo["network2"].hubPool.address,
                 //amount to transfer
-                token_amount_h: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
+                tokenAmountH: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
                 y: 0,
-                expected_min_amount_h: 0,
+                expectedMinAmountH: 0,
                 //recipient address
                 to: userNet1
             }
@@ -301,15 +320,17 @@ contract('CurveProxy', () => {
                 approveMax: false
             }
 
-            await this.EUSD.approve(this.curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
-            await this.EUSD.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
+            await this.EUSD.approve(this.routerB.address, 0, { from: userNet2, gas: 300_000 });
+            await this.EUSD.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
-            await this.curveProxyB.redeem_eusd(
+            await this.routerB.redeemEusdRequest(
                 redeemEUSDParams,
                 permitParams,
+                this.EUSD.address,
+                userNet2,
                 unsynthParams.receiveSide,
                 unsynthParams.oppositeBridge,
-                unsynthParams.chainID,
+                unsynthParams.chainId,
                 { from: userNet2, gas: 1000_000 }
             )
 
@@ -318,7 +339,9 @@ contract('CurveProxy', () => {
         })
 
         it("Redeem EUSD: network2(hub) -> network3", async function () {
-            this.curveProxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
             this.tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
             this.tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
@@ -330,19 +353,19 @@ contract('CurveProxy', () => {
             const unsynthParams = {
                 receiveSide: deployInfo["network3"].portal,
                 oppositeBridge: deployInfo["network3"].bridge,
-                chainID: deployInfo["network3"].chainId
+                chainId: deployInfo["network3"].chainId
             }
 
             const redeemEUSDParams = {
-                remove_c: deployInfo["network2"].crosschainPool[1].address,
+                removeAtCrosschainPool: deployInfo["network2"].crosschainPool[1].address,
                 x: 2,
-                expected_min_amount_c: 0,
+                expectedMinAmountC: 0,
                 //hub pool params
-                remove_h: deployInfo["network2"].hubPool.address,
+                removeAtHubPool: deployInfo["network2"].hubPool.address,
                 //amount to transfer
-                token_amount_h: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
+                tokenAmountH: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
                 y: 1,
-                expected_min_amount_h: 0,
+                expectedMinAmountH: 0,
                 //recipient address
                 to: userNet3
             }
@@ -356,15 +379,17 @@ contract('CurveProxy', () => {
                 approveMax: false
             }
 
-            await this.EUSD.approve(this.curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
-            await this.EUSD.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
+            await this.EUSD.approve(this.routerB.address, 0, { from: userNet2, gas: 300_000 });
+            await this.EUSD.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
-            await this.curveProxyB.redeem_eusd(
+            await this.routerB.redeemEusdRequest(
                 redeemEUSDParams,
                 permitParams,
+                this.EUSD.address,
+                userNet2,
                 unsynthParams.receiveSide,
                 unsynthParams.oppositeBridge,
-                unsynthParams.chainID,
+                unsynthParams.chainId,
                 { from: userNet2, gas: 1000_000 }
             )
 
@@ -373,7 +398,9 @@ contract('CurveProxy', () => {
         })
 
         it("Redeem EUSD: network2(hub) -> network2(hub)", async function () {
-            this.curveProxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -385,7 +412,7 @@ contract('CurveProxy', () => {
             const unsynthParams = {
                 receiveSide: ethers.constants.AddressZero,
                 oppositeBridge: ethers.constants.AddressZero,
-                chainID: 0
+                chainId: 0
             }
 
             //unused in this case
@@ -398,28 +425,30 @@ contract('CurveProxy', () => {
             }
 
             const redeemEUSDParams = {
-                remove_c: deployInfo["network2"].localPool.address,
+                removeAtCrosschainPool: deployInfo["network2"].localPool.address,
                 x: 2,
-                expected_min_amount_c: 0,
+                expectedMinAmountC: 0,
                 //hub pool params
-                remove_h: deployInfo["network2"].hubPool.address,
+                removeAtHubPool: deployInfo["network2"].hubPool.address,
                 //amount to transfer
-                token_amount_h: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
+                tokenAmountH: ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0"), //test amount
                 y: 2,
-                expected_min_amount_h: 0,
+                expectedMinAmountH: 0,
                 //recipient address
                 to: userNet2
             }
 
-            await this.EUSD.approve(this.curveProxyB.address, 0, { from: userNet2, gas: 300_000 });
-            await this.EUSD.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 });
+            await this.EUSD.approve(this.routerB.address, 0, { from: userNet2, gas: 300_000 });
+            await this.EUSD.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
-            await this.curveProxyB.redeem_eusd(
+            await this.routerB.redeemEUSD(
                 redeemEUSDParams,
                 permitParams,
+                this.EUSD.address,
+                userNet2,
                 unsynthParams.receiveSide,
                 unsynthParams.oppositeBridge,
-                unsynthParams.chainID,
+                unsynthParams.chainId,
                 { from: userNet2, gas: 1000_000 }
             )
 
@@ -429,14 +458,16 @@ contract('CurveProxy', () => {
 
         it("Exchange: network1 -> network3", async function () {
             selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-                'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
+                'transiSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
             )
 
             this.curveProxyA = await CurveProxyA.at(deployInfo["network1"].curveProxy)
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
             this.tokenA3 = await ERC20A.at(deployInfo["network1"].localToken[2].address)
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
             this.tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
             this.tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
@@ -448,7 +479,7 @@ contract('CurveProxy', () => {
                 chain2address: deployInfo["network2"].curveProxy,
                 receiveSide: deployInfo["network2"].curveProxy,
                 oppositeBridge: deployInfo["network2"].bridge,
-                chainID: deployInfo["network2"].chainId
+                chainId: deployInfo["network2"].chainId
             }
 
             const metaExchangeParams = {
@@ -456,7 +487,7 @@ contract('CurveProxy', () => {
                 exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
                 remove: deployInfo["network2"].crosschainPool[1].address,         //remove pool address
                 //add liquidity params
-                expected_min_mint_amount: 0,
+                expectedMinMintAmount: 0,
                 //exchange params
                 i: 0,                                             //index value for the coin to send
                 j: 1,                                             //index value of the coin to receive
@@ -470,7 +501,7 @@ contract('CurveProxy', () => {
                 chain2address: deployInfo["network3"].portal,
                 receiveSide: deployInfo["network3"].portal,
                 oppositeBridge: deployInfo["network3"].bridge,
-                chainID: deployInfo["network3"].chainId,
+                chainId: deployInfo["network3"].chainId,
                 initialBridge:deployInfo["network1"].bridge,
                 initialChainID:deployInfo["network1"].chainId
             }
@@ -482,7 +513,7 @@ contract('CurveProxy', () => {
                 metaExchangeParams.exchange,
                 metaExchangeParams.remove,
                 /////
-                metaExchangeParams.expected_min_mint_amount,
+                metaExchangeParams.expectedMinMintAmount,
                 /////
                 metaExchangeParams.i,
                 metaExchangeParams.j,
@@ -496,7 +527,7 @@ contract('CurveProxy', () => {
                 metaExchangeParams.chain2address,
                 metaExchangeParams.receiveSide,
                 metaExchangeParams.oppositeBridge,
-                metaExchangeParams.chainID,
+                metaExchangeParams.chainId,
                 metaExchangeParams.initialBridge,
                 metaExchangeParams.initialChainID
                 ]
@@ -511,18 +542,19 @@ contract('CurveProxy', () => {
                 approveMax: false
             })
 
-            await this.tokenA1.approve(this.portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+            await this.tokenA1.approve(this.routerA.address, totalSupply, { from: userNet1, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
             const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
 
-            await this.portalA.synthesize_batch_transit(
+            await this.routerA.batchSynthesizeRequestWithDataTransit(
                 tokensToSynth,
                 amounts,
-                synthParams,
+                userNet1,
                 selectorMetaExchange,
                 encodedTransitData,
+                synthParams,
                 permitParams,
                 { from: userNet1, gas: 1000_000 }
             )
@@ -534,13 +566,15 @@ contract('CurveProxy', () => {
 
         it("Exchange: network3 -> network1", async function () {
             selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-                'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
+                'transiSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
             )
 
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
             this.tokenA3 = await ERC20A.at(deployInfo["network1"].localToken[2].address)
-            this.portalC = await PortalC.at(deployInfo["network3"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
             this.tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
             this.tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
@@ -552,7 +586,7 @@ contract('CurveProxy', () => {
                 chain2address: deployInfo["network2"].curveProxy,
                 receiveSide: deployInfo["network2"].curveProxy,
                 oppositeBridge: deployInfo["network2"].bridge,
-                chainID: deployInfo["network2"].chainId
+                chainId: deployInfo["network2"].chainId
             }
 
             const metaExchangeParams = {
@@ -560,7 +594,7 @@ contract('CurveProxy', () => {
                 exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
                 remove: deployInfo["network2"].crosschainPool[0].address,         //remove pool address
                 //add liquidity params
-                expected_min_mint_amount: 0,
+                expectedMinMintAmount: 0,
                 //exchange params
                 i: 1,                                             //index value for the coin to send
                 j: 0,                                             //index value of the coin to receive
@@ -574,7 +608,7 @@ contract('CurveProxy', () => {
                 chain2address: deployInfo["network1"].portal,
                 receiveSide: deployInfo["network1"].portal,
                 oppositeBridge: deployInfo["network1"].bridge,
-                chainID: deployInfo["network1"].chainId,
+                chainId: deployInfo["network1"].chainId,
                 initialBridge:deployInfo["network3"].bridge,
                 initialChainID:deployInfo["network3"].chainId
             }
@@ -595,7 +629,7 @@ contract('CurveProxy', () => {
                 metaExchangeParams.exchange,
                 metaExchangeParams.remove,
                 /////
-                metaExchangeParams.expected_min_mint_amount,
+                metaExchangeParams.expectedMinMintAmount,
                 /////
                 metaExchangeParams.i,
                 metaExchangeParams.j,
@@ -609,24 +643,25 @@ contract('CurveProxy', () => {
                 metaExchangeParams.chain2address,
                 metaExchangeParams.receiveSide,
                 metaExchangeParams.oppositeBridge,
-                metaExchangeParams.chainID,
+                metaExchangeParams.chainId,
                 metaExchangeParams.initialBridge,
                 metaExchangeParams.initialChainID
                 ]
             )
 
-            await this.tokenC1.approve(this.portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
+            await this.tokenC1.approve(this.routerC.address, totalSupply, { from: userNet3, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
             const tokensToSynth = [this.tokenC1.address, this.tokenC2.address, this.tokenC3.address]
 
-            await this.portalC.synthesize_batch_transit(
+            await this.routerC.batchSynthesizeRequestWithDataTransit(
                 tokensToSynth,
                 amounts,
-                synthParams,
+                userNet3,
                 selectorMetaExchange,
                 encodedTransitData,
+                synthParams,
                 permitParams,
                 { from: userNet3, gas: 1000_000 }
             )
@@ -644,7 +679,9 @@ contract('CurveProxy', () => {
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
-            this.curveProxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
 
             this.balanceA2 = (await this.tokenA2.balanceOf(userNet1))
 
@@ -653,7 +690,7 @@ contract('CurveProxy', () => {
                 exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
                 remove: deployInfo["network2"].crosschainPool[0].address,         //remove pool address
                 //add liquidity params
-                expected_min_mint_amount: 0,
+                expectedMinMintAmount: 0,
                 //exchange params
                 i: 2,                                             //index value for the coin to send
                 j: 0,                                             //index value of the coin to receive
@@ -667,7 +704,7 @@ contract('CurveProxy', () => {
                 chain2address: deployInfo["network1"].portal,
                 receiveSide: deployInfo["network1"].portal,
                 oppositeBridge: deployInfo["network1"].bridge,
-                chainID: deployInfo["network1"].chainId,
+                chainId: deployInfo["network1"].chainId,
                 initialBridge:deployInfo["network2"].bridge,
                 initialChainID:deployInfo["network2"].chainId
             }
@@ -681,15 +718,16 @@ contract('CurveProxy', () => {
                 approveMax: false
             })
 
-            await this.tokenB1.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 })
+            await this.tokenB1.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount + ".0")
             const tokens = [this.tokenB1.address, this.tokenB2.address, this.tokenB3.address]
 
-            await this.curveProxyB.meta_exchange(
+            await this.routerB.metaExchangeRequestVia3pool(
                 metaExchangeParams,
                 permitParams,
+                userNet2,
                 tokens,
                 amounts,
                 { from: userNet2, gas: 1000_000 }
@@ -705,7 +743,9 @@ contract('CurveProxy', () => {
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
-            this.curveProxyB = await CurveProxyB.at(deployInfo["network2"].curveProxy)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
 
             this.balanceC2 = (await this.tokenC2.balanceOf(userNet3))
 
@@ -714,7 +754,7 @@ contract('CurveProxy', () => {
                 exchange: deployInfo["network2"].hubPool.address,           //exchange pool address
                 remove: deployInfo["network2"].crosschainPool[1].address,   //remove pool address
                 //add liquidity params
-                expected_min_mint_amount: 0,
+                expectedMinMintAmount: 0,
                 //exchange params
                 i: 2,                                             //index value for the coin to send
                 j: 1,                                             //index value of the coin to receive
@@ -728,7 +768,7 @@ contract('CurveProxy', () => {
                 chain2address: deployInfo["network3"].portal,
                 receiveSide: deployInfo["network3"].portal,
                 oppositeBridge: deployInfo["network3"].bridge,
-                chainID: deployInfo["network3"].chainId,
+                chainId: deployInfo["network3"].chainId,
                 initialBridge:deployInfo["network2"].bridge,
                 initialChainID:deployInfo["network2"].chainId
             }
@@ -742,15 +782,16 @@ contract('CurveProxy', () => {
                 approveMax: false
             })
 
-            await this.tokenB1.approve(this.curveProxyB.address, totalSupply, { from: userNet2, gas: 300_000 })
+            await this.tokenB1.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount + ".0")
             const tokens = [this.tokenB1.address, this.tokenB2.address, this.tokenB3.address]
 
-            await this.curveProxyB.meta_exchange(
+            await this.routerB.metaExchangeRequestVia3pool(
                 metaExchangeParams,
                 permitParams,
+                userNet2,
                 tokens,
                 amounts,
                 { from: userNet2, gas: 1000_000 }
@@ -761,13 +802,15 @@ contract('CurveProxy', () => {
 
         it("Exchange: network1 -> network2(hub)", async function () {
             selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-                'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
+                'transiSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
             )
 
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
             this.tokenA3 = await ERC20A.at(deployInfo["network1"].localToken[2].address)
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -779,7 +822,7 @@ contract('CurveProxy', () => {
                 chain2address: deployInfo["network2"].curveProxy,
                 receiveSide: deployInfo["network2"].curveProxy,
                 oppositeBridge: deployInfo["network2"].bridge,
-                chainID: deployInfo["network2"].chainId
+                chainId: deployInfo["network2"].chainId
             }
 
             const metaExchangeParams = {
@@ -787,7 +830,7 @@ contract('CurveProxy', () => {
                 exchange: deployInfo["network2"].hubPool.address,         //exchange pool address
                 remove: deployInfo["network2"].localPool.address,         //remove pool address
                 //add liquidity params
-                expected_min_mint_amount: 0,
+                expectedMinMintAmount: 0,
                 //exchange params
                 i: 0,                                             //index value for the coin to send
                 j: 2,                                             //index value of the coin to receive
@@ -801,7 +844,7 @@ contract('CurveProxy', () => {
                 chain2address: ethers.constants.AddressZero,
                 receiveSide: ethers.constants.AddressZero,
                 oppositeBridge: ethers.constants.AddressZero,
-                chainID: 0,
+                chainId: 0,
                 initialBridge:deployInfo["network1"].bridge,
                 initialChainID:deployInfo["network1"].chainId
             }
@@ -822,7 +865,7 @@ contract('CurveProxy', () => {
                 metaExchangeParams.exchange,
                 metaExchangeParams.remove,
                 /////
-                metaExchangeParams.expected_min_mint_amount,
+                metaExchangeParams.expectedMinMintAmount,
                 /////
                 metaExchangeParams.i,
                 metaExchangeParams.j,
@@ -836,24 +879,25 @@ contract('CurveProxy', () => {
                 metaExchangeParams.chain2address,
                 metaExchangeParams.receiveSide,
                 metaExchangeParams.oppositeBridge,
-                metaExchangeParams.chainID,
+                metaExchangeParams.chainId,
                 metaExchangeParams.initialBridge,
                 metaExchangeParams.initialChainID
                 ]
             )
 
-            await this.tokenA1.approve(this.portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+            await this.tokenA1.approve(this.routerA.address, totalSupply, { from: userNet1, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
             const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
 
-            await this.portalA.synthesize_batch_transit(
+            await this.routerA.batchSynthesizeRequestWithDataTransit(
                 tokensToSynth,
                 amounts,
-                synthParams,
+                userNet1,
                 selectorMetaExchange,
                 encodedTransitData,
+                synthParams,
                 permitParams,
                 { from: userNet1, gas: 1000_000 }
             )
@@ -865,13 +909,15 @@ contract('CurveProxy', () => {
 
         it("Exchange: network3 -> network2(hub)", async function () {
             selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
-                'transit_synth_batch_meta_exchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
+                'transiSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
             )
 
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
             this.tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
             this.tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
-            this.portalA = await PortalA.at(deployInfo["network1"].portal)
+            this.routerA = await RouterA.at(deployInfo["network1"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.tokenB2 = await ERC20B.at(deployInfo["network2"].localToken[1].address)
             this.tokenB3 = await ERC20B.at(deployInfo["network2"].localToken[2].address)
@@ -883,7 +929,7 @@ contract('CurveProxy', () => {
                 chain2address: deployInfo["network2"].curveProxy,
                 receiveSide: deployInfo["network2"].curveProxy,
                 oppositeBridge: deployInfo["network2"].bridge,
-                chainID: deployInfo["network2"].chainId
+                chainId: deployInfo["network2"].chainId
             }
 
             const metaExchangeParams = {
@@ -891,7 +937,7 @@ contract('CurveProxy', () => {
                 exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
                 remove: deployInfo["network2"].localPool.address,         //remove pool address
                 //add liquidity params
-                expected_min_mint_amount: 0,
+                expectedMinMintAmount: 0,
                 //exchange params
                 i: 0,                                             //index value for the coin to send
                 j: 2,                                             //index value of the coin to receive
@@ -905,7 +951,7 @@ contract('CurveProxy', () => {
                 chain2address: ethers.constants.AddressZero,
                 receiveSide: ethers.constants.AddressZero,
                 oppositeBridge: ethers.constants.AddressZero,
-                chainID: 0,
+                chainId: 0,
                 initialBridge:deployInfo["network3"].bridge,
                 initialChainID:deployInfo["network3"].chainId
             }
@@ -926,7 +972,7 @@ contract('CurveProxy', () => {
                 metaExchangeParams.exchange,
                 metaExchangeParams.remove,
                 /////
-                metaExchangeParams.expected_min_mint_amount,
+                metaExchangeParams.expectedMinMintAmount,
                 /////
                 metaExchangeParams.i,
                 metaExchangeParams.j,
@@ -940,24 +986,25 @@ contract('CurveProxy', () => {
                 metaExchangeParams.chain2address,
                 metaExchangeParams.receiveSide,
                 metaExchangeParams.oppositeBridge,
-                metaExchangeParams.chainID,
+                metaExchangeParams.chainId,
                 metaExchangeParams.initialBridge,
                 metaExchangeParams.initialChainID
                 ]
             )
 
-            await this.tokenA1.approve(this.portalA.address, totalSupply, { from: userNet1, gas: 300_000 })
+            await this.tokenA1.approve(this.routerA.address, totalSupply, { from: userNet1, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
             amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
             const tokensToSynth = [this.tokenA1.address, this.tokenA2.address, this.tokenA3.address]
 
-            await this.portalA.synthesize_batch_transit(
+            await this.routerA.batchSynthesizeRequestWithDataTransit(
                 tokensToSynth,
                 amounts,
-                synthParams,
+                userNet1,
                 selectorMetaExchange,
                 encodedTransitData,
+                synthParams,
                 permitParams,
                 { from: userNet1, gas: 1000_000 }
             )

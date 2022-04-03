@@ -2,11 +2,8 @@
 pragma solidity 0.8.10;
 
 abstract contract BridgeCore {
-    address public _listNode;
-
     mapping(address => uint256) internal nonces;
     mapping(bytes32 => mapping(bytes32 => mapping(bytes32 => bool))) internal contractBind;
-    mapping(bytes32 => bool) private is_in;
 
     event OracleRequest(
         string requestType,
@@ -15,7 +12,7 @@ abstract contract BridgeCore {
         bytes selector,
         address receiveSide,
         address oppositeBridge,
-        uint256 chainid
+        uint256 chainId
     );
 
     event OracleRequestSolana(
@@ -24,7 +21,7 @@ abstract contract BridgeCore {
         bytes32 requestId,
         bytes selector,
         bytes32 oppositeBridge,
-        uint256 chainid
+        uint256 chainId
     );
 
     event ReceiveRequest(bytes32 reqId, address receiveSide, bytes32 bridgeFrom);
@@ -42,13 +39,10 @@ abstract contract BridgeCore {
     function addContractBind(
         bytes32 from,
         bytes32 oppositeBridge,
-        bytes32 to
-    ) external virtual /**  onlyOwner*/
-    {
+        bytes32 to 
+    ) external /**  onlyOwner TODO:(need to use DAO/Owner for this!)*/ {
         require(to != "", "Bridge: invalid 'to' address");
         require(from != "", "Bridge: invalid 'from' address");
-        // TODO
-        // to prevent malicious behaviour like switching between older and newer contracts (need to use DAO/Owner for this!)
         contractBind[from][oppositeBridge][to] = true;
     }
 

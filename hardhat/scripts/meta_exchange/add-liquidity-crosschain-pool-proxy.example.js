@@ -23,7 +23,7 @@ async function main() {
   let synthParams, addLiquidityParams;
   let coinsToSynth = [];
   selector = web3.eth.abi.encodeFunctionSignature(
-    'transit_synth_batch_add_liquidity_3pool((address,address,uint256),address[3],uint256[3],bytes32[3])'
+    'transitSynthBatchAddLiquidity3Pool((address,address,uint256),address[3],uint256[3],bytes32[3])'
   )
 
   if (network.name == "network1" || network.name == "rinkeby") {
@@ -38,7 +38,7 @@ async function main() {
 
     //add liquidity amount params
     const amountsEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"));
-    const expected_min_mint_amount = ethers.utils.parseEther("100000000.0");
+    const expectedMinMintAmount = ethers.utils.parseEther("100000000.0");
 
     //synth params
     switch (network.name) {
@@ -47,12 +47,12 @@ async function main() {
           chain2address: deployInfo["network2"].curveProxy,
           receiveSide: deployInfo["network2"].curveProxy,
           oppositeBridge: deployInfo["network2"].bridge,
-          chainID: deployInfo["network2"].chainId
+          chainId: deployInfo["network2"].chainId
         }
         addLiquidityParams = {
           add: deployInfo["network2"].crosschainPool[0].address,
           to: owner.address,
-          expected_min_mint_amount: expected_min_mint_amount
+          expectedMinMintAmount: expectedMinMintAmount
         }
         break;
       case "rinkeby":
@@ -60,12 +60,12 @@ async function main() {
           chain2address: deployInfo["mumbai"].curveProxy,
           receiveSide: deployInfo["mumbai"].curveProxy,
           oppositeBridge: deployInfo["mumbai"].bridge,
-          chainID: deployInfo["mumbai"].chainId
+          chainId: deployInfo["mumbai"].chainId
         }
         addLiquidityParams = {
           add: deployInfo["mumbai"].crosschainPool,
           to: owner.address,
-          expected_min_mint_amount: expected_min_mint_amount
+          expectedMinMintAmount: expectedMinMintAmount
         }
         break;
     }
@@ -74,11 +74,11 @@ async function main() {
       ['address', 'address', 'uint256'],
       [addLiquidityParams.add,
       addLiquidityParams.to,
-      addLiquidityParams.expected_min_mint_amount
+      addLiquidityParams.expectedMinMintAmount
       ]
     )
 
-    tx = await Portal.attach(deployInfo[network.name].portal).synthesize_batch_transit(
+    tx = await Portal.attach(deployInfo[network.name].portal).synthesizeBatchWithDataTransit(
       coinsToSynth,
       amountsEth,
       synthParams,
@@ -89,7 +89,7 @@ async function main() {
       }
     );
     await tx.wait();
-    console.log("synthesize_batch_transit", tx.hash);
+    console.log("synthesizeBatchWithDataTransit", tx.hash);
     //=================================================================================
   }
 

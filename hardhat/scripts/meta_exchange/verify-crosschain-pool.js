@@ -1,4 +1,4 @@
-// npx hardhat run scripts/meta_exchange/verify-crosschain-pool.js --network rinkeby
+// npx hardhat run scripts/metaExchange/verify-crosschain-pool.js --network rinkeby
 
 // verify CurveProxy
 let networkConfig = require('../../helper-hardhat-config.json')

@@ -98,7 +98,7 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
 
         bytes memory payload = Merkle.prove(_txMerkleProve, Block.transactionsRoot(_blockHeader));
         (uint32 txNewEpochNum, bytes memory txNewKey, uint8 txNewEpochParticipantsNum) = Block.epochRequestTx(payload);
-        
+
         require(epochNum + 1 == txNewEpochNum, "wrong epoch number");
         Bls.E2Point memory newKey = Bls.decodeE2Point(txNewKey);
         epochKey = newKey;
@@ -196,7 +196,7 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         );
         emit ReceiveRequest(reqId, receiveSide, bridgeFrom);
     }
-    
+
     /**
      * @dev Request updating epoch. Only DAO may call it.
      * @param resetEpoch true to reset the epoch to zero so anyone can set up a new one, without any check,
