@@ -1,6 +1,7 @@
 let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
 const { checkoutProvider, timeout } = require("../../utils/helper");
 const { ethers } = require("hardhat");
+const { userNet2 } = require("./e2e.test");
 
 contract('CurveProxy', () => {
 
@@ -46,12 +47,27 @@ contract('CurveProxy', () => {
             userNet2 = (await PortalB.web3.eth.getAccounts())[0];
             userNet3 = (await PortalC.web3.eth.getAccounts())[0];
 
+            synthesisA = await SynthesisA.at(deployInfo["network1"].synthesis)
+            synthesisB = await SynthesisB.at(deployInfo["network2"].synthesis)
+            synthesisC = await SynthesisC.at(deployInfo["network3"].synthesis)
+
+            SynthA = artifacts.require('SyntERC20')
+            SynthB = artifacts.require('SyntERC20')
+            SynthC = artifacts.require('SyntERC20')
+
+            SynthA.setProvider(factoryProvider.web3Net1)
+            SynthB.setProvider(factoryProvider.web3Net2)
+            SynthC.setProvider(factoryProvider.web3Net3)
+
         })
 
 
         it("Synthesize: network1 -> network2(hub)", async function () {
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.routerA = await RouterA.at(deployInfo["network1"].router)
+            const synthAddress = await synthesisB.getRepresentation(addressToBytes32(tokenA1.address))
+            this.Synth = await SynthB.at(synthAddress)
+            const oldBalance = this.Synth.balanceOf(userNet2)
 
             // const testAmount = Math.floor((Math.random() * 100) + 1);
             const amount = ethers.utils.parseEther("0.5")
@@ -108,7 +124,9 @@ contract('CurveProxy', () => {
                 delegatedCallReceipt,
                 { from: userNet1, gas: 1000_000 }
             )
-
+            
+            const newBalance = this.Synth.balanceOf(userNet2)
+            assert(oldBalance.lt(newBalance))    
             // await this.routerA.tokenSynthesizeRequest(
             //     tokenToSynth,
             //     amount,
@@ -128,6 +146,10 @@ contract('CurveProxy', () => {
 
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.routerA = await RouterA.at(deployInfo["network1"].router)
+            const synthAddress = await synthesisC.getRepresentation(addressToBytes32(tokenA1.address))
+            this.Synth = await SynthC.at(synthAddress)
+            const oldBalance = this.Synth.balanceOf(userNet3)
+
             const amount = ethers.utils.parseEther("0.5")
             const executionPrice = ethers.utils.parseEther("0.1")
             const tokenToSynth = this.tokenA1.address
@@ -180,12 +202,18 @@ contract('CurveProxy', () => {
                 delegatedCallReceipt,
                 { from: userNet1, gas: 1000_000 }
             )
+            const newBalance = this.Synth.balanceOf(userNet3)
+            assert(oldBalance.lt(newBalance))
         })
 
         it("Synthesize: network2 -> network1", async function () {
 
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.routerB = await RouterB.at(deployInfo["network2"].router)
+            const synthAddress = await synthesisA.getRepresentation(addressToBytes32(tokenB1.address))
+            this.Synth = await SynthA.at(synthAddress)
+            const oldBalance = this.Synth.balanceOf(userNet1)
+
             const amount = ethers.utils.parseEther("0.5")
             const executionPrice = ethers.utils.parseEther("0.1")
             const tokenToSynth = this.tokenB1.address
@@ -238,12 +266,18 @@ contract('CurveProxy', () => {
                 delegatedCallReceipt,
                 { from: userNet2, gas: 1000_000 }
             )
+            const newBalance = this.Synth.balanceOf(userNet1)
+            assert(oldBalance.lt(newBalance))
         })
 
         it("Synthesize: network2 -> network3", async function () {
 
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.routerB = await RouterB.at(deployInfo["network2"].router)
+            const synthAddress = await synthesisC.getRepresentation(addressToBytes32(tokenB1.address))
+            this.Synth = await SynthC.at(synthAddress)
+            const oldBalance = this.Synth.balanceOf(userNet3)
+
             const amount = ethers.utils.parseEther("0.5")
             const executionPrice = ethers.utils.parseEther("0.1")
             const tokenToSynth = this.tokenB1.address
@@ -296,12 +330,18 @@ contract('CurveProxy', () => {
                 delegatedCallReceipt,
                 { from: userNet2, gas: 1000_000 }
             )
+            const newBalance = this.Synth.balanceOf(userNet3)
+            assert(oldBalance.lt(newBalance))
         })
 
         it("Synthesize: network3 -> network1", async function () {
 
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
             this.routerC = await RouterC.at(deployInfo["network3"].router)
+            const synthAddress = await synthesisA.getRepresentation(addressToBytes32(tokenC1.address))
+            this.Synth = await SynthA.at(synthAddress)
+            const oldBalance = this.Synth.balanceOf(userNet1)
+
             const amount = ethers.utils.parseEther("0.5")
             const executionPrice = ethers.utils.parseEther("0.1")
             const tokenToSynth = this.tokenC1.address
@@ -354,12 +394,17 @@ contract('CurveProxy', () => {
                 delegatedCallReceipt,
                 { from: userNet3, gas: 1000_000 }
             )
+            const newBalance = this.Synth.balanceOf(userNet1)
+            assert(oldBalance.lt(newBalance))
         })
 
         it("Synthesize: network3 -> network2", async function () {
-
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
             this.routerC = await RouterC.at(deployInfo["network3"].router)
+            const synthAddress = await synthesisB.getRepresentation(addressToBytes32(tokenC1.address))
+            this.Synth = await SynthB.at(synthAddress)
+            const oldBalance = this.Synth.balanceOf(userNet2)
+            
             const amount = ethers.utils.parseEther("0.5")
             const executionPrice = ethers.utils.parseEther("0.1")
             const tokenToSynth = this.tokenC1.address
@@ -413,6 +458,8 @@ contract('CurveProxy', () => {
                 delegatedCallReceipt,
                 { from: userNet3, gas: 1000_000 }
             )
+            const newBalance = this.Synth.balanceOf(userNet2)
+            assert(oldBalance.lt(newBalance))
         })
     })
 })
