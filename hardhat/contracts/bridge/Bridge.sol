@@ -227,4 +227,14 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
     function setTrustedForwarder(address _forwarder) external onlyOwner {
         return _setTrustedForwarder(_forwarder);
     }
+
+    function addContractBind(
+        bytes32 from,
+        bytes32 oppositeBridge,
+        bytes32 to
+    ) external override onlyOwner {
+        require(to != "", "Bridge: invalid 'to' address");
+        require(from != "", "Bridge: invalid 'from' address");
+        contractBind[from][oppositeBridge][to] = true;
+    }
 }

@@ -84,6 +84,7 @@ npx hardhat balanceDeployer --network ${net}
         EYWA_TOKEN_ADDRESS=$(getField ${net}.eywa) \
         TEST_TOKEN_ADDRESS=$(getField ${net}.token[0].address) \
         FORWARDER_ADDRESS=$(getField ${net}.forwarder) \
+        ROUTER_ADDRESS=$(getField ${net}.router) \
       && echo $(getField ${net}.env_file[0])
 
       ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[1]) \
@@ -95,6 +96,7 @@ npx hardhat balanceDeployer --network ${net}
         PAYMASTER_$(getField ${net}.n)=$(getField ${net}.paymaster) \
         EYWA_TOKEN_$(getField ${net}.n)=$(getField ${net}.eywa) \
         FORWARDER_$(getField ${net}.n)=$(getField ${net}.forwarder) \
+        ROUTER_$(getField ${net}.n)=$(getField ${net}.router) \
       && echo $(getField ${net}.env_file[1])
 
       ./scripts/env2json_adapter.sh $(getField ${net}.env_file[0])

@@ -40,7 +40,7 @@ abstract contract BridgeCore {
         bytes32 from,
         bytes32 oppositeBridge,
         bytes32 to 
-    ) external /**  onlyOwner TODO:(need to use DAO/Owner for this!)*/ {
+    ) external virtual {
         require(to != "", "Bridge: invalid 'to' address");
         require(from != "", "Bridge: invalid 'from' address");
         contractBind[from][oppositeBridge][to] = true;
