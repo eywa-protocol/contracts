@@ -43,8 +43,7 @@ abstract contract BridgeCore {
         bytes32 from,
         bytes32 oppositeBridge,
         bytes32 to
-    ) external virtual /**  onlyOwner*/
-    {
+    ) external virtual {
         require(to != "", "Bridge: invalid 'to' address");
         require(from != "", "Bridge: invalid 'from' address");
         // TODO

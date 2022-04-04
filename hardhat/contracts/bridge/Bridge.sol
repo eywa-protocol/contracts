@@ -61,6 +61,18 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         _;
     }
 
+    function addContractBind(
+        bytes32 from,
+        bytes32 oppositeBridge,
+        bytes32 to
+    ) external override onlyOwner {
+        require(to != "", "Bridge: invalid 'to' address");
+        require(from != "", "Bridge: invalid 'from' address");
+        // TODO
+        // to prevent malicious behaviour like switching between older and newer contracts (need to use DAO/Owner for this!)
+        contractBind[from][oppositeBridge][to] = true;
+    }
+
     function getEpoch()
         public
         view
