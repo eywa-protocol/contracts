@@ -58,6 +58,8 @@ contract('Router', () => {
             SynthB.setProvider(factoryProvider.web3Net2)
             SynthC.setProvider(factoryProvider.web3Net3)
 
+            amount = ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0")
+
         })
 
         it("Unsynthsize: network2 -> network3 ", async function () {
@@ -67,47 +69,16 @@ contract('Router', () => {
             const synthAddress = await synthesisB.getRepresentation(addressToBytes32(this.tokenA1.address))
             this.synthB = await SynthB.at(synthAddress)
             this.oldBalance = await this.synthB.balanceOf(userNet2)
-            const amount = ethers.utils.parseEther("0.5")
-            const executionPrice = ethers.utils.parseEther("0.1")
-            const amountToUnsynth = ethers.utils.parseEther("0.4")
             const tokenToSynth = this.tokenA1.address
             const receiveSideB = deployInfo["network2"].synthesis
             const oppositeBridge = deployInfo["network2"].bridge
-            const chainIdA = deployInfo["network1"].chainId
             const chainIdB = deployInfo["network2"].chainId
-            const deadline = "10000000000000"
 
             await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
             await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
             await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
 
-            const workerMsgHash = ethers.utils.solidityKeccak256(
-                ['uint256', 'address', 'uint256', 'address', 'address', 'uint256'],
-                [chainIdA, tokenToSynth, executionPrice, userNet1, userNet1, deadline]
-            );
-
-            signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
-
-            const workerSignature = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(workerMsgHash)));
-
-            const senderMsgHash = web3.utils.soliditySha3(
-                { type: 'uint8', value: workerSignature.v },
-                { type: 'bytes32', value: workerSignature.r },
-                { type: 'bytes32', value: workerSignature.s }
-
-            );
-
-            const senderSignature = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(senderMsgHash)));
-
-            const delegatedCallReceipt = {
-                executionPrice: executionPrice,
-                deadline: deadline,
-                v: [workerSignature.v, senderSignature.v],
-                r: [workerSignature.r, senderSignature.r],
-                s: [workerSignature.s, senderSignature.s]
-            }
-
-            await this.routerA.delegatedTokenSynthesizeRequest(
+            await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet1,
@@ -117,7 +88,6 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
                 },
-                delegatedCallReceipt,
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -126,7 +96,7 @@ contract('Router', () => {
 
             await this.routerB.unsynthesizeRequest(
                 this.synthB.address,
-                amountToUnsynth,
+                amount,
                 userNet2,
                 userNet3,
                 deployInfo["network3"].synthesis,
@@ -146,47 +116,16 @@ contract('Router', () => {
             const synthAddress = await synthesisB.getRepresentation(addressToBytes32(this.tokenA1.address))
             this.synthB = await SynthB.at(synthAddress)
             this.oldBalance = await this.synthB.balanceOf(userNet2)
-            const amount = ethers.utils.parseEther("0.5")
-            const executionPrice = ethers.utils.parseEther("0.1")
-            const amountToUnsynth = ethers.utils.parseEther("0.4")
             const tokenToSynth = this.tokenA1.address
             const receiveSideB = deployInfo["network2"].synthesis
             const oppositeBridge = deployInfo["network2"].bridge
-            const chainIdA = deployInfo["network1"].chainId
             const chainIdB = deployInfo["network2"].chainId
-            const deadline = "10000000000000"
 
             await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
             await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
             await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
 
-            const workerMsgHash = ethers.utils.solidityKeccak256(
-                ['uint256', 'address', 'uint256', 'address', 'address', 'uint256'],
-                [chainIdA, tokenToSynth, executionPrice, userNet1, userNet1, deadline]
-            );
-
-            signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
-
-            const workerSignature = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(workerMsgHash)));
-
-            const senderMsgHash = web3.utils.soliditySha3(
-                { type: 'uint8', value: workerSignature.v },
-                { type: 'bytes32', value: workerSignature.r },
-                { type: 'bytes32', value: workerSignature.s }
-
-            );
-
-            const senderSignature = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(senderMsgHash)));
-
-            const delegatedCallReceipt = {
-                executionPrice: executionPrice,
-                deadline: deadline,
-                v: [workerSignature.v, senderSignature.v],
-                r: [workerSignature.r, senderSignature.r],
-                s: [workerSignature.s, senderSignature.s]
-            }
-
-            await this.routerA.delegatedTokenSynthesizeRequest(
+            await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet1,
@@ -196,7 +135,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
                 },
-                delegatedCallReceipt,
+                
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -205,7 +144,7 @@ contract('Router', () => {
 
             await this.routerB.unsynthesizeRequest(
                 this.synthB.address,
-                amountToUnsynth,
+                amount,
                 userNet2,
                 userNet1,
                 deployInfo["network1"].synthesis,
@@ -225,45 +164,16 @@ contract('Router', () => {
             const synthAddress = await synthesisA.getRepresentation(addressToBytes32(this.tokenB1.address))
             this.synthA = await SynthA.at(synthAddress)
             const oldBalance = await this.synthA.balanceOf(userNet1)
-            const amount = ethers.utils.parseEther("0.5")
-            const executionPrice = ethers.utils.parseEther("0.1")
-            const amountToUnsynth = ethers.utils.parseEther("0.4")
             const tokenToSynth = this.tokenB1.address
             const receiveSideA = deployInfo["network1"].synthesis
             const oppositeBridge = deployInfo["network1"].bridge
-            const chainIdB = deployInfo["network2"].chainId
             const chainIdA = deployInfo["network1"].chainId
-            const deadline = "10000000000000"
 
             await this.tokenB1.mint(userNet2, amount, { from: userNet2, gas: 300_000 })
             await this.tokenB1.approve(this.routerB.address, amount, { from: userNet2, gas: 300_000 })
             await this.routerB.setTrustedWorker(userNet2, { from: userNet2, gas: 300_000 })
 
-            const workerMsgHash = ethers.utils.solidityKeccak256(
-                ['uint256', 'address', 'uint256', 'address', 'address', 'uint256'],
-                [chainIdB, tokenToSynth, executionPrice, userNet2, userNet2, deadline]
-            );
-
-            signerUserNet2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK2)
-            const workerSignature = ethers.utils.splitSignature(await signerUserNet2.signMessage(ethers.utils.arrayify(workerMsgHash)));
-
-            const senderMsgHash = web3.utils.soliditySha3(
-                { type: 'uint8', value: workerSignature.v },
-                { type: 'bytes32', value: workerSignature.r },
-                { type: 'bytes32', value: workerSignature.s }
-            );
-
-            const senderSignature = ethers.utils.splitSignature(await signerUserNet2.signMessage(ethers.utils.arrayify(senderMsgHash)));
-
-            const delegatedCallReceipt = {
-                executionPrice: executionPrice,
-                deadline: deadline,
-                v: [workerSignature.v, senderSignature.v],
-                r: [workerSignature.r, senderSignature.r],
-                s: [workerSignature.s, senderSignature.s]
-            }
-
-            await this.routerB.delegatedTokenSynthesizeRequest(
+            await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet2,
@@ -273,7 +183,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
                 },
-                delegatedCallReceipt,
+                
                 { from: userNet2, gas: 1000_000 }
             )
 
@@ -282,7 +192,7 @@ contract('Router', () => {
 
             await this.routerA.unsynthesizeRequest(
                 this.synthA.address,
-                amountToUnsynth,
+                amount,
                 userNet1,
                 userNet2,
                 deployInfo["network2"].synthesis,
@@ -302,45 +212,16 @@ contract('Router', () => {
             const synthAddress = await synthesisA.getRepresentation(addressToBytes32(this.tokenB1.address))
             this.synthA = await SynthA.at(synthAddress)
             const oldBalance = await this.synthA.balanceOf(userNet1)
-            const amount = ethers.utils.parseEther("0.5")
-            const executionPrice = ethers.utils.parseEther("0.1")
-            const amountToUnsynth = ethers.utils.parseEther("0.4")
             const tokenToSynth = this.tokenB1.address
             const receiveSideA = deployInfo["network1"].synthesis
             const oppositeBridge = deployInfo["network1"].bridge
-            const chainIdB = deployInfo["network2"].chainId
             const chainIdA = deployInfo["network1"].chainId
-            const deadline = "10000000000000"
 
             await this.tokenB1.mint(userNet2, amount, { from: userNet2, gas: 300_000 })
             await this.tokenB1.approve(this.routerB.address, amount, { from: userNet2, gas: 300_000 })
             await this.routerB.setTrustedWorker(userNet2, { from: userNet2, gas: 300_000 })
 
-            const workerMsgHash = ethers.utils.solidityKeccak256(
-                ['uint256', 'address', 'uint256', 'address', 'address', 'uint256'],
-                [chainIdB, tokenToSynth, executionPrice, userNet2, userNet2, deadline]
-            );
-
-            signerUserNet2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK2)
-            const workerSignature = ethers.utils.splitSignature(await signerUserNet2.signMessage(ethers.utils.arrayify(workerMsgHash)));
-
-            const senderMsgHash = web3.utils.soliditySha3(
-                { type: 'uint8', value: workerSignature.v },
-                { type: 'bytes32', value: workerSignature.r },
-                { type: 'bytes32', value: workerSignature.s }
-            );
-
-            const senderSignature = ethers.utils.splitSignature(await signerUserNet2.signMessage(ethers.utils.arrayify(senderMsgHash)));
-
-            const delegatedCallReceipt = {
-                executionPrice: executionPrice,
-                deadline: deadline,
-                v: [workerSignature.v, senderSignature.v],
-                r: [workerSignature.r, senderSignature.r],
-                s: [workerSignature.s, senderSignature.s]
-            }
-
-            await this.routerB.delegatedTokenSynthesizeRequest(
+            await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet2,
@@ -350,7 +231,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
                 },
-                delegatedCallReceipt,
+                
                 { from: userNet2, gas: 1000_000 }
             )
             
@@ -359,7 +240,7 @@ contract('Router', () => {
 
             await this.routerA.unsynthesizeRequest(
                 this.synthA.address,
-                amountToUnsynth,
+                amount,
                 userNet1,
                 userNet3,
                 deployInfo["network3"].synthesis,
@@ -380,46 +261,16 @@ contract('Router', () => {
             const synthAddress = await synthesisC.getRepresentation(addressToBytes32(this.tokenA1.address))
             this.synthC = await SynthC.at(synthAddress)
             const oldBalance = await this.synthC.balanceOf(userNet3)
-            const amount = ethers.utils.parseEther("0.5")
-            const executionPrice = ethers.utils.parseEther("0.1")
-            const amountToUnsynth = ethers.utils.parseEther("0.4")
             const tokenToSynth = this.tokenA1.address
             const receiveSideC = deployInfo["network3"].synthesis
             const oppositeBridge = deployInfo["network3"].bridge
-            const chainIdA = deployInfo["network1"].chainId
             const chainIdC = deployInfo["network3"].chainId
-            const deadline = "10000000000000"
 
             await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
             await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
             await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
 
-            const workerMsgHash = ethers.utils.solidityKeccak256(
-                ['uint256', 'address', 'uint256', 'address', 'address', 'uint256'],
-                [chainIdA, tokenToSynth, executionPrice, userNet1, userNet1, deadline]
-            );
-
-            signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
-            const workerSignature = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(workerMsgHash)));
-
-            const senderMsgHash = web3.utils.soliditySha3(
-                { type: 'uint8', value: workerSignature.v },
-                { type: 'bytes32', value: workerSignature.r },
-                { type: 'bytes32', value: workerSignature.s }
-
-            );
-
-            const senderSignature = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(senderMsgHash)));
-
-            const delegatedCallReceipt = {
-                executionPrice: executionPrice,
-                deadline: deadline,
-                v: [workerSignature.v, senderSignature.v],
-                r: [workerSignature.r, senderSignature.r],
-                s: [workerSignature.s, senderSignature.s]
-            }
-
-            await this.routerA.delegatedTokenSynthesizeRequest(
+            await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet1,
@@ -429,7 +280,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
                 },
-                delegatedCallReceipt,
+                
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -438,7 +289,7 @@ contract('Router', () => {
 
             await this.routerC.unsynthesizeRequest(
                 this.synthC.address,
-                amountToUnsynth,
+                amount,
                 userNet3,
                 userNet2,
                 deployInfo["network2"].synthesis,
@@ -459,46 +310,16 @@ contract('Router', () => {
             const synthAddress = await synthesisC.getRepresentation(addressToBytes32(this.tokenA1.address))
             this.synthC = await SynthC.at(synthAddress)
             const oldBalance = await this.synthC.balanceOf(userNet3)
-            const amount = ethers.utils.parseEther("0.5")
-            const executionPrice = ethers.utils.parseEther("0.1")
-            const amountToUnsynth = ethers.utils.parseEther("0.4")
             const tokenToSynth = this.tokenA1.address
             const receiveSideC = deployInfo["network3"].synthesis
             const oppositeBridge = deployInfo["network3"].bridge
-            const chainIdA = deployInfo["network1"].chainId
             const chainIdC = deployInfo["network3"].chainId
-            const deadline = "10000000000000"
 
             await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
             await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
             await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
 
-            const workerMsgHash = ethers.utils.solidityKeccak256(
-                ['uint256', 'address', 'uint256', 'address', 'address', 'uint256'],
-                [chainIdA, tokenToSynth, executionPrice, userNet1, userNet1, deadline]
-            );
-
-            signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
-            const workerSignature = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(workerMsgHash)));
-
-            const senderMsgHash = web3.utils.soliditySha3(
-                { type: 'uint8', value: workerSignature.v },
-                { type: 'bytes32', value: workerSignature.r },
-                { type: 'bytes32', value: workerSignature.s }
-
-            );
-
-            const senderSignature = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(senderMsgHash)));
-
-            const delegatedCallReceipt = {
-                executionPrice: executionPrice,
-                deadline: deadline,
-                v: [workerSignature.v, senderSignature.v],
-                r: [workerSignature.r, senderSignature.r],
-                s: [workerSignature.s, senderSignature.s]
-            }
-
-            await this.routerA.delegatedTokenSynthesizeRequest(
+            await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet1,
@@ -508,7 +329,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
                 },
-                delegatedCallReceipt,
+                
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -517,7 +338,7 @@ contract('Router', () => {
 
             await this.routerC.unsynthesizeRequest(
                 this.synthC.address,
-                amountToUnsynth,
+                amount,
                 userNet3,
                 userNet1,
                 deployInfo["network1"].synthesis,
