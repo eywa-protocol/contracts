@@ -7,6 +7,7 @@ import "./IBridge.sol";
 import "./RelayRecipient.sol";
 import "./SolanaSerialize.sol";
 import "../utils/Typecast.sol";
+import "./RequestIdLib.sol";
 
 //TODO: relocate
 interface IERC20 {
@@ -146,7 +147,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         registerNewBalance(_token, _amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_from);
-        txID = IBridge(bridge).prepareRqId(
+        txID = RequestIdLib.prepareRqId(
             castToBytes32(_synthParams.oppositeBridge),
             _synthParams.chainId,
             castToBytes32(_synthParams.receiveSide),
@@ -249,7 +250,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         uint64 solAmount = solAmount64(_amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_from);
-        txID = IBridge(bridge).prepareRqId(
+        txID = RequestIdLib.prepareRqId(
             _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
@@ -390,7 +391,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         );
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-        bytes32 txID = IBridge(bridge).prepareRqId(
+        bytes32 txID = RequestIdLib.prepareRqId(
             castToBytes32(_oppositeBridge),
             _chainId,
             castToBytes32(_receiveSide),
@@ -422,7 +423,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         unsynthesizeStates[_txID] = UnsynthesizeState.RevertRequest;
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-        bytes32 txID = IBridge(bridge).prepareRqId(
+        bytes32 txID = RequestIdLib.prepareRqId(
             _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
@@ -515,7 +516,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     ) external {
         bytes32[] memory txId = new bytes32[](_tokens.length);
         uint256 generalNonce = IBridge(bridge).getNonce(_from);
-        bytes32 generalTxId = IBridge(bridge).prepareRqId(
+        bytes32 generalTxId = RequestIdLib.prepareRqId(
             castToBytes32(_synthParams.oppositeBridge),
             _synthParams.chainId,
             castToBytes32(_synthParams.receiveSide),

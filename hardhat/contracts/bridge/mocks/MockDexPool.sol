@@ -3,6 +3,7 @@ pragma solidity 0.8.10;
 
 import "../Bridge.sol";
 import "../../amm_pool/SolanaSerialize.sol";
+import "../../amm_pool/RequestIdLib.sol";
 
 /**
  * @notice This is for test purpose.
@@ -46,7 +47,7 @@ contract MockDexPool is SolanaSerialize {
         // ...
 
         uint256 nonce = Bridge(bridge).getNonce(msg.sender);
-        bytes32 requestId = Bridge(bridge).prepareRqId(
+        bytes32 requestId = RequestIdLib.prepareRqId(
             bytes32(uint256(uint160(oppBridge))),
             chainId,
             bytes32(uint256(uint160(secondPartPool))),
@@ -97,7 +98,7 @@ contract MockDexPool is SolanaSerialize {
         require(chainId == SOLANA_CHAIN_ID, "incorrect chainId");
         uint256 nonce = Bridge(bridge).getNonce(msg.sender);
 
-        bytes32 requestId = Bridge(bridge).prepareRqId(
+        bytes32 requestId = RequestIdLib.prepareRqId(
             testStubPID_,
             chainId,
             dataAcc_,
