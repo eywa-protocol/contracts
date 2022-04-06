@@ -32,7 +32,10 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     uint256 public vEywaInitialSupply;
     mapping (address => uint256) public unburnBalanceOf;
 
+    // bool internal isOriginal = true;
+
     event ReleasedAfterClaim(address indexed from, uint256 indexed amount);
+    event NewVestingContractCloned(address indexed vestingContract);
 
     constructor(address _adminDeployer, IERC20 _eywaToken) ERC20("Vested Eywa", "vEYWA"){
         adminDeployer = _adminDeployer;
@@ -102,7 +105,26 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     }
 
     function available(uint256 time, address tokenOwner) public view returns(uint256) {
-        return (claimable(time).mul(unburnBalanceOf[tokenOwner]).div(vEywaInitialSupply)).sub(claimed[tokenOwner]);
+        if(claimable(time) >= vEywaInitialSupply){
+            return balanceOf(tokenOwner);
+        }
+        if(claimable(time).mul(unburnBalanceOf[tokenOwner]).div(vEywaInitialSupply) >= claimed[tokenOwner]){
+            return (claimable(time).mul(unburnBalanceOf[tokenOwner]).div(vEywaInitialSupply)).sub(claimed[tokenOwner]);
+        } else {
+            return 0;
+        }
+    }
+
+    function updateUnburnBalanceAndClaimed(address sender, address recipient, uint256 amount) private {
+        uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(unburnBalanceOf[sender]);
+        uint256 remainderIncrease;
+        if ((claimed[sender].mul(amount)).mod(unburnBalanceOf[sender]) > 0){
+            remainderIncrease = 1;
+        }
+        claimed[sender] = claimed[sender] - claimedNumberTransfer;
+        claimed[recipient] = claimed[recipient] + claimedNumberTransfer + remainderIncrease; 
+        unburnBalanceOf[sender] = unburnBalanceOf[sender] - amount; 
+        unburnBalanceOf[recipient] = unburnBalanceOf[recipient] + amount;
     }
 
     function claimable(uint256 time) public view returns(uint256) {
@@ -120,27 +142,14 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     }
 
     function claim(uint256 claimedAmount) external nonReentrant() {
-        uint256 claimableAmount = claimable(block.timestamp);
-        if(claimableAmount >= vEywaInitialSupply && balanceOf(msg.sender) >= claimedAmount) {
-            _burn(msg.sender, claimedAmount);
-            IERC20(eywaToken).safeTransfer(msg.sender, claimedAmount);
-            return;
-        }
         uint256 availableAmount = available(block.timestamp, msg.sender);
         require(claimedAmount > 0, "available amount is 0");
         require(availableAmount >= claimedAmount, "the amount is not available");
+        // if(claimableAmount >= vEywaInitialSupply && balanceOf(msg.sender) >= claimedAmount) {
         claimed[msg.sender] = claimed[msg.sender].add(claimedAmount);
         _burn(msg.sender, claimedAmount);
         IERC20(eywaToken).safeTransfer(msg.sender, claimedAmount);
         emit ReleasedAfterClaim(msg.sender, claimedAmount);
-    }
-
-    function updateUnburnBalanceAndClaimed(address sender, address recipient, uint256 amount) private {
-        uint256 claimedNumberTransfer = claimed[sender].mul(amount).div(unburnBalanceOf[sender]);
-        unburnBalanceOf[sender] = unburnBalanceOf[sender] - amount; 
-        unburnBalanceOf[recipient] = unburnBalanceOf[recipient] + amount;
-        claimed[sender] = claimed[sender] - claimedNumberTransfer;
-        claimed[recipient] = claimed[recipient] + claimedNumberTransfer; 
     }
 
     function transferWithSignature(
@@ -161,7 +170,7 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         address recipient, 
         uint256 amount
     ) public override nonReentrant() returns (bool) {
-        require(block.timestamp >= started + signatureTimeStamp);
+        require(block.timestamp >= started + signatureTimeStamp, "It's not signature timestamp yet");
         updateUnburnBalanceAndClaimed(msg.sender, recipient, amount);
         bool result = super.transfer(recipient, amount);
         return result;
@@ -186,9 +195,31 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         address recipient, 
         uint256 amount
     ) public override nonReentrant() returns (bool) {
-        require(block.timestamp >= started + signatureTimeStamp);
+        require(block.timestamp >= started + signatureTimeStamp, "It's not signature timestamp yet");
         updateUnburnBalanceAndClaimed(sender, recipient, amount);
         bool result = super.transferFrom(sender, recipient, amount);
         return result;
     }
+
+    // address public nV;
+    // function clone() external returns (address newVesting) {
+    //     require(isOriginal, "This is not original");
+    //     require(msg.sender == adminDeployer, "Only admin can clone");
+
+        
+
+    //     bytes20 addressBytes = bytes20(address(this));
+
+    //     assembly {
+    //     // EIP-1167 bytecode
+    //         let clone_code := mload(0x40)
+    //         mstore(clone_code, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
+    //         mstore(add(clone_code, 0x14), addressBytes)
+    //         mstore(add(clone_code, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+    //         newVesting := create(0, clone_code, 0x37)
+    //     }
+    //     nV = newVesting;
+    //     emit NewVestingContractCloned(newVesting);
+    // }
 }
+
