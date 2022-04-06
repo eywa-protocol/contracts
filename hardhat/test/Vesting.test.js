@@ -261,7 +261,7 @@ describe('Vesting tests. Part 1', () => {
         await vesting.connect(addr2).transfer(addr3.address, 50000);
         await vesting.connect(addr3).claim(114); // addr 3
         claimedAlready = parseInt(claimedAlready) + parseInt(114);
-        numberOfTransferOrClaim = parseInt(numberOfTransferOrClaim) + parseInt(2);
+        numberOfTransferOrClaim = parseInt(numberOfTransferOrClaim) + parseInt(3);
 
         blockNumBefore = await ethers.provider.getBlockNumber();
         blockBefore = await ethers.provider.getBlock(blockNumBefore);
@@ -336,6 +336,7 @@ describe('Vesting tests. Part 1', () => {
         blockBefore = await ethers.provider.getBlock(blockNumBefore);
         timestampBefore = blockBefore.timestamp;
 
+
         availableAddr1before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address);
         availableAddr2before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr2.address);
         availableAddr3before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr3.address);
@@ -363,10 +364,7 @@ describe('Vesting tests. Part 1', () => {
         let addr4Eywa = await tokenErc20.connect(addr1).balanceOf(addr4.address);
         sumEywa = parseInt(addr1Eywa) + parseInt(addr2Eywa) + parseInt(addr3Eywa) + parseInt(addr4Eywa);
         expect(sumEywa).to.be.equal(await vesting.connect(addr1).vEywaInitialSupply());
-        
     });
-
-
 
     it('can not claim more than available now', async function () {
         await increaseTime(day_in_seconds * 71);
@@ -596,4 +594,236 @@ describe('Vesting tests. Part 2', () => {
         )).to.be.revertedWith("Msg.sender is not admin");
     });
         
+});
+
+
+describe('Vesting tests. Part 3. If step is 1sec', () => {
+    let snapshot0;
+    let blockNumBefore;
+    let blockBefore;
+    let timestampBefore;
+
+    let tokenErc20;
+    let vesting;
+    let adminDeployer;
+    let signAdmin;
+    let addr1;
+    let addr2;
+    let addr3;
+    let addrs;
+    let day_in_seconds = 86400;
+
+    let accForSing = web3.eth.accounts.create();
+
+    let startTimeStamp;
+    let cliffDuration;
+    let stepDuration;
+    let cliffAmount;
+    let stepAmount;
+    let numOfSteps;
+    let signAdminAddress = accForSing.address;
+    let signAdminPrKey = accForSing.privateKey;
+    
+    let signatureTimeStamp;
+    let vestingSupply;
+
+    before(async () => {
+        const ERC20 = await ethers.getContractFactory('PermitERC20');
+        tokenErc20 = await ERC20.deploy("PermitERC20 token", "prmt20t");
+        await tokenErc20.deployed();
+        [adminDeployer, signAdmin, addr1, addr2, addr3, addr4, ...addrs] = await ethers.getSigners();
+        const Vesting = await ethers.getContractFactory('EywaVesting');
+        vesting = await Vesting.deploy(
+            adminDeployer.address,
+            tokenErc20.address
+        );
+        await vesting.deployed();
+
+        cliffDuration = parseInt(day_in_seconds) * 50;
+        stepDuration = 1;
+        cliffAmount = 10000000;
+        numOfSteps = 1000000;
+        stepAmount = 10;
+        signatureTimeStamp = day_in_seconds * 10;
+
+        // vestingSupply = 10000000;
+        vestingSupply = parseInt(cliffAmount) + parseInt(10)*parseInt(1000000);
+        
+        await tokenErc20.mint(adminDeployer.address, vestingSupply, {from: adminDeployer.address});
+        expect(await tokenErc20.balanceOf(adminDeployer.address, {from: adminDeployer.address})).to.equal(vestingSupply);
+        await tokenErc20.approve(vesting.address, vestingSupply, {from: adminDeployer.address});
+        expect(await tokenErc20.allowance(adminDeployer.address, vesting.address, {from: adminDeployer.address})).to.equal(vestingSupply);
+        let blockNumBefore = await ethers.provider.getBlockNumber();
+        let blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        let timestampBefore = blockBefore.timestamp;
+
+        startTimeStamp = timestampBefore + day_in_seconds;
+        
+
+        await vesting.initialize(
+            startTimeStamp, 
+            cliffDuration,
+            stepDuration,
+            cliffAmount,
+            stepAmount,
+            numOfSteps,
+            signAdminAddress,
+            signatureTimeStamp,
+            [addr1.address, addr2.address, addr3.address],
+            [10000000, 10000000 / 2, 10000000 / 2],
+            {from: adminDeployer.address}
+        );
+        expect(await vesting.cliffAmount()).to.equal(cliffAmount);
+        expect(await vesting.stepAmount()).to.equal(stepAmount);
+        });
+    beforeEach(async () => {
+        snapshot0 = await takeSnapshot();
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore = blockBefore.timestamp;
+    });
+    afterEach(async () => {
+        await restoreSnapshot(snapshot0);
+    });
+    it('Linear unlock vesting checks', async function () {
+        await increaseTime(cliffDuration); 
+        await increaseTime(day_in_seconds - 1);
+        let claimedAlready = parseInt(0);
+        let numberOfTransferOrClaim = parseInt(0);
+
+        let claimable = parseInt(0);
+        let sumAvailable = parseInt(0);
+
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore =  blockBefore.timestamp;
+
+        let claimableBefore = await vesting.connect(addr1).claimable(parseInt(timestampBefore));
+        let increaseTimeNew = 206;
+        // stepAmount
+        await increaseTime(increaseTimeNew); 
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore =  blockBefore.timestamp;
+        let claimableAfter = await vesting.connect(addr1).claimable(parseInt(timestampBefore));
+        expect(parseInt(claimableAfter) - parseInt(claimableBefore)).to.be.equal(parseInt(stepAmount)*parseInt(increaseTimeNew));
+        // console.log("balance addr1 = ", await vesting.connect(addr1).balanceOf(addr1.address));
+        // // console.log("available addr1 = ", await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address));
+        // console.log("claimable = ", await vesting.connect(addr1).claimable(parseInt(timestampBefore)));
+        // await increaseTime(day_in_seconds - 1);
+        // 10000000
+        // 10000010
+        // blockNumBefore = await ethers.provider.getBlockNumber();
+        // blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        // timestampBefore =  blockBefore.timestamp;
+        // console.log("claimable = ", await vesting.connect(addr1).claimable(parseInt(timestampBefore)));
+        // console.log("available addr1 = ", await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address));
+        await vesting.connect(addr1).transfer(addr2.address, 1000000);
+        await vesting.connect(addr2).transfer(addr3.address, 50000);
+        await vesting.connect(addr3).claim(114); // addr 3
+        claimedAlready = parseInt(claimedAlready) + parseInt(114);
+        numberOfTransferOrClaim = parseInt(numberOfTransferOrClaim) + parseInt(3);
+
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore =  blockBefore.timestamp;
+        let availableAddr1before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address);
+        let availableAddr2before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr2.address);
+        let availableAddr3before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr3.address);
+        expect(parseInt(availableAddr1before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr1.address)));
+        expect(parseInt(availableAddr2before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr2.address)));
+        expect(parseInt(availableAddr3before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr3.address)));
+
+
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore =  blockBefore.timestamp;
+        claimable = await vesting.connect(addr1).claimable(timestampBefore);
+        sum = parseInt(availableAddr1before) + parseInt(availableAddr2before) + parseInt(availableAddr3before) + parseInt(claimedAlready);
+
+        expect(parseInt(claimable) - parseInt(sum)).to.be.lessThan(parseInt(numberOfTransferOrClaim));
+
+        await increaseTime(day_in_seconds * 20); 
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore =  blockBefore.timestamp;
+        availableAddr1before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address);
+        await vesting.connect(addr1).claim(parseInt(availableAddr1before)); //addr 1
+        claimedAlready = parseInt(claimedAlready) + parseInt(availableAddr1before);
+        await vesting.connect(addr3).transfer(addr1.address, 444);
+        numberOfTransferOrClaim = parseInt(numberOfTransferOrClaim) + parseInt(2);
+
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore =  blockBefore.timestamp;
+
+        availableAddr1before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address);
+        availableAddr2before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr2.address);
+        availableAddr3before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr3.address);
+        expect(parseInt(availableAddr1before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr1.address)));
+        expect(parseInt(availableAddr2before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr2.address)));
+        expect(parseInt(availableAddr3before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr3.address)));
+        claimable = await vesting.connect(addr1).claimable(timestampBefore);
+        sum = parseInt(availableAddr1before) + parseInt(availableAddr2before) + parseInt(availableAddr3before) + parseInt(claimedAlready);
+        expect(parseInt(claimable) - parseInt(sum)).to.be.lessThan(parseInt(numberOfTransferOrClaim));
+        
+        await increaseTime(day_in_seconds * 20); 
+
+        await vesting.connect(addr2).claim(96); //addr 2
+        claimedAlready = parseInt(claimedAlready) + parseInt(96);
+        await vesting.connect(addr2).transfer(addr4.address, 1151);
+        numberOfTransferOrClaim = parseInt(numberOfTransferOrClaim) + parseInt(2);
+
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore =  blockBefore.timestamp;
+
+        
+        availableAddr1before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address);
+        availableAddr2before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr2.address);
+        availableAddr3before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr3.address);
+        let availableAddr4before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr4.address);
+        expect(parseInt(availableAddr1before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr1.address)));
+        expect(parseInt(availableAddr2before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr2.address)));
+        expect(parseInt(availableAddr3before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr3.address)));
+        expect(parseInt(availableAddr4before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr4.address)));
+        claimable = await vesting.connect(addr1).claimable(timestampBefore);
+        sum = parseInt(availableAddr1before) + parseInt(availableAddr2before) + parseInt(availableAddr3before) + parseInt(availableAddr4before) + parseInt(claimedAlready);
+        expect(parseInt(claimable) - parseInt(sum)).to.be.lessThan(parseInt(numberOfTransferOrClaim));
+
+        // final part of vesting
+        await increaseTime(day_in_seconds * 6000000); 
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore = blockBefore.timestamp;
+
+        availableAddr1before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address);
+        availableAddr2before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr2.address);
+        availableAddr3before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr3.address);
+        availableAddr4before = await vesting.connect(addr1).available(parseInt(timestampBefore), addr4.address);
+        expect(parseInt(availableAddr1before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr1.address)));
+        expect(parseInt(availableAddr2before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr2.address)));
+        expect(parseInt(availableAddr3before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr3.address)));
+        expect(parseInt(availableAddr4before)).to.be.lessThanOrEqual(parseInt(await vesting.connect(addr1).balanceOf(addr4.address)));
+        sum = parseInt(availableAddr1before)+parseInt(availableAddr2before)+parseInt(availableAddr3before) + +parseInt(availableAddr4before) + parseInt(claimedAlready);
+        claimable = await vesting.connect(addr1).claimable(parseInt(timestampBefore));
+        expect(sum).to.be.equal(claimable);
+
+
+        await vesting.connect(addr1).claim(availableAddr1before);
+        await vesting.connect(addr2).claim(availableAddr2before);
+        await vesting.connect(addr3).claim(availableAddr3before);
+        await vesting.connect(addr4).claim(availableAddr4before);
+        
+        let sumEywa = parseInt(0);
+        let vestingEywa = await tokenErc20.connect(addr1).balanceOf(vesting.address);
+        expect(vestingEywa).to.be.equal(0);
+        let addr1Eywa = await tokenErc20.connect(addr1).balanceOf(addr1.address);
+        let addr2Eywa = await tokenErc20.connect(addr1).balanceOf(addr2.address);
+        let addr3Eywa = await tokenErc20.connect(addr1).balanceOf(addr3.address);
+        let addr4Eywa = await tokenErc20.connect(addr1).balanceOf(addr4.address);
+        sumEywa = parseInt(addr1Eywa) + parseInt(addr2Eywa) + parseInt(addr3Eywa) + parseInt(addr4Eywa);
+        expect(sumEywa).to.be.equal(await vesting.connect(addr1).vEywaInitialSupply());
+        
+    });
 });
