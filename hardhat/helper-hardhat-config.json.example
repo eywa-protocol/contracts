@@ -646,7 +646,7 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "harmonylocal": {
-    "rpcUrl": "ws://172.20.128.14:9800",
+    "rpcUrl": "http://172.20.128.14:9500",
     "rpcUrl2": "http://172.20.128.14:9500",
     "n": "HARMONYLOCAL",
     "netwiker": "HRM",
@@ -654,7 +654,7 @@
       "networks_env/env_connect_to_harmonylocal.env",
       "networks_env/env_test_for_harmonylocal.env"
     ],
-    "chainId": 789,
+    "chainId": 2,
     "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
