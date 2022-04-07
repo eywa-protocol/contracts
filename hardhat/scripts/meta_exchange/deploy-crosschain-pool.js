@@ -21,8 +21,6 @@ async function main() {
   console.log("Deployment in progress...");
 
   const ERC20 = await ethers.getContractFactory('PermitERC20');
-  const Portal = await ethers.getContractFactory('Portal');
-  const Synthesis = await ethers.getContractFactory('Synthesis');
   const CurveProxy = await ethers.getContractFactory('CurveProxy');
   const LpToken = await ethers.getContractFactory('CurveTokenV5');
   // const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool');

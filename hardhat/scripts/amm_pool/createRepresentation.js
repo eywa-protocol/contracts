@@ -7,15 +7,19 @@ async function main() {
   this.s = networkConfig[network.name].synthesis;
   this.p = networkConfig[network.name].portal;
   this.sourceForRepresentation = networkConfig[network.name].sourceForRepresentation;
-  this.networks = ["network1","network2","network3"];
+  this.networks = ["network1", "network2", "network3"];
 
   const [deployer] = await ethers.getSigners();
   console.log("Owner:", deployer.address);
 
-  const Synthesis = await ethers.getContractFactory("Synthesis");
+  const Synthesis = await ethers.getContractFactory("Synthesis", {
+    libraries: {
+      RequestIdLib: networkConfig[network.name].requestIdLib,
+    }
+  });
   const synthesis = Synthesis.attach(this.s);
-  const Portal = await ethers.getContractFactory("Portal");
-  const portal = Portal.attach(this.p);
+  // const Portal = await ethers.getContractFactory("Portal");
+  // const portal = Portal.attach(this.p);
   // origin token should be from another place
   for (let netw of this.sourceForRepresentation) {
     let tokens = networkConfig[netw].token;

@@ -16,7 +16,7 @@ async function main() {
   // const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool');
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool');
   // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool');
-  const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool');
+  // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool');
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool');
 
   // hub pool params

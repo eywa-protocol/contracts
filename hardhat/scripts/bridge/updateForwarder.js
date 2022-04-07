@@ -15,39 +15,47 @@ async function main() {
     let metistestnet_forwarder = '0x86f5F6e8139eA72479D40888FeD66eE8662Ca7E3';
     let coinextestnet_forwarder = '0x805AB09e70F4d5512cE65543b959B5c7824605f6';
 
-    const _Portal = await ethers.getContractFactory("Portal");
-    const portal  = await _Portal.attach(networkConfig[network.name].portal);
-    let tx = await portal.setTrustedForwarder(eval(network.name+'_forwarder'));
+    const _Portal = await ethers.getContractFactory("Portal", {
+        libraries: {
+            RequestIdLib: networkConfig[network.name].requestIdLib,
+        }
+    });
+    const portal = await _Portal.attach(networkConfig[network.name].portal);
+    let tx = await portal.setTrustedForwarder(eval(network.name + '_forwarder'));
     await tx.wait();
-    console.log(`Forwarder ${eval(network.name+'_forwarder')} were updated on portal ${JSON.stringify(tx.hash)}`);
+    console.log(`Forwarder ${eval(network.name + '_forwarder')} were updated on portal ${JSON.stringify(tx.hash)}`);
     let applyedFwd = await portal.trustedForwarder();
-    console.log(`New forwarder applyed:  ${applyedFwd == eval(network.name+'_forwarder')}`);
+    console.log(`New forwarder applyed:  ${applyedFwd == eval(network.name + '_forwarder')}`);
 
-    const _Synthesis = await ethers.getContractFactory("Synthesis");
-    const synthesis  = await _Synthesis.attach(networkConfig[network.name].synthesis);
-    tx = await synthesis.setTrustedForwarder(eval(network.name+'_forwarder'));
+    const _Synthesis = await ethers.getContractFactory("Synthesis", {
+        libraries: {
+            RequestIdLib: networkConfig[network.name].requestIdLib,
+        }
+    });
+    const synthesis = await _Synthesis.attach(networkConfig[network.name].synthesis);
+    tx = await synthesis.setTrustedForwarder(eval(network.name + '_forwarder'));
     await tx.wait();
-    console.log(`Forwarder ${eval(network.name+'_forwarder')} were updated on synthesis ${JSON.stringify(tx.hash)}`);
+    console.log(`Forwarder ${eval(network.name + '_forwarder')} were updated on synthesis ${JSON.stringify(tx.hash)}`);
     applyedFwd = await synthesis.trustedForwarder();
-    console.log(`New forwarder applyed:  ${applyedFwd == eval(network.name+'_forwarder')}`);
+    console.log(`New forwarder applyed:  ${applyedFwd == eval(network.name + '_forwarder')}`);
 
     const _Bridge = await ethers.getContractFactory("Bridge");
-    const bridge  = await _Bridge.attach(networkConfig[network.name].bridge);
-    tx = await bridge.setTrustedForwarder(eval(network.name+'_forwarder'));
+    const bridge = await _Bridge.attach(networkConfig[network.name].bridge);
+    tx = await bridge.setTrustedForwarder(eval(network.name + '_forwarder'));
     await tx.wait();
-    console.log(`Forwarder ${eval(network.name+'_forwarder')} were updated on synthesis ${JSON.stringify(tx.hash)}`);
+    console.log(`Forwarder ${eval(network.name + '_forwarder')} were updated on synthesis ${JSON.stringify(tx.hash)}`);
     applyedFwd = await bridge.trustedForwarder();
-    console.log(`New forwarder applyed:  ${applyedFwd == eval(network.name+'_forwarder')}`);
+    console.log(`New forwarder applyed:  ${applyedFwd == eval(network.name + '_forwarder')}`);
 
     const _CurveProxy = await ethers.getContractFactory("CurveProxy");
-    const curveProxy  = await _CurveProxy.attach(networkConfig[network.name].curveProxy);
-    tx = await curveProxy.setTrustedForwarder(eval(network.name+'_forwarder'));
+    const curveProxy = await _CurveProxy.attach(networkConfig[network.name].curveProxy);
+    tx = await curveProxy.setTrustedForwarder(eval(network.name + '_forwarder'));
     await tx.wait();
-    console.log(`Forwarder ${eval(network.name+'_forwarder')} were updated on curveProxy ${JSON.stringify(tx.hash)}`);
+    console.log(`Forwarder ${eval(network.name + '_forwarder')} were updated on curveProxy ${JSON.stringify(tx.hash)}`);
     applyedFwd = await bridge.trustedForwarder();
-    console.log(`New forwarder applyed:  ${applyedFwd == eval(network.name+'_forwarder')}`);
+    console.log(`New forwarder applyed:  ${applyedFwd == eval(network.name + '_forwarder')}`);
 
-    
+
 }
 
 main()

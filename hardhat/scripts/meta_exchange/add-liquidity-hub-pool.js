@@ -13,7 +13,7 @@ async function main() {
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
   const ERC20 = await ethers.getContractFactory('ERC20Mock');
-  const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool');
+  // const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool');
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool');
   // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
   // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')

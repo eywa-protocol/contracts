@@ -10,6 +10,13 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     console.log("Owner:", deployer.address);
 
+    // Deploy RequestIdLib library
+    const _RequestIdLib = await ethers.getContractFactory("RequestIdLib");
+    const requestIdLib = await _RequestIdLib.deploy();
+    await requestIdLib.deployed();
+    networkConfig[network.name].requestIdLib = requestIdLib.address;
+    console.log("RequestIdLib address:", requestIdLib.address);
+
     // Deploy Forwarder
     const _Forwarder = await ethers.getContractFactory("Forwarder");
     const forwarder = await _Forwarder.deploy();
@@ -29,7 +36,11 @@ async function main() {
     console.log("Bridge address:", bridge.address);
 
     // Deploy MockDexPool
-    const _MockDexPool = await ethers.getContractFactory("MockDexPool");
+    const _MockDexPool = await ethers.getContractFactory("MockDexPool", {
+        libraries: {
+            RequestIdLib: requestIdLib.address,
+        }
+    });
     const mockDexPool = await _MockDexPool.deploy(bridge.address);
     await mockDexPool.deployed();
 
