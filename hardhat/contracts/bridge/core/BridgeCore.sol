@@ -47,24 +47,6 @@ abstract contract BridgeCore {
     }
 
     /**
-     * @dev Prepares a request ID with the given arguments.
-     * @param oppositeBridge padded opposite bridge address
-     * @param chainId opposite chain ID
-     * @param receiveSide padded receive contract address
-     * @param from padded sender's address
-     * @param nonce current nonce
-     */
-    function prepareRqId(
-        bytes32 oppositeBridge,
-        uint256 chainId,
-        bytes32 receiveSide,
-        bytes32 from,
-        uint256 nonce
-    ) public view returns (bytes32) {
-        return keccak256(abi.encodePacked(from, nonce, chainId, block.chainid, receiveSide, oppositeBridge));
-    }
-
-    /**
      * @dev Get the nonce of the current sender.
      * @param from sender's address
      */

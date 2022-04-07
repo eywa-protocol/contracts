@@ -10,6 +10,7 @@ import "./SyntERC20.sol";
 import "./RelayRecipient.sol";
 import "./SolanaSerialize.sol";
 import "../utils/Typecast.sol";
+import "./RequestIdLib.sol";
 
 contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     mapping(address => bytes32) public representationReal;
@@ -152,7 +153,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         ISyntERC20(synth).burn(_msgSender(), _amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_from);
-        bytes32 txID = IBridge(bridge).prepareRqId(
+        bytes32 txID = RequestIdLib.prepareRqId(
             castToBytes32(_synthParams.oppositeBridge),
             _synthParams.chainId,
             castToBytes32(_synthParams.receiveSide),
@@ -215,7 +216,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         );
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-        bytes32 txID = IBridge(bridge).prepareRqId(
+        bytes32 txID = RequestIdLib.prepareRqId(
             castToBytes32(_oppositeBridge),
             _chainId,
             castToBytes32(_receiveSide),
@@ -245,7 +246,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         require(_chainId == SOLANA_CHAIN_ID, "Synthesis: incorrect chainId");
 
         uint256 nonce = IBridge(bridge).getNonce(_msgSender());
-        bytes32 txID = IBridge(bridge).prepareRqId(
+        bytes32 txID = RequestIdLib.prepareRqId(
             _pubkeys[uint256(UnsynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             _pubkeys[uint256(UnsynthesizePubkeys.receiveSide)],
@@ -331,7 +332,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     ) external returns (bytes32 txID) {
         ISyntERC20(_stoken).burn(_msgSender(), _amount);
         uint256 nonce = IBridge(bridge).getNonce(_from);
-        txID = IBridge(bridge).prepareRqId(
+        txID = RequestIdLib.prepareRqId(
             castToBytes32(_oppositeBridge),
             _chainId,
             castToBytes32(_receiveSide),
@@ -389,7 +390,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         ISyntERC20(_stoken).burn(_msgSender(), _amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_from);
-        txID = IBridge(bridge).prepareRqId(
+        txID = RequestIdLib.prepareRqId(
             _pubkeys[uint256(UnsynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
             _pubkeys[uint256(UnsynthesizePubkeys.receiveSide)],
