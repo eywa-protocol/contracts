@@ -3,6 +3,7 @@ const { ethers } = require('hardhat');
 const { constants, expectEvent, expectRevert, BN } = require('@openzeppelin/test-helpers');
 const { parseEvent } = require('typechain');
 const { ZERO_ADDRESS } = constants;
+const { getAddress } = require('ethers').utils
 
 const EywaVesting = artifacts.require('EywaVesting');
 const PermitERC20 = artifacts.require('PermitERC20');
@@ -505,16 +506,12 @@ describe('Vesting tests. Part 1', () => {
         expect(balanceAddr1Before - balanceAddr1After).to.be.equal(amount);
     });
 
-    // it('Cloning', async function () {
-    //     let clonedAddress = await vesting.connect(adminDeployer).clone();
-    //     console.log("adminDeployer = ", adminDeployer.address);
-    //     console.log("vesting = ", vesting.address);
-    //     console.log("clonedAddress = ", clonedAddress);
-
-    //     console.log("nv = ", await vesting.connect(adminDeployer).nV());
-
-    //     const newVesting = getContractAt(abi, await vesting.connect(adminDeployer).nV());
-    // });
+    it('Cloning', async function () {
+        let clonedAddress = await vesting.connect(adminDeployer).clone();
+        console.log("adminDeployer = ", adminDeployer.address);
+        console.log("vesting = ", vesting.address);
+        console.log("clonedAddress = ", clonedAddress);
+    });
 });
     
 describe('Vesting tests. Part 2', () => {

@@ -32,7 +32,7 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     uint256 public vEywaInitialSupply;
     mapping (address => uint256) public unburnBalanceOf;
 
-    // bool internal isOriginal = true;
+    bool internal isOriginal = true;
 
     event ReleasedAfterClaim(address indexed from, uint256 indexed amount);
     event NewVestingContractCloned(address indexed vestingContract);
@@ -201,13 +201,9 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         return result;
     }
 
-    // address public nV;
-    // function clone() external returns (address newVesting) {
+    // function clone() public returns (address newVesting) {
     //     require(isOriginal, "This is not original");
     //     require(msg.sender == adminDeployer, "Only admin can clone");
-
-        
-
     //     bytes20 addressBytes = bytes20(address(this));
 
     //     assembly {
@@ -218,7 +214,6 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     //         mstore(add(clone_code, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
     //         newVesting := create(0, clone_code, 0x37)
     //     }
-    //     nV = newVesting;
     //     emit NewVestingContractCloned(newVesting);
     // }
 }
