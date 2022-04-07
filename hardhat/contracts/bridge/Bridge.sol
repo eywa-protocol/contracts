@@ -210,8 +210,6 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
             Bls.E2Point memory zero;
             emit NewEpoch(epochKeyBytes, abi.encode(zero), true, epochNum);
             epochKey = zero;
-        } else {
-            emit NewEpoch(epochKeyBytes, epochKeyBytes, true, epochNum);
         }
     }
 
