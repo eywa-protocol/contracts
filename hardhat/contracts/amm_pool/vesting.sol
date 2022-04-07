@@ -32,10 +32,10 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     uint256 public vEywaInitialSupply;
     mapping (address => uint256) public unburnBalanceOf;
 
-    bool internal isOriginal = true;
+    // bool internal isOriginal = true;
 
     event ReleasedAfterClaim(address indexed from, uint256 indexed amount);
-    event NewVestingContractCloned(address indexed vestingContract);
+    // event NewVestingContractCloned(address indexed vestingContract);
 
     constructor(address _adminDeployer, IERC20 _eywaToken) ERC20("Vested Eywa", "vEYWA"){
         adminDeployer = _adminDeployer;
