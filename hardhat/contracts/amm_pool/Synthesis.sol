@@ -237,7 +237,10 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     function emergencyUnsyntesizeRequestToSolana(
         bytes32[] calldata _pubkeys,
         bytes1 _bumpSynthesizeRequest,
-        uint256 _chainId
+        uint256 _chainId,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
     ) external {
         require(_chainId == SOLANA_CHAIN_ID, "Synthesis: incorrect chainId");
 
@@ -294,7 +297,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
                     /* accounts: */
                     accounts,
                     /* data: */
-                    abi.encodePacked(sighashEmergencyUnsynthesize, _bumpSynthesizeRequest)
+                    abi.encodePacked(sighashEmergencyUnsynthesize, _bumpSynthesizeRequest, _v, _r, _s)
                 )
             ),
             _pubkeys[uint256(UnsynthesizePubkeys.receiveSide)],

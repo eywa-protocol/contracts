@@ -411,7 +411,11 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     function emergencyUnburnRequestToSolana(
         bytes32 _txID,
         bytes32[] calldata _pubkeys,
-        uint256 _chainId
+        uint256 _chainId,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+
     ) external {
         require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainId");
         require(
@@ -471,7 +475,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
                     /* accounts: */
                     accounts,
                     /* data: */
-                    abi.encodePacked(sighashEmergencyUnburn)
+                    abi.encodePacked(sighashEmergencyUnburn, _v, _r, _s)
                 )
             ),
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
@@ -526,6 +530,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         //synthesize request
         for (uint256 i = 0; i < _tokens.length; i++) {
             if (_amounts[i] > 0) {
+                //TODO:
                 // require(tokenDecimals[castToBytes32(_token)[i]] > 0, "Portal: token must be verified");
 
                 registerNewBalance(_tokens[i], _amounts[i]);

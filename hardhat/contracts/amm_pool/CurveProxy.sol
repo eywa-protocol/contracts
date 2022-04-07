@@ -193,8 +193,8 @@ contract CurveProxy is Initializable, RelayRecipient {
     function setPool(
         address _pool,
         address _lpToken,
-        address[] calldata _coins /**onlyOwner TODO*/
-    ) public {
+        address[] calldata _coins 
+    ) public onlyOwner {
         for (uint256 i = 0; i < _coins.length; i++) {
             pool[_pool].add(_coins[i]);
         }
