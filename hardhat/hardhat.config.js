@@ -58,7 +58,7 @@ module.exports = {
       accounts: [PRIVATE_KEY_BSC]
     },
     mumbai:{
-        url: networkConfig.mumbai.rpcUrl.replace('ws','http').replace('-ws','-rpc'),
+        url: 'https://mumbai.testnet.eywa.fi ',
         accounts: [PRIVATE_KEY_MUMBAI],
         gasPrice: 2_000_000_000
 
