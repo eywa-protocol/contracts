@@ -506,12 +506,12 @@ describe('Vesting tests. Part 1', () => {
         expect(balanceAddr1Before - balanceAddr1After).to.be.equal(amount);
     });
 
-    it('Cloning', async function () {
-        let clonedAddress = await vesting.connect(adminDeployer).clone();
-        console.log("adminDeployer = ", adminDeployer.address);
-        console.log("vesting = ", vesting.address);
-        console.log("clonedAddress = ", clonedAddress);
-    });
+    // it('Cloning', async function () {
+    //     let clonedAddress = await vesting.connect(adminDeployer).clone();
+    //     console.log("adminDeployer = ", adminDeployer.address);
+    //     console.log("vesting = ", vesting.address);
+    //     console.log("clonedAddress = ", clonedAddress);
+    // });
 });
     
 describe('Vesting tests. Part 2', () => {
