@@ -17,8 +17,8 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     string constant prefix = "\x19Ethereum Signed Message:\n32"; 
 
     address public immutable adminDeployer;
-    address public signAdmin; // address which can sign early transfer
-    uint256 public signatureTimeStamp;
+    address public earlyTransferPermissionAdmin; // address which can agree early transfer
+    uint256 public permissionlessTimeStamp;
     uint256 public started; 
     IERC20 public immutable eywaToken;
     uint256 public cliffDuration; // timestamp cliff duration
@@ -27,10 +27,12 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     uint256 public stepAmount; // realeseble number of tokens after 1 step
     uint256 public numOfSteps; // number of linear steps
 
-    mapping(address => Counters.Counter) private _nonces;
+    // mapping(address => Counters.Counter) private _nonces;
     mapping (address => uint256) public claimed; // how much already claimed
     uint256 public vEywaInitialSupply;
     mapping (address => uint256) public unburnBalanceOf;
+
+    mapping(address => mapping(address => uint256)) public transferPermission;
 
     // bool internal isOriginal = true;
 
@@ -49,14 +51,14 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         uint256 _cliffAmount,
         uint256 _stepAmount,
         uint256 _numOfSteps,
-        address _signAdmin,
-        uint256 _signatureTimeStamp,
+        address _earlyTransferPermissionAdmin,
+        uint256 _permissionlessTimeStamp,
         address[] calldata _initialAddresses,
         uint256[] calldata _initialSupplyAddresses
     ) external {
         require(adminDeployer == msg.sender, "Msg.sender is not admin");
-        require(signAdmin == address(0), "Contract is already initialized");
-        require(_signAdmin != address(0), "Zero address");
+        require(earlyTransferPermissionAdmin == address(0), "Contract is already initialized");
+        require(_earlyTransferPermissionAdmin != address(0), "Zero address");
 
         started = _started;
         cliffDuration = _cliffDuration;
@@ -64,8 +66,8 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         cliffAmount = _cliffAmount;
         stepAmount = _stepAmount;
         numOfSteps = _numOfSteps;
-        signAdmin = _signAdmin;
-        signatureTimeStamp = _signatureTimeStamp;
+        earlyTransferPermissionAdmin = _earlyTransferPermissionAdmin;
+        permissionlessTimeStamp = _permissionlessTimeStamp;
 
         for(uint256 i=0; i < _initialAddresses.length;i++){
             _mint(_initialAddresses[i], _initialSupplyAddresses[i]);
@@ -75,33 +77,18 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         IERC20(eywaToken).safeTransferFrom(msg.sender, address(this), vEywaInitialSupply);
     }
 
-    function nonces(address owner) public view returns (uint256) {
-        return _nonces[owner].current();
+    function getCurrentTransferPermission(address from, address to) external view returns(uint256) {
+        return transferPermission[from][to];
     }
 
-    function _useNonce(address owner) internal returns (uint256 current) {
-        Counters.Counter storage nonce = _nonces[owner];
-        current = nonce.current();
-        nonce.increment();
+    function increaseTransferPermission(address from, address to, uint256 amount) external {
+        require(msg.sender == earlyTransferPermissionAdmin, "msg.sender is not admin");
+        transferPermission[from][to] = transferPermission[from][to].add(amount);
     }
 
-    function checkSignature(
-        address sender, 
-        address recipient, 
-        uint256 amount,
-        uint8 v, 
-        bytes32 r, 
-        bytes32 s
-        ) private {
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, 
-            keccak256(abi.encodePacked(
-                keccak256(abi.encodePacked(sender)), 
-                keccak256(abi.encodePacked(recipient)),
-                keccak256(abi.encodePacked(_useNonce(sender))), 
-                keccak256(abi.encodePacked(amount)) 
-            ))
-        ));
-        require(ecrecover(prefixedHash, v, r, s) == signAdmin, "ERROR: Verifying signature failed");
+    function decreaseTransferPermission(address from, address to, uint256 amount) external {
+        require(msg.sender == earlyTransferPermissionAdmin, "msg.sender is not admin");
+        transferPermission[from][to] = transferPermission[from][to].sub(amount);
     }
 
     function available(uint256 time, address tokenOwner) public view returns(uint256) {
@@ -145,49 +132,29 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         uint256 availableAmount = available(block.timestamp, msg.sender);
         require(claimedAmount > 0, "available amount is 0");
         require(availableAmount >= claimedAmount, "the amount is not available");
-        // if(claimableAmount >= vEywaInitialSupply && balanceOf(msg.sender) >= claimedAmount) {
         claimed[msg.sender] = claimed[msg.sender].add(claimedAmount);
         _burn(msg.sender, claimedAmount);
         IERC20(eywaToken).safeTransfer(msg.sender, claimedAmount);
         emit ReleasedAfterClaim(msg.sender, claimedAmount);
     }
 
-    function transferWithSignature(
-        address recipient, 
-        uint256 amount,  
-        uint8 v, 
-        bytes32 r, 
-        bytes32 s 
-    ) public nonReentrant() returns (bool) {
-        require(started <= block.timestamp, "It is not started time yet");
-        checkSignature(msg.sender, recipient, amount, v, r, s);
-        updateUnburnBalanceAndClaimed(msg.sender, recipient, amount);
-        bool result = super.transfer(recipient, amount);
-        return result;
-    }
-
     function transfer(
         address recipient, 
         uint256 amount
     ) public override nonReentrant() returns (bool) {
-        require(block.timestamp >= started + signatureTimeStamp, "It's not signature timestamp yet");
-        updateUnburnBalanceAndClaimed(msg.sender, recipient, amount);
-        bool result = super.transfer(recipient, amount);
-        return result;
-    }
-    
-    function transferFromWithSignature(
-        address sender, 
-        address recipient, 
-        uint256 amount, 
-        uint8 v, 
-        bytes32 r, 
-        bytes32 s
-    ) public nonReentrant() returns (bool) {
-        checkSignature(sender, recipient, amount, v, r, s);
-        updateUnburnBalanceAndClaimed(sender, recipient,  amount);
-        bool result = super.transferFrom(sender, recipient, amount);
-        return result;
+        require(started <= block.timestamp, "It is not started time yet");
+        bool result;
+        if(block.timestamp < started + permissionlessTimeStamp){
+            require(amount <= transferPermission[msg.sender][recipient], "This early transfer doesn't have permission");
+            transferPermission[msg.sender][recipient] = transferPermission[msg.sender][recipient].sub(amount);
+            updateUnburnBalanceAndClaimed(msg.sender, recipient, amount);
+            result = super.transfer(recipient, amount);
+            return result;
+        } else {
+            updateUnburnBalanceAndClaimed(msg.sender, recipient, amount);
+            result = super.transfer(recipient, amount);
+            return result;
+        }
     }
 
     function transferFrom(
@@ -195,10 +162,19 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         address recipient, 
         uint256 amount
     ) public override nonReentrant() returns (bool) {
-        require(block.timestamp >= started + signatureTimeStamp, "It's not signature timestamp yet");
-        updateUnburnBalanceAndClaimed(sender, recipient, amount);
-        bool result = super.transferFrom(sender, recipient, amount);
-        return result;
+        require(started <= block.timestamp, "It is not started time yet");
+        bool result;
+        if(block.timestamp < started + permissionlessTimeStamp){
+            require(amount <= transferPermission[sender][recipient], "This early transfer doesn't have permission");
+            transferPermission[sender][recipient] = transferPermission[sender][recipient].sub(amount);
+            updateUnburnBalanceAndClaimed(sender, recipient, amount);
+            result = super.transferFrom(sender, recipient, amount);
+            return result;
+        } else {
+            updateUnburnBalanceAndClaimed(sender, recipient, amount);
+            result = super.transferFrom(sender, recipient, amount);
+            return result;
+        }
     }
 
     // function clone() public returns (address newVesting) {

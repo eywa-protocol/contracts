@@ -61,7 +61,7 @@ describe('Vesting tests. Part 1', () => {
     let tokenErc20;
     let vesting;
     let adminDeployer;
-    let signAdmin;
+    let earlyTransferPermissionAdmin;
     let addr1;
     let addr2;
     let addr3;
@@ -76,10 +76,8 @@ describe('Vesting tests. Part 1', () => {
     let cliffAmount;
     let stepAmount;
     let numOfSteps;
-    let signAdminAddress = accForSing.address;
-    let signAdminPrKey = accForSing.privateKey;
     
-    let signatureTimeStamp;
+    let permissionlessTimeStamp;
     let vestingSupply;
 
 
@@ -87,7 +85,7 @@ describe('Vesting tests. Part 1', () => {
         const ERC20 = await ethers.getContractFactory('PermitERC20');
         tokenErc20 = await ERC20.deploy("PermitERC20 token", "prmt20t");
         await tokenErc20.deployed();
-        [adminDeployer, signAdmin, addr1, addr2, addr3, addr4, ...addrs] = await ethers.getSigners();
+        [adminDeployer, earlyTransferPermissionAdmin, addr1, addr2, addr3, addr4, ...addrs] = await ethers.getSigners();
         const Vesting = await ethers.getContractFactory('EywaVesting');
         vesting = await Vesting.deploy(
             adminDeployer.address,
@@ -111,7 +109,7 @@ describe('Vesting tests. Part 1', () => {
         cliffAmount = vestingSupply / 2;
         numOfSteps = 10;
         stepAmount = (vestingSupply / 2) / numOfSteps;
-        signatureTimeStamp = day_in_seconds * 10;
+        permissionlessTimeStamp = day_in_seconds * 10;
 
         await vesting.initialize(
             startTimeStamp, 
@@ -120,8 +118,8 @@ describe('Vesting tests. Part 1', () => {
             cliffAmount,
             stepAmount,
             numOfSteps,
-            signAdminAddress,
-            signatureTimeStamp,
+            earlyTransferPermissionAdmin.address,
+            permissionlessTimeStamp,
             [addr1.address, addr2.address, addr3.address],
             [vestingSupply / 2, vestingSupply / 4, vestingSupply / 4],
             {from: adminDeployer.address}
@@ -147,8 +145,8 @@ describe('Vesting tests. Part 1', () => {
             cliffAmount,
             stepAmount,
             numOfSteps,
-            signAdminAddress,
-            signatureTimeStamp,
+            earlyTransferPermissionAdmin.address,
+            permissionlessTimeStamp,
             [addr1.address, addr2.address, addr3.address],
             [400 / 2, 400 / 4, 400 / 4],
             {from: adminDeployer.address}
@@ -170,7 +168,7 @@ describe('Vesting tests. Part 1', () => {
         blockNumBefore = await ethers.provider.getBlockNumber();
         blockBefore = await ethers.provider.getBlock(blockNumBefore);
         timestampBefore = blockBefore.timestamp;
-        await expect(vesting.connect(signAdmin).claim(1)).to.be.revertedWith('the amount is not available');
+        await expect(vesting.connect(earlyTransferPermissionAdmin).claim(1)).to.be.revertedWith('the amount is not available');
     });
 
     it('claim aftercliff is working', async function () {
@@ -188,10 +186,6 @@ describe('Vesting tests. Part 1', () => {
         expect(balanceBeforeRealEYWA).to.equal(0);
         expect(balanceAfterRealEYWA).to.equal(1);
         expect(await tokenErc20.balanceOf(vesting.address)).to.equal(vestingSupply - 1);
-    });
-    it('It cannot transfer before signature timestamp', async function () {
-        await increaseTime(day_in_seconds * 9); 
-        await expect(vesting.connect(addr1).transfer(addr2.address, 1000000)).to.be.revertedWith("It's not signature timestamp yet");
     });
     it('Transfer right after cliff', async function () {
         await increaseTime(parseInt(cliffDuration) + parseInt(day_in_seconds)); 
@@ -410,101 +404,7 @@ describe('Vesting tests. Part 1', () => {
         expect(parseInt(summaOf3by2ndIteration) - parseInt(summaOf3by1stIteration)).to.be.equal(vestingSupply/10);
     });
 
-    it('signature', async function () {
-        await increaseTime(day_in_seconds * 1);
-        let sender = addr1.address;
-        let recepient = addr2.address;
-        let nonce = await vesting.connect(addr1).nonces(addr1.address);
-        let amount = 9911;
-
-        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(parseInt(nonce)), web3.utils.soliditySha3(amount));
-
-        let sigObj = web3.eth.accounts.sign(msg, signAdminPrKey);
-        let signa = sigObj.signature;
-        signature = signa.substr(2);
-        let r = '0x' + signature.slice(0, 64);
-        let s = '0x' + signature.slice(64, 128);
-        let v = '0x' + signature.slice(128, 130);
-
-        let balanceAddr1Before = await vesting.connect(addr1).balanceOf(addr1.address);
-        let balanceAddr2Before = await vesting.connect(addr1).balanceOf(addr2.address);
-
-        await vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, r, s);
-        let balanceAddr1After = await vesting.connect(addr1).balanceOf(addr1.address);
-        let balanceAddr2After = await vesting.connect(addr1).balanceOf(addr2.address);
-
-        expect(balanceAddr2After - balanceAddr2Before).to.be.equal(amount);
-        expect(balanceAddr1Before - balanceAddr1After).to.be.equal(amount);
-    });
-
-    it('signature wrong', async function () {
-        await increaseTime(day_in_seconds * 1);
-        let sender = addr1.address;
-        let recepient = addr2.address;
-        let nonce = await vesting.connect(addr1).nonces(addr1.address);
-        let amount = 9911;
-
-        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(parseInt(nonce)), web3.utils.soliditySha3(amount));
-
-        let sigObj = web3.eth.accounts.sign(msg, signAdminPrKey);
-        let signa = sigObj.signature;
-        signature = signa.substr(2);
-        let r = '0x' + signature.slice(0, 64);
-        let s = '0x' + signature.slice(64, 128);
-        let v = '0x' + signature.slice(128, 130);
-
-        let fakeR = '0x468dc65fc3d1f1b1e283392c2ef3da995279f36e940c31ce1319b2d47f8e98c6';
-
-        await expect(vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, fakeR, s)).to.be.revertedWith('ERROR: Verifying signature failed');
-    });
-
-    it('Wrong signature suppose to not work', async function () {
-        await increaseTime(day_in_seconds * 1);
-        let sender = addr1.address;
-        let recepient = addr2.address;
-        let nonce = await vesting.connect(addr1).nonces(addr1.address);
-        let amount = 9911;
-
-        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(parseInt(nonce)), web3.utils.soliditySha3(amount));
-
-        let sigObj = web3.eth.accounts.sign(msg, signAdminPrKey);
-        let signa = sigObj.signature;
-        signature = signa.substr(2);
-        let r = '0x' + signature.slice(0, 64);
-        let s = '0x' + signature.slice(64, 128);
-        let v = '0x' + signature.slice(128, 130);
-
-        let fakeR = '0x468dc65fc3d1f1b1e283392c2ef3da995279f36e940c31ce1319b2d47f8e98c6';
-
-        await expect(vesting.connect(addr1).transferWithSignature(addr2.address, amount, v, fakeR, s)).to.be.revertedWith('ERROR: Verifying signature failed');
-    });
-
-    it('signature transferFrom', async function () {
-        await increaseTime(day_in_seconds * 1);
-        let sender = addr1.address;
-        let recepient = addr2.address;
-        let nonce = await vesting.connect(addr1).nonces(addr1.address);
-        let amount = 9911;
-
-        let msg = web3.utils.soliditySha3(web3.utils.soliditySha3(sender), web3.utils.soliditySha3(recepient), web3.utils.soliditySha3(parseInt(nonce)), web3.utils.soliditySha3(amount));
-
-        let sigObj = web3.eth.accounts.sign(msg, signAdminPrKey);
-        let signa = sigObj.signature;
-        signature = signa.substr(2);
-        let r = '0x' + signature.slice(0, 64);
-        let s = '0x' + signature.slice(64, 128);
-        let v = '0x' + signature.slice(128, 130);
-
-        let balanceAddr1Before = await vesting.connect(addr1).balanceOf(addr1.address);
-        let balanceAddr2Before = await vesting.connect(addr1).balanceOf(addr2.address);
-        await vesting.connect(addr1).approve(addr3.address,amount);
-        await vesting.connect(addr3).transferFromWithSignature(addr1.address, addr2.address, amount, v, r, s);
-        let balanceAddr1After = await vesting.connect(addr1).balanceOf(addr1.address);
-        let balanceAddr2After = await vesting.connect(addr1).balanceOf(addr2.address);
-
-        expect(balanceAddr2After - balanceAddr2Before).to.be.equal(amount);
-        expect(balanceAddr1Before - balanceAddr1After).to.be.equal(amount);
-    });
+  
 
     // it('Cloning', async function () {
     //     let clonedAddress = await vesting.connect(adminDeployer).clone();
@@ -523,7 +423,7 @@ describe('Vesting tests. Part 2', () => {
     let tokenErc20;
     let vesting;
     let adminDeployer;
-    let signAdmin;
+    let earlyTransferPermissionAdmin;
     let addr1;
     let addr2;
     let addr3;
@@ -538,17 +438,15 @@ describe('Vesting tests. Part 2', () => {
     let cliffAmount;
     let stepAmount;
     let numOfSteps;
-    let signAdminAddress = accForSing.address;
-    let signAdminPrKey = accForSing.privateKey;
     
-    let signatureTimeStamp;
+    let permissionlessTimeStamp;
     let vestingSupply;
 
     it('Only adminDeployer can call initialize', async function () {
         const ERC20 = await ethers.getContractFactory('PermitERC20');
         tokenErc20 = await ERC20.deploy("PermitERC20 token", "prmt20t");
         await tokenErc20.deployed();
-        [adminDeployer, signAdmin, addr1, addr2, addr3, addr4, ...addrs] = await ethers.getSigners();
+        [adminDeployer, earlyTransferPermissionAdmin, addr1, addr2, addr3, addr4, ...addrs] = await ethers.getSigners();
         const Vesting = await ethers.getContractFactory('EywaVesting');
         vesting = await Vesting.deploy(
             adminDeployer.address,
@@ -575,7 +473,7 @@ describe('Vesting tests. Part 2', () => {
         cliffAmount = vestingSupply / 2;
         numOfSteps = 10;
         stepAmount = (vestingSupply / 2) / numOfSteps;
-        signatureTimeStamp = day_in_seconds * 10;
+        permissionlessTimeStamp = day_in_seconds * 10;
 
         await expect(vesting.connect(addr2).initialize(
             startTimeStamp, 
@@ -584,8 +482,8 @@ describe('Vesting tests. Part 2', () => {
             cliffAmount,
             stepAmount,
             numOfSteps,
-            signAdminAddress,
-            signatureTimeStamp,
+            earlyTransferPermissionAdmin.address,
+            permissionlessTimeStamp,
             [addr1.address, addr2.address, addr3.address],
             [vestingSupply / 2, vestingSupply / 4, vestingSupply / 4]        
         )).to.be.revertedWith("Msg.sender is not admin");
@@ -603,7 +501,7 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
     let tokenErc20;
     let vesting;
     let adminDeployer;
-    let signAdmin;
+    let earlyTransferPermissionAdmin;
     let addr1;
     let addr2;
     let addr3;
@@ -618,17 +516,15 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
     let cliffAmount;
     let stepAmount;
     let numOfSteps;
-    let signAdminAddress = accForSing.address;
-    let signAdminPrKey = accForSing.privateKey;
     
-    let signatureTimeStamp;
+    let permissionlessTimeStamp;
     let vestingSupply;
 
     before(async () => {
         const ERC20 = await ethers.getContractFactory('PermitERC20');
         tokenErc20 = await ERC20.deploy("PermitERC20 token", "prmt20t");
         await tokenErc20.deployed();
-        [adminDeployer, signAdmin, addr1, addr2, addr3, addr4, ...addrs] = await ethers.getSigners();
+        [adminDeployer, earlyTransferPermissionAdmin, addr1, addr2, addr3, addr4, ...addrs] = await ethers.getSigners();
         const Vesting = await ethers.getContractFactory('EywaVesting');
         vesting = await Vesting.deploy(
             adminDeployer.address,
@@ -641,7 +537,7 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
         cliffAmount = 10000000;
         numOfSteps = 1000000;
         stepAmount = 10;
-        signatureTimeStamp = day_in_seconds * 10;
+        permissionlessTimeStamp = day_in_seconds * 10;
 
         // vestingSupply = 10000000;
         vestingSupply = parseInt(cliffAmount) + parseInt(10)*parseInt(1000000);
@@ -664,8 +560,8 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
             cliffAmount,
             stepAmount,
             numOfSteps,
-            signAdminAddress,
-            signatureTimeStamp,
+            earlyTransferPermissionAdmin.address,
+            permissionlessTimeStamp,
             [addr1.address, addr2.address, addr3.address],
             [10000000, 10000000 / 2, 10000000 / 2],
             {from: adminDeployer.address}
@@ -682,6 +578,23 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
     afterEach(async () => {
         await restoreSnapshot(snapshot0);
     });
+    it('Permission check', async function () {
+        await increaseTime(day_in_seconds * 9); 
+        await expect(vesting.connect(addr1).transfer(addr2.address, 1000000)).to.be.revertedWith("This early transfer doesn't have permission");
+        let allowedNumberCurrent = await vesting.connect(addr1).getCurrentTransferPermission(addr1.address, addr2.address);
+        expect(allowedNumberCurrent).to.be.equal(0);
+        await expect(vesting.connect(addr1).increaseTransferPermission(addr1.address, addr2.address, 1000)).to.be.revertedWith("msg.sender is not admin");
+        await vesting.connect(earlyTransferPermissionAdmin).increaseTransferPermission(addr1.address, addr2.address, 1000);
+        allowedNumberCurrent = await vesting.connect(addr1).getCurrentTransferPermission(addr1.address, addr2.address);
+        expect(allowedNumberCurrent).to.be.equal(1000);
+        await vesting.connect(earlyTransferPermissionAdmin).decreaseTransferPermission(addr1.address, addr2.address, 800);
+        allowedNumberCurrent = await vesting.connect(addr1).getCurrentTransferPermission(addr1.address, addr2.address);
+        expect(allowedNumberCurrent).to.be.equal(200);
+        await vesting.connect(addr1).transfer(addr2.address, 190);
+        allowedNumberCurrent = await vesting.connect(addr1).getCurrentTransferPermission(addr1.address, addr2.address);
+        expect(allowedNumberCurrent).to.be.equal(10);
+
+    }); 
     it('Linear unlock vesting checks', async function () {
         await increaseTime(cliffDuration); 
         await increaseTime(day_in_seconds - 1);
@@ -704,17 +617,7 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
         timestampBefore =  blockBefore.timestamp;
         let claimableAfter = await vesting.connect(addr1).claimable(parseInt(timestampBefore));
         expect(parseInt(claimableAfter) - parseInt(claimableBefore)).to.be.equal(parseInt(stepAmount)*parseInt(increaseTimeNew));
-        // console.log("balance addr1 = ", await vesting.connect(addr1).balanceOf(addr1.address));
-        // // console.log("available addr1 = ", await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address));
-        // console.log("claimable = ", await vesting.connect(addr1).claimable(parseInt(timestampBefore)));
-        // await increaseTime(day_in_seconds - 1);
-        // 10000000
-        // 10000010
-        // blockNumBefore = await ethers.provider.getBlockNumber();
-        // blockBefore = await ethers.provider.getBlock(blockNumBefore);
-        // timestampBefore =  blockBefore.timestamp;
-        // console.log("claimable = ", await vesting.connect(addr1).claimable(parseInt(timestampBefore)));
-        // console.log("available addr1 = ", await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address));
+
         await vesting.connect(addr1).transfer(addr2.address, 1000000);
         await vesting.connect(addr2).transfer(addr3.address, 50000);
         await vesting.connect(addr3).claim(114); // addr 3
