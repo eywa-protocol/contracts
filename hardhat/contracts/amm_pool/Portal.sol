@@ -82,10 +82,14 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bool approveMax;
     }
 
+    struct TokenInfo {
+        uint8 tokenDecimals;
+        bool isApproved;
+    }
+
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => UnsynthesizeState) public unsynthesizeStates;
-    mapping(bytes32 => uint8) public tokenDecimals;
-    mapping(bytes32 => bool) public tokenApprove;
+    mapping(bytes32 => TokenInfo) public tokenDecimalsData;
 
     event SynthesizeRequest(
         bytes32 indexed id,
@@ -142,7 +146,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _from,
         SynthParams calldata _synthParams
     ) external returns (bytes32 txID) {
-        require(tokenApprove[castToBytes32(_token)], "Portal: token must be verified");
+        require(tokenDecimalsData[castToBytes32(_token)].isApproved, "Portal: token must be verified");
         registerNewBalance(_token, _amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_from);
@@ -238,8 +242,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bytes1 _txStateBump,
         uint256 _chainId
     ) external returns (bytes32 txID) {
-        //TODO: check token to be verified
-        require(tokenApprove[castToBytes32(_token)], "Portal: token must be verified");
+        require(tokenDecimalsData[castToBytes32(_token)].isApproved, "Portal: token must be verified");
         registerNewBalance(_token, _amount);
 
         require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainID");
@@ -496,17 +499,21 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
 
     // implies manual verification point
     function approveRepresentationRequest(bytes32 _rtoken, uint8 _decimals) external onlyOwner {
-        tokenDecimals[_rtoken] = _decimals;
-        tokenApprove[_rtoken] = true;
+        tokenDecimalsData[_rtoken].tokenDecimals = _decimals;
+        tokenDecimalsData[_rtoken].isApproved = true;
 
         emit ApprovedRepresentationRequest(_rtoken);
     }
 
     function approveRepresentationRequest(bytes32 _rtoken, uint8 _decimals, bool _approve) external onlyOwner {
-        tokenDecimals[_rtoken] = _decimals;
-        tokenApprove[_rtoken] = _approve;
+        tokenDecimalsData[_rtoken].tokenDecimals = _decimals;
+        tokenDecimalsData[_rtoken].isApproved = _approve;
 
         emit ApprovedRepresentationRequest(_rtoken);
+    }
+
+    function tokenDecimals(bytes32 _rtoken) public view returns (uint8) {
+        return tokenDecimalsData[_rtoken].tokenDecimals;
     }
 
     function setTrustedForwarder(address _forwarder) external onlyOwner {
@@ -535,7 +542,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         //synthesize request
         for (uint256 i = 0; i < _tokens.length; i++) {
             if (_amounts[i] > 0) {
-                require(tokenApprove[castToBytes32(_tokens[i])], "Portal: token must be verified");
+                require(tokenDecimalsData[castToBytes32(_tokens[i])].isApproved, "Portal: token must be verified");
 
                 registerNewBalance(_tokens[i], _amounts[i]);
 
