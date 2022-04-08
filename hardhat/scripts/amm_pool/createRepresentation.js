@@ -4,8 +4,8 @@ const hre = require("hardhat");
 
 async function main() {
 
-  this.s = networkConfig[network.name].synthesis;
-  this.p = networkConfig[network.name].portal;
+  this.s = await networkConfig[network.name].synthesis;
+  this.p = await networkConfig[network.name].portal;
   this.sourceForRepresentation = networkConfig[network.name].sourceForRepresentation;
   this.networks = ["network1","network2","network3"];
 
@@ -52,8 +52,7 @@ async function main() {
       for (let t of tokens) {
         let tokenAddressBytes32 = addressToBytes32(t.address);
         if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
-          console.log('portal', portal);
-          this.tx = await portal.approveRepresentationRequest(tokenAddressBytes32, "18");
+          this.tx = await portal["approveRepresentationRequest(bytes32,uint8)"](tokenAddressBytes32, "18");
           console.log(`approveRepresentationRequest for ${t.name} token on ${network.name} source from ${netw}: ${this.tx.hash}`);
           await this.tx.wait();
         }
