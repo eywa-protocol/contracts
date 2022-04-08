@@ -114,7 +114,6 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
      * @param receiveSide receive contract address
      * @param oppositeBridge opposite bridge address
      * @param chainId opposite chain ID
-     * @param requestId request ID
      * @param sender sender's address
      * @param nonce sender's nonce
      */
@@ -123,11 +122,16 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         address receiveSide,
         address oppositeBridge,
         uint256 chainId,
-        bytes32 requestId,
         address sender,
         uint256 nonce
     ) external onlyTrustedContract(receiveSide, oppositeBridge) returns (bool) {
         verifyAndUpdateNonce(sender, nonce);
+        bytes32 requestId = prepareRqId(
+            bytes32(bytes20(oppositeBridge)),
+            chainId,
+            bytes32(bytes20(receiveSide)),
+            bytes32(bytes20(sender)),
+            nonce);
         emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
         return true;
     }
@@ -138,7 +142,6 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
      * @param receiveSide receive contract address
      * @param oppositeBridge opposite bridge address
      * @param chainId opposite chain ID
-     * @param requestId request ID
      * @param sender sender's address
      * @param nonce sender's nonce
      */
@@ -147,11 +150,16 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         bytes32 receiveSide,
         bytes32 oppositeBridge,
         uint256 chainId,
-        bytes32 requestId,
         address sender,
         uint256 nonce
     ) external onlyTrustedContractBytes32(receiveSide, oppositeBridge) returns (bool) {
         verifyAndUpdateNonce(sender, nonce);
+        bytes32 requestId = prepareRqId(
+            oppositeBridge,
+            chainId,
+            receiveSide,
+            bytes32(bytes20(sender)),
+            nonce);
         emit OracleRequestSolana(
             "setRequest",
             castToBytes32(address(this)),
