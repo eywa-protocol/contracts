@@ -24,6 +24,7 @@ type tmplData struct {
 	Contracts map[string]*tmplContract // List of contracts to generate into this file
 	Libraries map[string]string        // Map the bytecode's link pattern to the library name
 	Structs   map[string]*tmplStruct   // Contract struct type definitions
+	Imports   string
 }
 
 // tmplContract contains the data needed to generate an individual contract binding.
@@ -83,6 +84,25 @@ var tmplLibs = map[Lang]string{
 	LangGo: templateGSNBaseGo,
 }
 
+var tmplImports = map[string]string{
+	"std": `
+	ethereum "github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/event"
+`,
+	"harmony": `
+	ethereum "github.com/ethereum/go-ethereum"
+	"github.com/harmony-one/harmony/accounts/abi"
+	"github.com/harmony-one/harmony/accounts/abi/bind"
+	"github.com/harmony-one/harmony/core/types"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/event"
+`,
+}
+
 // tmplSourceGo is the Go source template that the generated Go contract binding
 // is based on.
 const tmplSourceGo = `
@@ -97,12 +117,7 @@ import (
 	"errors"
 	"fmt"
 
-	ethereum "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
+	{{.Imports}}
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
