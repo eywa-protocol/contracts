@@ -1,5 +1,5 @@
 let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
-const { checkoutProvider, addressToBytes32, timeout } = require("../../utils/helper"); 
+const { checkoutProvider, addressToBytes32, timeout, getTxId } = require("../../utils/helper"); 
 const { ethers } = require("hardhat");
 
 contract('Synthesize', () => {
@@ -112,14 +112,7 @@ contract('Synthesize', () => {
                 
                 { from: userNet1, gas: 1000_000 }
             )
-            const txID = web3.utils.soliditySha3(
-                { type: 'bytes32', value:addressToBytes32(userNet1)},
-                { type: 'uint256', value:nonce},
-                { type: 'uint256', value:chainIdB},
-                { type: 'uint256', value:chainIdA},
-                { type: 'bytes32', value:addressToBytes32(receiveSideB)},
-                { type: 'bytes32', value:addressToBytes32(oppositeBridge)},
-            );
+            const txID = getTxId(userNet1, nonce, chainIdB, chainIdA, receiveSideB, oppositeBridge)
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
@@ -181,14 +174,7 @@ contract('Synthesize', () => {
                 { from: userNet1, gas: 1000_000 }
             )
             
-            const txID = web3.utils.soliditySha3(
-                { type: 'bytes32', value:addressToBytes32(userNet1)},
-                { type: 'uint256', value:nonce},
-                { type: 'uint256', value:chainIdC},
-                { type: 'uint256', value:chainIdA},
-                { type: 'bytes32', value:addressToBytes32(receiveSideC)},
-                { type: 'bytes32', value:addressToBytes32(oppositeBridge)},
-            );
+            const txID = getTxId(userNet1, nonce, chainIdC, chainIdA, receiveSideC, oppositeBridge)
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
@@ -250,14 +236,7 @@ contract('Synthesize', () => {
                 { from: userNet2, gas: 1000_000 }
             )
             
-            const txID = web3.utils.soliditySha3(
-                { type: 'bytes32', value:addressToBytes32(userNet2)},
-                { type: 'uint256', value:nonce},
-                { type: 'uint256', value:chainIdA},
-                { type: 'uint256', value:chainIdB},
-                { type: 'bytes32', value:addressToBytes32(receiveSideA)},
-                { type: 'bytes32', value:addressToBytes32(oppositeBridge)},
-            );
+            const txID = getTxId(userNet2, nonce, chainIdA, chainIdB, receiveSideA, oppositeBridge)
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
@@ -319,14 +298,7 @@ contract('Synthesize', () => {
                 { from: userNet2, gas: 1000_000 }
             )
 
-            const txID = web3.utils.soliditySha3(
-                { type: 'bytes32', value:addressToBytes32(userNet2)},
-                { type: 'uint256', value:nonce},
-                { type: 'uint256', value:chainIdC},
-                { type: 'uint256', value:chainIdB},
-                { type: 'bytes32', value:addressToBytes32(receiveSideC)},
-                { type: 'bytes32', value:addressToBytes32(oppositeBridge)},
-            );
+            const txID = getTxId(userNet2, nonce, chainIdC, chainIdB, receiveSideC, oppositeBridge)
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
@@ -388,14 +360,7 @@ contract('Synthesize', () => {
                 { from: userNet3, gas: 1000_000 }
             )
 
-            const txID = web3.utils.soliditySha3(
-                { type: 'bytes32', value:addressToBytes32(userNet3)},
-                { type: 'uint256', value:nonce},
-                { type: 'uint256', value:chainIdA},
-                { type: 'uint256', value:chainIdC},
-                { type: 'bytes32', value:addressToBytes32(receiveSideA)},
-                { type: 'bytes32', value:addressToBytes32(oppositeBridge)},
-            );
+            const txID = getTxId(userNet3, nonce, chainIdA, chainIdC, receiveSideA, oppositeBridge)
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
@@ -456,14 +421,7 @@ contract('Synthesize', () => {
                 { from: userNet3, gas: 1000_000 }
             )
 
-            const txID = web3.utils.soliditySha3(
-                { type: 'bytes32', value:addressToBytes32(userNet3)},
-                { type: 'uint256', value:nonce},
-                { type: 'uint256', value:chainIdB},
-                { type: 'uint256', value:chainIdC},
-                { type: 'bytes32', value:addressToBytes32(receiveSideB)},
-                { type: 'bytes32', value:addressToBytes32(oppositeBridge)},
-            );
+            const txID = getTxId(userNet3, nonce, chainIdB, chainIdC, receiveSideB, oppositeBridge)
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
