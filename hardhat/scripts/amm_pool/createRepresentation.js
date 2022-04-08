@@ -16,6 +16,7 @@ async function main() {
   const synthesis = Synthesis.attach(this.s);
   const Portal = await ethers.getContractFactory("Portal");
   const portal = Portal.attach(this.p);
+
   // origin token should be from another place
   for (let netw of this.sourceForRepresentation) {
     let tokens = networkConfig[netw].token;
@@ -46,17 +47,18 @@ async function main() {
     }
   }
 
-  // for (let netw of networks) {
-  //     let tokens = networkConfig[netw].localToken;
-  //     for (let t of tokens) {
-  //       let tokenAddressBytes32 = addressToBytes32(t.address);
-  //       if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
-  //         this.tx = await portal.approveRepresentationRequest( t.address, "18"/*_decimals*/)
-  //         console.log(`approveRepresentationRequest for ${t.name} token on ${network.name} source from ${netw}: ${this.tx.hash}`);
-  //         await this.tx.wait();
-  //       }
-  //    }
-  // }
+  for (let netw of networks) {
+      let tokens = networkConfig[netw].localToken;
+      for (let t of tokens) {
+        let tokenAddressBytes32 = addressToBytes32(t.address);
+        if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
+          console.log('portal', portal);
+          this.tx = await portal.approveRepresentationRequest(tokenAddressBytes32, "18");
+          console.log(`approveRepresentationRequest for ${t.name} token on ${network.name} source from ${netw}: ${this.tx.hash}`);
+          await this.tx.wait();
+        }
+     }
+  }
 
 }
 
