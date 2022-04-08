@@ -1,8 +1,5 @@
 #! /bin/bash
 
-
-
-
 source $(pwd)/scripts/import.sh
 
 nets=${1}
@@ -36,9 +33,7 @@ if [ ! -z "$REGNET" -a "$PART" == "deploy_crosspool" -a "$STEP" != "init" ]; the
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network "$regnet"
 elif [ -z "$STEP" ]; then
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network1
-  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network1
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network3
-  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network harmonylocal
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network2
 fi
 
@@ -69,7 +64,8 @@ if [ \( ! -z "$REGNET" -a "$STEP" == "init" \) -o -z "$REGNET" ]; then
   done
 
   if [ ! -z "$REGNET" -a "$STEP" == "init" ]; then
-    npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network ${regnet}
+     echo "NOTE: Temporary disabled 'dao deploy' !"
+#    npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network ${regnet}
   elif [ -z "$STEP" ]; then
     npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network network2
   fi
