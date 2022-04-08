@@ -654,7 +654,7 @@
       "networks_env/env_connect_to_harmonylocal.env",
       "networks_env/env_test_for_harmonylocal.env"
     ],
-    "chainId": 1666700000,
+    "chainId": 789,
     "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
