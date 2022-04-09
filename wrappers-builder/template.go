@@ -86,20 +86,15 @@ var tmplLibs = map[Lang]string{
 
 var tmplImports = map[string]string{
 	"std": `
-	ethereum "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
+
 `,
 	"harmony": `
-	ethereum "github.com/ethereum/go-ethereum"
 	"github.com/harmony-one/harmony/accounts/abi"
 	"github.com/harmony-one/harmony/accounts/abi/bind"
 	"github.com/harmony-one/harmony/core/types"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/event"
 `,
 }
 
@@ -116,6 +111,10 @@ import (
 	"strings"
 	"errors"
 	"fmt"
+
+	ethereum "github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/event"
 
 	{{.Imports}}
 )
@@ -747,12 +746,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core"
+
+	{{.Imports}}
 )
 
 const (
@@ -764,6 +763,8 @@ var (
 	ErrStringTooLong = errors.New("string to long")
 	ErrHexTooShort   = errors.New("hex string is shorter than bytes32")
 	UseGsnFlag       bool
+	
+	_ = types.BloomLookup
 )
 
 func init() {
