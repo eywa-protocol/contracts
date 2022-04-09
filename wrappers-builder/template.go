@@ -992,7 +992,7 @@ func GsnExecutor(gsnParams *GsnCallOpts, abiSrc, methodName string, args ...inte
 
 // Contract structs
 
-{{$structs := .}}
+{{$structs := .Structs}}
 {{range $structs}}
 	// {{.Name}} is an auto generated low-level Go binding around an user-defined struct.
 	type {{.Name}} struct {

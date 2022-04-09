@@ -106,6 +106,11 @@ func findAllSourceFiles(roots []string, extension string) ([]string, error) {
 
 // dumpContracts generates go binding files from contract ABI and write them to files
 func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputDir string, isHarmony bool) error {
+	importsType := "std"
+	if isHarmony {
+		importsType = "harmony"
+	}
+
 	for key, value := range contracts {
 		// logrus.Printf("VALUE %x \n",value.Code)
 		// logrus.Printf("KEY %s \n",key)
@@ -127,11 +132,6 @@ func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputD
 		types = append(types, keyParts[len(keyParts)-1])
 		fsigs = append(fsigs, value.Hashes)
 		structs := make(map[string]*tmplStruct)
-
-		importsType := "std"
-		if isHarmony {
-			importsType = "harmony"
-		}
 
 		code, err := Bind(types, []string{string(abi)}, []string{value.Code}, fsigs, packageName, LangGo, libs, aliases, tmplSource, structs, tmplImports[importsType])
 		if err != nil {
@@ -155,8 +155,16 @@ func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputD
 	// Libs code
 	buf := new(bytes.Buffer)
 
+	data := struct {
+		Structs map[string]*tmplStruct
+		Imports string
+	}{
+		Structs: allStructs,
+		Imports: tmplImports[importsType],
+	}
+
 	tmpl := template.Must(template.New("").Parse(templateGSNBaseGo))
-	if err := tmpl.Execute(buf, allStructs); err != nil {
+	if err := tmpl.Execute(buf, data); err != nil {
 		logrus.Fatal(err)
 		return err
 	}
