@@ -136,7 +136,7 @@ func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputD
 		fsigs = append(fsigs, value.Hashes)
 		structs := make(map[string]*tmplStruct)
 
-		code, err := Bind(types, []string{string(abi)}, []string{value.Code}, fsigs, packageName, LangGo, libs, aliases, tmplSource, structs, tmplImports[importsType])
+		code, err := Bind(types, []string{string(abi)}, []string{value.Code}, fsigs, packageName, LangGo, libs, aliases, tmplSource, structs, tmplImports[importsType], isHarmony)
 		if err != nil {
 			logrus.Fatal(err)
 			return err

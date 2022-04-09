@@ -49,7 +49,7 @@ var isStructsPresent = make(map[string]struct{})
 // to be used as is in client code, but rather as an intermediate struct which
 // enforces compile time type safety and naming convention opposed to having to
 // manually maintain hard coded strings that break on runtime.
-func Bind(types []string, abis []string, bytecodes []string, fsigs []map[string]string, pkg string, lang Lang, libs map[string]string, aliases map[string]string, tmplMap map[Lang]string, structs map[string]*tmplStruct, tmplImport string) (string, error) {
+func Bind(types []string, abis []string, bytecodes []string, fsigs []map[string]string, pkg string, lang Lang, libs map[string]string, aliases map[string]string, tmplMap map[Lang]string, structs map[string]*tmplStruct, tmplImport string, isHarmony bool) (string, error) {
 	var (
 		// contracts is the map of each individual contract requested binding
 		contracts = make(map[string]*tmplContract)
@@ -223,6 +223,7 @@ func Bind(types []string, abis []string, bytecodes []string, fsigs []map[string]
 		Libraries: libs,
 		Structs:   structs,
 		Imports:   tmplImport,
+		IsHarmony: isHarmony,
 	}
 	buffer := new(bytes.Buffer)
 

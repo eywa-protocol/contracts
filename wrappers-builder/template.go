@@ -25,6 +25,7 @@ type tmplData struct {
 	Libraries map[string]string        // Map the bytecode's link pattern to the library name
 	Structs   map[string]*tmplStruct   // Contract struct type definitions
 	Imports   string
+	IsHarmony bool
 }
 
 // tmplContract contains the data needed to generate an individual contract binding.
@@ -133,10 +134,15 @@ var (
 )
 
 {{$structs := .Structs}}
+{{$isHarmony := .IsHarmony}}
 
 {{range $contract := .Contracts}}
 	// {{.Type}}MetaData contains all meta data concerning the {{.Type}} contract.
+	{{if $isHarmony}}
+	var {{.Type}}MetaData = &MetaData{
+	{{else}}
 	var {{.Type}}MetaData = &bind.MetaData{
+	{{end}}
 		ABI: "{{.InputABI}}",
 		{{if $contract.FuncSigs -}}
 		Sigs: map[string]string{
