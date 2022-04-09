@@ -33,7 +33,7 @@ wrappers: npm compile copy_configs
 	--json ${ARTIFACTS}/test/MerkleTest.sol \
 	--json ${ARTIFACTS}/test/BlockTest.sol \
 	--pkg wrappers --out ${WRAPPERS}
-	./wrappers-builder/wrappers-builder --hmy --json hardhat/artifacts/@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol \
+	./wrappers-builder/wrappers-builder --t harmony --json hardhat/artifacts/@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol \
 	--json ${ARTIFACTS}/bridge/Bridge.sol \
 	--json ${ARTIFACTS}/bridge/Forwarder.sol \
 	--json ${ARTIFACTS}/bridge/NodeRegistry.sol \
@@ -47,7 +47,7 @@ wrappers: npm compile copy_configs
 	--json ${ARTIFACTS}/amm_pool/Synthesis.sol \
 	--json ${ARTIFACTS}/test/MerkleTest.sol \
 	--json ${ARTIFACTS}/test/BlockTest.sol \
-	--pkg wrappers --out ${HMYWRAPPERS}
+	--pkg hmy --out ${HMYWRAPPERS}
 
 deps:
 	go mod tidy

@@ -735,7 +735,7 @@ import java.util.*;
 `
 
 const templateGSNBaseGo = `
-package wrappers
+package {{.Package}}
 
 import (
 	"crypto/ecdsa"

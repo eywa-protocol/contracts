@@ -30,6 +30,7 @@ var (
 	app         *cli.App
 	packageName string
 	outputDir   string
+	typeName    string
 	solFlag     = cli.StringSliceFlag{
 		Name:  "sol",
 		Usage: "this flag defines that input files will be .sol's and should be compiled with build/wrappers/solc",
@@ -48,9 +49,10 @@ var (
 		Usage: "this flag defines the package name that will be used for Go contract wrappers",
 		Value: "wrappers",
 	}
-	harmonyFlag = cli.BoolFlag{
-		Name:  "harmony, hmy",
+	typeFlag = cli.StringFlag{
+		Name:  "type, t",
 		Usage: "this flag generate wrappers for harmony-one",
+		Value: "std",
 	}
 
 	allStructs = make(map[string]*tmplStruct)
@@ -63,7 +65,7 @@ func init() {
 		jsonFlag,
 		outputFlag,
 		packageFlag,
-		harmonyFlag,
+		typeFlag,
 	}
 	app.Usage = "use for generate Go wrappers for smart contracts"
 	app.Description = "CLI App for compile Go wrappers for smart contracts"
@@ -110,6 +112,7 @@ func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputD
 	if isHarmony {
 		importsType = "harmony"
 	}
+	logrus.Printf("Import type: %s\n", importsType)
 
 	for key, value := range contracts {
 		// logrus.Printf("VALUE %x \n",value.Code)
@@ -158,9 +161,11 @@ func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputD
 	data := struct {
 		Structs map[string]*tmplStruct
 		Imports string
+		Package string
 	}{
 		Structs: allStructs,
 		Imports: tmplImports[importsType],
+		Package: packageName,
 	}
 
 	tmpl := template.Must(template.New("").Parse(templateGSNBaseGo))
@@ -256,6 +261,7 @@ func PackagePathFile(name string) string {
 func compile(c *cli.Context) {
 	outputDir = c.String("output")
 	packageName = c.String("package")
+	typeName = c.String("type")
 	var (
 		err         error
 		sourceFiles []string
@@ -296,7 +302,7 @@ func compile(c *cli.Context) {
 	}
 	logrus.Printf("DUMPING CONTRACTS package %s dir %s", packageName, outputDir)
 
-	err = dumpContracts(contracts, packageName, outputDir, c.IsSet(harmonyFlag.Name))
+	err = dumpContracts(contracts, packageName, outputDir, typeName == "harmony")
 	if err != nil {
 		logrus.Fatal(err)
 		panic(err)
