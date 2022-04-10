@@ -304,6 +304,7 @@ contract Router is EIP712, Ownable {
         bytes32 executionHash,
         DelegatedCallReceipt calldata receipt
     ) internal {
+        uint256 nonce = _useNonce(from);
         bytes32 workerHash = _hashTypedDataV4(
             keccak256(
                 abi.encodePacked(
@@ -316,7 +317,7 @@ contract Router is EIP712, Ownable {
                     transferAmount,
                     receipt.executionPrice,
                     executionHash,
-                    _useNonce(from),
+                    nonce,
                     receipt.deadline
                 )
             )
@@ -334,7 +335,7 @@ contract Router is EIP712, Ownable {
                     transferAmount,
                     receipt.executionPrice,
                     executionHash,
-                    _useNonce(from),
+                    nonce,
                     receipt.deadline,
                     receipt.v[0],
                     receipt.r[0],
