@@ -2,21 +2,18 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-newone/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts-newone/security/ReentrancyGuard.sol";
-
 import "@openzeppelin/contracts-newone/access/Ownable.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/extensions/ERC20Burnable.sol";
 
-contract PermitERC20 is ERC20Permit {
+
+contract EywaToken is ERC20Permit, ERC20Burnable {
     constructor (
-        string memory name_, 
-        string memory symbol_,
-        uint256 totalEywa,
-        uint256 initialOwner
-    ) ERC20Permit(name_) ERC20(name_,symbol_) {
-        _mint(initialOwner, amount);
+        string memory name, 
+        string memory symbol,
+        address initialOwner,
+        uint256 totalEywaAmount
+    ) ERC20Permit(name) ERC20(name,symbol) {
+        _mint(initialOwner, totalEywaAmount);
     }
-    
 }
