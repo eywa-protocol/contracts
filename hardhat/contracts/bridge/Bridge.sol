@@ -122,6 +122,7 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         address receiveSide,
         address oppositeBridge,
         uint256 chainId,
+        bytes32 /*deprecated_request_id*/,
         address sender,
         uint256 nonce
     ) external onlyTrustedContract(receiveSide, oppositeBridge) returns (bool) {
@@ -150,6 +151,7 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         bytes32 receiveSide,
         bytes32 oppositeBridge,
         uint256 chainId,
+        bytes32 /*deprecated_request_id*/,
         address sender,
         uint256 nonce
     ) external onlyTrustedContractBytes32(receiveSide, oppositeBridge) returns (bool) {

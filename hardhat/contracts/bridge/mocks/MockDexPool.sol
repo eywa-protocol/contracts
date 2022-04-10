@@ -58,7 +58,7 @@ contract MockDexPool is SolanaSerialize {
             testData_,
             requestId
         );
-        Bridge(bridge).transmitRequestV2(output, secondPartPool, oppBridge, chainId, msg.sender, nonce);
+        Bridge(bridge).transmitRequestV2(output, secondPartPool, oppBridge, chainId, 0, msg.sender, nonce);
 
         emit RequestSent(requestId);
     }
@@ -125,6 +125,7 @@ contract MockDexPool is SolanaSerialize {
             testStubPID_,
             solBridgePID_,
             SOLANA_CHAIN_ID,
+            0,
             msg.sender,
             nonce
         );
