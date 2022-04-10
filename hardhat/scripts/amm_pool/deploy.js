@@ -54,7 +54,7 @@ async function main() {
 
     //Deploy Router
     const _Router = await ethers.getContractFactory("Router");
-    const router = await _Router.deploy(portal.address, synthesis.address, curveProxy.address, ethers.constants.AddressZero /*local treasury*/);
+    const router = await _Router.deploy(portal.address, synthesis.address, curveProxy.address);
     await router.deployed();
     console.log(`Router address: ${router.address}`);
 
