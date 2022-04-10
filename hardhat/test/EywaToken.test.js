@@ -24,20 +24,20 @@ describe('Vesting tests. Part 1', () => {
 
 
         const ERC20 = await ethers.getContractFactory('EywaToken');
-        eywaToken = await ERC20.deploy("EywaToken", "realEywa", signAdminAddress, 1000);
+        eywaToken = await ERC20.deploy("EywaToken", "realEywa", initialOwner.address, 1000);
         await eywaToken.deployed();
     });
     it('Initial owner has right balance', async function () {
-        expect(await eywaToken.balanceOf(signAdminAddress)).to.be.equal(1000);
+        expect(await eywaToken.balanceOf(initialOwner.address)).to.be.equal(1000);
     });
     it('Burns right', async function () {
         let totalSupBefore = await eywaToken.totalSupply();
-        let balanceBefore = await eywaToken.balanceOf(signAdminAddress);
+        let balanceBefore = await eywaToken.balanceOf(initialOwner.address);
 
 
-        await eywaToken.burn(333, {from: accForSing});
+        await eywaToken.connect(initialOwner).burn(333);
         let totalSupAfter = await eywaToken.totalSupply();
-        let balanceAfter = await eywaToken.balanceOf(signAdminAddress);
+        let balanceAfter = await eywaToken.balanceOf(initialOwner.address);
 
         expect(parseInt(totalSupBefore) - parseInt(333)).to.be.equal(parseInt(totalSupAfter));
         expect(parseInt(balanceBefore) - parseInt(333)).to.be.equal(parseInt(balanceAfter));
@@ -54,18 +54,35 @@ describe('Vesting tests. Part 1', () => {
         let _PERMIT_TYPEHASH = web3.utils.soliditySha3("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
 
-        let msgHash = web3.utils.soliditySha3(
-            _PERMIT_TYPEHASH,
-            signAdminAddress,
-            addr1.address,
-            500,
-            nonce,
-            deadline
+        // let msgHash = web3.utils.soliditySha3(
+        //     _PERMIT_TYPEHASH,
+        //     signAdminAddress,
+        //     addr1.address,
+        //     500,
+        //     nonce,
+        //     deadline
+        // );
+        // let msgHash = ethUtil.hashPersonalMessage(
+        //     ethUtil.toBuffer(_PERMIT_TYPEHASH),
+        //     ethUtil.toBuffer(signAdminAddress),
+        //     ethUtil.toBuffer(addr1.address),
+        //     ethUtil.toBuffer(500),
+        //     ethUtil.toBuffer(nonce),
+        //     ethUtil.toBuffer(deadline)
+        // );
+        let msgHash = ethUtil.hashPersonalMessage(
+            ethUtil.toBuffer(_PERMIT_TYPEHASH) +
+            ethUtil.toBuffer(signAdminAddress) +
+            ethUtil.toBuffer(addr1.address) +
+            ethUtil.toBuffer(500) +
+            ethUtil.toBuffer(nonce) +
+            ethUtil.toBuffer(deadline)
         );
-        var sig = ethUtil.ecsign(msgHash, signAdminPrKey);
+        var privateKey = ethUtil.toBuffer(signAdminPrKey)
+        var sig = ethUtil.ecsign(msgHash, privateKey);
         var signature = ethUtil.toBuffer(sig);
-        var sigParams = ethUtil.fromRpcSig(signature);
-        await eywaToken.connect(addr3).permit(signAdminAddress, addr1.address, 500, deadline, sigParams.v, sigParams.r, sigParams.s);
+        // var sigParams = ethUtil.fromRpcSig(signature);
+        // await eywaToken.connect(addr3).permit(signAdminAddress, addr1.address, 500, deadline, sigParams.v, sigParams.r, sigParams.s);
 
 
 
