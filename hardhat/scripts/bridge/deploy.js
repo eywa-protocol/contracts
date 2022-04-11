@@ -10,13 +10,6 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     console.log("Owner:", deployer.address);
 
-    // Deploy RequestIdLib library
-    const _RequestIdLib = await ethers.getContractFactory("RequestIdLib");
-    const requestIdLib = await _RequestIdLib.deploy();
-    await requestIdLib.deployed();
-    networkConfig[network.name].requestIdLib = requestIdLib.address;
-    console.log("RequestIdLib address:", requestIdLib.address);
-
     // Deploy Forwarder
     const _Forwarder = await ethers.getContractFactory("Forwarder");
     const forwarder = await _Forwarder.deploy();
