@@ -10,8 +10,8 @@ async function main() {
     console.log("Owner:", deployer.address);
 
     // Deploy EYWA Test token with permit
-    const _ERC20Permit = await ethers.getContractFactory("TestTokenPermit");
-    const EYWA = await _ERC20Permit.deploy("EYWA", "EYWA");
+    const _ERC20Permit = await ethers.getContractFactory("EywaToken");
+    const EYWA = await _ERC20Permit.deploy(deployer.address);
     await EYWA.deployed();
     networkConfig[network.name].eywa = EYWA.address;
     console.log("EYWA ERC20 address:", EYWA.address);

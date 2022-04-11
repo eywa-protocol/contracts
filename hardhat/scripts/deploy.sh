@@ -131,7 +131,7 @@ if [ \( ! -z "$REGNET" -a "$STEP" == "init" \) -o -z "$REGNET" ]; then
   for net in ${nets//\,/ }; do
     echo 'init into:' ${net}
     npx hardhat balanceDeployer --network ${net}
-    npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
+    NETS=$nets npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
   done
 
 

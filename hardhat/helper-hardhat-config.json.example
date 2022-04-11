@@ -12,18 +12,7 @@
     "relayHub":  "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
-    "token": [
-      {
-        "address": "0xB2e6a5a864A1004C3c828a2e767A08C173939b01",
-        "name": "EYWA",
-        "symbol": "EYWA"
-      },
-      {
-        "address": "0x351950C7C686de38383Fe0175fceC25aF8402b3d",
-        "name": "USDT",
-        "symbol": "USDT"
-      }
-    ],
+    "token": [],
     "crosschainPool": [],
     "hubPool": {
       "address": "",
@@ -72,18 +61,7 @@
     "relayHub":  "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x19BCFEe83ee0D77158b0c151150aFb0f389E4721",
-    "token": [
-        {
-            "address": "0xB2e6a5a864A1004C3c828a2e767A08C173939b01",
-            "name": "EYWA",
-            "symbol": "EYWA"
-        },
-        {
-            "address": "0x351950C7C686de38383Fe0175fceC25aF8402b3d",
-            "name": "USDT",
-            "symbol": "USDT"
-        }
-    ],
+    "token": [],
     "crosschainPool": [],
     "hubPool": {
       "address": "",
@@ -132,18 +110,7 @@
     "relayHub":  "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
-    "token": [
-      {
-        "address": "0xB81547FA8E4e37A410a42acA3aE28A7dc170Bb23",
-        "name": "EYWA",
-        "symbol": "EYWA"
-      },
-      {
-        "address": "0x786Ba7a3B3229B0eD707aFf2731DFa4a4E6CB104",
-        "name": "USDT",
-        "symbol": "USDT"
-      }
-    ],
+    "token": [],
     "crosschainPool": [],
     "hubPool": {
       "address": "",
@@ -163,12 +130,8 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "rinkeby",
       "mumbai",
-      "hecotestnet",
-      "avalanchetestnet",
-      "metistestnet",
-      "coinextestnet"
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -192,18 +155,7 @@
     "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x2D99ABD9008Dc933ff5c0CD271B88309593aB921",
-    "token": [
-      {
-        "address": "0x1e3817FD91Cc66d3137043ac45B1d3acDe288C0c",
-        "name": "EYWA",
-        "symbol": "EYWA"
-      },
-      {
-        "address": "0xd8b917cf32022e35E09Bac2c6F16a64fa7D1DEC9",
-        "name": "USDT",
-        "symbol": "USDT"
-      }
-    ],
+    "token": [],
     "crosschainPool": [],
     "hubPool": {
       "address": "",
@@ -252,18 +204,7 @@
     "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",
-    "token": [
-      {
-        "address": "0xA9A689d9A0C7a018FAacd90662acE690Fb09a623",
-        "name": "EYWA",
-        "symbol": "EYWA"
-      },
-      {
-        "address": "0x77c24f0Af71257C0ee26e0E0a108F940D1698d53",
-        "name": "USDT",
-        "symbol": "USDT"
-      }
-    ],
+    "token": [],
     "crosschainPool": [],
     "hubPool": {
       "address": "",
@@ -312,18 +253,7 @@
     "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x2bCeC25644e56422bEFd3feA5286344369396fF1",
-    "token": [
-      {
-        "address": "0x330B6f89235900A328Bd31025a6aF8f4C63734d8",
-        "name": "EYWA",
-        "symbol": "EYWA"
-      },
-      {
-        "address": "0x8781f0Fe84cc9Aa55F3e0F622001F816ccA61Cc9",
-        "name": "USDT",
-        "symbol": "USDT"
-      }
-    ],
+    "token": [],
     "crosschainPool": [],
     "hubPool": {
       "address": "",
@@ -372,18 +302,7 @@
     "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506",
-    "token": [
-      {
-        "address": "0x8198a5716de98ba81b75bf6cEBFd3f27053876B9",
-        "name": "EYWA",
-        "symbol": "EYWA"
-      },
-      {
-        "address": "0x55c18d10ded7968Cd980AbfE0547B410DF284413",
-        "name": "USDT",
-        "symbol": "USDT"
-      }
-    ],
+    "token": [],
     "crosschainPool": [],
     "hubPool": {
       "address": "",
@@ -403,12 +322,8 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "rinkeby",
       "bsctestnet",
-      "hecotestnet",
-      "avalanchetestnet",
-      "coinextestnet",
-      "metistestnet"
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",

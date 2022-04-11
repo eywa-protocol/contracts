@@ -40,7 +40,7 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     event ReleasedAfterClaim(address indexed from, uint256 indexed amount);
     // event NewVestingContractCloned(address indexed vestingContract);
 
-    constructor(string _vestingName, address _adminDeployer, IERC20 _eywaToken) ERC20("Vested Eywa", "vEYWA"){
+    constructor(string memory _vestingName, address _adminDeployer, IERC20 _eywaToken) ERC20("Vested Eywa", "vEYWA"){
         vestingName = _vestingName;
         adminDeployer = _adminDeployer;
         eywaToken = _eywaToken;

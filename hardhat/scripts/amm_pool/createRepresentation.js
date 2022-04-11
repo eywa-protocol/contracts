@@ -7,7 +7,7 @@ async function main() {
   this.s = await networkConfig[network.name].synthesis;
   this.p = await networkConfig[network.name].portal;
   this.sourceForRepresentation = networkConfig[network.name].sourceForRepresentation;
-  this.networks = ["network1", "network2", "network3"];
+  this.networks = process.env.NETS.trim().split(",");
 
   const [deployer] = await ethers.getSigners();
   console.log("Owner:", deployer.address);
@@ -66,6 +66,32 @@ async function main() {
           await this.tx.wait();
         }
      }
+  }
+
+  for (let netw of this.sourceForRepresentation) {
+    let adrTokenEywa = networkConfig[netw].eywa;
+    console.log('@@@@@@ - ',adrTokenEywa);
+    if(adrTokenEywa){
+      let tokenAddressBytes32 = addressToBytes32(adrTokenEywa);
+      if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
+        this.tx = await synthesis.createRepresentation(tokenAddressBytes32, "18", "EYWA-Token", `EYWA(${networkConfig[netw].netwiker})`,
+        networkConfig[netw].chainId, networkConfig[netw].netwiker)
+        console.log(`createRepresentation for ${t.name} token on ${network.name} source from ${netw}: ${this.tx.hash}`);
+        await this.tx.wait();
+      }
+    }
+  }
+
+  for (let netw of networks) {
+    let adrTokenEywa = networkConfig[netw].eywa;
+    if (adrTokenEywa){
+      let tokenAddressBytes32 = addressToBytes32(adrTokenEywa);
+      if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
+        this.tx = await portal["approveRepresentationRequest(bytes32,uint8)"](tokenAddressBytes32, "18");
+        console.log(`approveRepresentationRequest for EYWA-Token token on ${network.name} source from ${netw}: ${this.tx.hash}`);
+        await this.tx.wait();
+      }
+    }
   }
 
 }
