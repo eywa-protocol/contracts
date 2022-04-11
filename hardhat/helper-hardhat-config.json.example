@@ -1,4 +1,53 @@
 {
+  "harmonytestnet": {
+    "rpcUrl": "ws://185.132.176.248:16011",
+    "rpcUrl2": "https://harmony.testnet.eywa.fi",
+    "n": "HARMONYTESTNET",
+    "netwiker": "HRM",
+    "env_file": [
+      "networks_env/env_connect_to_harmonytestnet.env",
+      "networks_env/env_test_for_harmonytestnet.env"
+    ],
+    "chainId": 1666700000,
+    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "rinkeby",
+      "mumbai",
+      "hecotestnet",
+      "avalanchetestnet",
+      "metistestnet",
+      "bsctestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
   "coinextestnet": {
     "rpcUrl": "wss://testnet-ws.coinex.net/",
     "rpcUrl2": "https://testnet-rpc1.coinex.net/",
@@ -98,7 +147,7 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "bsctestnet": {
-    "rpcUrl": "ws://65.21.81.106:8547",
+    "rpcUrl": "ws://185.132.176.248:16001",
     "rpcUrl2": "https://bsc.testnet.eywa.fi",
     "n": "BSCTESTNET",
     "netwiker": "BSC",
@@ -290,7 +339,7 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "mumbai": {
-    "rpcUrl": "wss://matic-testnet-archive-ws.bwarelabs.com",
+    "rpcUrl": "ws://185.132.176.248:16007",
     "rpcUrl2": "https://mumbai.testnet.eywa.fi",
     "n": "MUMBAI",
     "netwiker": "MUMBAI",

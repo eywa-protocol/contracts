@@ -10,8 +10,16 @@ async function main() {
     console.log("Owner:", deployer.address);
 
     // Deploy EYWA Test token with permit
-    const _ERC20Permit = await ethers.getContractFactory("EywaToken");
-    const EYWA = await _ERC20Permit.deploy(deployer.address);
+    let _ERC20Permit = null;
+    let  EYWA = null;
+    if (network.name.includes("network") || network.name === 'harmonylocalhost'){
+        _ERC20Permit = await ethers.getContractFactory("TestTokenPermit");
+        EYWA = await _ERC20Permit.deploy("EYWA-TOKEN", "EYWA");
+    }else{
+        _ERC20Permit = await ethers.getContractFactory("EywaToken");
+        EYWA = await _ERC20Permit.deploy(deployer.address);
+    }
+
     await EYWA.deployed();
     networkConfig[network.name].eywa = EYWA.address;
     console.log("EYWA ERC20 address:", EYWA.address);
