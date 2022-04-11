@@ -13,11 +13,7 @@ async function main() {
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
   const ERC20 = await ethers.getContractFactory('ERC20Mock');
-  const Portal = await ethers.getContractFactory("Portal", {
-    libraries: {
-        RequestIdLib: networkConfig[network.name].requestIdLib,
-    }
-});
+  const Portal = await ethers.getContractFactory("Portal");
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool');
 
   const totalSupply = ethers.utils.parseEther("100000000000.0");

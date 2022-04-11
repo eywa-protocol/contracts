@@ -36,11 +36,7 @@ async function main() {
     console.log("Bridge address:", bridge.address);
 
     // Deploy MockDexPool
-    const _MockDexPool = await ethers.getContractFactory("MockDexPool", {
-        libraries: {
-            RequestIdLib: requestIdLib.address,
-        }
-    });
+    const _MockDexPool = await ethers.getContractFactory("MockDexPool");
     const mockDexPool = await _MockDexPool.deploy(bridge.address);
     await mockDexPool.deployed();
 
