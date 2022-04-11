@@ -38,13 +38,6 @@ async function main() {
     networkConfig[network.name].relayerPoolFactory = relayerPoolFactory.address;
     console.log("RelayerPoolFactory address:", relayerPoolFactory.address);
 
-    // Deploy RequestIdLib library
-    const _RequestIdLib = await ethers.getContractFactory("RequestIdLib");
-    const requestIdLib = await _RequestIdLib.deploy();
-    await requestIdLib.deployed();
-    networkConfig[network.name].requestIdLib = requestIdLib.address;
-    console.log("RequestIdLib address:", requestIdLib.address);
-
     // Deploy NodeRegistry (contains Bridge)
     const _NodeRegistry = await ethers.getContractFactory("NodeRegistry", {
         libraries: {
@@ -64,11 +57,7 @@ async function main() {
     console.log("NodeRegistry address:", bridge.address);
 
     // Deploy MockDexPool
-    const _MockDexPool = await ethers.getContractFactory("MockDexPool", {
-        libraries: {
-            RequestIdLib: requestIdLib.address,
-        }
-    });
+    const _MockDexPool = await ethers.getContractFactory("MockDexPool");
     const mockDexPool = await _MockDexPool.deploy(bridge.address);
     await mockDexPool.deployed();
     networkConfig[network.name].mockDexPool = mockDexPool.address;

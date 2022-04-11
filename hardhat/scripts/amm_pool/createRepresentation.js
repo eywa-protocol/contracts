@@ -12,18 +12,10 @@ async function main() {
   const [deployer] = await ethers.getSigners();
   console.log("Owner:", deployer.address);
 
-  const Synthesis = await ethers.getContractFactory("Synthesis", {
-    libraries: {
-      RequestIdLib: networkConfig[network.name].requestIdLib,
-    }
-  });
+  const Synthesis = await ethers.getContractFactory("Synthesis");
   const synthesis = Synthesis.attach(this.s);
   
-  const Portal = await ethers.getContractFactory("Portal", {
-    libraries: {
-      RequestIdLib: networkConfig[network.name].requestIdLib,
-    }
-  });
+  const Portal = await ethers.getContractFactory("Portal");
   const portal = Portal.attach(this.p);
 
   // origin token should be from another place

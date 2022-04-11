@@ -8,25 +8,17 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     console.log("Owner:", deployer.address);
 
-    const _Portal = await ethers.getContractFactory("Portal", {
-        libraries: {
-            RequestIdLib: networkConfig[network.name].requestIdLib,
-        }
-    });
+    const _Portal = await ethers.getContractFactory("Portal")
     //const portal  = await _Portal.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
     const portal = await upgrades.deployProxy(_Portal, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder], 
-        { initializer: 'initializeFunc', unsafeAllowLinkedLibraries: true }
+        { initializer: 'initializeFunc' }
         );
     await portal.deployed();
     console.log("Portal address:", portal.address);
 
-    const _Synthesis = await ethers.getContractFactory("Synthesis", {
-        libraries: {
-            RequestIdLib: networkConfig[network.name].requestIdLib,
-        }
-    });
+    const _Synthesis = await ethers.getContractFactory("Synthesis");
     //const synthesis  = await _Synthesis.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
-    const synthesis = await upgrades.deployProxy(_Synthesis, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder], { initializer: 'initializeFunc', unsafeAllowLinkedLibraries: true });
+    const synthesis = await upgrades.deployProxy(_Synthesis, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder], { initializer: 'initializeFunc'});
     await synthesis.deployed();
     console.log("Synthesis address:", synthesis.address);
 
