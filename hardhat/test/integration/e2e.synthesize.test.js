@@ -170,8 +170,8 @@ contract('Router', () => {
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.routerB = await RouterB.at(deployInfo["network2"].router)
             const synthAddress = await synthesisC.getRepresentation(addressToBytes32(this.tokenB1.address))
-            this.synthB = await SynthC.at(synthAddress)
-            const oldBalance = await this.synthB.balanceOf(userNet3)
+            this.synthC = await SynthC.at(synthAddress)
+            const oldBalance = await this.synthC.balanceOf(userNet3)
             const amount = ethers.utils.parseEther("0.5")
 
             const tokenToSynth = this.tokenB1.address
@@ -199,7 +199,7 @@ contract('Router', () => {
                 { from: userNet2, gas: 1000_000 }
             )
             await timeout(15000)
-            const newBalance = await this.synthB.balanceOf(userNet3)
+            const newBalance = await this.synthC.balanceOf(userNet3)
             assert(oldBalance.lt(newBalance))
         })
 
