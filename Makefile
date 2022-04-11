@@ -51,6 +51,14 @@ testnet-test:
 eth-local-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh network2,network1,network3
 
+eth-local-migrate-core: deps npm wrappers
+	cd hardhat; REGNET="network2" PART="deploy_bridge" STEP="deploy" ./scripts/deploy.sh network2,network1,network3;
+	cd hardhat; REGNET="network2" PART="" STEP="init" ./scripts/deploy.sh network2,network1,network3
+
+eth-testnet-migrate-core: deps npm wrappers
+	cd hardhat; REGNET="harmonytestnet" PART="deploy_bridge" STEP="deploy" ./scripts/deploy.sh harmonytestnet,mumbai,bsctestnet;
+	cd hardhat; REGNET="harmonytestnet" PART="" STEP="init" ./scripts/deploy.sh harmonytestnet,mumbai,bsctestnet
+
 eth-testnet-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh mumbai,bsctestnet,avalanchetestnet,hecotestnet,rinkeby
 
