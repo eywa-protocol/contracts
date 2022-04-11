@@ -397,7 +397,8 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     function emergencyUnburnRequestToSolana(
         bytes32 _txID,
         bytes32[] calldata _pubkeys,
-        uint256 _chainId
+        uint256 _chainId,
+        SolanaSignedMessage signedMessage
     ) external {
         require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainId");
         require(
@@ -416,7 +417,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             nonce
         );
 
-        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](7);
+        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](8);
         accounts[0] = SolanaAccountMeta({
             pubkey: _pubkeys[uint256(SynthesizePubkeys.receiveSideData)],
             isSigner: false,
@@ -442,8 +443,13 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             isSigner: false,
             isWritable: true
         });
-        accounts[5] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
-        accounts[6] = SolanaAccountMeta({
+        accounts[5] = SolanaAccountMeta({
+            pubkey: SOLANA_INSTRUCTIONS,
+            isSigner: false,
+            isWritable: false
+        });
+        accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
+        accounts[7] = SolanaAccountMeta({
             pubkey: _pubkeys[uint256(SynthesizePubkeys.oppositeBridgeData)],
             isSigner: true,
             isWritable: false
@@ -457,7 +463,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
                     /* accounts: */
                     accounts,
                     /* data: */
-                    abi.encodePacked(sighashEmergencyUnburn)
+                    abi.encodePacked(sighashEmergencyUnburn, signedMessage)
                 )
             ),
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],

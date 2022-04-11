@@ -237,7 +237,8 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     function emergencyUnsyntesizeRequestToSolana(
         bytes32[] calldata _pubkeys,
         bytes1 _bumpSynthesizeRequest,
-        uint256 _chainId
+        uint256 _chainId,
+        SolanaSignedMessage signedMessage
     ) external {
         require(_chainId == SOLANA_CHAIN_ID, "Synthesis: incorrect chainId");
 
@@ -253,7 +254,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         require(synthesizeStates[txID] != SynthesizeState.Synthesized, "Synthesis: synthetic tokens already minted");
         synthesizeStates[txID] = SynthesizeState.RevertRequest; // close
 
-        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](7);
+        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](8);
         accounts[0] = SolanaAccountMeta({
             pubkey: _pubkeys[uint256(UnsynthesizePubkeys.receiveSideData)],
             isSigner: false,
@@ -284,7 +285,12 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             isSigner: true,
             isWritable: false
         });
-        accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
+        accounts[6] = SolanaAccountMeta({
+            pubkey: SOLANA_INSTRUCTIONS,
+            isSigner: false,
+            isWritable: false
+        });
+        accounts[7] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
 
         IBridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
@@ -294,7 +300,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
                     /* accounts: */
                     accounts,
                     /* data: */
-                    abi.encodePacked(sighashEmergencyUnsynthesize, _bumpSynthesizeRequest)
+                    abi.encodePacked(sighashEmergencyUnsynthesize, _bumpSynthesizeRequest, signedMessage)
                 )
             ),
             _pubkeys[uint256(UnsynthesizePubkeys.receiveSide)],

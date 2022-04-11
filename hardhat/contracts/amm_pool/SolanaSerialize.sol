@@ -10,6 +10,10 @@ abstract contract SolanaSerialize {
     bytes32 public constant SOLANA_SYSTEM_PROGRAM = 0x0;
     // base58: SysvarRent111111111111111111111111111111111
     bytes32 public constant SOLANA_RENT = 0x06a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a00000000;
+    // base58: Ed25519SigVerify111111111111111111111111111
+    bytes32 public constant SOLANA_ED25519_SIG = 0x037d46d67c93fbbe12f9428f838d40ff0570744927f48a64fcca704480000000;
+    // base58: Sysvar1nstructions1111111111111111111111111
+    bytes32 public constant SOLANA_INSTRUCTIONS = 0x06a7d517187bd16635dad40455fdc2c0c124c68f215675a5dbbacb5f08000000;
 
     struct SolanaAccountMeta {
         bytes32 pubkey;
@@ -21,6 +25,13 @@ abstract contract SolanaSerialize {
         bytes32 programId;
         SolanaAccountMeta[] accounts;
         bytes data;
+    }
+
+    struct SolanaSignedMessage {
+        bytes32 r;
+        bytes32 s;
+        bytes32 publicKey;
+        bytes message;
     }
 
     function serializeSolanaStandaloneInstruction(SolanaStandaloneInstruction memory ix)
