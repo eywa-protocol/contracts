@@ -112,6 +112,18 @@ const getRepresentation = async (realToken, decimals, chainId, netwiker, synthes
         bytecodeWithParams
     ))
 }
+
+const getTxId = (userFrom, nonce, chainIdOpposite, chainIdCurrent, receiveSide, oppositeBridge) => {
+    return web3.utils.soliditySha3(
+        { type: 'bytes32', value:addressToBytes32(userFrom)},
+        { type: 'uint256', value:nonce},
+        { type: 'uint256', value:chainIdOpposite},
+        { type: 'uint256', value:chainIdCurrent},
+        { type: 'bytes32', value:addressToBytes32(receiveSide)},
+        { type: 'bytes32', value:addressToBytes32(oppositeBridge)},
+    );
+}
+
 module.exports = {
     toWei,
     fromWei,
@@ -122,5 +134,6 @@ module.exports = {
     specialQuikHackProvider,
     addressToBytes32,
     getCreate2Address,
-    getRepresentation
+    getRepresentation,
+    getTxId
 };
