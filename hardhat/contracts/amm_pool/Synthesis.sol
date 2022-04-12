@@ -300,7 +300,14 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
                     /* accounts: */
                     accounts,
                     /* data: */
-                    abi.encodePacked(sighashEmergencyUnsynthesize, _bumpSynthesizeRequest, signedMessage)
+                    abi.encodePacked(
+                        sighashEmergencyUnsynthesize,
+                        _bumpSynthesizeRequest,
+                        signedMessage.r,
+                        signedMessage.s,
+                        signedMessage.publicKey,
+                        signedMessage.message
+                    )
                 )
             ),
             _pubkeys[uint256(UnsynthesizePubkeys.receiveSide)],

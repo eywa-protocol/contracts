@@ -463,7 +463,13 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
                     /* accounts: */
                     accounts,
                     /* data: */
-                    abi.encodePacked(sighashEmergencyUnburn, signedMessage)
+                    abi.encodePacked(
+                        sighashEmergencyUnburn,
+                        signedMessage.r,
+                        signedMessage.s,
+                        signedMessage.publicKey,
+                        signedMessage.message
+                    )
                 )
             ),
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
