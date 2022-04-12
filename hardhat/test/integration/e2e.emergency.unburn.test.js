@@ -4,7 +4,7 @@ const { ethers } = require("hardhat");
 
 contract('Router', () => {
 
-    describe("synthesize local test", () => {
+    describe("emergency unburn local test", () => {
 
         before(async () => {
             ERC20A = artifacts.require('ERC20Mock')
@@ -149,8 +149,6 @@ contract('Router', () => {
             )
             await timeout(15000)
             const newBalance = await this.synthB.balanceOf(userNet2)
-            console.log(newBalance.toString())
-            console.log((await this.tokenA1.balanceOf(userNet1)).toString())
             assert(oldBalance.lt(newBalance))    
         })
 

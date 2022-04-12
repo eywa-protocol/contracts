@@ -4,7 +4,7 @@ const { ethers } = require("hardhat");
 
 contract('Synthesize', () => {
 
-    describe("synthesize local test", () => {
+    describe("emergency unsynthesize local test", () => {
 
         before(async () => {
             ERC20A = artifacts.require('ERC20Mock')
