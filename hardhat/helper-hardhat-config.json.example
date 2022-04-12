@@ -1,7 +1,7 @@
 {
   "harmonytestnet": {
     "rpcUrl": "ws://185.132.176.248:16011",
-    "rpcUrl2": "https://harmony.testnet.eywa.fi",
+    "rpcUrl2": "http://10.1.0.71:16665",
     "n": "HARMONYTESTNET",
     "netwiker": "HRM",
     "env_file": [
@@ -32,11 +32,7 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "rinkeby",
       "mumbai",
-      "hecotestnet",
-      "avalanchetestnet",
-      "metistestnet",
       "bsctestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
@@ -148,7 +144,7 @@
   },
   "bsctestnet": {
     "rpcUrl": "ws://185.132.176.248:16001",
-    "rpcUrl2": "https://bsc.testnet.eywa.fi",
+    "rpcUrl2": "http://10.1.0.71:9699",
     "n": "BSCTESTNET",
     "netwiker": "BSC",
     "env_file": [
@@ -340,7 +336,7 @@
   },
   "mumbai": {
     "rpcUrl": "ws://185.132.176.248:16007",
-    "rpcUrl2": "https://mumbai.testnet.eywa.fi",
+    "rpcUrl2": "http://10.1.0.71:8000",
     "n": "MUMBAI",
     "netwiker": "MUMBAI",
     "env_file": [
