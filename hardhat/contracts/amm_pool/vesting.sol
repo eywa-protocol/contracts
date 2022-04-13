@@ -27,17 +27,13 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     uint256 public stepAmount; // realeseble number of tokens after 1 step
     uint256 public numOfSteps; // number of linear steps
 
-    // mapping(address => Counters.Counter) private _nonces;
     mapping (address => uint256) public claimed; // how much already claimed
     uint256 public vEywaInitialSupply;
     mapping (address => uint256) public unburnBalanceOf;
 
     mapping(address => mapping(address => uint256)) public transferPermission;
 
-    // bool internal isOriginal = true;
-
     event ReleasedAfterClaim(address indexed from, uint256 indexed amount);
-    // event NewVestingContractCloned(address indexed vestingContract);
 
     constructor(address _adminDeployer, IERC20 _eywaToken) ERC20("Vested Eywa", "vEYWA"){
         adminDeployer = _adminDeployer;
@@ -75,6 +71,11 @@ contract EywaVesting is ERC20, ReentrancyGuard {
             unburnBalanceOf[_initialAddresses[i]] = _initialSupplyAddresses[i];
         }
         IERC20(eywaToken).safeTransferFrom(msg.sender, address(this), vEywaInitialSupply);
+    }
+
+    function renounceEarlyTransferPermissionAdmin(address newAdmin) external {
+        require(msg.sender == earlyTransferPermissionAdmin, "msg.sender is not admin");
+        earlyTransferPermissionAdmin = newAdmin;
     }
 
     function getCurrentTransferPermission(address from, address to) external view returns(uint256) {
@@ -123,6 +124,9 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         }
         uint256 passedSinceCliff = time.sub(started.add(cliffDuration));
         uint256 stepsPassed = Math.min(numOfSteps, passedSinceCliff.div(stepDuration));
+        if (stepsPassed >= numOfSteps){
+            return vEywaInitialSupply;
+        }
         return cliffAmount.add(
             stepsPassed.mul(stepAmount)
         );
@@ -176,21 +180,5 @@ contract EywaVesting is ERC20, ReentrancyGuard {
             return result;
         }
     }
-
-    // function clone() public returns (address newVesting) {
-    //     require(isOriginal, "This is not original");
-    //     require(msg.sender == adminDeployer, "Only admin can clone");
-    //     bytes20 addressBytes = bytes20(address(this));
-
-    //     assembly {
-    //     // EIP-1167 bytecode
-    //         let clone_code := mload(0x40)
-    //         mstore(clone_code, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
-    //         mstore(add(clone_code, 0x14), addressBytes)
-    //         mstore(add(clone_code, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
-    //         newVesting := create(0, clone_code, 0x37)
-    //     }
-    //     emit NewVestingContractCloned(newVesting);
-    // }
 }
 
