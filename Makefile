@@ -64,10 +64,13 @@ local-test:
 testnet-test:
 	cd hardhat;npm run e2e:testnet;
 
-eth-local-migrate: deps npm wrappers
-	cd hardhat;./scripts/deploy.sh network2,network1,network3
+eth-hmy-migrate: deps npm wrappers
+	cd hardhat;./scripts/deploy.sh harmonylocal
 
-eth-testnet-migrate: deps npm wrappers
+eth-local-migrate: deps npm wrappers
+	cd hardhat;./scripts/deploy.sh network2,network1,network3,harmonylocal
+
+eth-testnet-migrate: deps npm wrappers eth-hmy-migrate
 	cd hardhat;./scripts/deploy.sh mumbai,bsctestnet,avalanchetestnet,hecotestnet,rinkeby
 
 eth-testnet-ci-migrate: debug deps npm wrappers

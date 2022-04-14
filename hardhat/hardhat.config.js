@@ -16,6 +16,7 @@ const PRIVATE_KEY_HECO     = process.env.PRIVATE_KEY_HECO     || "0x000000000000
 const PRIVATE_KEY_AVALANCHETESTNET = process.env.PRIVATE_KEY_AVALANCHETESTNET || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_METISTESTNET     = process.env.PRIVATE_KEY_METISTESTNET     || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_COINEXTESTNET    = process.env.PRIVATE_KEY_COINEXTESTNET    || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_HARMONYLOCAL     = process.env.PRIVATE_KEY_HARMONYLOCAL     || "0x0000000000000000000000000000000000000000";
 
 task("balanceDeployer", "Print info about balance deployer", async () => {
   const [deployer] = await ethers.getSigners();
@@ -36,6 +37,10 @@ module.exports = {
     },
     localhost: {
         //
+    },
+    harmonylocal:{
+      url: networkConfig.harmonylocal.rpcUrl2,
+      accounts: [PRIVATE_KEY_HARMONYLOCAL]
     },
     coinextestnet:{
       url: networkConfig.coinextestnet.rpcUrl2,

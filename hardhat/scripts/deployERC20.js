@@ -5,7 +5,7 @@ const h = require("../utils/helper");
 
 async function main() {
 
-    if(network.name.includes('network')){
+    if(network.name.includes('network') || network.name === 'harmonylocal'){
 
         const [deployer] = await ethers.getSigners();
         console.log("Owner:", deployer.address);
