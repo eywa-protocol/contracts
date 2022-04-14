@@ -301,7 +301,7 @@ contract Router is EIP712, Ownable {
             keccak256(
                 abi.encodePacked(
                     keccak256(
-                        "DelegatedCallWorkerPermit(address from,uint256 executionPrice,bytes32 executionHash,uint256 nonce,uint256 deadline)"
+                        "DelegatedCallWorkerPermit(address from,uint256 chainIdTo,uint256 executionPrice,bytes32 executionHash,uint256 nonce,uint256 deadline)"
                     ),
                     msg.sender,
                     chainIdTo,
