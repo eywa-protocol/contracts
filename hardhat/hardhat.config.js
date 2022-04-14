@@ -17,6 +17,9 @@ const PRIVATE_KEY_AVALANCHETESTNET = process.env.PRIVATE_KEY_AVALANCHETESTNET ||
 const PRIVATE_KEY_METISTESTNET     = process.env.PRIVATE_KEY_METISTESTNET     || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_COINEXTESTNET    = process.env.PRIVATE_KEY_COINEXTESTNET    || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_HARMONYTESTNET   = process.env.PRIVATE_KEY_HARMONYTESTNET   || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_HARMONY   = process.env.PRIVATE_KEY_HARMONY   || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_BSC       = process.env.PRIVATE_KEY_BSC       || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_POLYGON   = process.env.PRIVATE_KEY_POLYGON   || "0x0000000000000000000000000000000000000000";
 
 task("balanceDeployer", "Print info about balance deployer", async () => {
   const [deployer] = await ethers.getSigners();
@@ -38,6 +41,19 @@ module.exports = {
     localhost: {
         //
     },
+    polygon:{
+      url: networkConfig.polygon.rpcUrl2,
+      accounts: [PRIVATE_KEY_POLYGON],
+      gasPrice: 2_000_000_000
+    },
+    bsc: {
+      url: networkConfig.bsc.rpcUrl2,
+      accounts: [PRIVATE_KEY_BSC]
+    },
+    harmony:{
+      url: networkConfig.harmony.rpcUrl2,
+      accounts: [PRIVATE_KEY_HARMONY]
+    },    
     harmonytestnet:{
       url: networkConfig.harmonytestnet.rpcUrl2,
       accounts: [PRIVATE_KEY_HARMONYTESTNET]
