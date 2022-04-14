@@ -24,6 +24,8 @@ type tmplData struct {
 	Contracts map[string]*tmplContract // List of contracts to generate into this file
 	Libraries map[string]string        // Map the bytecode's link pattern to the library name
 	Structs   map[string]*tmplStruct   // Contract struct type definitions
+	Imports   string
+	IsHarmony bool
 }
 
 // tmplContract contains the data needed to generate an individual contract binding.
@@ -83,6 +85,20 @@ var tmplLibs = map[Lang]string{
 	LangGo: templateGSNBaseGo,
 }
 
+var tmplImports = map[string]string{
+	"std": `
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/core/types"
+
+`,
+	"harmony": `
+	"github.com/harmony-one/harmony/accounts/abi"
+	"github.com/harmony-one/harmony/accounts/abi/bind"
+	"github.com/harmony-one/harmony/core/types"
+`,
+}
+
 // tmplSourceGo is the Go source template that the generated Go contract binding
 // is based on.
 const tmplSourceGo = `
@@ -98,11 +114,10 @@ import (
 	"fmt"
 
 	ethereum "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
+
+	{{.Imports}}
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -119,10 +134,15 @@ var (
 )
 
 {{$structs := .Structs}}
+{{$isHarmony := .IsHarmony}}
 
 {{range $contract := .Contracts}}
 	// {{.Type}}MetaData contains all meta data concerning the {{.Type}} contract.
+	{{if $isHarmony}}
+	var {{.Type}}MetaData = &MetaData{
+	{{else}}
 	var {{.Type}}MetaData = &bind.MetaData{
+	{{end}}
 		ABI: "{{.InputABI}}",
 		{{if $contract.FuncSigs -}}
 		Sigs: map[string]string{
@@ -721,7 +741,7 @@ import java.util.*;
 `
 
 const templateGSNBaseGo = `
-package wrappers
+package {{.Package}}
 
 import (
 	"crypto/ecdsa"
@@ -732,12 +752,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core"
+
+	{{.Imports}}
 )
 
 const (
@@ -749,6 +769,8 @@ var (
 	ErrStringTooLong = errors.New("string to long")
 	ErrHexTooShort   = errors.New("hex string is shorter than bytes32")
 	UseGsnFlag       bool
+	
+	_ = types.BloomLookup
 )
 
 func init() {
@@ -976,7 +998,7 @@ func GsnExecutor(gsnParams *GsnCallOpts, abiSrc, methodName string, args ...inte
 
 // Contract structs
 
-{{$structs := .}}
+{{$structs := .Structs}}
 {{range $structs}}
 	// {{.Name}} is an auto generated low-level Go binding around an user-defined struct.
 	type {{.Name}} struct {

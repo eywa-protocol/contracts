@@ -3,6 +3,7 @@
 .PHONY: wrappers
 
 WRAPPERS ?= ../wrappers
+HMYWRAPPERS ?= ../hmy-wrappers
 ARTIFACTS ?= hardhat/artifacts/contracts
 all: wrappers
         : '$(WRAPPERS)'
@@ -32,6 +33,21 @@ wrappers: npm compile copy_configs
 	--json ${ARTIFACTS}/test/MerkleTest.sol \
 	--json ${ARTIFACTS}/test/BlockTest.sol \
 	--pkg wrappers --out ${WRAPPERS}
+	./wrappers-builder/wrappers-builder --t harmony --json hardhat/artifacts/@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol \
+	--json ${ARTIFACTS}/bridge/Bridge.sol \
+	--json ${ARTIFACTS}/bridge/Forwarder.sol \
+	--json ${ARTIFACTS}/bridge/NodeRegistry.sol \
+	--json ${ARTIFACTS}/bridge/RelayerPool.sol \
+	--json ${ARTIFACTS}/bridge/mocks/MockDexPool.sol \
+	--json ${ARTIFACTS}/bridge/test/TestTarget.sol \
+	--json ${ARTIFACTS}/bridge/test/TestForward.sol \
+	--json ${ARTIFACTS}/bridge/test/TestERC20Permit.sol \
+	--json ${ARTIFACTS}/amm_pool/Router.sol \
+	--json ${ARTIFACTS}/amm_pool/Portal.sol \
+	--json ${ARTIFACTS}/amm_pool/Synthesis.sol \
+	--json ${ARTIFACTS}/test/MerkleTest.sol \
+	--json ${ARTIFACTS}/test/BlockTest.sol \
+	--pkg hmy --out ${HMYWRAPPERS}
 
 deps:
 	go mod tidy

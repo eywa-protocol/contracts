@@ -30,6 +30,7 @@ var (
 	app         *cli.App
 	packageName string
 	outputDir   string
+	typeName    string
 	solFlag     = cli.StringSliceFlag{
 		Name:  "sol",
 		Usage: "this flag defines that input files will be .sol's and should be compiled with build/wrappers/solc",
@@ -48,6 +49,11 @@ var (
 		Usage: "this flag defines the package name that will be used for Go contract wrappers",
 		Value: "wrappers",
 	}
+	typeFlag = cli.StringFlag{
+		Name:  "type, t",
+		Usage: "this flag generate wrappers for harmony-one",
+		Value: "std",
+	}
 
 	allStructs = make(map[string]*tmplStruct)
 )
@@ -59,6 +65,7 @@ func init() {
 		jsonFlag,
 		outputFlag,
 		packageFlag,
+		typeFlag,
 	}
 	app.Usage = "use for generate Go wrappers for smart contracts"
 	app.Description = "CLI App for compile Go wrappers for smart contracts"
@@ -100,7 +107,13 @@ func findAllSourceFiles(roots []string, extension string) ([]string, error) {
 }
 
 // dumpContracts generates go binding files from contract ABI and write them to files
-func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputDir string) error {
+func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputDir string, isHarmony bool) error {
+	importsType := "std"
+	if isHarmony {
+		importsType = "harmony"
+	}
+	logrus.Printf("Import type: %s\n", importsType)
+
 	for key, value := range contracts {
 		// logrus.Printf("VALUE %x \n",value.Code)
 		// logrus.Printf("KEY %s \n",key)
@@ -122,7 +135,8 @@ func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputD
 		types = append(types, keyParts[len(keyParts)-1])
 		fsigs = append(fsigs, value.Hashes)
 		structs := make(map[string]*tmplStruct)
-		code, err := Bind(types, []string{string(abi)}, []string{value.Code}, fsigs, packageName, LangGo, libs, aliases, tmplSource, structs)
+
+		code, err := Bind(types, []string{string(abi)}, []string{value.Code}, fsigs, packageName, LangGo, libs, aliases, tmplSource, structs, tmplImports[importsType], isHarmony)
 		if err != nil {
 			logrus.Fatal(err)
 			return err
@@ -144,8 +158,18 @@ func dumpContracts(contracts map[string]*compiler.Contract, packageName, outputD
 	// Libs code
 	buf := new(bytes.Buffer)
 
+	data := struct {
+		Structs map[string]*tmplStruct
+		Imports string
+		Package string
+	}{
+		Structs: allStructs,
+		Imports: tmplImports[importsType],
+		Package: packageName,
+	}
+
 	tmpl := template.Must(template.New("").Parse(templateGSNBaseGo))
-	if err := tmpl.Execute(buf, allStructs); err != nil {
+	if err := tmpl.Execute(buf, data); err != nil {
 		logrus.Fatal(err)
 		return err
 	}
@@ -237,6 +261,7 @@ func PackagePathFile(name string) string {
 func compile(c *cli.Context) {
 	outputDir = c.String("output")
 	packageName = c.String("package")
+	typeName = c.String("type")
 	var (
 		err         error
 		sourceFiles []string
@@ -277,7 +302,7 @@ func compile(c *cli.Context) {
 	}
 	logrus.Printf("DUMPING CONTRACTS package %s dir %s", packageName, outputDir)
 
-	err = dumpContracts(contracts, packageName, outputDir)
+	err = dumpContracts(contracts, packageName, outputDir, typeName == "harmony")
 	if err != nil {
 		logrus.Fatal(err)
 		panic(err)
