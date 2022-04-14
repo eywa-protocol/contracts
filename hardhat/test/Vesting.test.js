@@ -75,6 +75,7 @@ describe('Vesting tests. Part 1', () => {
     let stepDuration;
     let cliffAmount;
     let stepAmount;
+    let allStepsDuration;
     let numOfSteps;
     
     let permissionlessTimeStamp;
@@ -110,14 +111,16 @@ describe('Vesting tests. Part 1', () => {
         numOfSteps = 10;
         stepAmount = (vestingSupply / 2) / numOfSteps;
         permissionlessTimeStamp = day_in_seconds * 10;
+        allStepsDuration = numOfSteps * stepDuration;
 
         await vesting.initialize(
             startTimeStamp, 
             cliffDuration,
             stepDuration,
             cliffAmount,
-            stepAmount,
-            numOfSteps,
+            // stepAmount,
+            // numOfSteps,
+            allStepsDuration,
             earlyTransferPermissionAdmin.address,
             permissionlessTimeStamp,
             [addr1.address, addr2.address, addr3.address],
@@ -138,13 +141,15 @@ describe('Vesting tests. Part 1', () => {
     });
 
     it('cannot be reInitialize', async function () {
+        console.log("sdgdsgdsgsd");
         await expect(vesting.initialize(
             startTimeStamp, 
             cliffDuration,
             stepDuration,
             cliffAmount,
-            stepAmount,
-            numOfSteps,
+            // stepAmount,
+            // numOfSteps,
+            allStepsDuration,
             earlyTransferPermissionAdmin.address,
             permissionlessTimeStamp,
             [addr1.address, addr2.address, addr3.address],
@@ -438,6 +443,7 @@ describe('Vesting tests. Part 2', () => {
     let cliffAmount;
     let stepAmount;
     let numOfSteps;
+    let allStepsDuration;
     
     let permissionlessTimeStamp;
     let vestingSupply;
@@ -474,14 +480,16 @@ describe('Vesting tests. Part 2', () => {
         numOfSteps = 10;
         stepAmount = (vestingSupply / 2) / numOfSteps;
         permissionlessTimeStamp = day_in_seconds * 10;
+        allStepsDuration = numOfSteps * stepDuration;
 
         await expect(vesting.connect(addr2).initialize(
             startTimeStamp, 
             cliffDuration,
             stepDuration,
             cliffAmount,
-            stepAmount,
-            numOfSteps,
+            // stepAmount,
+            // numOfSteps,
+            allStepsDuration,
             earlyTransferPermissionAdmin.address,
             permissionlessTimeStamp,
             [addr1.address, addr2.address, addr3.address],
@@ -516,6 +524,7 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
     let cliffAmount;
     let stepAmount;
     let numOfSteps;
+    let allStepsDuration;
     
     let permissionlessTimeStamp;
     let vestingSupply;
@@ -538,6 +547,7 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
         numOfSteps = 1000000;
         stepAmount = 10;
         permissionlessTimeStamp = day_in_seconds * 10;
+        allStepsDuration = numOfSteps * stepDuration;
 
         // vestingSupply = 10000000;
         vestingSupply = parseInt(cliffAmount) + parseInt(10)*parseInt(1000000);
@@ -558,8 +568,9 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
             cliffDuration,
             stepDuration,
             cliffAmount,
-            stepAmount,
-            numOfSteps,
+            // stepAmount,
+            // numOfSteps,
+            allStepsDuration,
             earlyTransferPermissionAdmin.address,
             permissionlessTimeStamp,
             [addr1.address, addr2.address, addr3.address],

@@ -26,6 +26,8 @@ contract EywaVesting is ERC20, ReentrancyGuard {
     uint256 public cliffAmount; // realeseble number of tokens after cliff
     uint256 public stepAmount; // realeseble number of tokens after 1 step
     uint256 public numOfSteps; // number of linear steps
+    // uint256 public allStepsDuration;
+
 
     mapping (address => uint256) public claimed; // how much already claimed
     uint256 public vEywaInitialSupply;
@@ -45,8 +47,9 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         uint256 _cliffDuration,
         uint256 _stepDuration,
         uint256 _cliffAmount,
-        uint256 _stepAmount,
-        uint256 _numOfSteps,
+        // uint256 _stepAmount,
+        // uint256 _numOfSteps,
+        uint256 _allStepsDuration,
         address _earlyTransferPermissionAdmin,
         uint256 _permissionlessTimeStamp,
         address[] calldata _initialAddresses,
@@ -60,8 +63,9 @@ contract EywaVesting is ERC20, ReentrancyGuard {
         cliffDuration = _cliffDuration;
         stepDuration = _stepDuration;
         cliffAmount = _cliffAmount;
-        stepAmount = _stepAmount;
-        numOfSteps = _numOfSteps;
+        // stepAmount = _stepAmount;
+        // allStepsDuration = _allStepsDuration;
+        // numOfSteps = _numOfSteps;
         earlyTransferPermissionAdmin = _earlyTransferPermissionAdmin;
         permissionlessTimeStamp = _permissionlessTimeStamp;
 
@@ -70,6 +74,8 @@ contract EywaVesting is ERC20, ReentrancyGuard {
             vEywaInitialSupply = vEywaInitialSupply + _initialSupplyAddresses[i];
             unburnBalanceOf[_initialAddresses[i]] = _initialSupplyAddresses[i];
         }
+        numOfSteps = _allStepsDuration / stepDuration;
+        stepAmount = (vEywaInitialSupply - cliffAmount) / numOfSteps;
         IERC20(eywaToken).safeTransferFrom(msg.sender, address(this), vEywaInitialSupply);
     }
 
