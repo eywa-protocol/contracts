@@ -1,5 +1,5 @@
 let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
-const { checkoutProvider, addressToBytes32, timeout, chainId } = require("../../utils/helper");
+const { checkoutProvider, addressToBytes32, timeout } = require("../../utils/helper");
 const { ethers } = require("hardhat");
 
 contract('Router', () => {
@@ -76,7 +76,7 @@ contract('Router', () => {
         };
 
 
-        const signWorkerPermitTest = async (
+        const signWorkerPermit = async (
             signer,
             contract,
             from,
@@ -104,39 +104,82 @@ contract('Router', () => {
             return { ...sig, ...message };
         };
 
-        async function signWorkerPermit(
-            userFrom,
-            verifyingContract,
-            workerExecutionPrice,
-            executionHash,
-            chainIdFrom,
-            chainIdTo,
-            userNonce,
-            workerDeadline
-        ) {
+        before(async () => {
+            [owner] = await ethers.getSigners()
+            ERC20A = await ethers.getContractFactory('ERC20Mock')
+            ERC20B = await ethers.getContractFactory('ERC20Mock')
+            ERC20C = await ethers.getContractFactory('ERC20Mock')
+
+            PortalA = await ethers.getContractFactory('Portal')
+
+            RouterA = await ethers.getContractFactory('Router')
+            RouterB = await ethers.getContractFactory('Router')
+            RouterC = await ethers.getContractFactory('Router')
+
+            SynthesisA =  await ethers.getContractFactory('Synthesis')
+            SynthesisB =  await ethers.getContractFactory('Synthesis')
+            SynthesisC =  await ethers.getContractFactory('Synthesis')
+
+            factoryProvider = checkoutProvider({ 'typenet': 'devstand', 'net1': 'network1', 'net2': 'network2', 'net3': 'network3' })
+            totalSupply = ethers.constants.MaxUint256
+
+
+        })
+
+        it("Synthesize: network1 -> network2(hub)", async function () {
+            this.portalA = await PortalA.deploy()
+            this.portalA.initializeFunc(owner.address, owner.address)
+            this.tokenA1 = await ERC20A.deploy("test","test")
+            this.routerA = await RouterA.deploy(this.portalA.address,this.portalA.address,this.portalA.address,)
+            // const synthAddress = await synthesisB.getRepresentation(addressToBytes32(this.tokenA1.address))
+            // this.synthB = await SynthB.at(synthAddress)
+            // const oldBalance = await this.synthB.balanceOf(userNet2)
+            const amount = ethers.utils.parseEther("1.0")
+
+            const tokenToSynth = this.tokenA1.address
+            const receiveSideB = deployInfo["network2"].synthesis
+            const oppositeBridge = deployInfo["network2"].bridge
+            const chainIdB = deployInfo["network2"].chainId
+            const userFrom = owner.address
+            const userTo = owner.address
+
+            await this.tokenA1.mint(owner.address, amount)
+            await this.tokenA1.approve(this.routerA.address, amount)
+            await this.routerA.setTrustedWorker(owner.address)
+
+            const executionHash = await this.routerA._SYNTHESIZE_REQUEST_SIGNATURE_HASH()
+            const workerExecutionPrice = "1111111"//ethers.utils.parseEther("1.0")
+            const workerDeadline = "11111111111"
+            const userNonce = await this.routerA.nonces(userFrom)
+            const signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
+            // const signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
+            // console.log({signerUserNet1, contract:this.routerA.address, userFrom, workerExecutionPrice, executionHash, userNonce, workerDeadline})
+            // const workerSig = await signWorkerPermit(signerUserNet1, this.routerA.address, userFrom, chainIdB, workerExecutionPrice, executionHash, userNonce.toString(), workerDeadline)
+            // console.log(workerSig)
+            console.log("ow", owner.address)
             const hashedName = ethers.utils.solidityKeccak256(
                 ['string'],
                 ["EYWA"]
-            );
+            ); console.log("hashedName js",hashedName)
             const hashedVersion = ethers.utils.solidityKeccak256(
                 ['string'],
                 ["1"]
-            );
+            );console.log("hashedVersion js",hashedVersion)
 
             const typeHash = ethers.utils.solidityKeccak256(
                 ['string'],
                 ["EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"]
-            );
+            );console.log("typeHash js",typeHash)
 
-            const domainSeparator = web3.eth.abi.encodeParameters(
+            const DomainSeparator = web3.eth.abi.encodeParameters(
                 ['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],
-                [typeHash, hashedName, hashedVersion, chainIdFrom, verifyingContract]
-            );
+                [typeHash, hashedName, hashedVersion, await web3.eth.net.getId(), this.routerA.address]
+            ); console.log("DomainSeparator js",DomainSeparator)
 
-            const domainSeparatorHash = ethers.utils.solidityKeccak256(
+            const DomainSeparatorHash = ethers.utils.solidityKeccak256(
                 ['bytes'],
-                [domainSeparator]
-            );
+                [DomainSeparator]
+            ); console.log("hash js",DomainSeparator)
 
             const delegatedCallWorkerPermitHash = ethers.utils.solidityKeccak256(
                 ['string'],
@@ -145,113 +188,32 @@ contract('Router', () => {
 
             const workerStructHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'uint256', 'bytes32', 'uint256', 'uint256'],
-                [delegatedCallWorkerPermitHash, userFrom.address, chainIdTo, workerExecutionPrice, executionHash, userNonce.toString(), workerDeadline]
-            );
+                [delegatedCallWorkerPermitHash, userFrom, chainIdB, workerExecutionPrice, executionHash, userNonce.toString(), workerDeadline]
+            ); console.log("workerStructHash js",workerStructHash);
 
             const workerMsgHash = ethers.utils.solidityKeccak256(
                 ['string', 'bytes32', 'bytes32'],
-                ['\x19\x01', domainSeparatorHash, workerStructHash]
-            );
-            return ethers.utils.splitSignature(await userFrom.signMessage(ethers.utils.arrayify(workerMsgHash)));
-        }
+                ['\x19\x01', DomainSeparatorHash, workerStructHash]
+            );console.log("workerMsgHash js",workerMsgHash)
+            // signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
 
-        before(async () => {
-            ERC20A = artifacts.require('ERC20Mock')
-            ERC20B = artifacts.require('ERC20Mock')
-            ERC20C = artifacts.require('ERC20Mock')
+            const workerSignature = ethers.utils.splitSignature(await owner.signMessage(ethers.utils.arrayify(workerMsgHash)));
+            // const workerSignature = ethers.utils.splitSignature(await web3.eth.sign(workerMsgHash, owner.address))
 
-            RouterA = artifacts.require('Router')
-            RouterB = artifacts.require('Router')
-            RouterC = artifacts.require('Router')
 
-            SynthesisA = artifacts.require('Synthesis')
-            SynthesisB = artifacts.require('Synthesis')
-            SynthesisC = artifacts.require('Synthesis')
 
-            factoryProvider = checkoutProvider({ 'typenet': 'devstand', 'net1': 'network1', 'net2': 'network2', 'net3': 'network3' })
-            totalSupply = ethers.constants.MaxUint256
 
-            RouterA.setProvider(factoryProvider.web3Net1)
-            RouterB.setProvider(factoryProvider.web3Net2)
-            RouterC.setProvider(factoryProvider.web3Net3)
 
-            SynthesisA.setProvider(factoryProvider.web3Net1)
-            SynthesisB.setProvider(factoryProvider.web3Net2)
-            SynthesisC.setProvider(factoryProvider.web3Net3)
 
-            ERC20A.setProvider(factoryProvider.web3Net1)
-            ERC20B.setProvider(factoryProvider.web3Net2)
-            ERC20C.setProvider(factoryProvider.web3Net3)
 
-            userNet1 = (await RouterA.web3.eth.getAccounts())[0];
-            userNet2 = (await RouterB.web3.eth.getAccounts())[0];
-            userNet3 = (await RouterC.web3.eth.getAccounts())[0];
-
-            synthesisA = await SynthesisA.at(deployInfo["network1"].synthesis)
-            synthesisB = await SynthesisB.at(deployInfo["network2"].synthesis)
-            synthesisC = await SynthesisC.at(deployInfo["network3"].synthesis)
-
-            SynthA = artifacts.require('SyntERC20')
-            SynthB = artifacts.require('SyntERC20')
-            SynthC = artifacts.require('SyntERC20')
-
-            SynthA.setProvider(factoryProvider.web3Net1)
-            SynthB.setProvider(factoryProvider.web3Net2)
-            SynthC.setProvider(factoryProvider.web3Net3)
-
-        })
-
-        it("Synthesize (pay native): network1 -> network2(hub)", async function () {
-            this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
-            this.routerA = await RouterA.at(deployInfo["network1"].router)
-            const synthAddress = await synthesisB.getRepresentation(addressToBytes32(this.tokenA1.address))
-            this.synthB = await SynthB.at(synthAddress)
-            const oldBalance = await this.synthB.balanceOf(userNet2)
-            const amount = ethers.utils.parseEther("1.0")
-
-            const tokenToSynth = this.tokenA1.address
-            const receiveSideB = deployInfo["network2"].synthesis
-            const oppositeBridge = deployInfo["network2"].bridge
-            const chainIdFrom = deployInfo["network1"].chainId
-            const chainIdTo = deployInfo["network2"].chainId
-            const userFrom = userNet1
-            const userTo = userNet2
-
-            await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
-            await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
-            await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
-
-            const executionHash = await this.routerA._SYNTHESIZE_REQUEST_SIGNATURE_HASH()
-            const workerExecutionPrice = ethers.utils.parseEther("1.0")
-            const workerDeadline = "100000000000"
-            const userNonce = await this.routerA.nonces(userFrom)
-            const signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
-            // console.log(await this.routerA._trustedWorker(userNet1))
-            // const signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
-            // console.log({signerUserNet1, contract:this.routerA.address, userFrom, workerExecutionPrice, executionHash, userNonce, workerDeadline})
-            // const workerSig = await signWorkerPermit(signerUserNet1, this.routerA.address, userFrom, chainIdTo, workerExecutionPrice, executionHash, userNonce.toString(), workerDeadline)
-            // console.log(workerSig)
-            // console.log("ow", owner.address)
-
-            const workerSignature = await signWorkerPermit(
-                signerUserNet1,
-                this.routerA.address,
-                workerExecutionPrice,
-                executionHash,
-                chainIdFrom,
-                chainIdTo,
-                userNonce,
-                workerDeadline
-            )
-
-            expect(await this.routerA.tokenSynthesizeRequestPayNative(
+            await this.routerA.tokenSynthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 {
                     to: userTo,
                     receiveSide: receiveSideB,
                     oppositeBridge: oppositeBridge,
-                    chainId: chainIdTo,
+                    chainId: chainIdB,
                 },
                 {
                     executionPrice: workerExecutionPrice,
@@ -260,9 +222,9 @@ contract('Router', () => {
                     r: workerSignature.r,
                     s: workerSignature.s
                 },
-                { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
-            )).to.emit(this.routerA.address, 'CrosschainPaymentEvent').withArgs(userNet1, userNet1, workerExecutionPrice);
+                {value: workerExecutionPrice}
             
+            )
             await timeout(15000)
             const newBalance = await this.synthB.balanceOf(userNet2)
             assert(oldBalance.lt(newBalance))
@@ -318,7 +280,7 @@ contract('Router', () => {
         //     const tokenToSynth = this.tokenB1.address
         //     const receiveSideA = deployInfo["network1"].synthesis
         //     const oppositeBridge = deployInfo["network1"].bridge
-        //     const chainIdFrom = deployInfo["network1"].chainId
+        //     const chainIdA = deployInfo["network1"].chainId
         //     const userFrom = userNet2
         //     const userTo = userNet1
 
@@ -334,7 +296,7 @@ contract('Router', () => {
         //             to: userTo,
         //             receiveSide: receiveSideA,
         //             oppositeBridge: oppositeBridge,
-        //             chainId: chainIdFrom,
+        //             chainId: chainIdA,
         //         },
 
         //         { from: userNet2, gas: 1000_000 }
@@ -394,7 +356,7 @@ contract('Router', () => {
         //     const tokenToSynth = this.tokenC1.address
         //     const receiveSideA = deployInfo["network1"].synthesis
         //     const oppositeBridge = deployInfo["network1"].bridge
-        //     const chainIdFrom = deployInfo["network1"].chainId
+        //     const chainIdA = deployInfo["network1"].chainId
         //     const userFrom = userNet3
         //     const userTo = userNet1
 
@@ -410,7 +372,7 @@ contract('Router', () => {
         //             to: userTo,
         //             receiveSide: receiveSideA,
         //             oppositeBridge: oppositeBridge,
-        //             chainId: chainIdFrom,
+        //             chainId: chainIdA,
         //         },
 
         //         { from: userNet3, gas: 1000_000 }
@@ -431,7 +393,7 @@ contract('Router', () => {
         //     const tokenToSynth = this.tokenC1.address
         //     const receiveSideB = deployInfo["network2"].synthesis
         //     const oppositeBridge = deployInfo["network2"].bridge
-        //     const chainIdTo = deployInfo["network2"].chainId
+        //     const chainIdB = deployInfo["network2"].chainId
         //     const userFrom = userNet3
         //     const userTo = userNet2
 
@@ -447,7 +409,7 @@ contract('Router', () => {
         //             to: userTo,
         //             receiveSide: receiveSideB,
         //             oppositeBridge: oppositeBridge,
-        //             chainId: chainIdTo,
+        //             chainId: chainIdB,
         //         },
 
         //         { from: userNet3, gas: 1000_000 }

@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts-newone/utils/Counters.sol";
+import "hardhat/console.sol";
 
 interface IPortal {
     struct PermitData {
@@ -241,22 +242,22 @@ contract Router is EIP712, Ownable {
     address _portal;
     address _synthesis;
 
-    bytes32 public constant _DELEGATED_SYNTHESIZE_REQUEST_TYPEHASH =
+    bytes32 public constant _SYNTHESIZE_REQUEST_SIGNATURE_HASH =
         keccak256(
             abi.encodePacked(
-                "delegatedTokenSynthesizeRequest(address,uint256,address,[address,address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
+                "tokenSynthesizeRequest(address,uint256,address,[address,address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
             )
         );
-    bytes32 public constant _DELEGATED_UNSYNTHESIZE_REQUEST_TYPEHASH =
+    bytes32 public constant _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH =
         keccak256(
             abi.encodePacked(
-                "delegatedUnsynthesizeRequest(address,uint256,address,address,address,address,uint256,[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
+                "unsynthesizeRequest(address,uint256,address,address,address,address,uint256,[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
             )
         );
     bytes32 public constant _DELEGATED_SYNTH_TRANSFER_REQUEST_TYPEHASH =
         keccak256(
             abi.encodePacked(
-                "delegatedTokenSynthesizeRequest(delegatedSynthTransferRequest(bytes32,address,uint256,address,address,[address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
+                "tokenSynthesizeRequest(delegatedSynthTransferRequest(bytes32,address,uint256,address,address,[address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
             )
         );
 
@@ -297,22 +298,21 @@ contract Router is EIP712, Ownable {
         DelegatedCallReceipt calldata receipt
     ) internal returns (address worker) {
         uint256 nonce = _useNonce(msg.sender);
-        bytes32 workerHash = _hashTypedDataV4(
-            keccak256(
-                abi.encodePacked(
-                    keccak256(
-                        "DelegatedCallWorkerPermit(address from,uint256 chainIdTo,uint256 executionPrice,bytes32 executionHash,uint256 nonce,uint256 deadline)"
-                    ),
-                    msg.sender,
-                    chainIdTo,
-                    receipt.executionPrice,
-                    executionHash,
-                    nonce,
-                    receipt.deadline
-                )
+        bytes32 workerStructHash = keccak256(
+            abi.encodePacked(
+                keccak256(
+                    "DelegatedCallWorkerPermit(address from,uint256 chainIdTo,uint256 executionPrice,bytes32 executionHash,uint256 nonce,uint256 deadline)"
+                ),
+                msg.sender,
+                chainIdTo,
+                receipt.executionPrice,
+                executionHash,
+                nonce,
+                receipt.deadline
             )
         );
 
+        bytes32 workerHash = ECDSA.toEthSignedMessageHash(_hashTypedDataV4(workerStructHash));
         worker = ECDSA.recover(workerHash, receipt.v, receipt.r, receipt.s);
 
         require(_trustedWorker[worker], "Router: invalid signature from worker");
@@ -347,7 +347,7 @@ contract Router is EIP712, Ownable {
         IPortal.SynthParams calldata synthParams,
         DelegatedCallReceipt calldata receipt
     ) external payable {
-        address worker = _checkWorkerSignature(synthParams.chainId, _DELEGATED_SYNTHESIZE_REQUEST_TYPEHASH, receipt);
+        address worker = _checkWorkerSignature(synthParams.chainId, _SYNTHESIZE_REQUEST_SIGNATURE_HASH, receipt);
         _proceedFees(receipt.executionPrice, worker);
         SafeERC20.safeTransferFrom(IERC20(token), msg.sender, _portal, amount);
         IPortal(_portal).synthesize(token, amount, msg.sender, synthParams);
@@ -371,7 +371,7 @@ contract Router is EIP712, Ownable {
         IPortal.PermitData calldata permitData,
         DelegatedCallReceipt calldata receipt
     ) external payable {
-        address worker = _checkWorkerSignature(synthParams.chainId, _DELEGATED_SYNTHESIZE_REQUEST_TYPEHASH, receipt);
+        address worker = _checkWorkerSignature(synthParams.chainId, _SYNTHESIZE_REQUEST_SIGNATURE_HASH, receipt);
         IERC20Permit(token).permit(
             msg.sender,
             address(this),
@@ -415,7 +415,7 @@ contract Router is EIP712, Ownable {
         uint256 chainId,
         DelegatedCallReceipt calldata receipt
     ) external payable {
-        address worker = _checkWorkerSignature(chainId, _DELEGATED_UNSYNTHESIZE_REQUEST_TYPEHASH, receipt);
+        address worker = _checkWorkerSignature(chainId, _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH, receipt);
         _proceedFees(receipt.executionPrice, worker);
         IERC20(stoken).approve(_synthesis, amount);
         ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, msg.sender, to, receiveSide, oppositeBridge, chainId);
