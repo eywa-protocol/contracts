@@ -81,6 +81,10 @@ describe('Vesting tests. Part 1', () => {
     let permissionlessTimeStamp;
     let vestingSupply;
 
+    let claimAllowanceContract = "0x0000000000000000000000000000000000000000";
+    let claimWithAllowanceTimeStamp = 0;
+
+
 
     before(async () => {
         const ERC20 = await ethers.getContractFactory('PermitERC20');
@@ -88,8 +92,7 @@ describe('Vesting tests. Part 1', () => {
         await tokenErc20.deployed();
         [adminDeployer, earlyTransferPermissionAdmin, addr1, addr2, addr3, addr4, ...addrs] = await ethers.getSigners();
         const Vesting = await ethers.getContractFactory('EywaVesting');
-        vesting = await Vesting.deploy(
-            adminDeployer.address,
+        vesting = await Vesting.connect(adminDeployer).deploy(
             tokenErc20.address
         );
         await vesting.deployed();
@@ -114,21 +117,20 @@ describe('Vesting tests. Part 1', () => {
         allStepsDuration = numOfSteps * stepDuration;
 
         await vesting.initialize(
+            claimAllowanceContract,
+            claimWithAllowanceTimeStamp,
             startTimeStamp, 
             cliffDuration,
             stepDuration,
             cliffAmount,
-            // stepAmount,
-            // numOfSteps,
             allStepsDuration,
-            earlyTransferPermissionAdmin.address,
             permissionlessTimeStamp,
             [addr1.address, addr2.address, addr3.address],
             [vestingSupply / 2, vestingSupply / 4, vestingSupply / 4],
             {from: adminDeployer.address}
         );
         expect(await vesting.cliffAmount()).to.equal(cliffAmount);
-        expect(await vesting.stepAmount()).to.equal(stepAmount);
+        // expect(await vesting.stepAmount()).to.equal(stepAmount);
         });
     beforeEach(async () => {
         snapshot0 = await takeSnapshot();
@@ -143,14 +145,13 @@ describe('Vesting tests. Part 1', () => {
     it('cannot be reInitialize', async function () {
         console.log("sdgdsgdsgsd");
         await expect(vesting.initialize(
+            claimAllowanceContract,
+            claimWithAllowanceTimeStamp,
             startTimeStamp, 
             cliffDuration,
             stepDuration,
             cliffAmount,
-            // stepAmount,
-            // numOfSteps,
             allStepsDuration,
-            earlyTransferPermissionAdmin.address,
             permissionlessTimeStamp,
             [addr1.address, addr2.address, addr3.address],
             [400 / 2, 400 / 4, 400 / 4],
@@ -165,6 +166,7 @@ describe('Vesting tests. Part 1', () => {
     });
 
     it('cannot claim before cliff', async function () {
+        await increaseTime(day_in_seconds + 1);
         await expect(vesting.connect(addr1).claim(1)).to.be.revertedWith('the amount is not available');
     });
     
@@ -448,14 +450,17 @@ describe('Vesting tests. Part 2', () => {
     let permissionlessTimeStamp;
     let vestingSupply;
 
+    let claimAllowanceContract = "0x0000000000000000000000000000000000000000";
+    let claimWithAllowanceTimeStamp = 0;
+
+
     it('Only adminDeployer can call initialize', async function () {
         const ERC20 = await ethers.getContractFactory('PermitERC20');
         tokenErc20 = await ERC20.deploy("PermitERC20 token", "prmt20t");
         await tokenErc20.deployed();
         [adminDeployer, earlyTransferPermissionAdmin, addr1, addr2, addr3, addr4, ...addrs] = await ethers.getSigners();
         const Vesting = await ethers.getContractFactory('EywaVesting');
-        vesting = await Vesting.deploy(
-            adminDeployer.address,
+        vesting = await Vesting.connect(adminDeployer).deploy(
             tokenErc20.address
         );
         await vesting.deployed();
@@ -483,18 +488,17 @@ describe('Vesting tests. Part 2', () => {
         allStepsDuration = numOfSteps * stepDuration;
 
         await expect(vesting.connect(addr2).initialize(
+            claimAllowanceContract,
+            claimWithAllowanceTimeStamp,
             startTimeStamp, 
             cliffDuration,
             stepDuration,
             cliffAmount,
-            // stepAmount,
-            // numOfSteps,
             allStepsDuration,
-            earlyTransferPermissionAdmin.address,
             permissionlessTimeStamp,
             [addr1.address, addr2.address, addr3.address],
             [vestingSupply / 2, vestingSupply / 4, vestingSupply / 4]        
-        )).to.be.revertedWith("Msg.sender is not admin");
+        )).to.be.revertedWith("Ownable: caller is not the owner");
     });
         
 });
@@ -516,8 +520,6 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
     let addrs;
     let day_in_seconds = 86400;
 
-    let accForSing = web3.eth.accounts.create();
-
     let startTimeStamp;
     let cliffDuration;
     let stepDuration;
@@ -528,6 +530,8 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
     
     let permissionlessTimeStamp;
     let vestingSupply;
+    let claimAllowanceContract = "0x0000000000000000000000000000000000000000";
+    let claimWithAllowanceTimeStamp = 0;
 
     before(async () => {
         const ERC20 = await ethers.getContractFactory('PermitERC20');
@@ -535,8 +539,7 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
         await tokenErc20.deployed();
         [adminDeployer, earlyTransferPermissionAdmin, addr1, addr2, addr3, addr4, ...addrs] = await ethers.getSigners();
         const Vesting = await ethers.getContractFactory('EywaVesting');
-        vesting = await Vesting.deploy(
-            adminDeployer.address,
+        vesting = await Vesting.connect(adminDeployer).deploy(
             tokenErc20.address
         );
         await vesting.deployed();
@@ -561,24 +564,24 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
         let timestampBefore = blockBefore.timestamp;
 
         startTimeStamp = timestampBefore + day_in_seconds;
+
         
 
         await vesting.initialize(
+            claimAllowanceContract,
+            claimWithAllowanceTimeStamp,
             startTimeStamp, 
             cliffDuration,
             stepDuration,
             cliffAmount,
-            // stepAmount,
-            // numOfSteps,
             allStepsDuration,
-            earlyTransferPermissionAdmin.address,
             permissionlessTimeStamp,
             [addr1.address, addr2.address, addr3.address],
             [10000000, 10000000 / 2, 10000000 / 2],
             {from: adminDeployer.address}
         );
         expect(await vesting.cliffAmount()).to.equal(cliffAmount);
-        expect(await vesting.stepAmount()).to.equal(stepAmount);
+        // expect(await vesting.stepAmount()).to.equal(stepAmount);
         });
     beforeEach(async () => {
         snapshot0 = await takeSnapshot();
@@ -594,11 +597,11 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
         await expect(vesting.connect(addr1).transfer(addr2.address, 1000000)).to.be.revertedWith("This early transfer doesn't have permission");
         let allowedNumberCurrent = await vesting.connect(addr1).getCurrentTransferPermission(addr1.address, addr2.address);
         expect(allowedNumberCurrent).to.be.equal(0);
-        await expect(vesting.connect(addr1).increaseTransferPermission(addr1.address, addr2.address, 1000)).to.be.revertedWith("msg.sender is not admin");
-        await vesting.connect(earlyTransferPermissionAdmin).increaseTransferPermission(addr1.address, addr2.address, 1000);
+        await expect(vesting.connect(addr1).increaseTransferPermission(addr1.address, addr2.address, 1000)).to.be.revertedWith("Ownable: caller is not the owner");
+        await vesting.connect(adminDeployer).increaseTransferPermission(addr1.address, addr2.address, 1000);
         allowedNumberCurrent = await vesting.connect(addr1).getCurrentTransferPermission(addr1.address, addr2.address);
         expect(allowedNumberCurrent).to.be.equal(1000);
-        await vesting.connect(earlyTransferPermissionAdmin).decreaseTransferPermission(addr1.address, addr2.address, 800);
+        await vesting.connect(adminDeployer).decreaseTransferPermission(addr1.address, addr2.address, 800);
         allowedNumberCurrent = await vesting.connect(addr1).getCurrentTransferPermission(addr1.address, addr2.address);
         expect(allowedNumberCurrent).to.be.equal(200);
         await vesting.connect(addr1).transfer(addr2.address, 190);
@@ -737,4 +740,138 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
         expect(sumEywa).to.be.equal(await vesting.connect(addr1).vEywaInitialSupply());
         
     });
+});
+
+
+
+describe('Vesting tests. Part 4. Pre-seed round', () => {
+    let snapshot0;
+    let blockNumBefore;
+    let blockBefore;
+    let timestampBefore;
+
+    let tokenErc20;
+    let vesting;
+    let adminDeployer;
+    let earlyTransferPermissionAdmin;
+    let addr1;
+    let addr2;
+    let addr3;
+    let addrs;
+    let day_in_seconds = 86400;
+
+    let monthInSec = 2629743;
+
+    let startTimeStamp;
+    let cliffDuration;
+    let stepDuration;
+    let cliffAmount;
+    let stepAmount;
+    let numOfSteps;
+    let allStepsDuration;
+    
+    let permissionlessTimeStamp;
+    let vestingSupply;
+    let claimAllowanceContract = "0x0000000000000000000000000000000000000000";
+    let claimWithAllowanceTimeStamp = 0;
+
+    before(async () => {
+        const ERC20 = await ethers.getContractFactory('PermitERC20');
+        tokenErc20 = await ERC20.deploy("PermitERC20 token", "prmt20t");
+        await tokenErc20.deployed();
+        [adminDeployer, earlyTransferPermissionAdmin, addr1, addr2, addr3, addr4, ...addrs] = await ethers.getSigners();
+        const Vesting = await ethers.getContractFactory('EywaVesting');
+        vesting = await Vesting.connect(adminDeployer).deploy(
+            tokenErc20.address
+        );
+        await vesting.deployed();
+
+        vestingSupply = 50000000;
+
+        cliffDuration = 9*parseInt(monthInSec);
+        stepDuration = 1;
+        cliffAmount = parseInt(vestingSupply)/10;
+        numOfSteps = 1000000;
+        stepAmount = 1;
+        permissionlessTimeStamp = 0;
+        allStepsDuration = 15*monthInSec;
+
+        // vestingSupply = parseInt(cliffAmount) + parseInt(10)*parseInt(1000000);
+        
+        await tokenErc20.mint(adminDeployer.address, vestingSupply, {from: adminDeployer.address});
+        expect(await tokenErc20.balanceOf(adminDeployer.address, {from: adminDeployer.address})).to.equal(vestingSupply);
+        await tokenErc20.approve(vesting.address, vestingSupply, {from: adminDeployer.address});
+        expect(await tokenErc20.allowance(adminDeployer.address, vesting.address, {from: adminDeployer.address})).to.equal(vestingSupply);
+        let blockNumBefore = await ethers.provider.getBlockNumber();
+        let blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        let timestampBefore = blockBefore.timestamp;
+
+        startTimeStamp = timestampBefore + day_in_seconds;
+
+        
+
+        await vesting.initialize(
+            claimAllowanceContract,
+            claimWithAllowanceTimeStamp,
+            startTimeStamp, 
+            cliffDuration,
+            stepDuration,
+            cliffAmount,
+            allStepsDuration,
+            permissionlessTimeStamp,
+            [addr1.address, addr2.address, addr3.address],
+            [50000000 / 2, 50000000 / 4, 50000000 / 4],
+            {from: adminDeployer.address}
+        );
+        expect(await vesting.cliffAmount()).to.equal(cliffAmount);
+        // expect(await vesting.stepAmount()).to.equal(stepAmount);
+        });
+    beforeEach(async () => {
+        snapshot0 = await takeSnapshot();
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore = blockBefore.timestamp;
+    });
+    afterEach(async () => {
+        await restoreSnapshot(snapshot0);
+    });
+
+    it('another linear unlock check', async function () {
+        await increaseTime(day_in_seconds - 1 + cliffDuration);
+        await vesting.connect(addr3).claim(403006);
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore = blockBefore.timestamp;
+        let av33 = await vesting.connect(addr3).available(parseInt(timestampBefore), addr3.address);
+        let av11 = await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address);
+        let summa = parseInt(av33) + parseInt(av11);
+
+        await vesting.connect(addr3).transfer(addr1.address, 7777);
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore = blockBefore.timestamp;
+        let av3 = await vesting.connect(addr3).available(parseInt(timestampBefore), addr3.address);
+        let av1 = await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address);
+        let summa2 = parseInt(av3) + parseInt(av1);
+
+        // !!!!!!!!
+        // because of with remainder in calculation of claim and transfer:
+        // next sum can be the same or less than previous on 2
+        expect(parseInt(summa) - parseInt(summa2)).to.be.lessThan(3);
+        
+        let av2 = await vesting.connect(addr2).available(parseInt(timestampBefore), addr2.address);
+        let summaOf3by1stIteration = parseInt(av3) + parseInt(av2) + parseInt(av1);
+
+        await increaseTime(day_in_seconds * 20);
+        blockNumBefore = await ethers.provider.getBlockNumber();
+        blockBefore = await ethers.provider.getBlock(blockNumBefore);
+        timestampBefore = blockBefore.timestamp;
+        av3 = await vesting.connect(addr3).available(parseInt(timestampBefore), addr3.address);
+        av1 = await vesting.connect(addr1).available(parseInt(timestampBefore), addr1.address);
+        av2 = await vesting.connect(addr2).available(parseInt(timestampBefore), addr2.address);
+        let summaOf3by2ndIteration = parseInt(av3) + parseInt(av2) + parseInt(av1);
+                                                                                                
+        expect(parseInt(summaOf3by2ndIteration) - parseInt(summaOf3by1stIteration)).to.be.equal(parseInt((vestingSupply-cliffAmount)*(day_in_seconds * 20)/allStepsDuration));
+    });
+    
 });
