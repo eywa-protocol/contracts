@@ -254,7 +254,7 @@ contract Router is EIP712, Ownable {
                 "unsynthesizeRequest(address,uint256,address,address,address,address,uint256,[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
             )
         );
-    bytes32 public constant _DELEGATED_SYNTH_TRANSFER_REQUEST_TYPEHASH =
+    bytes32 public constant _SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH =
         keccak256(
             abi.encodePacked(
                 "tokenSynthesizeRequest(delegatedSynthTransferRequest(bytes32,address,uint256,address,address,[address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
@@ -398,10 +398,11 @@ contract Router is EIP712, Ownable {
     ) external payable {
         address worker = _checkWorkerSignature(
             synthParams.chainId,
-            _DELEGATED_SYNTH_TRANSFER_REQUEST_TYPEHASH,
+            _SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH,
             receipt
         );
         _proceedFees(receipt.executionPrice, worker);
+        SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
         IERC20(tokenSynth).approve(_synthesis, amount);
         ISynthesis(_synthesis).synthTransfer(tokenReal, amount, msg.sender, to, synthParams);
     }
@@ -417,6 +418,7 @@ contract Router is EIP712, Ownable {
     ) external payable {
         address worker = _checkWorkerSignature(chainId, _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH, receipt);
         _proceedFees(receipt.executionPrice, worker);
+        SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
         IERC20(stoken).approve(_synthesis, amount);
         ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, msg.sender, to, receiveSide, oppositeBridge, chainId);
     }
