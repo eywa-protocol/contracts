@@ -74,7 +74,6 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
                 {
                     to: userTo,
                     receiveSide: receiveSideB,
@@ -112,7 +111,6 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
                 {
                     to: userTo,
                     receiveSide: receiveSideC,
@@ -150,7 +148,6 @@ contract('Router', () => {
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
                 {
                     to: userTo,
                     receiveSide: receiveSideA,
@@ -188,7 +185,6 @@ contract('Router', () => {
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
                 {
                     to: userTo,
                     receiveSide: receiveSideC,
@@ -226,7 +222,6 @@ contract('Router', () => {
             await this.routerC.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
                 {
                     to: userTo,
                     receiveSide: receiveSideA,
@@ -263,7 +258,6 @@ contract('Router', () => {
             await this.routerC.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
                 {
                     to: userTo,
                     receiveSide: receiveSideB,
