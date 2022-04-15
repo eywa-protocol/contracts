@@ -134,8 +134,8 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
      * @param _tokenReal real token address
      * @param _amount amount to transfer
      * @param _to recipient address
-     * @param _from from address
-     * @param _synthParams synth params
+     * @param _from msg sender address
+     * @param _synthParams synthesize parameters
      */
     function synthTransfer(
         bytes32 _tokenReal,

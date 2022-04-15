@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts-newone/utils/Counters.sol";
+import "hardhat/console.sol";
 
 interface IPortal {
     struct PermitData {
@@ -241,41 +242,36 @@ contract Router is EIP712, Ownable {
     address _portal;
     address _synthesis;
 
-    bytes32 public constant _DELEGATED_SYNTHESIZE_REQUEST_TYPEHASH =
+    bytes32 public constant _SYNTHESIZE_REQUEST_SIGNATURE_HASH =
         keccak256(
             abi.encodePacked(
-                "delegatedTokenSynthesizeRequest(address,uint256,address,[address,address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
+                "tokenSynthesizeRequest(address,uint256,address,[address,address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
             )
         );
-    bytes32 public constant _DELEGATED_UNSYNTHESIZE_REQUEST_TYPEHASH =
+    bytes32 public constant _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH =
         keccak256(
             abi.encodePacked(
-                "delegatedUnsynthesizeRequest(address,uint256,address,address,address,address,uint256,[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
+                "unsynthesizeRequest(address,uint256,address,address,address,address,uint256,[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
             )
         );
-    bytes32 public constant _DELEGATED_SYNTH_TRANSFER_REQUEST_TYPEHASH =
+    bytes32 public constant _SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH =
         keccak256(
             abi.encodePacked(
-                "delegatedTokenSynthesizeRequest(delegatedSynthTransferRequest(bytes32,address,uint256,address,address,[address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
+                "tokenSynthesizeRequest(delegatedSynthTransferRequest(bytes32,address,uint256,address,address,[address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
             )
         );
 
     mapping(address => bool) public _trustedWorker;
     mapping(address => Counters.Counter) private _nonces;
 
-    event CrosschainPaymentEvent(
-        address indexed userFrom,
-        address payToken,
-        uint256 executionPrice,
-        address indexed worker
-    );
+    event CrosschainPaymentEvent(address indexed userFrom, address indexed worker, uint256 executionPrice);
 
     struct DelegatedCallReceipt {
         uint256 executionPrice;
         uint256 deadline;
-        uint8[2] v;
-        bytes32[2] r;
-        bytes32[2] s;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
     }
 
     constructor(
@@ -296,105 +292,40 @@ contract Router is EIP712, Ownable {
         _trustedWorker[worker] = false;
     }
 
-    function _checkSignatures(
-        address payToken,
-        address from,
-        address to,
-        uint256 transferAmount,
+    function _checkWorkerSignature(
+        uint256 chainIdTo,
         bytes32 executionHash,
         DelegatedCallReceipt calldata receipt
-    ) internal {
-        uint256 nonce = _useNonce(from);
-        bytes32 workerHash = _hashTypedDataV4(
-            keccak256(
-                abi.encodePacked(
-                    keccak256(
-                        "DelegatedCallWorkerPermit(address payToken,address from,address to,uint256 transferAmount,uint256 executionPrice,bytes32 executionHash,uint256 nonce,uint256 deadline)"
-                    ),
-                    payToken,
-                    from,
-                    to,
-                    transferAmount,
-                    receipt.executionPrice,
-                    executionHash,
-                    nonce,
-                    receipt.deadline
-                )
+    ) internal returns (address worker) {
+        uint256 nonce = _useNonce(msg.sender);
+        bytes32 workerStructHash = keccak256(
+            abi.encodePacked(
+                keccak256(
+                    "DelegatedCallWorkerPermit(address from,uint256 chainIdTo,uint256 executionPrice,bytes32 executionHash,uint256 nonce,uint256 deadline)"
+                ),
+                msg.sender,
+                chainIdTo,
+                receipt.executionPrice,
+                executionHash,
+                nonce,
+                receipt.deadline
             )
         );
 
-        bytes32 senderHash = _hashTypedDataV4(
-            keccak256(
-                abi.encodePacked(
-                    keccak256(
-                        "DelegatedCallSenderPermit(address payToken,address from,address to,uint256 transferAmount,uint256 executionPrice,bytes32 executionHash,uint256 nonce,uint256 deadline,uint8 v,bytes32 r,bytes32 s)"
-                    ),
-                    payToken,
-                    from,
-                    to,
-                    transferAmount,
-                    receipt.executionPrice,
-                    executionHash,
-                    nonce,
-                    receipt.deadline,
-                    receipt.v[0],
-                    receipt.r[0],
-                    receipt.s[0]
-                )
-            )
-        );
-
-        address worker = ECDSA.recover(workerHash, receipt.v[0], receipt.r[0], receipt.s[0]);
-        address sender = ECDSA.recover(senderHash, receipt.v[1], receipt.r[1], receipt.s[1]);
+        bytes32 workerHash = ECDSA.toEthSignedMessageHash(_hashTypedDataV4(workerStructHash));
+        worker = ECDSA.recover(workerHash, receipt.v, receipt.r, receipt.s);
 
         require(_trustedWorker[worker], "Router: invalid signature from worker");
-        require(sender == from, "Router: invalid signature from sender");
         require(block.timestamp <= receipt.deadline, "Router: deadline");
     }
 
-    // function _proceedFees(
-    //     address payToken,
-    //     address from,
-    //     bytes32 executionHash,
-    //     DelegatedCallReceipt calldata receipt
-    // ) internal {
-    //     _checkSignatures(payToken, from, receipt.executionPrice, executionHash, receipt);
-    //     // worker fee
-    //     SafeERC20.safeTransferFrom(IERC20(payToken), from, msg.sender, receipt.executionPrice);
-
-    //     emit CrosschainPaymentEvent(from, payToken, receipt.executionPrice, msg.sender);
-    // }
-
-    function _proceedFeesWithTransfer(
-        address payToken,
-        uint256 generalAmount,
-        address from,
-        address to,
-        uint256 executionPrice
-    ) internal returns (uint256 proceedAmount) {
+    function _proceedFees(uint256 executionPrice, address worker) internal {
         // worker fee
-        SafeERC20.safeTransferFrom(IERC20(payToken), from, msg.sender, executionPrice);
-        // proceed remaining amount
-        proceedAmount = generalAmount - executionPrice;
-        SafeERC20.safeTransferFrom(IERC20(payToken), from, to, proceedAmount);
+        require(msg.value >= executionPrice, "Invalid amount");
+        (bool sent, ) = worker.call{ value: msg.value }("");
+        require(sent, "Failed to send Ether");
 
-        emit CrosschainPaymentEvent(from, payToken, executionPrice, msg.sender);
-    }
-
-    function _proceedFeesWithApprove(
-        address payToken,
-        uint256 generalAmount,
-        address from,
-        address to,
-        uint256 executionPrice
-    ) internal returns (uint256 proceedAmount) {
-        // worker fee
-        SafeERC20.safeTransferFrom(IERC20(payToken), from, msg.sender, executionPrice);
-        // approve remaining amount
-        proceedAmount = generalAmount - executionPrice;
-        IERC20(payToken).approve(to, proceedAmount);
-
-        emit CrosschainPaymentEvent(from, payToken, executionPrice, msg.sender);
+        emit CrosschainPaymentEvent(msg.sender, worker, executionPrice);
     }
 
     //==============================PORTAL==============================
@@ -402,7 +333,6 @@ contract Router is EIP712, Ownable {
      * @dev Delegated token synthesize request.
      * @param token token address to synthesize
      * @param amount amount to synthesize
-     * @param from msg sender address
      * @param to amount recipient address
      * @param receiveSide request recipient address
      * @param oppositeBridge opposite bridge address
@@ -410,16 +340,16 @@ contract Router is EIP712, Ownable {
      * @param receipt delegated call receipt
      */
 
-    function delegatedTokenSynthesizeRequest(
+    function tokenSynthesizeRequestPayNative(
         address token,
         uint256 amount,
-        address from,
         IPortal.SynthParams calldata synthParams,
         DelegatedCallReceipt calldata receipt
-    ) external {
-        _checkSignatures(token, from, synthParams.to, amount, _DELEGATED_SYNTHESIZE_REQUEST_TYPEHASH, receipt);
-        uint256 proceedAmount = _proceedFeesWithTransfer(token, amount, from, _portal, receipt.executionPrice);
-        IPortal(_portal).synthesize(token, proceedAmount, from, synthParams);
+    ) external payable {
+        address worker = _checkWorkerSignature(synthParams.chainId, _SYNTHESIZE_REQUEST_SIGNATURE_HASH, receipt);
+        _proceedFees(receipt.executionPrice, worker);
+        SafeERC20.safeTransferFrom(IERC20(token), msg.sender, _portal, amount);
+        IPortal(_portal).synthesize(token, amount, msg.sender, synthParams);
     }
 
     /* *
@@ -433,17 +363,16 @@ contract Router is EIP712, Ownable {
      * @param permitData permit data
      * @param receipt delegated call receipt
      */
-    function delegatedTokenSynthesizeRequestWithPermit(
+    function tokenSynthesizeRequestWithPermitPayNative(
         address token,
         uint256 amount,
-        address from,
         IPortal.SynthParams calldata synthParams,
         IPortal.PermitData calldata permitData,
         DelegatedCallReceipt calldata receipt
-    ) external {
-        _checkSignatures(token, from, synthParams.to, amount, _DELEGATED_SYNTHESIZE_REQUEST_TYPEHASH, receipt);
+    ) external payable {
+        address worker = _checkWorkerSignature(synthParams.chainId, _SYNTHESIZE_REQUEST_SIGNATURE_HASH, receipt);
         IERC20Permit(token).permit(
-            from,
+            msg.sender,
             address(this),
             permitData.approveMax ? uint256(2**256 - 1) : amount,
             permitData.deadline,
@@ -451,90 +380,80 @@ contract Router is EIP712, Ownable {
             permitData.r,
             permitData.s
         );
-        uint256 proceedAmount = _proceedFeesWithTransfer(token, amount, from, _portal, receipt.executionPrice);
-        IPortal(_portal).synthesize(token, proceedAmount, from, synthParams);
+
+        _proceedFees(receipt.executionPrice, worker);
+        SafeERC20.safeTransferFrom(IERC20(token), msg.sender, _portal, amount);
+        IPortal(_portal).synthesize(token, amount, msg.sender, synthParams);
     }
 
     //==============================SYNTHESIS==============================
-    function delegatedSynthTransferRequest(
+    function synthTransferRequestPayNative(
         bytes32 tokenReal,
         address tokenSynth,
         uint256 amount,
-        address from,
         address to,
         ISynthesis.SynthParams calldata synthParams,
         DelegatedCallReceipt calldata receipt
-    ) external {
-        _checkSignatures(tokenSynth, from, to, amount, _DELEGATED_SYNTH_TRANSFER_REQUEST_TYPEHASH, receipt);
-        uint256 proceedAmount = _proceedFeesWithApprove(tokenSynth, amount, from, _synthesis, receipt.executionPrice);
-        ISynthesis(_synthesis).synthTransfer(tokenReal, proceedAmount, from, to, synthParams);
+    ) external payable {
+        address worker = _checkWorkerSignature(
+            synthParams.chainId,
+            _SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH,
+            receipt
+        );
+        _proceedFees(receipt.executionPrice, worker);
+        SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
+        IERC20(tokenSynth).approve(_synthesis, amount);
+        ISynthesis(_synthesis).synthTransfer(tokenReal, amount, msg.sender, to, synthParams);
     }
 
-    function delegatedUnsynthesizeRequest(
+    function unsynthesizeRequestPayNative(
         address stoken,
         uint256 amount,
-        address from,
         address to,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId,
         DelegatedCallReceipt calldata receipt
-    ) external {
-        _checkSignatures(stoken, from, to, amount, _DELEGATED_UNSYNTHESIZE_REQUEST_TYPEHASH, receipt);
-        uint256 proceedAmount = _proceedFeesWithApprove(stoken, amount, from, _synthesis, receipt.executionPrice);
-        ISynthesis(_synthesis).burnSyntheticToken(
-            stoken,
-            proceedAmount,
-            from,
-            to,
-            receiveSide,
-            oppositeBridge,
-            chainId
-        );
+    ) external payable {
+        address worker = _checkWorkerSignature(chainId, _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH, receipt);
+        _proceedFees(receipt.executionPrice, worker);
+        SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
+        IERC20(stoken).approve(_synthesis, amount);
+        ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, msg.sender, to, receiveSide, oppositeBridge, chainId);
     }
 
     //.........................DIRECT-METHODS...........................
     //==============================PORTAL==============================
-    /* *
-     * @dev Delegated token synthesize request.
+    /**
+     * @dev Direct token synthesize request.
      * @param token token address to synthesize
      * @param amount amount to synthesize
-     * @param from msg sender address
-     * @param to amount recipient address
-     * @param receiveSide request recipient address
-     * @param oppositeBridge opposite bridge address
-     * @param chainId opposite chain ID
+     * @param synthParams synthesize parameters
      */
-
     function tokenSynthesizeRequest(
         address token,
         uint256 amount,
-        address from,
         IPortal.SynthParams calldata synthParams
     ) external {
-        SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
-        IPortal(_portal).synthesize(token, amount, from, synthParams);
+        SafeERC20.safeTransferFrom(IERC20(token), msg.sender, _portal, amount);
+        IPortal(_portal).synthesize(token, amount, msg.sender, synthParams);
     }
 
-    /* *
-     * @dev Delegated token synthesize request with permit.
+    /**
+     * @dev Direct token synthesize request with permit.
      * @param token token address to synthesize
      * @param amount amount to synthesize
-     * @param to amount recipient address
-     * @param receiveSide request recipient address
-     * @param oppositeBridge opposite bridge address
-     * @param chainId opposite chain ID
+     * @param synthParams synthesize parameters
      * @param permitData permit data
      */
     function tokenSynthesizeRequestWithPermit(
         address token,
         uint256 amount,
-        address from,
         IPortal.SynthParams calldata synthParams,
         IPortal.PermitData calldata permitData
     ) external {
         IERC20Permit(token).permit(
-            from,
+            msg.sender,
             address(this),
             permitData.approveMax ? uint256(2**256 - 1) : amount,
             permitData.deadline,
@@ -542,12 +461,12 @@ contract Router is EIP712, Ownable {
             permitData.r,
             permitData.s
         );
-        SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
-        IPortal(_portal).synthesize(token, amount, from, synthParams);
+        SafeERC20.safeTransferFrom(IERC20(token), msg.sender, _portal, amount);
+        IPortal(_portal).synthesize(token, amount, msg.sender, synthParams);
     }
 
-    /* *
-     * @dev  Delegated token synthesize request with bytes32 support for Solana.
+    /**
+     * @dev  Direct token synthesize request with bytes32 support for Solana.
      * @param token token address to synthesize
      * @param amount amount to synthesize
      * @param pubkeys synth data for Solana
@@ -557,22 +476,26 @@ contract Router is EIP712, Ownable {
     function tokenSynthesizeRequestToSolana(
         address token,
         uint256 amount,
-        address from,
         bytes32[] calldata pubkeys,
         bytes1 txStateBump,
         uint256 chainId
     ) external {
-        SafeERC20.safeTransferFrom(IERC20(token), from, _portal, amount);
-        IPortal(_portal).synthesizeToSolana(token, amount, from, pubkeys, txStateBump, chainId);
+        SafeERC20.safeTransferFrom(IERC20(token), msg.sender, _portal, amount);
+        IPortal(_portal).synthesizeToSolana(token, amount, msg.sender, pubkeys, txStateBump, chainId);
     }
 
-    /* *
-     * @dev  Delegated batch synthesize request with data transition.
+    /**
+     * @dev  Direct batch synthesize request with data transition.
+     * @param token token addresses to synthesize
+     * @param amount amounts to synthesize
+     * @param selector function selector
+     * @param transitData transit data
+     * @param synthParams synthesize parameters
+     * @param permitData permit operation params
      */
     function batchSynthesizeRequestWithDataTransit(
         address[] calldata token,
         uint256[] calldata amount, // set a positive amount in order to initiate a synthesize request
-        address from,
         bytes4 selector,
         bytes calldata transitData,
         IPortal.SynthParams calldata synthParams,
@@ -580,13 +503,13 @@ contract Router is EIP712, Ownable {
     ) external {
         for (uint256 i = 0; i < token.length; i++) {
             if (amount[i] > 0) {
-                SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
+                SafeERC20.safeTransferFrom(IERC20(token[i]), msg.sender, _portal, amount[i]);
             }
         }
         IPortal(_portal).synthesizeBatchWithDataTransit(
             token,
             amount,
-            from,
+            msg.sender,
             synthParams,
             selector,
             transitData,
@@ -594,7 +517,16 @@ contract Router is EIP712, Ownable {
         );
     }
 
-    //TODO:emergency?
+    /**
+     * @dev Direct revert burnSyntheticToken() operation, can be called several times.
+     * @param txID transaction ID to unburn
+     * @param receiveSide receiver contract address
+     * @param oppositeBridge opposite bridge address
+     * @param chainId opposite chain ID
+     * @param v must be a valid part of the signature from txID owner
+     * @param r must be a valid part of the signature from txID owner
+     * @param s must be a valid part of the signature from txID owner
+     */
     function emergencyUnburnRequest(
         bytes32 txID,
         address receiveSide,
@@ -616,8 +548,8 @@ contract Router is EIP712, Ownable {
     // }
 
     //==============================CURVE-PROXY==============================
-    /* *
-     * @dev Delegated local mint EUSD request (hub chain execution only)
+    /**
+     * @dev Direct local mint EUSD request (hub chain execution only)
      * @param params MetaMintEUSD params
      * @param permit permit operation params
      * @param token token addresses
@@ -626,20 +558,19 @@ contract Router is EIP712, Ownable {
     function mintEusdRequestVia3pool(
         ICurveProxy.MetaMintEUSD calldata params,
         ICurveProxy.PermitData[] calldata permit,
-        address from,
         address[3] calldata token,
         uint256[3] calldata amount
     ) external {
         for (uint256 i = 0; i < token.length; i++) {
             if (amount[i] > 0) {
-                SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
+                SafeERC20.safeTransferFrom(IERC20(token[i]), msg.sender, _portal, amount[i]);
             }
         }
         ICurveProxy(_curveProxy).addLiquidity3PoolMintEUSD(params, permit, token, amount);
     }
 
-    /* *
-     * @dev Delegated local meta exchange request (hub chain execution only)
+    /**
+     * @dev Direct local meta exchange request (hub chain execution only)
      * @param params meta exchange params
      * @param permit permit operation params
      * @param token token addresses to transfer within initial stage
@@ -648,23 +579,23 @@ contract Router is EIP712, Ownable {
     function metaExchangeRequestVia3pool(
         ICurveProxy.MetaExchangeParams calldata params,
         ICurveProxy.PermitData[] calldata permit,
-        address from,
         address[3] calldata token,
         uint256[3] calldata amount
     ) external {
         for (uint256 i = 0; i < token.length; i++) {
             if (amount[i] > 0) {
-                SafeERC20.safeTransferFrom(IERC20(token[i]), from, _portal, amount[i]);
+                SafeERC20.safeTransferFrom(IERC20(token[i]), msg.sender, _portal, amount[i]);
             }
         }
         ICurveProxy(_curveProxy).metaExchange(params, permit, token, amount);
     }
 
-    /* *
-     * @dev Delegated local EUSD redeem request with unsynth operation (hub chain execution only)
+    /**
+     * @dev Direct local EUSD redeem request with unsynth operation (hub chain execution only)
      * @param params meta redeem EUSD params
      * @param permit permit params
-     * @param receiveSide calldata recipient address for unsynth operation
+     * @param payToken pay token
+     * @param receiveSide recipient address for unsynth operation
      * @param oppositeBridge opposite bridge contract address
      * @param chainId opposite chain ID
      */
@@ -672,55 +603,84 @@ contract Router is EIP712, Ownable {
         ICurveProxy.MetaRedeemEUSD calldata params,
         ICurveProxy.PermitData calldata permit,
         address payToken,
-        address from,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId
     ) external {
-        SafeERC20.safeTransferFrom(IERC20(payToken), from, _curveProxy, params.tokenAmountH);
+        SafeERC20.safeTransferFrom(IERC20(payToken), msg.sender, _curveProxy, params.tokenAmountH);
         ICurveProxy(_curveProxy).redeemEUSD(params, permit, receiveSide, oppositeBridge, chainId);
     }
 
     //==============================SYNTHESIS==============================
+    /**
+     * @dev Direct synthetic token transfer request to another chain
+     * @param tokenReal real token address
+     * @param amount amount to transfer
+     * @param to recipient address
+     * @param synthParams synthesize parameters
+     */
     function synthTransferRequest(
         bytes32 tokenReal,
         uint256 amount,
-        address from,
         address to,
         ISynthesis.SynthParams calldata synthParams
     ) external {
         address tokenSynth = ISynthesis(_synthesis).getRepresentation(tokenReal);
-        SafeERC20.safeTransferFrom(IERC20(tokenSynth), from, address(this), amount);
+        SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
         IERC20(tokenSynth).approve(_synthesis, amount);
-        ISynthesis(_synthesis).synthTransfer(tokenReal, amount, from, to, synthParams);
+        ISynthesis(_synthesis).synthTransfer(tokenReal, amount, msg.sender, to, synthParams);
     }
 
+    /**
+     * @dev Direct unsynthesize request 
+     * @param stoken synthetic token address for unsynthesize
+     * @param amount amount to unsynth
+     * @param to recipient address
+     * @param receiveSide recipient address for unsynth operation
+     * @param oppositeBridge opposite bridge contract address
+     * @param chainId opposite chain ID
+     */
     function unsynthesizeRequest(
         address stoken,
         uint256 amount,
-        address from,
         address to,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId
     ) external {
-        SafeERC20.safeTransferFrom(IERC20(stoken), from, address(this), amount);
+        SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
         IERC20(stoken).approve(_synthesis, amount);
-        ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, from, to, receiveSide, oppositeBridge, chainId);
+        ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, msg.sender, to, receiveSide, oppositeBridge, chainId);
     }
 
+    /**
+     * @dev Direct unsynthesize request to Solana
+     * @param stoken synthetic token address for unsynthesize
+     * @param pubkeys synth data for Solana
+     * @param amount amount to unsynth
+     * @param chainId opposite chain ID
+     */
     function unsynthesizeRequestToSolana(
         address stoken,
-        address from,
         bytes32[] calldata pubkeys,
         uint256 amount,
         uint256 chainId
     ) external {
-        SafeERC20.safeTransferFrom(IERC20(stoken), from, address(this), amount);
+        SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
         IERC20(stoken).approve(_synthesis, amount);
-        ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, from, pubkeys, amount, chainId);
+        ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, msg.sender, pubkeys, amount, chainId);
     }
 
+    /**
+     * @dev Direct emergency unsynthesize request
+     * @param txID synthesize transaction ID
+     * @param receiveSide request recipient address
+     * @param oppositeBridge opposite bridge address
+     * @param chainId opposite chain ID
+     * @param v must be a valid part of the signature from txID owner
+     * @param r must be a valid part of the signature from txID owner
+     * @param s must be a valid part of the signature from txID owner
+     */
     function emergencyUnsyntesizeRequest(
         bytes32 txID,
         address receiveSide,

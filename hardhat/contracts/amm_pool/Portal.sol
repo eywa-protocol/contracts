@@ -311,6 +311,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     /**
      * @dev Emergency unsynthesize request. Can be called only by bridge after initiation on a second chain
      * @param _txID transaction ID to unsynth
+     * @param _trustedEmergencyExecuter trusted function executer
      */
     function emergencyUnsynthesize(
         bytes32 _txID,

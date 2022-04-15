@@ -28,7 +28,7 @@ if [[ ${1} =~ ^('')$ ]]; then
       SYNTHESIS_ADDRESS=$(getField ${net}.synthesis) \
       PAYMASTER_ADDRESS=$(getField ${net}.paymaster) \
       EYWA_TOKEN_ADDRESS=$(getField ${net}.eywa) \
-      TEST_TOKEN_ADDRESS=$(getField ${net}.token[0].address) \
+      TEST_TOKEN_ADDRESS=$(getField ${net}?.token[0]?.address) \
       NODEREGISTRY_ADDRESS=$(getField ${net}.nodeRegistry) \
       FORWARDER_ADDRESS=$(getField ${net}.forwarder) \
     && echo $(getField ${net}.env_file[0])
@@ -69,8 +69,6 @@ npx hardhat balanceDeployer --network ${net}
     npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
     npx hardhat run --no-compile ./scripts/deployERC20.js --network ${net}
 
-    if [ -z "$REGNET" ]; then
-      echo "It's not run"
       ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
         RPC_URL=$(getField ${net}.rpcUrl) \
         NETWORK_ID=$(getField ${net}.chainId) \
@@ -82,7 +80,7 @@ npx hardhat balanceDeployer --network ${net}
         SYNTHESIS_ADDRESS=$(getField ${net}.synthesis) \
         PAYMASTER_ADDRESS=$(getField ${net}.paymaster) \
         EYWA_TOKEN_ADDRESS=$(getField ${net}.eywa) \
-        TEST_TOKEN_ADDRESS=$(getField ${net}.token[0].address) \
+        TEST_TOKEN_ADDRESS=$(getField ${net}?.token[0]?.address) \
         FORWARDER_ADDRESS=$(getField ${net}.forwarder) \
         ROUTER_ADDRESS=$(getField ${net}.router) \
       && echo $(getField ${net}.env_file[0])
@@ -101,7 +99,6 @@ npx hardhat balanceDeployer --network ${net}
 
       ./scripts/env2json_adapter.sh $(getField ${net}.env_file[0])
       ./scripts/env2json_adapter.sh $(getField ${net}.env_file[1])
-    fi
   fi
 done
 
@@ -131,7 +128,7 @@ if [ \( ! -z "$REGNET" -a "$STEP" == "init" \) -o -z "$REGNET" ]; then
   for net in ${nets//\,/ }; do
     echo 'init into:' ${net}
     npx hardhat balanceDeployer --network ${net}
-    npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
+    NETS=$nets npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
   done
 
 

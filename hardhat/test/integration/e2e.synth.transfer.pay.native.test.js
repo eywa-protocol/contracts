@@ -1,0 +1,155 @@
+let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
+const { checkoutProvider, timeout, addressToBytes32, signWorkerPermit } = require("../../utils/helper");
+const { ethers } = require("hardhat");
+const { parseBytes32String } = require("ethers/lib/utils");
+const { expect } = require("chai");
+
+contract('Synthesis', () => {
+
+    describe("synthTransferRequest local test", () => {
+
+        before(async () => {
+            ERC20A = artifacts.require('SyntERC20')
+            ERC20B = artifacts.require('SyntERC20')
+            ERC20C = artifacts.require('SyntERC20')
+
+            LERC20A = artifacts.require('ERC20Mock')
+            LERC20B = artifacts.require('ERC20Mock')
+            LERC20C = artifacts.require('ERC20Mock')
+
+            SynthesisA = artifacts.require('Synthesis')
+            SynthesisB = artifacts.require('Synthesis')
+            SynthesisC = artifacts.require('Synthesis')
+
+            RouterA = artifacts.require('Router')
+            RouterB = artifacts.require('Router')
+            RouterC = artifacts.require('Router')
+
+            PortalA = artifacts.require('Portal')
+            PortalB = artifacts.require('Portal')
+            PortalC = artifacts.require('Portal')
+
+            factoryProvider = checkoutProvider({ 'typenet': 'devstand', 'net1': 'network1', 'net2': 'network2', 'net3': 'network3' })
+
+            totalSupply = ethers.constants.MaxUint256
+
+            RouterA.setProvider(factoryProvider.web3Net1)
+            RouterB.setProvider(factoryProvider.web3Net2)
+            RouterC.setProvider(factoryProvider.web3Net3)
+
+            SynthesisA.setProvider(factoryProvider.web3Net1)
+            SynthesisB.setProvider(factoryProvider.web3Net2)
+            SynthesisC.setProvider(factoryProvider.web3Net3)
+
+            PortalA.setProvider(factoryProvider.web3Net1)
+            PortalB.setProvider(factoryProvider.web3Net2)
+            PortalC.setProvider(factoryProvider.web3Net3)
+
+            ERC20A.setProvider(factoryProvider.web3Net1)
+            ERC20B.setProvider(factoryProvider.web3Net2)
+            ERC20C.setProvider(factoryProvider.web3Net3)
+
+            LERC20A.setProvider(factoryProvider.web3Net1)
+            LERC20B.setProvider(factoryProvider.web3Net2)
+            LERC20C.setProvider(factoryProvider.web3Net3)
+
+            userNet1 = (await SynthesisA.web3.eth.getAccounts())[0];
+            userNet2 = (await SynthesisB.web3.eth.getAccounts())[0];
+            userNet3 = (await SynthesisC.web3.eth.getAccounts())[0];
+
+            tokenA1 = await ERC20A.at(deployInfo['network1'].localToken[0].address)
+            tokenB1 = await ERC20B.at(deployInfo['network2'].localToken[0].address)
+            tokenC1 = await ERC20C.at(deployInfo['network3'].localToken[0].address)
+
+            const testAmount = Math.floor((Math.random() * 100) + 1);
+            amount = ethers.utils.parseEther(testAmount + ".0")
+
+            await tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
+            await tokenB1.mint(userNet2, amount, { from: userNet2, gas: 300_000 })
+            await tokenC1.mint(userNet3, amount, { from: userNet3, gas: 300_000 })
+
+            synthesisA = await SynthesisA.at(deployInfo["network1"].synthesis)
+            synthesisB = await SynthesisB.at(deployInfo["network2"].synthesis)
+            synthesisC = await SynthesisC.at(deployInfo["network3"].synthesis)
+
+            routerA = await RouterA.at(deployInfo["network1"].router)
+            routerB = await RouterB.at(deployInfo["network2"].router)
+            routerC = await RouterC.at(deployInfo["network3"].router)
+
+        })
+
+        it("Synth Transfer: network1 -> network3", async function () {
+            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(deployInfo["network1"].localToken[0].address))
+            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(deployInfo["network1"].localToken[0].address))
+            this.synthTokenC1 = await ERC20C.at(synthAddressC1)
+            this.synthTokenB1 = await ERC20B.at(synthAddressB1)
+            synthBalance = await this.synthTokenC1.balanceOf(userNet3)
+
+            await tokenA1.approve(routerA.address, totalSupply, { from: userNet1, gas: 300_000 })
+            await this.synthTokenB1.approve(routerB.address, totalSupply, { from: userNet2, gas: 300_000 })
+
+            //A->B
+            await routerA.tokenSynthesizeRequest(
+                deployInfo['network1'].localToken[0].address,
+                amount,
+                {
+                    to: userNet2,
+                    receiveSide: deployInfo['network2'].synthesis,
+                    oppositeBridge: deployInfo['network2'].bridge,
+                    chainId: deployInfo['network2'].chainId,
+                },
+                { from: userNet1, gas: 300_000 }
+            )
+
+            await timeout(15000)
+
+            const executionHash = await routerB._SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH()
+            const workerExecutionPrice = ethers.utils.parseEther("1.0")
+            const workerDeadline = "100000000000"
+            const userFrom = userNet2
+            const userTo = userNet3
+            const userNonce = await routerB.nonces(userFrom)
+            const chainIdFrom = deployInfo["network2"].chainId
+            const chainIdTo = deployInfo["network3"].chainId
+            const signerUserNet2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK2)
+
+            const workerSignature = await signWorkerPermit(
+                signerUserNet2,
+                routerB.address,
+                workerExecutionPrice,
+                executionHash,
+                chainIdFrom,
+                chainIdTo,
+                userNonce,
+                workerDeadline
+            )
+            //B->C
+            await routerB.synthTransferRequestPayNative(
+                addressToBytes32(deployInfo["network1"].localToken[0].address),
+                this.synthTokenB1.address,
+                amount,
+                userTo,
+                {
+                    receiveSide: deployInfo['network3'].synthesis,
+                    oppositeBridge: deployInfo['network3'].bridge,
+                    chainId: deployInfo['network3'].chainId,
+                },
+                {
+                    executionPrice: workerExecutionPrice,
+                    deadline: workerDeadline,
+                    v: workerSignature.v,
+                    r: workerSignature.r,
+                    s: workerSignature.s
+                },
+                { from: userNet2, gas: 300_000, value: workerExecutionPrice }
+            )
+
+            await timeout(15000)
+
+            //check balance
+            newSynthBalance = await this.synthTokenC1.balanceOf(userNet3)
+            assert(synthBalance.lt(newSynthBalance))
+        })
+
+    })
+})
