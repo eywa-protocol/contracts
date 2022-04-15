@@ -333,7 +333,6 @@ contract Router is EIP712, Ownable {
      * @dev Delegated token synthesize request.
      * @param token token address to synthesize
      * @param amount amount to synthesize
-     * @param from msg sender address
      * @param to amount recipient address
      * @param receiveSide request recipient address
      * @param oppositeBridge opposite bridge address
@@ -429,7 +428,6 @@ contract Router is EIP712, Ownable {
      * @dev Direct token synthesize request.
      * @param token token address to synthesize
      * @param amount amount to synthesize
-     * @param from msg sender address
      * @param synthParams synthesize parameters
      */
     function tokenSynthesizeRequest(
@@ -445,7 +443,6 @@ contract Router is EIP712, Ownable {
      * @dev Direct token synthesize request with permit.
      * @param token token address to synthesize
      * @param amount amount to synthesize
-     * @param from msg sender address
      * @param synthParams synthesize parameters
      * @param permitData permit data
      */
@@ -472,7 +469,6 @@ contract Router is EIP712, Ownable {
      * @dev  Direct token synthesize request with bytes32 support for Solana.
      * @param token token address to synthesize
      * @param amount amount to synthesize
-     * @param from msg sender address
      * @param pubkeys synth data for Solana
      * @param txStateBump transaction state bump
      * @param chainId opposite chain ID
@@ -492,7 +488,6 @@ contract Router is EIP712, Ownable {
      * @dev  Direct batch synthesize request with data transition.
      * @param token token addresses to synthesize
      * @param amount amounts to synthesize
-     * @param from msg sender address
      * @param selector function selector
      * @param transitData transit data
      * @param synthParams synthesize parameters
@@ -528,9 +523,9 @@ contract Router is EIP712, Ownable {
      * @param receiveSide receiver contract address
      * @param oppositeBridge opposite bridge address
      * @param chainId opposite chain ID
-     * @param v 
-     * @param r 
-     * @param s 'v', 'r' , 's' must be valid signature from txID owner
+     * @param v must be a valid part of the signature from txID owner
+     * @param r must be a valid part of the signature from txID owner
+     * @param s must be a valid part of the signature from txID owner
      */
     function emergencyUnburnRequest(
         bytes32 txID,
@@ -557,7 +552,6 @@ contract Router is EIP712, Ownable {
      * @dev Direct local mint EUSD request (hub chain execution only)
      * @param params MetaMintEUSD params
      * @param permit permit operation params
-     * @param from msg sender address
      * @param token token addresses
      * @param amount amounts to transfer
      */
@@ -579,7 +573,6 @@ contract Router is EIP712, Ownable {
      * @dev Direct local meta exchange request (hub chain execution only)
      * @param params meta exchange params
      * @param permit permit operation params
-     * @param from msg sender address
      * @param token token addresses to transfer within initial stage
      * @param amount amounts to transfer within initial stage
      */
@@ -601,8 +594,7 @@ contract Router is EIP712, Ownable {
      * @dev Direct local EUSD redeem request with unsynth operation (hub chain execution only)
      * @param params meta redeem EUSD params
      * @param permit permit params
-     * @param payToken
-     * @param from msg sender address
+     * @param payToken pay token
      * @param receiveSide recipient address for unsynth operation
      * @param oppositeBridge opposite bridge contract address
      * @param chainId opposite chain ID
@@ -624,7 +616,6 @@ contract Router is EIP712, Ownable {
      * @dev Direct synthetic token transfer request to another chain
      * @param tokenReal real token address
      * @param amount amount to transfer
-     * @param from msg sender address
      * @param to recipient address
      * @param synthParams synthesize parameters
      */
@@ -644,7 +635,6 @@ contract Router is EIP712, Ownable {
      * @dev Direct unsynthesize request 
      * @param stoken synthetic token address for unsynthesize
      * @param amount amount to unsynth
-     * @param from msg sender address
      * @param to recipient address
      * @param receiveSide recipient address for unsynth operation
      * @param oppositeBridge opposite bridge contract address
@@ -666,7 +656,6 @@ contract Router is EIP712, Ownable {
     /**
      * @dev Direct unsynthesize request to Solana
      * @param stoken synthetic token address for unsynthesize
-     * @param from msg sender address
      * @param pubkeys synth data for Solana
      * @param amount amount to unsynth
      * @param chainId opposite chain ID
@@ -688,9 +677,9 @@ contract Router is EIP712, Ownable {
      * @param receiveSide request recipient address
      * @param oppositeBridge opposite bridge address
      * @param chainId opposite chain ID
-     * @param v 
-     * @param r 
-     * @param s 'v', 'r' , 's' must be valid signature from txID owner
+     * @param v must be a valid part of the signature from txID owner
+     * @param r must be a valid part of the signature from txID owner
+     * @param s must be a valid part of the signature from txID owner
      */
     function emergencyUnsyntesizeRequest(
         bytes32 txID,

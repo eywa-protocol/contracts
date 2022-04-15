@@ -143,7 +143,6 @@ describe('Vesting tests. Part 1', () => {
     });
 
     it('cannot be reInitialize', async function () {
-        console.log("sdgdsgdsgsd");
         await expect(vesting.initialize(
             claimAllowanceContract,
             claimWithAllowanceTimeStamp,
