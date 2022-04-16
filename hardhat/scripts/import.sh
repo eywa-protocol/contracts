@@ -9,11 +9,8 @@ getField(){
 
 getNetRpcUrl(){
   case $1 in
-  "harmonylocal")
-  RPC_URL=$(getField ${net}.rpcUrl2)
-  ;;
-  *)
-  RPC_URL=$(getField ${net}.rpcUrl)
-  ;;
+    "harmonylocal")
+      RPC_URL=$(getField ${net}.rpcUrl2);
+      WS_URL=$(getField ${net}.rpcUrl);;
   esac
 }

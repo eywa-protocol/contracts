@@ -8,8 +8,10 @@ if [[ ${1} =~ ^('')$ ]]; then
   nets=${nets//\"/ }
   echo '> Create (override) env files only'
   for net in ${nets//\,/ }; do
-    ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
-      RPC_URL=$(getField ${net}.rpcUrl) \
+      getNetRpcUrl $net
+      ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
+      RPC_URL=${RPC_URL:-$(getField ${net}.rpcUrl)} \
+      WS_URL=${WS_URL:-"undefined"} \
       NETWORK_ID=$(getField ${net}.chainId) \
       NETWORK_NAME=${net} \
       BRIDGE_ADDRESS=$(getField ${net}.bridge) \
@@ -67,6 +69,7 @@ elif [ -z "$STEP" ]; then
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network1
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network3
   npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network network2
+  npx hardhat run --no-compile ./scripts/meta_exchange/deploy-crosschain-pool.js --network harmonylocal
 fi
 
 if [ \( ! -z "$REGNET" -a "$PART" == "deploy_crosspool" -a "$STEP" != "init" \) -o -z "$REGNET" ]; then
