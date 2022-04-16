@@ -88,6 +88,13 @@ async function main() {
         let txGC = await gaugeController.add_gauge(gaugeLocal.address, 0, "10000000000000000000"/*weight*/,{ gasLimit: 1000000 });
         await txGC.wait();
         deployInfo[network.name].localPool.gauge = gaugeLocal.address;
+
+        //deploy treasury
+        const _Treasury = await ethers.getContractFactory("Treasury");
+        const treasury = await _Treasury.deploy();
+        await treasury.deployed();
+        console.log("Treasury address:", treasury.address) 
+        deployInfo[network.name].treasury = treasury.address;
     }
 
     // write out the deploy configuration

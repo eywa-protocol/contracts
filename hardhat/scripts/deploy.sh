@@ -2,6 +2,12 @@
 
 source $(pwd)/scripts/import.sh
 
+echo "-----debug----"
+echo "nets - $nets"
+echo "regnet - $REGNET"
+echo "part - $PART"
+echo "step - $STEP"
+
 nets=${1}
 if [[ ${1} =~ ^('')$ ]]; then
   nets=$(jq 'keys[]' ./helper-hardhat-config.json)
@@ -20,7 +26,7 @@ if [[ ${1} =~ ^('')$ ]]; then
       SYNTHESIS_ADDRESS=$(getField ${net}.synthesis) \
       PAYMASTER_ADDRESS=$(getField ${net}.paymaster) \
       EYWA_TOKEN_ADDRESS=$(getField ${net}.eywa) \
-      TEST_TOKEN_ADDRESS=$(getField ${net}.token[0].address) \
+      TEST_TOKEN_ADDRESS=$(getField ${net}?.token[0]?.address) \
       NODEREGISTRY_ADDRESS=$(getField ${net}.nodeRegistry) \
       FORWARDER_ADDRESS=$(getField ${net}.forwarder) \
     && echo $(getField ${net}.env_file[0])
@@ -35,9 +41,13 @@ if [[ ${1} =~ ^('')$ ]]; then
       EYWA_TOKEN_$(getField ${net}.n)=$(getField ${net}.eywa) \
       FORWARDER_$(getField ${net}.n)=$(getField ${net}.forwarder) \
     && echo $(getField ${net}.env_file[1])
+
+    #  ./scripts/env2json_adapter.sh $(getField ${net}.env_file[0])
+    #  ./scripts/env2json_adapter.sh $(getField ${net}.env_file[1])
   done
   exit 0
  fi
+
 
 regnet="${REGNET:-$(cut -d "," -f1 <<<$nets)}"
 for net in ${nets//\,/ }; do
@@ -58,6 +68,9 @@ npx hardhat balanceDeployer --network ${net}
     npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
     npx hardhat run --no-compile ./scripts/deployERC20.js --network ${net}
 
+    $(pwd)/scripts/configs.sh ${net}
+    #  ./scripts/env2json_adapter.sh $(getField ${net}.env_file[0])
+    #  ./scripts/env2json_adapter.sh $(getField ${net}.env_file[1])
 
   fi
 done
@@ -89,7 +102,7 @@ if [ \( ! -z "$REGNET" -a "$STEP" == "init" \) -o -z "$REGNET" ]; then
   for net in ${nets//\,/ }; do
     echo 'init into:' ${net}
     npx hardhat balanceDeployer --network ${net}
-    npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
+    NETS=$nets npx hardhat run --no-compile ./scripts/amm_pool/createRepresentation.js --network ${net}
   done
 
 
@@ -105,5 +118,3 @@ if [ \( ! -z "$REGNET" -a "$STEP" == "init" \) -o -z "$REGNET" ]; then
     npx hardhat run --no-compile ./scripts/dao/deploy-dao.js --network network2
   fi
 fi
-
-$(pwd)/scripts/configs.sh ${1}

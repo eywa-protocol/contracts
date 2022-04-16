@@ -3,7 +3,6 @@
 source $(pwd)/scripts/import.sh
 
 nets=${1}
-regnet="${REGNET:-$(cut -d "," -f1 <<<$nets)}"
 for net in ${nets//\,/ }; do
 echo 'bash script for network:' ${net}
 echo '==========================================='
@@ -22,7 +21,7 @@ echo ''
         SYNTHESIS_ADDRESS=$(getField ${net}.synthesis) \
         PAYMASTER_ADDRESS=$(getField ${net}.paymaster) \
         EYWA_TOKEN_ADDRESS=$(getField ${net}.eywa) \
-        TEST_TOKEN_ADDRESS=$(getField ${net}.token[0].address) \
+        TEST_TOKEN_ADDRESS=$(getField ${net}?.token[0]?.address) \
         FORWARDER_ADDRESS=$(getField ${net}.forwarder) \
       && echo $(getField ${net}.env_file[0])
 

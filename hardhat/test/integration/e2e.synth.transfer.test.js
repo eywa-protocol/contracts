@@ -92,7 +92,6 @@ contract('Synthesis', () => {
             await routerA.tokenSynthesizeRequest(
                 deployInfo['network1'].localToken[0].address,
                 amount,
-                userNet1,
                 {
                     to: userNet2,
                     receiveSide: deployInfo['network2'].synthesis,
@@ -108,7 +107,6 @@ contract('Synthesis', () => {
             await routerB.synthTransferRequest(
                 addressToBytes32(deployInfo["network1"].localToken[0].address),
                 amount,
-                userNet2,
                 userNet3,
                 {
                     receiveSide: deployInfo['network3'].synthesis,
@@ -139,7 +137,6 @@ contract('Synthesis', () => {
             await routerC.tokenSynthesizeRequest(
                 deployInfo['network3'].localToken[0].address,
                 amount,
-                userNet3,
                 {
                     to: userNet2,
                     receiveSide: deployInfo['network2'].synthesis,
@@ -155,7 +152,6 @@ contract('Synthesis', () => {
             await routerB.synthTransferRequest(
                 addressToBytes32(deployInfo["network3"].localToken[0].address),
                 amount,
-                userNet2,
                 userNet1,
                 {
                     receiveSide: deployInfo['network1'].synthesis,
@@ -186,7 +182,6 @@ contract('Synthesis', () => {
             await routerC.tokenSynthesizeRequest(
                 deployInfo['network3'].localToken[0].address,
                 amount,
-                userNet3,
                 {
                     to: userNet1,
                     receiveSide: deployInfo['network1'].synthesis,
@@ -202,7 +197,6 @@ contract('Synthesis', () => {
             await routerA.synthTransferRequest(
                 addressToBytes32(deployInfo["network3"].localToken[0].address),
                 amount,
-                userNet1,
                 userNet2,
                 {
                     receiveSide: deployInfo['network2'].synthesis,
@@ -234,7 +228,6 @@ contract('Synthesis', () => {
             await routerA.tokenSynthesizeRequest(
                 deployInfo['network1'].localToken[0].address,
                 amount,
-                userNet1,
                 {
                     to: userNet3,
                     receiveSide: deployInfo['network3'].synthesis,
@@ -250,7 +243,6 @@ contract('Synthesis', () => {
             await routerC.synthTransferRequest(
                 addressToBytes32(deployInfo["network1"].localToken[0].address),
                 amount,
-                userNet3,
                 userNet2,
                 {
                     receiveSide: deployInfo['network2'].synthesis,
@@ -281,7 +273,6 @@ contract('Synthesis', () => {
             await routerB.tokenSynthesizeRequest(
                 deployInfo['network2'].localToken[0].address,
                 amount,
-                userNet2,
                 {
                     to: userNet3,
                     receiveSide: deployInfo['network3'].synthesis,
@@ -297,7 +288,6 @@ contract('Synthesis', () => {
             await routerC.synthTransferRequest(
                 addressToBytes32(deployInfo["network2"].localToken[0].address),
                 amount,
-                userNet3,
                 userNet1,
                 {
                     receiveSide: deployInfo['network1'].synthesis,
@@ -325,7 +315,6 @@ contract('Synthesis', () => {
             await routerC.tokenSynthesizeRequest(
                 deployInfo['network3'].localToken[0].address,
                 amount,
-                userNet3,
                 {
                     to: userNet1,
                     receiveSide: deployInfo['network1'].synthesis,
@@ -341,7 +330,6 @@ contract('Synthesis', () => {
             await expect(routerA.synthTransferRequest(
                 addressToBytes32(deployInfo["network3"].localToken[0].address),
                 amount,
-                userNet1,
                 userNet3,
                 {
                     receiveSide: deployInfo['network3'].synthesis,
