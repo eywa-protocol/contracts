@@ -50,8 +50,8 @@ async function main() {
         let tx = await gaugeController.add_type("Liquidity", "1000000000000000000" /* 10**18 */, { gasLimit: 1000000 }); //new web3.utils.BN(10).pow(new web3.utils.BN(18)
         await tx.wait();
 
-        // deploy minter 
-        // @param token: address, 
+        // deploy minter
+        // @param token: address,
         // @param controller: address
         const minter = await Minter.deploy(eywa.address, gaugeController.address);
         await minter.deployed();
@@ -65,8 +65,8 @@ async function main() {
             let owner = deployer.address;
             let lpToken = deployInfo[network.name].crosschainPool[i].lp[0];
 
-            // deploy LiquidityGauge 
-            // @param lp_addr: address, 
+            // deploy LiquidityGauge
+            // @param lp_addr: address,
             // @param minter: address
             // @param admin: address
             let gauge = await LiquidityGauge.deploy(lpToken.address, minter.address, owner);
@@ -97,7 +97,7 @@ async function main() {
         deployInfo[network.name].treasury = treasury.address;
     }
 
-    // write out the deploy configuration 
+    // write out the deploy configuration
     fs.writeFileSync("./helper-hardhat-config.json", JSON.stringify(deployInfo, undefined, 2));
     console.log("DAO contracts deployed!\n");
 

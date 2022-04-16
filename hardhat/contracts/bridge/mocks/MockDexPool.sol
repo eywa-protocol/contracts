@@ -23,9 +23,14 @@ contract MockDexPool is SolanaSerialize {
     event RequestSent(bytes32 reqId);
     event RequestReceived(uint256 data);
     event RequestReceivedV2(bytes32 reqId, uint256 data);
+    event TestEvent(bytes testData_, address secondPartPool, address oppBridge, uint chainId);
 
     constructor(address _bridge) {
         bridge = _bridge;
+    }
+
+    function sendTest2(bytes memory testData_, address secondPartPool_, address oppBridge_, uint chainId_) external {
+      emit TestEvent(testData_, secondPartPool_, oppBridge_, chainId_);
     }
 
     /**

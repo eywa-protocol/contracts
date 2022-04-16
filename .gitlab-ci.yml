@@ -53,7 +53,7 @@ deploy_bridge:
   artifacts:
     paths:
       - hardhat/helper-hardhat-config.json
-      - hardhat/.openzeppelin      
+      - hardhat/.openzeppelin
 
 deploy:cross_pool:
   stage: deploy
@@ -95,7 +95,7 @@ init:
     STEP: init
   artifacts:
     paths:
-      - hardhat/helper-hardhat-config.json  
+      - hardhat/helper-hardhat-config.json
 
 test:
   extends:
