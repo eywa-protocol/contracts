@@ -1,125 +1,170 @@
 {
-    "privateSale": [
+    "allVestingRounds": [
+        {
+            "name": "Pre-seed round",
+            "tokenAmount": "50000000",
+            "period": "24",
+            "cliffPeriod": "9",
+            "cliffPercent": "10",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "1",
+            "address":""
+        },
         {
             "name": "Strategic round",
             "tokenAmount": "10000000",
             "period": "18",
             "cliffPeriod": "6",
-            "cliffPercent": "10"
+            "cliffPercent": "10", 
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "1"
         },
         {
             "name": "Round 1",
             "tokenAmount": "35000000",
             "period": "18",
             "cliffPeriod": "6",
-            "cliffPercent": "10"
+            "cliffPercent": "10",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "1"
         },
         {
             "name": "Round 2",
             "tokenAmount": "67000000",
             "period": "18",
             "cliffPeriod": "6",
-            "cliffPercent": "10"
+            "cliffPercent": "10",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "1"
         },
         {
             "name": "KOLs round",
             "tokenAmount": "8000000",
             "period": "18",
             "cliffPeriod": "6",
-            "cliffPercent": "10"
-        }
-    ],
-    "publicSale": [
+            "cliffPercent": "10",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "1"
+        },
         {
             "name": "TGE - IDO launchpads: MoonEdge on Polygon",
-            "tokenAmount": "",
-            "period": "",
-            "cliffPeriod": "",
-            "cliffPercent": ""
+            "tokenAmount": "350000",
+            "period": "3",
+            "cliffPeriod": "0",
+            "cliffPercent": "25",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "2629743"
         },
         {
             "name": "TGE - IDO launchpads: Catapult on BSC",
-            "tokenAmount": "",
-            "period": "",
-            "cliffPeriod": "",
-            "cliffPercent": ""
+            "tokenAmount": "250000",
+            "period": "3",
+            "cliffPeriod": "0",
+            "cliffPercent": "30",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "2629743"
         },
         {
             "name": "TGE - IDO launchpads: Gagarin on BSC",
-            "tokenAmount": "",
-            "period": "",
-            "cliffPeriod": "",
-            "cliffPercent": ""
+            "tokenAmount": "150000",
+            "period": "3",
+            "cliffPeriod": "0",
+            "cliffPercent": "25",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "2629743"
         },
         {
             "name": "TGE - IDO launchpads: Harmony launcher on Harmony",
-            "tokenAmount": "",
-            "period": "",
-            "cliffPeriod": "",
-            "cliffPercent": ""
+            "tokenAmount": "500000",
+            "period": "3",
+            "cliffPeriod": "0",
+            "cliffPercent": "25",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "2629743"
         },
         {
             "name": "Round for validators",
-            "tokenAmount": "",
-            "period": "",
-            "cliffPeriod": "",
-            "cliffPercent": ""
+            "tokenAmount": "30000000",
+            "period": "16",
+            "cliffPeriod": "12",
+            "cliffPercent": "50",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "1"
         },
         {
             "name": "Round for alpha testers",
-            "tokenAmount": "",
-            "period": "",
-            "cliffPeriod": "",
-            "cliffPercent": ""
+            "tokenAmount": "12750000",
+            "period": "6",
+            "cliffPeriod": "2",
+            "cliffPercent": "10",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "1"
         },
         {
             "name": "Airdrop for early adopters",
-            "tokenAmount": "",
-            "period": "",
+            "tokenAmount": "10000000",
+            "period": "12",
             "cliffPeriod": "",
-            "cliffPercent": ""
-        },
-        {
-            "name": "Pre-seed round",
-            "tokenAmount": "",
-            "period": "",
-            "cliffPeriod": "",
-            "cliffPercent": ""
+            "cliffPercent": "10",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "1"
         },
         {
             "name": "Founders and team",
-            "tokenAmount": "",
-            "period": "",
-            "cliffPeriod": "",
-            "cliffPercent": ""
+            "tokenAmount": "170000000",
+            "period": "24",
+            "cliffPeriod": "12",
+            "cliffPercent": "10",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "1"
         },
         {
             "name": "Advisers",
-            "tokenAmount": "",
-            "period": "",
-            "cliffPeriod": "",
-            "cliffPercent": ""
+            "tokenAmount": "50000000",
+            "period": "24",
+            "cliffPeriod": "12",
+            "cliffPercent": "10",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "1"
         },
         {
-            "name": "Pre-seed round",
-            "tokenAmount": "",
-            "period": "",
+            "name": "Longterm market making (with vesting)",
+            "tokenAmount": "50000000",
+            "period": "5",
             "cliffPeriod": "",
-            "cliffPercent": ""
+            "cliffPercent": "",
+            "permissionlessTimeStamp": "0",
+            "claimWithAllowanceTimeStamp": "0",
+            "stepAmount": "2629743"
+        }
+        
+    ],
+    "treasuryAllocation": [
+        {
+            "name": "DAO treasury: Grants & hackatons rewards",
+            "tokenAmount": "50000000"
         },
         {
-            "name": "Pre-seed round",
-            "tokenAmount": "",
-            "period": "",
-            "cliffPeriod": "",
-            "cliffPercent": ""
+            "name": "DAO treasury: Marketing & strategic reserve",
+            "tokenAmount": "40000000"
         },
         {
-            "name": "Pre-seed round",
-            "tokenAmount": "",
-            "period": "",
-            "cliffPeriod": "",
-            "cliffPercent": ""
+            "name": "DAO treasury: Public rewards (farming, staking, bonding)",
+            "tokenAmount": "400000000"
         }
     ]
 }

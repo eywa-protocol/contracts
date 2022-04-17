@@ -2,6 +2,7 @@ const fs = require("fs");
 const { network } = require("hardhat");
 let deployInfo = require('../../helper-hardhat-config.json')
 
+//FOR LOCAL TEST ONLY
 async function main() {
     console.log("\n DAO contracts  deployment");
     const [deployer] = await ethers.getSigners();
@@ -90,7 +91,7 @@ async function main() {
         deployInfo[network.name].localPool.gauge = gaugeLocal.address;
 
         //deploy treasury
-        const _Treasury = await ethers.getContractFactory("Treasury");
+        const _Treasury = await ethers.getContractFactory("EywaTreasury");
         const treasury = await _Treasury.deploy();
         await treasury.deployed();
         console.log("Treasury address:", treasury.address) 
