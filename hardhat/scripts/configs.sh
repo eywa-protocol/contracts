@@ -11,6 +11,7 @@ if [[ ${1} =~ ^('')$ ]]; then
     getNetRpcUrl $net
     ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
       RPC_URL=$RPC_URL \
+      WS_URL=$WS_URL \
       NETWORK_ID=$(getField ${net}.chainId) \
       NETWORK_NAME=${net} \
       BRIDGE_ADDRESS=$(getField ${net}.bridge) \
@@ -49,6 +50,7 @@ echo ''
       getNetRpcUrl $net
       ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
         RPC_URL=$RPC_URL \
+        WS_URL=$WS_URL \
         NETWORK_ID=$(getField ${net}.chainId) \
         NETWORK_NAME=${net} \
         BRIDGE_ADDRESS=$(getField ${net}.bridge) \

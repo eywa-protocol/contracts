@@ -67,9 +67,11 @@ testnet-test:
 eth-hmy-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh harmonylocal
 
+# FIST PARAMETER IS HUB-CHAIN !!!
 eth-local-migrate: deps npm wrappers
-	cd hardhat;./scripts/deploy.sh network2,network1,network3,harmonylocal
+	cd hardhat;./scripts/deploy.sh harmonylocal,network2,network1,network3
 
+# FIST PARAMETER IS HUB-CHAIN !!!
 eth-testnet-migrate: deps npm wrappers eth-hmy-migrate
 	cd hardhat;./scripts/deploy.sh mumbai,bsctestnet,avalanchetestnet,hecotestnet,rinkeby
 
