@@ -81,9 +81,6 @@ eth-testnet-migrate-core: deps npm wrappers
 	cd hardhat; REGNET="harmonytestnet" PART="deploy_bridge" STEP="deploy" ./scripts/deploy.sh harmonytestnet,mumbai,bsctestnet;
 	cd hardhat; REGNET="harmonytestnet" PART="" STEP="init" ./scripts/deploy.sh harmonytestnet,mumbai,bsctestnet
 
-eth-testnet-migrate: deps npm wrappers
-	cd hardhat;./scripts/deploy.sh harmonytestnet,mumbai,bsctestnet,avalanchetestnet,hecotestnet,rinkeby
-
 eth-testnet-ci-migrate: debug deps npm wrappers
 	echo "${NETWORKS}";
 	cd hardhat;./scripts/deploy.sh ${NETWORKS}
