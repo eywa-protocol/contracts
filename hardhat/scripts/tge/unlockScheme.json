@@ -1,0 +1,125 @@
+{
+    "privateSale": [
+        {
+            "name": "Strategic round",
+            "tokenAmount": "10000000",
+            "period": "18",
+            "cliffPeriod": "6",
+            "cliffPercent": "10"
+        },
+        {
+            "name": "Round 1",
+            "tokenAmount": "35000000",
+            "period": "18",
+            "cliffPeriod": "6",
+            "cliffPercent": "10"
+        },
+        {
+            "name": "Round 2",
+            "tokenAmount": "67000000",
+            "period": "18",
+            "cliffPeriod": "6",
+            "cliffPercent": "10"
+        },
+        {
+            "name": "KOLs round",
+            "tokenAmount": "8000000",
+            "period": "18",
+            "cliffPeriod": "6",
+            "cliffPercent": "10"
+        }
+    ],
+    "publicSale": [
+        {
+            "name": "TGE - IDO launchpads: MoonEdge on Polygon",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        },
+        {
+            "name": "TGE - IDO launchpads: Catapult on BSC",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        },
+        {
+            "name": "TGE - IDO launchpads: Gagarin on BSC",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        },
+        {
+            "name": "TGE - IDO launchpads: Harmony launcher on Harmony",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        },
+        {
+            "name": "Round for validators",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        },
+        {
+            "name": "Round for alpha testers",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        },
+        {
+            "name": "Airdrop for early adopters",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        },
+        {
+            "name": "Pre-seed round",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        },
+        {
+            "name": "Founders and team",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        },
+        {
+            "name": "Advisers",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        },
+        {
+            "name": "Pre-seed round",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        },
+        {
+            "name": "Pre-seed round",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        },
+        {
+            "name": "Pre-seed round",
+            "tokenAmount": "",
+            "period": "",
+            "cliffPeriod": "",
+            "cliffPercent": ""
+        }
+    ]
+}

@@ -81,7 +81,6 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userNet1,
                 {
                     to: userNet2,
                     receiveSide: receiveSideB,
@@ -97,7 +96,6 @@ contract('Router', () => {
             await this.routerB.unsynthesizeRequest(
                 this.synthB.address,
                 amount,
-                userNet2,
                 userNet3,
                 deployInfo["network3"].synthesis,
                 deployInfo["network3"].bridge,
@@ -128,7 +126,6 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userNet1,
                 {
                     to: userNet2,
                     receiveSide: receiveSideB,
@@ -145,7 +142,6 @@ contract('Router', () => {
             await this.routerB.unsynthesizeRequest(
                 this.synthB.address,
                 amount,
-                userNet2,
                 userNet1,
                 deployInfo["network1"].synthesis,
                 deployInfo["network1"].bridge,
@@ -176,7 +172,6 @@ contract('Router', () => {
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userNet2,
                 {
                     to: userNet1,
                     receiveSide: receiveSideA,
@@ -193,7 +188,6 @@ contract('Router', () => {
             await this.routerA.unsynthesizeRequest(
                 this.synthA.address,
                 amount,
-                userNet1,
                 userNet2,
                 deployInfo["network2"].synthesis,
                 deployInfo["network2"].bridge,
@@ -224,7 +218,6 @@ contract('Router', () => {
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userNet2,
                 {
                     to: userNet1,
                     receiveSide: receiveSideA,
@@ -241,7 +234,6 @@ contract('Router', () => {
             await this.routerA.unsynthesizeRequest(
                 this.synthA.address,
                 amount,
-                userNet1,
                 userNet3,
                 deployInfo["network3"].synthesis,
                 deployInfo["network3"].bridge,
@@ -273,7 +265,6 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userNet1,
                 {
                     to: userNet3,
                     receiveSide: receiveSideC,
@@ -290,7 +281,6 @@ contract('Router', () => {
             await this.routerC.unsynthesizeRequest(
                 this.synthC.address,
                 amount,
-                userNet3,
                 userNet2,
                 deployInfo["network2"].synthesis,
                 deployInfo["network2"].bridge,
@@ -322,7 +312,6 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userNet1,
                 {
                     to: userNet3,
                     receiveSide: receiveSideC,
@@ -339,7 +328,6 @@ contract('Router', () => {
             await this.routerC.unsynthesizeRequest(
                 this.synthC.address,
                 amount,
-                userNet3,
                 userNet1,
                 deployInfo["network1"].synthesis,
                 deployInfo["network1"].bridge,

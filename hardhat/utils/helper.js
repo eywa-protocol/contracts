@@ -124,6 +124,58 @@ const getTxId = (userFrom, nonce, chainIdOpposite, chainIdCurrent, receiveSide, 
     );
 }
 
+const signWorkerPermit = async (
+    userFrom,
+    verifyingContract,
+    workerExecutionPrice,
+    executionHash,
+    chainIdFrom,
+    chainIdTo,
+    userNonce,
+    workerDeadline
+)  => {
+    const hashedName = ethers.utils.solidityKeccak256(
+        ['string'],
+        ["EYWA"]
+    );
+    const hashedVersion = ethers.utils.solidityKeccak256(
+        ['string'],
+        ["1"]
+    );
+
+    const typeHash = ethers.utils.solidityKeccak256(
+        ['string'],
+        ["EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"]
+    );
+
+    const domainSeparator = web3.eth.abi.encodeParameters(
+        ['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],
+        [typeHash, hashedName, hashedVersion, chainIdFrom, verifyingContract]
+    );
+
+    const domainSeparatorHash = ethers.utils.solidityKeccak256(
+        ['bytes'],
+        [domainSeparator]
+    );
+
+    const delegatedCallWorkerPermitHash = ethers.utils.solidityKeccak256(
+        ['string'],
+        ["DelegatedCallWorkerPermit(address from,uint256 chainIdTo,uint256 executionPrice,bytes32 executionHash,uint256 nonce,uint256 deadline)"]
+    );
+
+    const workerStructHash = ethers.utils.solidityKeccak256(
+        ['bytes32', 'address', 'uint256', 'uint256', 'bytes32', 'uint256', 'uint256'],
+        [delegatedCallWorkerPermitHash, userFrom.address, chainIdTo, workerExecutionPrice, executionHash, userNonce.toString(), workerDeadline]
+    );
+
+    const workerMsgHash = ethers.utils.solidityKeccak256(
+        ['string', 'bytes32', 'bytes32'],
+        ['\x19\x01', domainSeparatorHash, workerStructHash]
+    );
+    
+    return ethers.utils.splitSignature(await userFrom.signMessage(ethers.utils.arrayify(workerMsgHash)));
+}
+
 module.exports = {
     toWei,
     fromWei,
@@ -135,5 +187,6 @@ module.exports = {
     addressToBytes32,
     getCreate2Address,
     getRepresentation,
-    getTxId
+    getTxId,
+    signWorkerPermit
 };

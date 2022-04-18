@@ -55,59 +55,18 @@ async function main() {
         console.log(`addContractBind for mockDexPool on ${network.name} with ${netw}: ${this.tx.hash}`);
         await this.tx.wait();
 
-        console.log(`-> binding solana program to MockDexPool ${addressToBytes32(mDP)} to send request to solana`)
-        console.log(`-> pidBridge ${pidBridge}`)
-       this.tx = await bridgeA.addContractBind(
-        addressToBytes32(mDP),
-        pidBridge,
-        pidTestStub
-        );
-        console.log(`-> tx ${tx}`)
-       console.log(`-> addContractBind for mockDexPool on solana ${network.name} with ${netw}: ${this.tx.hash}`);
-       await this.tx.wait();
+      // TODO: some logic for switch this lines. For ex: if we know addresses porgram from helper anchor
+      //   console.log(`-> binding solana program to MockDexPool ${addressToBytes32(mDP)} to send request to solana`)
+      //   console.log(`-> pidBridge ${pidBridge}`)
+      //  this.tx = await bridgeA.addContractBind(
+      //   addressToBytes32(mDP),
+      //   pidBridge,
+      //   pidTestStub
+      //   );
+      //   console.log(`-> tx ${tx}`)
+      //  console.log(`-> addContractBind for mockDexPool on solana ${network.name} with ${netw}: ${this.tx.hash}`);
+      //  await this.tx.wait();
 //-----
-      this.tx = await bridgeA.addContractBind(
-        addressToBytes32(this.p),
-        addressToBytes32(bridgeB),
-        addressToBytes32(curveProxy)
-        );
-      console.log(`addContractBind for Curve proxy > Portal on ${network.name} with ${netw}: ${this.tx.hash}`);
-      await this.tx.wait();
-
-      this.tx = await bridgeA.addContractBind(
-        addressToBytes32(this.s),
-        addressToBytes32(bridgeB),
-        addressToBytes32(curveProxy)
-        );
-      console.log(`addContractBind for Curve proxy > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
-      await this.tx.wait();
-
-       this.tx = await bridgeA.addContractBind(
-        addressToBytes32(this.cp),
-        addressToBytes32(bridgeB),
-        addressToBytes32(portal)
-        );
-       console.log(`addContractBind for Curve proxy > Portal on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await this.tx.wait();
-
-       this.tx = await bridgeA.addContractBind(
-        addressToBytes32(this.cp),
-        addressToBytes32(bridgeB),
-        addressToBytes32(synth)
-        );
-       console.log(`addContractBind for Curve proxy > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await this.tx.wait();
-
-       this.tx = await bridgeA.addContractBind(
-        addressToBytes32(this.cp),
-        addressToBytes32(bridgeB),
-        addressToBytes32(curveProxy)
-        );
-       console.log(`addContractBind for Curve proxy > Curve proxy on ${network.name} with ${netw}: ${this.tx.hash}`);
-       await this.tx.wait();
-
-
-
        this.tx = await bridgeA.addContractBind(
         addressToBytes32(this.s),
         addressToBytes32(bridgeB),
