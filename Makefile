@@ -68,7 +68,9 @@ eth-hmy-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh harmonylocal
 
 eth-local-migrate: deps npm wrappers
-	cd hardhat;./scripts/deploy.sh network2,network1,network3,harmonylocal
+	cd hardhat;./scripts/deploy.sh harmonylocal,network2,network1,network3
+
+# REGCHAIN SHOULD BE FIRST PARAMETER of deploy.sh
 
 eth-testnet-migrate: deps npm wrappers eth-hmy-migrate
 	cd hardhat;./scripts/deploy.sh harmonytestnet,mumbai,bsctestnet,avalanchetestnet,hecotestnet,rinkeby
