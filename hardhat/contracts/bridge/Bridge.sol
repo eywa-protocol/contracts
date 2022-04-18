@@ -61,6 +61,9 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         _;
     }
 
+    /**
+    * @dev Get current epoch
+     */
     function getEpoch()
         public
         view
@@ -222,10 +225,17 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         dao = newDao;
     }
 
+    /**
+     * @dev Sets new trusted forwarder
+     * @param _forwarder new forwarder address
+     */
     function setTrustedForwarder(address _forwarder) external onlyOwner {
         return _setTrustedForwarder(_forwarder);
     }
 
+    /**
+     * @dev Adds new contract bind
+     */
     function addContractBind(
         bytes32 from,
         bytes32 oppositeBridge,

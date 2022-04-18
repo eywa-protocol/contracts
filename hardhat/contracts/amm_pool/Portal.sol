@@ -495,15 +495,28 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     // should be restricted in mainnets (test only)
+     /**
+     * @dev Changes bridge address
+     * @param _bridge new bridge address
+     */
     function changeBridge(address _bridge) external onlyOwner {
         bridge = _bridge;
     }
 
+    /**
+     * @dev Creates token representation request
+     * @param _rtoken real token address for representation
+     */
     function createRepresentationRequest(address _rtoken) external {
         emit RepresentationRequest(_rtoken);
     }
 
     // implies manual verification point
+    /**
+     * @dev Manual representation request approve
+     * @param _rtoken real token address
+     * @param _decimals token decimals
+     */
     function approveRepresentationRequest(bytes32 _rtoken, uint8 _decimals) external onlyOwner {
         tokenDecimalsData[_rtoken].tokenDecimals = _decimals;
         tokenDecimalsData[_rtoken].isApproved = true;
@@ -511,6 +524,12 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         emit ApprovedRepresentationRequest(_rtoken);
     }
 
+    /**
+     * @dev Set representation request approve state
+     * @param _rtoken real token address
+     * @param _decimals token decimals
+     * @param _approve approval state
+     */
     function approveRepresentationRequest(bytes32 _rtoken, uint8 _decimals, bool _approve) external onlyOwner {
         tokenDecimalsData[_rtoken].tokenDecimals = _decimals;
         tokenDecimalsData[_rtoken].isApproved = _approve;
@@ -518,18 +537,36 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         emit ApprovedRepresentationRequest(_rtoken);
     }
 
+    /**
+     * @dev Returns token decimals
+     * @param _rtoken token address
+     */
     function tokenDecimals(bytes32 _rtoken) public view returns (uint8) {
         return tokenDecimalsData[_rtoken].tokenDecimals;
     }
 
+    /**
+     * @dev Sets new trusted forwarder
+     * @param _forwarder new forwarder address
+     */
     function setTrustedForwarder(address _forwarder) external onlyOwner {
         return _setTrustedForwarder(_forwarder);
     }
 
     //TODO: revisit memory location and logic in general (may need to use a single case scenario only)
+    /**
+     * @dev Batch synthesize request
+     * @param _tokens tokens to synthesize
+     * @param _amounts token amounts to synthesize, set a positive amount in order to initiate a synthesize request
+     * @param _from message sender address
+     * @param _forwarder new forwarder address
+     * @param _synthParams synth params
+     * @param _selector function selector
+     * @param _transitData transit data
+     */
     function synthesizeBatchWithDataTransit(
         address[] memory _tokens,
-        uint256[] memory _amounts, // set a positive amount in order to initiate a synthesize request
+        uint256[] memory _amounts,
         address _from,
         SynthParams memory _synthParams,
         bytes4 _selector,
