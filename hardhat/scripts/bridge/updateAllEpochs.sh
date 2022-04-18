@@ -6,7 +6,7 @@ cd $DIR
 cd ../../
 pwd
 
-for net in harmonylocal network3 network1 network2
+for net in network3 network1 network2 harmonylocal
 do
     npx hardhat run --no-compile scripts/bridge/updateEpoch.js --network ${net}
 done

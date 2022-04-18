@@ -68,11 +68,11 @@ eth-hmy-migrate: deps npm wrappers
 	cd hardhat;./scripts/deploy.sh harmonylocal
 
 eth-local-migrate: deps npm wrappers
-	cd hardhat;./scripts/deploy.sh network2,network1,network3,harmonylocal
+	cd hardhat;./scripts/deploy.sh harmonylocal,network2,network1,network3
 
 eth-local-migrate-core: deps npm wrappers
-	cd hardhat; REGNET="network2" PART="deploy_bridge" STEP="deploy" ./scripts/deploy.sh network2,network1,network3,harmonylocal;
-	cd hardhat; REGNET="network2" PART="" STEP="init" ./scripts/deploy.sh network2,network1,network3,harmonylocal;
+	cd hardhat; REGNET="harmonylocal" PART="deploy_bridge" STEP="deploy" ./scripts/deploy.sh harmonylocal,network2,network1,network3;
+	cd hardhat; REGNET="harmonylocal" PART="" STEP="init" ./scripts/deploy.sh harmonylocal,network2,network1,network3;
 
 eth-testnet-migrate-core: deps npm wrappers
 	cd hardhat; REGNET="harmonytestnet" PART="deploy_bridge" STEP="deploy" ./scripts/deploy.sh harmonytestnet,mumbai,bsctestnet;
