@@ -15,5 +15,7 @@ getNetRpcUrl(){
     "harmonytestnet")
       RPC_URL=$(getField ${net}.rpcUrl2);
       WS_URL=$(getField ${net}.rpcUrl);;
+    *)
+      RPC_URL=$(getField ${net}.rpcUrl);;
   esac
 }
