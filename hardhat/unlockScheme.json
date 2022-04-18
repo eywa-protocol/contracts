@@ -9,7 +9,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x28bd793850432b99745d3715B9d3d4D3000530b6"
+      "address": "0xB0c32D0722c8264f027bC3D356C7882874FfeBed"
     },
     {
       "name": "Strategic round",
@@ -20,7 +20,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xDc3F2C9F98De0bD0E402308702b0C5E79026fF7b"
+      "address": "0x4C8eEaB19d87C3C22E500838236Fd180D325c96A"
     },
     {
       "name": "Round 1",
@@ -31,7 +31,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xc74cFF878061b8b4f6a63FcF46cC5807CCE5EEd5"
+      "address": "0xab1B09A7ABDbF37f2C64b17360F60B2137A98278"
     },
     {
       "name": "Round 2",
@@ -42,7 +42,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x732fd7c4fFE7f9bEb976a501c23dF9de67a9A777"
+      "address": "0xF6E53F6fa1A947Ee70BfbEc756eF98abD7D22A0f"
     },
     {
       "name": "KOLs round",
@@ -53,51 +53,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xd21534d5Ad5FfB35A7dF4D1a50FaA1a8349f37a5"
-    },
-    {
-      "name": "TGE - IDO launchpads: MoonEdge on Polygon",
-      "tokenAmount": "350000",
-      "period": "3",
-      "cliffPeriod": "0",
-      "cliffPercent": "25",
-      "permissionlessTimeStamp": "0",
-      "claimWithAllowanceTimeStamp": "0",
-      "stepAmount": "2629743",
-      "address": "0x845757AD0c245d1BE52CC1DD72b6dfB8ad7457f6"
-    },
-    {
-      "name": "TGE - IDO launchpads: Catapult on BSC",
-      "tokenAmount": "250000",
-      "period": "3",
-      "cliffPeriod": "0",
-      "cliffPercent": "30",
-      "permissionlessTimeStamp": "0",
-      "claimWithAllowanceTimeStamp": "0",
-      "stepAmount": "2629743",
-      "address": "0xCD517c0b849606D5d413F18AA629f1ECAf3Be1eD"
-    },
-    {
-      "name": "TGE - IDO launchpads: Gagarin on BSC",
-      "tokenAmount": "150000",
-      "period": "3",
-      "cliffPeriod": "0",
-      "cliffPercent": "25",
-      "permissionlessTimeStamp": "0",
-      "claimWithAllowanceTimeStamp": "0",
-      "stepAmount": "2629743",
-      "address": "0x06615066C85a764123f5034C1b788951B9b7F2B1"
-    },
-    {
-      "name": "TGE - IDO launchpads: Harmony launcher on Harmony",
-      "tokenAmount": "500000",
-      "period": "3",
-      "cliffPeriod": "0",
-      "cliffPercent": "25",
-      "permissionlessTimeStamp": "0",
-      "claimWithAllowanceTimeStamp": "0",
-      "stepAmount": "2629743",
-      "address": "0x871b9A8f91188549Eb2c8AfbC200592a596393c7"
+      "address": "0xc7b11714Ca362793d664f8b5aB302325977955E5"
     },
     {
       "name": "Round for validators",
@@ -108,7 +64,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xe9DBaB7334B6069F5129294209B8Fa2c91db0077"
+      "address": "0x8d6971548d48edc1D9747D640da29Ea95e313419"
     },
     {
       "name": "Round for alpha testers",
@@ -119,7 +75,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xB47AFA469Bd09b1df7226b9A2f60A721ABf59E38"
+      "address": "0x267f258033c66724a9c96abBC9C0e7Fd47362E7E"
     },
     {
       "name": "Airdrop for early adopters",
@@ -130,7 +86,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xEa54BF3b3b1e5779964B4A58673e1A769E11443d"
+      "address": "0xAf344a9f8617654395D63dbf335c16a9543bf1a6"
     },
     {
       "name": "Founders and team",
@@ -141,7 +97,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x7A70952455fdCfca1c5b583fF646264B3C0938Fc"
+      "address": "0xFf140e88005e0B74D55B035B1dfE406112D8484A"
     },
     {
       "name": "Advisers",
@@ -152,7 +108,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x6Cc4A6BAc9cb62cF60143c876a61866309edE0e6"
+      "address": "0xdcD8a47EFE21080696eb6eFa0849712Fb74a8804"
     },
     {
       "name": "Longterm market making (with vesting)",
@@ -163,7 +119,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "2629743",
-      "address": "0xF822d1f0f5e51Bc03eB1477B43EA4Dab3a659Dd0"
+      "address": "0x806B6FB47a059A6B097A90012ECBfDd5d0418B1f"
     }
   ],
   "treasuryAllocation": [
@@ -178,6 +134,22 @@
     {
       "name": "DAO treasury: Public rewards (farming, staking, bonding)",
       "tokenAmount": "400000000"
+    },
+    {
+      "name": "DAO treasury: TGE - IDO launchpads: MoonEdge on Polygon",
+      "tokenAmount": "350000"
+    },
+    {
+      "name": "DAO treasury: TGE - IDO launchpads: Catapult on BSC",
+      "tokenAmount": "250000"
+    },
+    {
+      "name": "DAO treasury: TGE - IDO launchpads: Gagarin on BSC",
+      "tokenAmount": "150000"
+    },
+    {
+      "name": "DAO treasury: TGE - IDO launchpads: Harmony launcher on Harmony",
+      "tokenAmount": "500000"
     }
   ]
 }

@@ -44,8 +44,9 @@ async function main() {
 
     console.log("claimAllowanceContract = ", claimAllowanceContract);
     console.log("claimWithAllowanceTimeStamp = ", claimWithAllowanceTimeStamp);
-    console.log("startTimeStamp = ", startTimeStamp);
+    console.log("startTimeStamp = ", startTimeStamp+startTimeStamp);
     console.log("cliffDuration = ", cliffDuration);
+    console.log("cliffTime = ", cliffDuration);
     console.log("stepDuration = ", stepDuration);
     console.log("cliffAmount = ", cliffAmount);
     console.log("allStepsDuration = ", allStepsDuration);
@@ -83,11 +84,11 @@ async function main() {
   deployInfo[network.name].dao.treasury = treasury.address;
 
   // write out the deploy configuration
-  fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "../../helper-hardhat-config.json",
+  fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
     JSON.stringify(deployInfo, undefined, 2));
   // fs.writeFileSync("./unlockScheme.json", JSON.stringify(unlockScheme, undefined, 2));
-  fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./unlockScheme.json",
-  JSON.stringify(unlockScheme, undefined, 2));
+  fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./scripts/tge/unlockScheme.json",
+    JSON.stringify(unlockScheme, undefined, 2));
 
   // console.log(unlockScheme)
 }
