@@ -36,7 +36,7 @@ npx hardhat balanceDeployer --network ${net}
 
     npx hardhat run --no-compile ./scripts/amm_pool/deploy.js --network ${net}
     npx hardhat run --no-compile ./scripts/deployERC20.js --network ${net}
-
+    $(pwd)/scripts/configs.sh ${net}
 
   fi
 done
@@ -85,4 +85,4 @@ if [ \( ! -z "$REGNET" -a "$STEP" == "init" \) -o -z "$REGNET" ]; then
   fi
 fi
 
-$(pwd)/scripts/configs.sh ${1}
+
