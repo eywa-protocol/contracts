@@ -147,7 +147,18 @@
     "relayHub":  "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
-    "token": [],
+    "token": [
+      {
+        "address": "0xF35d39587b9364BDaBA3Fe1E3b929B7877b2986d",
+        "name": "EYWA",
+        "symbol": "EYWA"
+      },
+      {
+        "address": "0x3C6693c5634AbE31850C71c6A70A4B02EC89f58e",
+        "name": "USDT",
+        "symbol": "USDT"
+      }
+    ],
     "crosschainPool": [],
     "hubPool": {
       "address": "",
