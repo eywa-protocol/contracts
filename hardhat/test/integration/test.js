@@ -206,7 +206,7 @@ contract('Router', () => {
 
 
 
-            await this.routerA.tokenSynthesizeRequestPayNative(
+            await this.routerA.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 {

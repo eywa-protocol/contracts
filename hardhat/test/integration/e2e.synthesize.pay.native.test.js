@@ -244,7 +244,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            expect(await this.routerA.tokenSynthesizeRequestPayNative(
+            expect(await this.routerA.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 {

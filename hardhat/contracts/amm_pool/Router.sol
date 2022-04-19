@@ -245,7 +245,7 @@ contract Router is EIP712, Ownable {
     bytes32 public constant _SYNTHESIZE_REQUEST_SIGNATURE_HASH =
         keccak256(
             abi.encodePacked(
-                "tokenSynthesizeRequest(address,uint256,address,[address,address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
+                "synthesizeRequest(address,uint256,address,[address,address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
             )
         );
     bytes32 public constant _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH =
@@ -257,7 +257,7 @@ contract Router is EIP712, Ownable {
     bytes32 public constant _SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH =
         keccak256(
             abi.encodePacked(
-                "tokenSynthesizeRequest(delegatedSynthTransferRequest(bytes32,address,uint256,address,address,[address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
+                "synthTransferRequest(bytes32,address,uint256,address,address,[address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
             )
         );
 
@@ -340,7 +340,7 @@ contract Router is EIP712, Ownable {
      * @param receipt delegated call receipt
      */
 
-    function tokenSynthesizeRequestPayNative(
+    function synthesizeRequestPayNative(
         address token,
         uint256 amount,
         IPortal.SynthParams calldata synthParams,
@@ -363,7 +363,7 @@ contract Router is EIP712, Ownable {
      * @param permitData permit data
      * @param receipt delegated call receipt
      */
-    function tokenSynthesizeRequestWithPermitPayNative(
+    function synthesizeRequestWithPermitPayNative(
         address token,
         uint256 amount,
         IPortal.SynthParams calldata synthParams,
