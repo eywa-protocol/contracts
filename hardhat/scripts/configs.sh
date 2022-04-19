@@ -10,8 +10,8 @@ if [[ ${1} =~ ^('')$ ]]; then
   for net in ${nets//\,/ }; do
     getNetRpcUrl $net
     ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
-      RPC_URL=$RPC_URL \
-      WS_URL=$WS_URL \
+      RPC_URL=${RPC_URL:-$(getField ${net}.rpcUrl)} \
+      WS_URL=${WS_URL:-"undefined"} \
       NETWORK_ID=$(getField ${net}.chainId) \
       NETWORK_NAME=${net} \
       BRIDGE_ADDRESS=$(getField ${net}.bridge) \
@@ -45,7 +45,6 @@ echo 'bash script for network:' ${net}
 echo '==========================================='
 echo ''
 
-    if [ -z "$REGNET" ]; then
       echo "It's not run"
       getNetRpcUrl $net
       ./scripts/update_env_adapter.sh create $(getField ${net}.env_file[0])  \
@@ -74,5 +73,4 @@ echo ''
         EYWA_TOKEN_$(getField ${net}.n)=$(getField ${net}.eywa) \
         FORWARDER_$(getField ${net}.n)=$(getField ${net}.forwarder) \
       && echo $(getField ${net}.env_file[1])
-    fi
 done
