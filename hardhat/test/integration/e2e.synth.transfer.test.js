@@ -92,8 +92,8 @@ contract('Synthesis', () => {
             await routerA.tokenSynthesizeRequest(
                 deployInfo['network1'].localToken[0].address,
                 amount,
+                userNet2,
                 {
-                    to: userNet2,
                     receiveSide: deployInfo['network2'].synthesis,
                     oppositeBridge: deployInfo['network2'].bridge,
                     chainId: deployInfo['network2'].chainId,
@@ -137,8 +137,8 @@ contract('Synthesis', () => {
             await routerC.tokenSynthesizeRequest(
                 deployInfo['network3'].localToken[0].address,
                 amount,
+                userNet2,
                 {
-                    to: userNet2,
                     receiveSide: deployInfo['network2'].synthesis,
                     oppositeBridge: deployInfo['network2'].bridge,
                     chainId: deployInfo['network2'].chainId,
@@ -182,8 +182,8 @@ contract('Synthesis', () => {
             await routerC.tokenSynthesizeRequest(
                 deployInfo['network3'].localToken[0].address,
                 amount,
+                userNet1,
                 {
-                    to: userNet1,
                     receiveSide: deployInfo['network1'].synthesis,
                     oppositeBridge: deployInfo['network1'].bridge,
                     chainId: deployInfo['network1'].chainId,
@@ -228,8 +228,8 @@ contract('Synthesis', () => {
             await routerA.tokenSynthesizeRequest(
                 deployInfo['network1'].localToken[0].address,
                 amount,
+                userNet3,
                 {
-                    to: userNet3,
                     receiveSide: deployInfo['network3'].synthesis,
                     oppositeBridge: deployInfo['network3'].bridge,
                     chainId: deployInfo['network3'].chainId,
@@ -273,8 +273,8 @@ contract('Synthesis', () => {
             await routerB.tokenSynthesizeRequest(
                 deployInfo['network2'].localToken[0].address,
                 amount,
+                userNet3,
                 {
-                    to: userNet3,
                     receiveSide: deployInfo['network3'].synthesis,
                     oppositeBridge: deployInfo['network3'].bridge,
                     chainId: deployInfo['network3'].chainId,
@@ -315,8 +315,8 @@ contract('Synthesis', () => {
             await routerC.tokenSynthesizeRequest(
                 deployInfo['network3'].localToken[0].address,
                 amount,
+                userNet1,
                 {
-                    to: userNet1,
                     receiveSide: deployInfo['network1'].synthesis,
                     oppositeBridge: deployInfo['network1'].bridge,
                     chainId: deployInfo['network1'].chainId,

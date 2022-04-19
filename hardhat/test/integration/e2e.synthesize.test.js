@@ -74,8 +74,8 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideB,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
@@ -111,8 +111,8 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideC,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
@@ -148,8 +148,8 @@ contract('Router', () => {
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideA,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
@@ -185,8 +185,8 @@ contract('Router', () => {
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideC,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
@@ -222,8 +222,8 @@ contract('Router', () => {
             await this.routerC.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideA,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
@@ -258,8 +258,8 @@ contract('Router', () => {
             await this.routerC.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideB,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
