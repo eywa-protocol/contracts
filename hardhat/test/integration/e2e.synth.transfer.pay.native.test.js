@@ -347,7 +347,7 @@ contract('Router', () => {
             )
 
             //C->B
-            await routerC.synthTransferRequest(
+            await routerC.synthTransferRequestPayNative(
                 addressToBytes32(deployInfo["network1"].localToken[0].address),
                 this.synthTokenC1.address,
                 amount,
@@ -421,7 +421,7 @@ contract('Router', () => {
             )
 
             //C->A
-            await routerC.synthTransferRequest(
+            await routerC.synthTransferRequestPayNative(
                 addressToBytes32(deployInfo["network2"].localToken[0].address),
                 this.synthTokenC1.address,
                 amount,

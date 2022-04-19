@@ -193,9 +193,11 @@ contract('Router', () => {
                 this.synthB.address,
                 amount,
                 userTo,
-                deployInfo["network3"].synthesis,
-                deployInfo["network3"].bridge,
-                deployInfo["network3"].chainId,
+                {
+                    receiveSide: deployInfo["network3"].portal,
+                    oppositeBridge: deployInfo["network3"].bridge,
+                    chainId: deployInfo["network3"].chainId,
+                },
                 {
                     executionPrice: workerExecutionPrice,
                     deadline: workerDeadline,
@@ -267,9 +269,11 @@ contract('Router', () => {
                 this.synthA.address,
                 amount,
                 userTo,
-                deployInfo["network2"].synthesis,
-                deployInfo["network2"].bridge,
-                deployInfo["network2"].chainId,
+                {
+                    receiveSide: deployInfo["network2"].portal,
+                    oppositeBridge: deployInfo["network2"].bridge,
+                    chainId: deployInfo["network2"].chainId,
+                },
                 {
                     executionPrice: workerExecutionPrice,
                     deadline: workerDeadline,
@@ -342,9 +346,11 @@ contract('Router', () => {
                 this.synthA.address,
                 amount,
                 userTo,
-                deployInfo["network3"].synthesis,
-                deployInfo["network3"].bridge,
-                deployInfo["network3"].chainId,
+                {
+                    receiveSide: deployInfo["network3"].portal,
+                    oppositeBridge: deployInfo["network3"].bridge,
+                    chainId: deployInfo["network3"].chainId,
+                },
                 {
                     executionPrice: workerExecutionPrice,
                     deadline: workerDeadline,
@@ -417,9 +423,11 @@ contract('Router', () => {
                 this.synthC.address,
                 amount,
                 userTo,
-                deployInfo["network2"].synthesis,
-                deployInfo["network2"].bridge,
-                deployInfo["network2"].chainId,
+                {
+                    receiveSide: deployInfo["network2"].portal,
+                    oppositeBridge: deployInfo["network2"].bridge,
+                    chainId: deployInfo["network2"].chainId,
+                },
                 {
                     executionPrice: workerExecutionPrice,
                     deadline: workerDeadline,
@@ -492,9 +500,11 @@ contract('Router', () => {
                 this.synthC.address,
                 amount,
                 userTo,
-                deployInfo["network1"].synthesis,
-                deployInfo["network1"].bridge,
-                deployInfo["network1"].chainId,
+                {
+                    receiveSide: deployInfo["network1"].portal,
+                    oppositeBridge: deployInfo["network1"].bridge,
+                    chainId: deployInfo["network1"].chainId,
+                },
                 {
                     executionPrice: workerExecutionPrice,
                     deadline: workerDeadline,
