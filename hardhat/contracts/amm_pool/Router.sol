@@ -18,8 +18,12 @@ interface IPortal {
         bool approveMax;
     }
 
+    struct TransitData {
+        bytes4 selector;
+        bytes data;
+    }
+
     struct SynthParams {
-        address to;
         address receiveSide;
         address oppositeBridge;
         uint256 chainId;
@@ -29,6 +33,7 @@ interface IPortal {
         address token,
         uint256 amount,
         address from,
+        address to,
         SynthParams calldata params
     ) external;
 
@@ -53,13 +58,12 @@ interface IPortal {
     ) external;
 
     function synthesizeBatchWithDataTransit(
-        address[] calldata token,
-        uint256[] calldata amount, // set a positive amount in order to initiate a synthesize request
+        address[] memory token,
+        uint256[] memory amount,
         address from,
-        SynthParams calldata synthparams,
-        bytes4 selector,
-        bytes calldata transitData,
-        PermitData[] calldata permitData
+        address to,
+        SynthParams memory synthParams,
+        TransitData memory transitData
     ) external;
 
     function emergencyUnburnRequest(
@@ -96,7 +100,7 @@ interface ISynthesis {
     ) external;
 
     function burnSyntheticToken(
-        address stoken,
+        address tokenSynth,
         uint256 amount,
         address from,
         address to,
@@ -106,7 +110,7 @@ interface ISynthesis {
     ) external;
 
     function burnSyntheticTokenToSolana(
-        address stoken,
+        address tokenSynth,
         address from,
         bytes32[] calldata pubkeys,
         uint256 amount,
@@ -329,43 +333,40 @@ contract Router is EIP712, Ownable {
     }
 
     //==============================PORTAL==============================
-    /* *
-     * @dev Delegated token synthesize request.
+    /**
+     * @dev Token synthesize request via native payment.
      * @param token token address to synthesize
      * @param amount amount to synthesize
      * @param to amount recipient address
-     * @param receiveSide request recipient address
-     * @param oppositeBridge opposite bridge address
-     * @param chainId opposite chain ID
-     * @param receipt delegated call receipt
+     * @param synthParams synth params
+     * @param receipt call receipt
      */
-
     function synthesizeRequestPayNative(
         address token,
         uint256 amount,
+        address to,
         IPortal.SynthParams calldata synthParams,
         DelegatedCallReceipt calldata receipt
     ) external payable {
         address worker = _checkWorkerSignature(synthParams.chainId, _SYNTHESIZE_REQUEST_SIGNATURE_HASH, receipt);
         _proceedFees(receipt.executionPrice, worker);
         SafeERC20.safeTransferFrom(IERC20(token), msg.sender, _portal, amount);
-        IPortal(_portal).synthesize(token, amount, msg.sender, synthParams);
+        IPortal(_portal).synthesize(token, amount, msg.sender, to, synthParams);
     }
 
-    /* *
-     * @dev Delegated token synthesize request with permit.
+    /**
+     * @dev Token synthesize request with permit via native payment.
      * @param token token address to synthesize
      * @param amount amount to synthesize
      * @param to amount recipient address
-     * @param receiveSide request recipient address
-     * @param oppositeBridge opposite bridge address
-     * @param chainId opposite chain ID
+     * @param synthParams synth params
      * @param permitData permit data
-     * @param receipt delegated call receipt
+     * @param receipt call receipt
      */
     function synthesizeRequestWithPermitPayNative(
         address token,
         uint256 amount,
+        address to,
         IPortal.SynthParams calldata synthParams,
         IPortal.PermitData calldata permitData,
         DelegatedCallReceipt calldata receipt
@@ -383,7 +384,7 @@ contract Router is EIP712, Ownable {
 
         _proceedFees(receipt.executionPrice, worker);
         SafeERC20.safeTransferFrom(IERC20(token), msg.sender, _portal, amount);
-        IPortal(_portal).synthesize(token, amount, msg.sender, synthParams);
+        IPortal(_portal).synthesize(token, amount, msg.sender, to, synthParams);
     }
 
     //==============================SYNTHESIS==============================
@@ -395,11 +396,7 @@ contract Router is EIP712, Ownable {
         ISynthesis.SynthParams calldata synthParams,
         DelegatedCallReceipt calldata receipt
     ) external payable {
-        address worker = _checkWorkerSignature(
-            synthParams.chainId,
-            _SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH,
-            receipt
-        );
+        address worker = _checkWorkerSignature(synthParams.chainId, _SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH, receipt);
         _proceedFees(receipt.executionPrice, worker);
         SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
         IERC20(tokenSynth).approve(_synthesis, amount);
@@ -407,19 +404,25 @@ contract Router is EIP712, Ownable {
     }
 
     function unsynthesizeRequestPayNative(
-        address stoken,
+        address tokenSynth,
         uint256 amount,
         address to,
-        address receiveSide,
-        address oppositeBridge,
-        uint256 chainId,
+        ISynthesis.SynthParams calldata synthParams,
         DelegatedCallReceipt calldata receipt
     ) external payable {
-        address worker = _checkWorkerSignature(chainId, _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH, receipt);
+        address worker = _checkWorkerSignature(synthParams.chainId, _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH, receipt);
         _proceedFees(receipt.executionPrice, worker);
-        SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
-        IERC20(stoken).approve(_synthesis, amount);
-        ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, msg.sender, to, receiveSide, oppositeBridge, chainId);
+        SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
+        IERC20(tokenSynth).approve(_synthesis, amount);
+        ISynthesis(_synthesis).burnSyntheticToken(
+            tokenSynth,
+            amount,
+            msg.sender,
+            to,
+            synthParams.receiveSide,
+            synthParams.oppositeBridge,
+            synthParams.chainId
+        );
     }
 
     //.........................DIRECT-METHODS...........................
@@ -433,10 +436,11 @@ contract Router is EIP712, Ownable {
     function tokenSynthesizeRequest(
         address token,
         uint256 amount,
+        address to,
         IPortal.SynthParams calldata synthParams
     ) external {
         SafeERC20.safeTransferFrom(IERC20(token), msg.sender, _portal, amount);
-        IPortal(_portal).synthesize(token, amount, msg.sender, synthParams);
+        IPortal(_portal).synthesize(token, amount, msg.sender, to, synthParams);
     }
 
     /**
@@ -449,6 +453,7 @@ contract Router is EIP712, Ownable {
     function tokenSynthesizeRequestWithPermit(
         address token,
         uint256 amount,
+        address to,
         IPortal.SynthParams calldata synthParams,
         IPortal.PermitData calldata permitData
     ) external {
@@ -462,7 +467,7 @@ contract Router is EIP712, Ownable {
             permitData.s
         );
         SafeERC20.safeTransferFrom(IERC20(token), msg.sender, _portal, amount);
-        IPortal(_portal).synthesize(token, amount, msg.sender, synthParams);
+        IPortal(_portal).synthesize(token, amount, msg.sender, to, synthParams);
     }
 
     /**
@@ -488,7 +493,6 @@ contract Router is EIP712, Ownable {
      * @dev  Direct batch synthesize request with data transition.
      * @param token token addresses to synthesize
      * @param amount amounts to synthesize
-     * @param selector function selector
      * @param transitData transit data
      * @param synthParams synthesize parameters
      * @param permitData permit operation params
@@ -496,25 +500,28 @@ contract Router is EIP712, Ownable {
     function batchSynthesizeRequestWithDataTransit(
         address[] calldata token,
         uint256[] calldata amount, // set a positive amount in order to initiate a synthesize request
-        bytes4 selector,
-        bytes calldata transitData,
+        address to,
+        IPortal.TransitData calldata transitData,
         IPortal.SynthParams calldata synthParams,
         IPortal.PermitData[] calldata permitData
     ) external {
         for (uint256 i = 0; i < token.length; i++) {
             if (amount[i] > 0) {
+                if (permitData[i].v != 0) {
+                    IERC20Permit(token[i]).permit(
+                        msg.sender,
+                        address(this),
+                        permitData[i].approveMax ? uint256(2**256 - 1) : amount[i],
+                        permitData[i].deadline,
+                        permitData[i].v,
+                        permitData[i].r,
+                        permitData[i].s
+                    );
+                }
                 SafeERC20.safeTransferFrom(IERC20(token[i]), msg.sender, _portal, amount[i]);
             }
         }
-        IPortal(_portal).synthesizeBatchWithDataTransit(
-            token,
-            amount,
-            msg.sender,
-            synthParams,
-            selector,
-            transitData,
-            permitData
-        );
+        IPortal(_portal).synthesizeBatchWithDataTransit(token, amount, msg.sender, to, synthParams, transitData);
     }
 
     /**
@@ -614,25 +621,25 @@ contract Router is EIP712, Ownable {
     //==============================SYNTHESIS==============================
     /**
      * @dev Direct synthetic token transfer request to another chain
-     * @param tokenReal real token address
+     * @param rtoken real token address
      * @param amount amount to transfer
      * @param to recipient address
      * @param synthParams synthesize parameters
      */
     function synthTransferRequest(
-        bytes32 tokenReal,
+        bytes32 rtoken,
         uint256 amount,
         address to,
         ISynthesis.SynthParams calldata synthParams
     ) external {
-        address tokenSynth = ISynthesis(_synthesis).getRepresentation(tokenReal);
-        SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
-        IERC20(tokenSynth).approve(_synthesis, amount);
-        ISynthesis(_synthesis).synthTransfer(tokenReal, amount, msg.sender, to, synthParams);
+        address stoken = ISynthesis(_synthesis).getRepresentation(rtoken);
+        SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
+        IERC20(stoken).approve(_synthesis, amount);
+        ISynthesis(_synthesis).synthTransfer(rtoken, amount, msg.sender, to, synthParams);
     }
 
     /**
-     * @dev Direct unsynthesize request 
+     * @dev Direct unsynthesize request
      * @param stoken synthetic token address for unsynthesize
      * @param amount amount to unsynth
      * @param to recipient address
