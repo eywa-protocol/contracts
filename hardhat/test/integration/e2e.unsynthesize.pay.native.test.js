@@ -4,7 +4,7 @@ const { ethers } = require("hardhat");
 
 contract('Router', () => {
 
-    describe("unsynthesize local test", () => {
+    describe("unsynthesize pay native local test", () => {
 
         before(async () => {
             ERC20A = artifacts.require('ERC20Mock')
@@ -118,9 +118,11 @@ contract('Router', () => {
                 this.synthB.address,
                 amount,
                 userTo,
-                deployInfo["network1"].portal,
-                deployInfo["network1"].bridge,
-                deployInfo["network1"].chainId,
+                {
+                    receiveSide: deployInfo["network1"].portal,
+                    oppositeBridge: deployInfo["network1"].bridge,
+                    chainId: deployInfo["network1"].chainId,
+                },
                 {
                     executionPrice: workerExecutionPrice,
                     deadline: workerDeadline,
@@ -128,11 +130,11 @@ contract('Router', () => {
                     r: workerSignature.r,
                     s: workerSignature.s
                 },
-                { from: userNet2, gas: 1000_000, value:workerExecutionPrice  }
+                { from: userNet2, gas: 1000_000, value: workerExecutionPrice }
             )
             await timeout(15000)
             const newBalance = await this.synthB.balanceOf(userNet2)
-            assert(this.oldBalance.eq(newBalance))    
+            assert(this.oldBalance.eq(newBalance))
         })
 
         it("Unsynthsize: network2 -> network3 ", async function () {
@@ -201,11 +203,11 @@ contract('Router', () => {
                     r: workerSignature.r,
                     s: workerSignature.s
                 },
-                { from: userNet2, gas: 1000_000, value:workerExecutionPrice }
+                { from: userNet2, gas: 1000_000, value: workerExecutionPrice }
             )
             await timeout(15000)
             const newBalance = await this.synthB.balanceOf(userNet2)
-            assert(this.oldBalance.eq(newBalance))    
+            assert(this.oldBalance.eq(newBalance))
         })
 
         it("Unsynthesize: network1 -> network2", async function () {
@@ -233,7 +235,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
                 },
-                
+
                 { from: userNet2, gas: 1000_000 }
             )
 
@@ -275,11 +277,11 @@ contract('Router', () => {
                     r: workerSignature.r,
                     s: workerSignature.s
                 },
-                { from: userNet1, gas: 1000_000, value:workerExecutionPrice }
+                { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
             )
             await timeout(15000)
             const newBalance = await this.synthA.balanceOf(userNet1)
-            assert(oldBalance.eq(newBalance))    
+            assert(oldBalance.eq(newBalance))
         })
 
         it("Unsynthesize: network1 -> network3", async function () {
@@ -307,10 +309,10 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
                 },
-                
+
                 { from: userNet2, gas: 1000_000 }
             )
-            
+
             await timeout(15000)
             await this.synthA.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
 
@@ -350,11 +352,11 @@ contract('Router', () => {
                     r: workerSignature.r,
                     s: workerSignature.s
                 },
-                { from: userNet1, gas: 1000_000, value:workerExecutionPrice }
+                { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
             )
             await timeout(15000)
             const newBalance = await this.synthA.balanceOf(userNet1)
-            assert(oldBalance.eq(newBalance))    
+            assert(oldBalance.eq(newBalance))
         })
 
         it("Unsynthesize: network3 -> network2", async function () {
@@ -383,7 +385,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
                 },
-                
+
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -425,7 +427,7 @@ contract('Router', () => {
                     r: workerSignature.r,
                     s: workerSignature.s
                 },
-                { from: userNet3, gas: 1000_000, value:workerExecutionPrice }
+                { from: userNet3, gas: 1000_000, value: workerExecutionPrice }
             )
             await timeout(15000)
             const newBalance = await this.synthC.balanceOf(userNet3)
@@ -458,7 +460,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
                 },
-                
+
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -500,7 +502,7 @@ contract('Router', () => {
                     r: workerSignature.r,
                     s: workerSignature.s
                 },
-                { from: userNet3, gas: 1000_000, value:workerExecutionPrice }
+                { from: userNet3, gas: 1000_000, value: workerExecutionPrice }
             )
             await timeout(15000)
             const newBalance = await this.synthC.balanceOf(userNet3)

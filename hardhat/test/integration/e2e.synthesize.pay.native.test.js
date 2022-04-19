@@ -4,7 +4,7 @@ const { ethers } = require("hardhat");
 
 contract('Router', () => {
 
-    describe("synthesize local test", () => {
+    describe("synthesize pay native local test", () => {
         const splitSignatureToRSV = (signature) => {
             const r = '0x' + signature.substring(2).substring(0, 64);
             const s = '0x' + signature.substring(2).substring(64, 128);
@@ -244,7 +244,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            expect(await this.routerA.tokenSynthesizeRequestPayNative(
+            expect(await this.routerA.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 userTo,
@@ -305,7 +305,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            expect(await this.routerA.tokenSynthesizeRequestPayNative(
+            expect(await this.routerA.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 userTo,
@@ -331,7 +331,7 @@ contract('Router', () => {
 
         it("Synthesize (pay native): network2 -> network3", async function () {
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
-            this.routerA = await RouterB.at(deployInfo["network2"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
             const synthAddress = await synthesisC.getRepresentation(addressToBytes32(this.tokenB1.address))
             this.synthC = await SynthC.at(synthAddress)
             const oldBalance = await this.synthC.balanceOf(userNet3)
@@ -366,7 +366,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            expect(await this.routerB.tokenSynthesizeRequestPayNative(
+            expect(await this.routerB.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 userTo,
@@ -392,7 +392,7 @@ contract('Router', () => {
 
         it("Synthesize (pay native): network2 -> network1", async function () {
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
-            this.routerA = await RouterB.at(deployInfo["network2"].router)
+            this.routerB = await RouterB.at(deployInfo["network2"].router)
             const synthAddress = await synthesisA.getRepresentation(addressToBytes32(this.tokenB1.address))
             this.synthA = await SynthA.at(synthAddress)
             const oldBalance = await this.synthA.balanceOf(userNet1)
@@ -427,7 +427,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            expect(await this.routerB.tokenSynthesizeRequestPayNative(
+            expect(await this.routerB.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 userTo,
@@ -453,7 +453,7 @@ contract('Router', () => {
 
         it("Synthesize (pay native): network3 -> network1", async function () {
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
-            this.routerA = await RouterC.at(deployInfo["network3"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             const synthAddress = await synthesisA.getRepresentation(addressToBytes32(this.tokenC1.address))
             this.synthA = await SynthA.at(synthAddress)
             const oldBalance = await this.synthA.balanceOf(userNet1)
@@ -488,7 +488,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            expect(await this.routerC.tokenSynthesizeRequestPayNative(
+            expect(await this.routerC.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 userTo,
@@ -514,7 +514,7 @@ contract('Router', () => {
 
         it("Synthesize (pay native): network3 -> network2", async function () {
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
-            this.routerA = await RouterC.at(deployInfo["network3"].router)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             const synthAddress = await synthesisB.getRepresentation(addressToBytes32(this.tokenC1.address))
             this.synthB = await SynthB.at(synthAddress)
             const oldBalance = await this.synthB.balanceOf(userNet2)
@@ -549,7 +549,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            expect(await this.routerC.tokenSynthesizeRequestPayNative(
+            expect(await this.routerC.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 userTo,

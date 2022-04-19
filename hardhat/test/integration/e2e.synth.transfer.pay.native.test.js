@@ -4,9 +4,9 @@ const { ethers } = require("hardhat");
 const { parseBytes32String } = require("ethers/lib/utils");
 const { expect } = require("chai");
 
-contract('Synthesis', () => {
+contract('Router', () => {
 
-    describe("synthTransferRequest local test", () => {
+    describe("synth transfer pay native local test", () => {
 
         before(async () => {
             ERC20A = artifacts.require('SyntERC20')

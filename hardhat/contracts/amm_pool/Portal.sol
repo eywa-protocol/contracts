@@ -425,7 +425,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-
     ) external {
         require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainId");
         require(
@@ -500,7 +499,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     // should be restricted in mainnets (test only)
-     /**
+    /**
      * @dev Changes bridge address
      * @param _bridge new bridge address
      */
@@ -535,7 +534,11 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
      * @param _decimals token decimals
      * @param _approve approval state
      */
-    function approveRepresentationRequest(bytes32 _rtoken, uint8 _decimals, bool _approve) external onlyOwner {
+    function approveRepresentationRequest(
+        bytes32 _rtoken,
+        uint8 _decimals,
+        bool _approve
+    ) external onlyOwner {
         tokenDecimalsData[_rtoken].tokenDecimals = _decimals;
         tokenDecimalsData[_rtoken].isApproved = _approve;
 
@@ -575,7 +578,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _to,
         SynthParams memory _synthParams,
         TransitData memory _transitData
-    ) external {     
+    ) external {
         bytes32[] memory txId = new bytes32[](_token.length);
         uint256 generalNonce = IBridge(bridge).getNonce(_from);
         bytes32 generalTxId = RequestIdLib.prepareRqId(
