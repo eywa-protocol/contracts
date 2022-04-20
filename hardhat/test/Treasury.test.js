@@ -1,5 +1,5 @@
 let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
-const { checkoutProvider, timeout } = require("../../utils/helper");
+const { checkoutProvider, timeout } = require("../utils/helper");
 const { ethers } = require("hardhat");
 const { assert } = require("chai");
 
@@ -10,7 +10,7 @@ contract('Treasury', () => {
         before(async () => {
             ERC20B = artifacts.require('ERC20Mock')
 
-            TreasuryB = artifacts.require('Treasury')
+            TreasuryB = artifacts.require('EywaTreasury')
 
             factoryProvider = checkoutProvider({ 'typenet': 'devstand', 'net1': 'network1', 'net2': 'network2', 'net3': 'network3' })
             totalSupply = ethers.constants.MaxUint256
@@ -33,7 +33,7 @@ contract('Treasury', () => {
         it("WithdrawToken", async function () {
 
             const oldBalance = await tokenB.balanceOf(userNet2)
-            
+
             await tokenB.mint(treasuryB.address, amount, { from: userNet2, gas: 1000_000 })
 
             await treasuryB.withdrawToken(
@@ -50,9 +50,9 @@ contract('Treasury', () => {
         it("WithdrawNative", async function () {
 
             await TreasuryB.web3.eth.sendTransaction({
-                to:treasuryB.address,
-                value:ethers.utils.parseEther("1.0"),
-                from:userNet2
+                to: treasuryB.address,
+                value: ethers.utils.parseEther("1.0"),
+                from: userNet2
             })
 
             const oldBalance = await TreasuryB.web3.eth.getBalance(treasuryB.address)

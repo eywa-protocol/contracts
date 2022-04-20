@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-newone/security/ReentrancyGuard.sol";
 
-contract Treasury is Ownable, ReentrancyGuard {
+contract EywaTreasury is Ownable, ReentrancyGuard {
     receive() external payable {}
 
     fallback() external payable {}

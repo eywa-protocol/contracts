@@ -21,8 +21,6 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
     using Counters for Counters.Counter;
 
-    string constant prefix = "\x19Ethereum Signed Message:\n32";
-
     uint256 public permissionlessTimeStamp;
     uint256 public started;
     IERC20 public immutable eywaToken;

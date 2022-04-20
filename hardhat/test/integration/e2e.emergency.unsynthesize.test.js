@@ -102,9 +102,8 @@ contract('Synthesize', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideB,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
@@ -163,9 +162,8 @@ contract('Synthesize', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideC,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
@@ -225,9 +223,8 @@ contract('Synthesize', () => {
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideA,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
@@ -287,9 +284,8 @@ contract('Synthesize', () => {
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideC,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
@@ -349,9 +345,8 @@ contract('Synthesize', () => {
             await this.routerC.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideA,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
@@ -410,9 +405,8 @@ contract('Synthesize', () => {
             await this.routerC.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideB,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,

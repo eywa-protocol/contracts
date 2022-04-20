@@ -17,7 +17,7 @@ async function main() {
         EYWA = await _ERC20Permit.deploy("EYWA-TOKEN", "EYWA");
     }else{
         _ERC20Permit = await ethers.getContractFactory("EywaToken");
-        EYWA = await _ERC20Permit.deploy(deployer.address);
+        EYWA = await _ERC20Permit.deploy(deployer.address, "1666700000");
     }
 
     await EYWA.deployed();

@@ -81,8 +81,8 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
+                userNet2,
                 {
-                    to: userNet2,
                     receiveSide: receiveSideB,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
@@ -126,8 +126,8 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
+                userNet2,
                 {
-                    to: userNet2,
                     receiveSide: receiveSideB,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
@@ -172,8 +172,8 @@ contract('Router', () => {
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
+                userNet1,
                 {
-                    to: userNet1,
                     receiveSide: receiveSideA,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
@@ -218,8 +218,8 @@ contract('Router', () => {
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
+                userNet1,
                 {
-                    to: userNet1,
                     receiveSide: receiveSideA,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
@@ -265,8 +265,8 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
+                userNet3,
                 {
-                    to: userNet3,
                     receiveSide: receiveSideC,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
@@ -312,8 +312,8 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
+                userNet3,
                 {
-                    to: userNet3,
                     receiveSide: receiveSideC,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,

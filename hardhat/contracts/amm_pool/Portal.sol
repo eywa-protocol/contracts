@@ -69,7 +69,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     struct SynthParams {
-        address to;
         address receiveSide;
         address oppositeBridge;
         uint256 chainId;
@@ -81,6 +80,11 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bytes32 s;
         uint256 deadline;
         bool approveMax;
+    }
+
+    struct TransitData {
+        bytes4 selector;
+        bytes data;
     }
 
     struct TokenInfo {
@@ -145,6 +149,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         address _token,
         uint256 _amount,
         address _from,
+        address _to,
         SynthParams calldata _synthParams
     ) external returns (bytes32 txID) {
         require(tokenDecimalsData[castToBytes32(_token)].isApproved, "Portal: token must be verified");
@@ -164,7 +169,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             txID,
             _token,
             _amount,
-            _synthParams.to
+            _to
         );
 
         IBridge(bridge).transmitRequestV2(
@@ -178,12 +183,12 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         );
         TxState storage txState = requests[txID];
         txState.from = castToBytes32(_from);
-        txState.to = castToBytes32(_synthParams.to);
+        txState.to = castToBytes32(_to);
         txState.rtoken = castToBytes32(_token);
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
-        emit SynthesizeRequest(txID, _from, _synthParams.to, _amount, _token);
+        emit SynthesizeRequest(txID, _from, _to, _amount, _token);
     }
 
     function solAmount64(uint256 amount) public pure returns (uint64 solAmount) {
@@ -420,7 +425,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-
     ) external {
         require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainId");
         require(
@@ -495,15 +499,28 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     // should be restricted in mainnets (test only)
+    /**
+     * @dev Changes bridge address
+     * @param _bridge new bridge address
+     */
     function changeBridge(address _bridge) external onlyOwner {
         bridge = _bridge;
     }
 
+    /**
+     * @dev Creates token representation request
+     * @param _rtoken real token address for representation
+     */
     function createRepresentationRequest(address _rtoken) external {
         emit RepresentationRequest(_rtoken);
     }
 
     // implies manual verification point
+    /**
+     * @dev Manual representation request approve
+     * @param _rtoken real token address
+     * @param _decimals token decimals
+     */
     function approveRepresentationRequest(bytes32 _rtoken, uint8 _decimals) external onlyOwner {
         tokenDecimalsData[_rtoken].tokenDecimals = _decimals;
         tokenDecimalsData[_rtoken].isApproved = true;
@@ -511,31 +528,58 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         emit ApprovedRepresentationRequest(_rtoken);
     }
 
-    function approveRepresentationRequest(bytes32 _rtoken, uint8 _decimals, bool _approve) external onlyOwner {
+    /**
+     * @dev Set representation request approve state
+     * @param _rtoken real token address
+     * @param _decimals token decimals
+     * @param _approve approval state
+     */
+    function approveRepresentationRequest(
+        bytes32 _rtoken,
+        uint8 _decimals,
+        bool _approve
+    ) external onlyOwner {
         tokenDecimalsData[_rtoken].tokenDecimals = _decimals;
         tokenDecimalsData[_rtoken].isApproved = _approve;
 
         emit ApprovedRepresentationRequest(_rtoken);
     }
 
+    /**
+     * @dev Returns token decimals
+     * @param _rtoken token address
+     */
     function tokenDecimals(bytes32 _rtoken) public view returns (uint8) {
         return tokenDecimalsData[_rtoken].tokenDecimals;
     }
 
+    /**
+     * @dev Sets new trusted forwarder
+     * @param _forwarder new forwarder address
+     */
     function setTrustedForwarder(address _forwarder) external onlyOwner {
         return _setTrustedForwarder(_forwarder);
     }
 
     //TODO: revisit memory location and logic in general (may need to use a single case scenario only)
+    /* *
+     * @dev Batch synthesize request
+     * @param _token tokens to synthesize
+     * @param _amount token amounts to synthesize, set a positive amount in order to initiate a synthesize request
+     * @param _from message sender address
+     * @param _to to address
+     * @param _synthParams synth params
+     * @param _transitData transit data
+     */
     function synthesizeBatchWithDataTransit(
-        address[] memory _tokens,
-        uint256[] memory _amounts, // set a positive amount in order to initiate a synthesize request
+        address[] memory _token,
+        uint256[] memory _amount,
         address _from,
+        address _to,
         SynthParams memory _synthParams,
-        bytes4 _selector,
-        bytes memory _transitData
+        TransitData memory _transitData
     ) external {
-        bytes32[] memory txId = new bytes32[](_tokens.length);
+        bytes32[] memory txId = new bytes32[](_token.length);
         uint256 generalNonce = IBridge(bridge).getNonce(_from);
         bytes32 generalTxId = RequestIdLib.prepareRqId(
             castToBytes32(_synthParams.oppositeBridge),
@@ -546,21 +590,21 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         );
 
         //synthesize request
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            if (_amounts[i] > 0) {
-                require(tokenDecimalsData[castToBytes32(_tokens[i])].isApproved, "Portal: token must be verified");
+        for (uint256 i = 0; i < _token.length; i++) {
+            if (_amount[i] > 0) {
+                require(tokenDecimalsData[castToBytes32(_token[i])].isApproved, "Portal: token must be verified");
 
-                registerNewBalance(_tokens[i], _amounts[i]);
+                registerNewBalance(_token[i], _amount[i]);
 
                 txId[i] = keccak256(abi.encodePacked(generalTxId, i));
                 TxState storage txState = requests[txId[i]];
                 txState.from = castToBytes32(_from); //change!
-                txState.to = castToBytes32(_synthParams.to);
-                txState.rtoken = castToBytes32(_tokens[i]);
-                txState.amount = _amounts[i];
+                txState.to = castToBytes32(_to);
+                txState.rtoken = castToBytes32(_token[i]);
+                txState.amount = _amount[i];
                 txState.state = RequestState.Sent;
 
-                emit SynthesizeRequest(txId[i], _from, _synthParams.to, _amounts[i], _tokens[i]);
+                emit SynthesizeRequest(txId[i], _from, _to, _amount[i], _token[i]);
 
                 // break;
             }
@@ -568,11 +612,11 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
 
         // encode call
         bytes memory out = abi.encodePacked(
-            _selector,
-            _transitData,
+            _transitData.selector,
+            _transitData.data,
             //////////////
-            _tokens,
-            _amounts,
+            _token,
+            _amount,
             txId
         );
 

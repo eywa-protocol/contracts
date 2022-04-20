@@ -103,9 +103,8 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideB,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
@@ -120,7 +119,6 @@ contract('Router', () => {
             await this.routerB.unsynthesizeRequest(
                 synthAddress,
                 amount,
-                userNet2,
                 userNet1,
                 deployInfo["network1"].synthesis,
                 deployInfo["network1"].bridge,
@@ -179,9 +177,8 @@ contract('Router', () => {
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideC,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
@@ -196,7 +193,6 @@ contract('Router', () => {
             await this.routerC.unsynthesizeRequest(
                 synthAddress,
                 amount,
-                userNet3,
                 userNet1,
                 deployInfo["network1"].synthesis,
                 deployInfo["network1"].bridge,
@@ -255,9 +251,8 @@ contract('Router', () => {
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideA,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
@@ -272,7 +267,6 @@ contract('Router', () => {
             await this.routerA.unsynthesizeRequest(
                 synthAddress,
                 amount,
-                userNet1,
                 userNet2,
                 deployInfo["network2"].synthesis,
                 deployInfo["network2"].bridge,
@@ -332,9 +326,8 @@ contract('Router', () => {
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideC,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
@@ -349,7 +342,6 @@ contract('Router', () => {
             await this.routerC.unsynthesizeRequest(
                 synthAddress,
                 amount,
-                userNet3,
                 userNet2,
                 deployInfo["network2"].synthesis,
                 deployInfo["network2"].bridge,
@@ -409,9 +401,8 @@ contract('Router', () => {
             await this.routerC.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideA,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
@@ -426,7 +417,6 @@ contract('Router', () => {
             await this.routerA.unsynthesizeRequest(
                 synthAddress,
                 amount,
-                userNet1,
                 userNet3,
                 deployInfo["network3"].synthesis,
                 deployInfo["network3"].bridge,
@@ -485,9 +475,8 @@ contract('Router', () => {
             await this.routerC.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
-                userFrom,
+                userTo,
                 {
-                    to: userTo,
                     receiveSide: receiveSideB,
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
@@ -502,7 +491,6 @@ contract('Router', () => {
             await this.routerB.unsynthesizeRequest(
                 synthAddress,
                 amount,
-                userNet2,
                 userNet3,
                 deployInfo["network3"].synthesis,
                 deployInfo["network3"].bridge,

@@ -465,7 +465,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     /**
      * @dev Emergency unburn request. Can be called only by bridge after initiation on a second chain
      * @param _txID transaction ID to use unburn on
-     */
+    */
     function emergencyUnburn(
         bytes32 _txID,
         address _trustedEmergencyExecuter,
@@ -546,10 +546,17 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         keys.push(_rtoken);
     }
 
+    /**
+     * @dev Get token representation address
+     * @param _rtoken real token address
+     */
     function getRepresentation(bytes32 _rtoken) external view returns (address) {
         return representationSynt[_rtoken];
     }
 
+    /**
+     * @dev Get token representation list
+     */
     function getListRepresentation() external view returns (bytes32[] memory, address[] memory) {
         uint256 len = keys.length;
         address[] memory sToken = new address[](len);
@@ -559,10 +566,18 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         return (keys, sToken);
     }
 
+    /**
+     * @dev Set new CurveProxy address
+     * @param _proxy new contract address
+     */
     function setCurveProxy(address _proxy) external onlyOwner {
         proxy = _proxy;
     }
 
+    /**
+     * @dev Sets new trusted forwarder
+     * @param _forwarder new forwarder address
+     */
     function setTrustedForwarder(address _forwarder) external onlyOwner {
         return _setTrustedForwarder(_forwarder);
     }
