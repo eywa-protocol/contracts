@@ -106,7 +106,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Mints synthetic token. Can be called only by bridge after initiation on a second chain
+     * @dev Mints synthetic token. Can be called only by bridge after initiation on a second chain.
      * @param _txID transaction ID
      * @param _tokenReal real token address
      * @param _amount amount to mint
@@ -130,7 +130,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Transfers synthetic token to another chain
+     * @dev Transfers synthetic token to another chain.
      * @param _tokenReal real token address
      * @param _amount amount to transfer
      * @param _to recipient address
@@ -189,7 +189,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Revert synthesize() operation, can be called several times
+     * @dev Revert synthesize() operation, can be called several times.
      * @param _txID transaction ID
      * @param _receiveSide request recipient address
      * @param _oppositeBridge opposite bridge address
@@ -232,7 +232,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Revert synthesize() operation with bytes32 support for Solana. Can be called several times
+     * @dev Revert synthesize() operation with bytes32 support for Solana. Can be called several times.
      * @param _pubkeys unsynth data for Solana
      * @param _bumpSynthesizeRequest synthesize request bump
      * @param _chainId opposite chain ID
@@ -322,7 +322,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Burns given synthetic token and unlocks the original one in the destination chain
+     * @dev Burns given synthetic token and unlocks the original one in the destination chain.
      * @param _stoken transaction ID
      * @param _amount amount to burn
      * @param _to recipient address
@@ -542,12 +542,11 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         emit CreatedRepresentation(_rtoken, stoken);
     }
 
-    // TODO should be restricted in mainnets
+    // TODO should be restricted in mainnets (use DAO)
     function changeBridge(address _bridge) external onlyOwner {
         bridge = _bridge;
     }
 
-    // utils
     function setRepresentation(
         bytes32 _rtoken,
         address _stoken,

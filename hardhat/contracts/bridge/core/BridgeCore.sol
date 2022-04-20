@@ -27,7 +27,7 @@ abstract contract BridgeCore {
     event ReceiveRequest(bytes32 reqId, address receiveSide, bytes32 bridgeFrom);
 
     /**
-     * @dev Mandatory for all participants who wants to use their own contracts
+     * @dev Mandatory for all participants who wants to use their own contracts.
      * 1. Contract A (chain A) should be binded with Contract B (chain B) only once! It's not allowed to switch Contract A (chain A) to Contract C (chain B).
      * to prevent malicious behaviour.
      * 2. Contract A (chain A) could be binded with several contracts where every contract from another chain.

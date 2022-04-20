@@ -139,7 +139,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Synthesize token request.
+     * @dev Token synthesize request.
      * @param _token token address to synthesize
      * @param _amount amount to synthesize
      * @param _from msg sender address
@@ -314,7 +314,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Emergency unsynthesize request. Can be called only by bridge after initiation on a second chain
+     * @dev Emergency unsynthesize request. Can be called only by bridge after initiation on a second chain.
      * @param _txID transaction ID to unsynth
      * @param _trustedEmergencyExecuter trusted function executer
      */
@@ -349,7 +349,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Unsynthesize request. Can be called only by bridge after initiation on a second chain
+     * @dev Unsynthesize request. Can be called only by bridge after initiation on a second chain.
      * @param _txID transaction ID to unsynth
      * @param _token token address to unsynth
      * @param _amount amount to unsynth

@@ -7,7 +7,6 @@ import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts-newone/utils/Counters.sol";
-import "hardhat/console.sol";
 
 interface IPortal {
     struct PermitData {
@@ -247,7 +246,7 @@ contract Router is EIP712, Ownable {
     bytes32 public constant _SYNTHESIZE_REQUEST_SIGNATURE_HASH =
         keccak256(abi.encodePacked("synthesizeRequest(address,uint256,address,address,[address,address,uint256])"));
     bytes32 public constant _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH =
-        keccak256(abi.encodePacked("unsynthesizeRequest(address,uint256,address,address,address,address,uint256)"));
+        keccak256(abi.encodePacked("unsynthesizeRequest(address,uint256,address,address,[address,address,uint256])"));
     bytes32 public constant _SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH =
         keccak256(abi.encodePacked("synthTransferRequest(bytes32,uint256,address,address,[address,address,uint256])"));
 
@@ -421,7 +420,7 @@ contract Router is EIP712, Ownable {
     }
 
     //.........................DIRECT-METHODS...........................
-    //==============================PORTAL==============================
+    //=============================PORTAL===============================
     /**
      * @dev Direct token synthesize request.
      * @param token token address to synthesize
@@ -525,9 +524,9 @@ contract Router is EIP712, Ownable {
      * @param receiveSide receiver contract address
      * @param oppositeBridge opposite bridge address
      * @param chainId opposite chain ID
-     * @param v must be a valid part of the signature from txID owner
-     * @param r must be a valid part of the signature from txID owner
-     * @param s must be a valid part of the signature from txID owner
+     * @param v must be a valid part of the signature from tx owner
+     * @param r must be a valid part of the signature from tx owner
+     * @param s must be a valid part of the signature from tx owner
      */
     function emergencyUnburnRequest(
         bytes32 txID,
@@ -543,7 +542,7 @@ contract Router is EIP712, Ownable {
 
     //==============================CURVE-PROXY==============================
     /**
-     * @dev Direct local mint EUSD request (hub chain execution only)
+     * @dev Direct local mint EUSD request (hub chain execution only).
      * @param params MetaMintEUSD params
      * @param permit permit operation params
      * @param token token addresses
@@ -564,7 +563,7 @@ contract Router is EIP712, Ownable {
     }
 
     /**
-     * @dev Direct local meta exchange request (hub chain execution only)
+     * @dev Direct local meta exchange request (hub chain execution only).
      * @param params meta exchange params
      * @param permit permit operation params
      * @param token token addresses to transfer within initial stage
@@ -585,7 +584,7 @@ contract Router is EIP712, Ownable {
     }
 
     /**
-     * @dev Direct local EUSD redeem request with unsynth operation (hub chain execution only)
+     * @dev Direct local EUSD redeem request with unsynth operation (hub chain execution only).
      * @param params meta redeem EUSD params
      * @param permit permit params
      * @param payToken pay token
@@ -607,7 +606,7 @@ contract Router is EIP712, Ownable {
 
     //==============================SYNTHESIS==============================
     /**
-     * @dev Direct synthetic token transfer request to another chain
+     * @dev Direct synthetic token transfer request to another chain.
      * @param rtoken real token address
      * @param amount amount to transfer
      * @param to recipient address
@@ -626,7 +625,7 @@ contract Router is EIP712, Ownable {
     }
 
     /**
-     * @dev Direct unsynthesize request
+     * @dev Direct unsynthesize request.
      * @param stoken synthetic token address for unsynthesize
      * @param amount amount to unsynth
      * @param to recipient address
@@ -644,7 +643,7 @@ contract Router is EIP712, Ownable {
     }
 
     /**
-     * @dev Direct unsynthesize request to Solana
+     * @dev Direct unsynthesize request to Solana.
      * @param stoken synthetic token address for unsynthesize
      * @param pubkeys synth data for Solana
      * @param amount amount to unsynth
@@ -662,7 +661,7 @@ contract Router is EIP712, Ownable {
     }
 
     /**
-     * @dev Direct emergency unsynthesize request
+     * @dev Direct emergency unsynthesize request.
      * @param txID synthesize transaction ID
      * @param receiveSide request recipient address
      * @param oppositeBridge opposite bridge address
