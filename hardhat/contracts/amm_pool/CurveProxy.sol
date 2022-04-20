@@ -6,52 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "./RelayRecipient.sol";
 import "./IStableSwapPool.sol";
-
-interface ISynthesis {
-    function mintSyntheticToken(
-        bytes32 txId,
-        address tokenReal,
-        uint256 amount,
-        address to
-    ) external;
-
-    function burnSyntheticToken(
-        address stoken,
-        uint256 amount,
-        address from,
-        address to,
-        address receiveSide,
-        address oppositeBridge,
-        uint256 chainId
-    ) external returns (bytes32 txID);
-
-    function emergencyUnsyntesizeRequest(
-        bytes32 txID,
-        address receiveSide,
-        address oppositeBridge,
-        uint256 chainId,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
-
-    function getRepresentation(bytes32 rtoken) external view returns (address);
-
-    function getTxId() external returns (bytes32);
-}
-
-//TODO: relocate
-interface IERC20WithPermit {
-    function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
-}
+import "./IUtils.sol";
 
 contract CurveProxy is Initializable, RelayRecipient {
     using SafeERC20Upgradeable for IERC20Upgradeable;
