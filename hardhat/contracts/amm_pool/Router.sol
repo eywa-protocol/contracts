@@ -104,9 +104,7 @@ interface ISynthesis {
         uint256 amount,
         address from,
         address to,
-        address receiveSide,
-        address oppositeBridge,
-        uint256 chainId
+        SynthParams calldata params
     ) external;
 
     function burnSyntheticTokenToSolana(
@@ -247,23 +245,11 @@ contract Router is EIP712, Ownable {
     address _synthesis;
 
     bytes32 public constant _SYNTHESIZE_REQUEST_SIGNATURE_HASH =
-        keccak256(
-            abi.encodePacked(
-                "synthesizeRequest(address,uint256,address,[address,address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
-            )
-        );
+        keccak256(abi.encodePacked("synthesizeRequest(address,uint256,address,address,[address,address,uint256])"));
     bytes32 public constant _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH =
-        keccak256(
-            abi.encodePacked(
-                "unsynthesizeRequest(address,uint256,address,address,address,address,uint256,[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
-            )
-        );
+        keccak256(abi.encodePacked("unsynthesizeRequest(address,uint256,address,address,address,address,uint256)"));
     bytes32 public constant _SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH =
-        keccak256(
-            abi.encodePacked(
-                "synthTransferRequest(bytes32,address,uint256,address,address,[address,address,uint256],[uint256,uint256,uint8[2],bytes32[2],bytes32[2]])"
-            )
-        );
+        keccak256(abi.encodePacked("synthTransferRequest(bytes32,uint256,address,address,[address,address,uint256])"));
 
     mapping(address => bool) public _trustedWorker;
     mapping(address => Counters.Counter) private _nonces;
@@ -334,12 +320,12 @@ contract Router is EIP712, Ownable {
 
     //==============================PORTAL==============================
     /**
-     * @dev Token synthesize request via native payment.
+     * @dev Token synthesize request to another EVM chain via native payment.
      * @param token token address to synthesize
      * @param amount amount to synthesize
      * @param to amount recipient address
      * @param synthParams synth params
-     * @param receipt call receipt
+     * @param receipt delegated call receipt from worker
      */
     function synthesizeRequestPayNative(
         address token,
@@ -355,13 +341,13 @@ contract Router is EIP712, Ownable {
     }
 
     /**
-     * @dev Token synthesize request with permit via native payment.
+     * @dev Token synthesize request with permit to another EVM chain via native payment.
      * @param token token address to synthesize
      * @param amount amount to synthesize
      * @param to amount recipient address
      * @param synthParams synth params
      * @param permitData permit data
-     * @param receipt call receipt
+     * @param receipt delegated call receipt from worker
      */
     function synthesizeRequestWithPermitPayNative(
         address token,
@@ -388,6 +374,15 @@ contract Router is EIP712, Ownable {
     }
 
     //==============================SYNTHESIS==============================
+    /**
+     * @dev Synthetic token transfer request to another EVM chain via native payment.
+     * @param tokenReal real token address
+     * @param tokenSynth synth token address
+     * @param amount amount to transfer
+     * @param to recipient address
+     * @param synthParams synthesize parameters
+     * @param receipt delegated call receipt from worker
+     */
     function synthTransferRequestPayNative(
         bytes32 tokenReal,
         address tokenSynth,
@@ -403,6 +398,14 @@ contract Router is EIP712, Ownable {
         ISynthesis(_synthesis).synthTransfer(tokenReal, amount, msg.sender, to, synthParams);
     }
 
+    /**
+     * @dev Unsynthesize request to another EVM chain via native payment.
+     * @param tokenSynth synthetic token address for unsynthesize
+     * @param amount amount to unsynth
+     * @param to recipient address
+     * @param synthParams transfer params
+     * @param receipt delegated call receipt from worker
+     */
     function unsynthesizeRequestPayNative(
         address tokenSynth,
         uint256 amount,
@@ -414,15 +417,7 @@ contract Router is EIP712, Ownable {
         _proceedFees(receipt.executionPrice, worker);
         SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
         IERC20(tokenSynth).approve(_synthesis, amount);
-        ISynthesis(_synthesis).burnSyntheticToken(
-            tokenSynth,
-            amount,
-            msg.sender,
-            to,
-            synthParams.receiveSide,
-            synthParams.oppositeBridge,
-            synthParams.chainId
-        );
+        ISynthesis(_synthesis).burnSyntheticToken(tokenSynth, amount, msg.sender, to, synthParams);
     }
 
     //.........................DIRECT-METHODS...........................
@@ -431,7 +426,7 @@ contract Router is EIP712, Ownable {
      * @dev Direct token synthesize request.
      * @param token token address to synthesize
      * @param amount amount to synthesize
-     * @param synthParams synthesize parameters
+     * @param synthParams transfer params
      */
     function tokenSynthesizeRequest(
         address token,
@@ -546,14 +541,6 @@ contract Router is EIP712, Ownable {
         IPortal(_portal).emergencyUnburnRequest(txID, receiveSide, oppositeBridge, chainId, v, r, s);
     }
 
-    // function emergencyUnburnRequestToSolana(
-    //     bytes32 txID,
-    //     bytes32[] calldata pubkeys,
-    //     uint256 chainId
-    // ) external {
-    //     IPortal(_portal).emergencyUnburnRequestToSolana(txID, pubkeys, chainId);
-    // }
-
     //==============================CURVE-PROXY==============================
     /**
      * @dev Direct local mint EUSD request (hub chain execution only)
@@ -643,21 +630,17 @@ contract Router is EIP712, Ownable {
      * @param stoken synthetic token address for unsynthesize
      * @param amount amount to unsynth
      * @param to recipient address
-     * @param receiveSide recipient address for unsynth operation
-     * @param oppositeBridge opposite bridge contract address
-     * @param chainId opposite chain ID
+     * @param synthParams transfer params
      */
     function unsynthesizeRequest(
         address stoken,
         uint256 amount,
         address to,
-        address receiveSide,
-        address oppositeBridge,
-        uint256 chainId
+        ISynthesis.SynthParams calldata synthParams
     ) external {
         SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
         IERC20(stoken).approve(_synthesis, amount);
-        ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, msg.sender, to, receiveSide, oppositeBridge, chainId);
+        ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, msg.sender, to, synthParams);
     }
 
     /**
@@ -684,9 +667,9 @@ contract Router is EIP712, Ownable {
      * @param receiveSide request recipient address
      * @param oppositeBridge opposite bridge address
      * @param chainId opposite chain ID
-     * @param v must be a valid part of the signature from txID owner
-     * @param r must be a valid part of the signature from txID owner
-     * @param s must be a valid part of the signature from txID owner
+     * @param v must be a valid part of the signature from tx owner
+     * @param r must be a valid part of the signature from tx owner
+     * @param s must be a valid part of the signature from tx owner
      */
     function emergencyUnsyntesizeRequest(
         bytes32 txID,

@@ -416,15 +416,13 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
      * @param _txID transaction ID to unburn
      * @param _pubkeys unsynth data for Solana
      * @param _chainId opposite chain ID
+     * @param _signedMessage solana signed message
      */
-    // TODO check sig from orig sender
     function emergencyUnburnRequestToSolana(
         bytes32 _txID,
         bytes32[] calldata _pubkeys,
         uint256 _chainId,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
+        SolanaSignedMessage calldata _signedMessage
     ) external {
         require(_chainId == SOLANA_CHAIN_ID, "Portal: incorrect chainId");
         require(
@@ -443,7 +441,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             nonce
         );
 
-        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](7);
+        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](8);
         accounts[0] = SolanaAccountMeta({
             pubkey: _pubkeys[uint256(SynthesizePubkeys.receiveSideData)],
             isSigner: false,
@@ -469,8 +467,9 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             isSigner: false,
             isWritable: true
         });
-        accounts[5] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
-        accounts[6] = SolanaAccountMeta({
+        accounts[5] = SolanaAccountMeta({ pubkey: SOLANA_INSTRUCTIONS, isSigner: false, isWritable: false });
+        accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
+        accounts[7] = SolanaAccountMeta({
             pubkey: _pubkeys[uint256(SynthesizePubkeys.oppositeBridgeData)],
             isSigner: true,
             isWritable: false
@@ -484,7 +483,13 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
                     /* accounts: */
                     accounts,
                     /* data: */
-                    abi.encodePacked(sighashEmergencyUnburn, _v, _r, _s)
+                    abi.encodePacked(
+                        sighashEmergencyUnburn,
+                        _signedMessage.r,
+                        _signedMessage.s,
+                        _signedMessage.publicKey,
+                        _signedMessage.message
+                    )
                 )
             ),
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
