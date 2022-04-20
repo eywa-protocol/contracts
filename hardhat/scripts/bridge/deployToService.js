@@ -12,7 +12,7 @@ async function main() {
     // Deploy EYWA Test token with permit
     let _ERC20Permit = null;
     let  EYWA = null;
-    if (network.name.includes("network") || network.name === 'harmonylocal'){
+    if (network.name.includes("network") || network.name === 'harmonylocal' || network.name === 'harmonytestnet'){
         _ERC20Permit = await ethers.getContractFactory("TestTokenPermit");
         EYWA = await _ERC20Permit.deploy("EYWA-TOKEN", "EYWA");
     }else{
