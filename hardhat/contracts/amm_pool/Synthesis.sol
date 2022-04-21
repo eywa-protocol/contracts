@@ -106,7 +106,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Mints synthetic token. Can be called only by bridge after initiation on a second chain
+     * @dev Mints synthetic token. Can be called only by bridge after initiation on a second chain.
      * @param _txID transaction ID
      * @param _tokenReal real token address
      * @param _amount amount to mint
@@ -130,12 +130,12 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Transfers synthetic token to another chain
+     * @dev Transfers synthetic token to another chain.
      * @param _tokenReal real token address
      * @param _amount amount to transfer
      * @param _to recipient address
      * @param _from msg sender address
-     * @param _synthParams synthesize parameters
+     * @param _synthParams synth transfer parameters
      */
     function synthTransfer(
         bytes32 _tokenReal,
@@ -189,11 +189,14 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Revert synthesize() operation, can be called several times
+     * @dev Revert synthesize() operation, can be called several times.
      * @param _txID transaction ID
      * @param _receiveSide request recipient address
      * @param _oppositeBridge opposite bridge address
      * @param _chainId opposite chain ID
+     * @param _v must be a valid part of the signature from tx owner
+     * @param _r must be a valid part of the signature from tx owner
+     * @param _s must be a valid part of the signature from tx owner
      */
     function emergencyUnsyntesizeRequest(
         bytes32 _txID,
@@ -229,19 +232,17 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Revert synthesize() operation with bytes32 support for Solana. Can be called several times
+     * @dev Revert synthesize() operation with bytes32 support for Solana. Can be called several times.
      * @param _pubkeys unsynth data for Solana
      * @param _bumpSynthesizeRequest synthesize request bump
      * @param _chainId opposite chain ID
+     * @param _signedMessage solana signed message
      */
-    // TODO check sig from orig sender
     function emergencyUnsyntesizeRequestToSolana(
         bytes32[] calldata _pubkeys,
         bytes1 _bumpSynthesizeRequest,
         uint256 _chainId,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
+        SolanaSignedMessage calldata _signedMessage
     ) external {
         require(_chainId == SOLANA_CHAIN_ID, "Synthesis: incorrect chainId");
 
@@ -257,7 +258,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         require(synthesizeStates[txID] != SynthesizeState.Synthesized, "Synthesis: synthetic tokens already minted");
         synthesizeStates[txID] = SynthesizeState.RevertRequest; // close
 
-        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](7);
+        SolanaAccountMeta[] memory accounts = new SolanaAccountMeta[](8);
         accounts[0] = SolanaAccountMeta({
             pubkey: _pubkeys[uint256(UnsynthesizePubkeys.receiveSideData)],
             isSigner: false,
@@ -288,7 +289,8 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             isSigner: true,
             isWritable: false
         });
-        accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
+        accounts[6] = SolanaAccountMeta({ pubkey: SOLANA_INSTRUCTIONS, isSigner: false, isWritable: false });
+        accounts[7] = SolanaAccountMeta({ pubkey: SOLANA_TOKEN_PROGRAM, isSigner: false, isWritable: false });
 
         IBridge(bridge).transmitRequestV2ToSolana(
             serializeSolanaStandaloneInstruction(
@@ -298,7 +300,14 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
                     /* accounts: */
                     accounts,
                     /* data: */
-                    abi.encodePacked(sighashEmergencyUnsynthesize, _bumpSynthesizeRequest, _v, _r, _s)
+                    abi.encodePacked(
+                        sighashEmergencyUnsynthesize,
+                        _bumpSynthesizeRequest,
+                        _signedMessage.r,
+                        _signedMessage.s,
+                        _signedMessage.publicKey,
+                        _signedMessage.message
+                    )
                 )
             ),
             _pubkeys[uint256(UnsynthesizePubkeys.receiveSide)],
@@ -313,29 +322,25 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
-     * @dev Burns given synthetic token and unlocks the original one in the destination chain
+     * @dev Burns given synthetic token and unlocks the original one in the destination chain.
      * @param _stoken transaction ID
      * @param _amount amount to burn
      * @param _to recipient address
-     * @param _receiveSide request recipient address
-     * @param _oppositeBridge opposite bridge address
-     * @param _chainId opposite chain ID
+     * @param _synthParams transfer parameters
      */
     function burnSyntheticToken(
         address _stoken,
         uint256 _amount,
         address _from,
         address _to,
-        address _receiveSide,
-        address _oppositeBridge,
-        uint256 _chainId
+        SynthParams calldata _synthParams
     ) external returns (bytes32 txID) {
         ISyntERC20(_stoken).burn(_msgSender(), _amount);
         uint256 nonce = IBridge(bridge).getNonce(_from);
         txID = RequestIdLib.prepareRqId(
-            castToBytes32(_oppositeBridge),
-            _chainId,
-            castToBytes32(_receiveSide),
+            castToBytes32(_synthParams.oppositeBridge),
+            _synthParams.chainId,
+            castToBytes32(_synthParams.receiveSide),
             castToBytes32(_from),
             nonce
         );
@@ -348,7 +353,15 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             _to
         );
 
-        IBridge(bridge).transmitRequestV2(out, _receiveSide, _oppositeBridge, _chainId, txID, _from, nonce);
+        IBridge(bridge).transmitRequestV2(
+            out,
+            _synthParams.receiveSide,
+            _synthParams.oppositeBridge,
+            _synthParams.chainId,
+            txID,
+            _from,
+            nonce
+        );
         TxState storage txState = requests[txID];
         txState.from = castToBytes32(_from);
         txState.to = castToBytes32(_to);
@@ -465,7 +478,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     /**
      * @dev Emergency unburn request. Can be called only by bridge after initiation on a second chain
      * @param _txID transaction ID to use unburn on
-    */
+     */
     function emergencyUnburn(
         bytes32 _txID,
         address _trustedEmergencyExecuter,
@@ -529,12 +542,11 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         emit CreatedRepresentation(_rtoken, stoken);
     }
 
-    // TODO should be restricted in mainnets
+    // TODO should be restricted in mainnets (use DAO)
     function changeBridge(address _bridge) external onlyOwner {
         bridge = _bridge;
     }
 
-    // utils
     function setRepresentation(
         bytes32 _rtoken,
         address _stoken,

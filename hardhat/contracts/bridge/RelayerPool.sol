@@ -3,12 +3,12 @@ pragma solidity 0.8.10;
 
 // https://confluence.digiu.ai/pages/viewpage.action?pageId=19202711
 
-import {Ownable} from '@openzeppelin/contracts-newone/access/Ownable.sol';
-import {EnumerableSet} from '@openzeppelin/contracts-newone/utils/structs/EnumerableSet.sol';
-import {IERC20} from '@openzeppelin/contracts-newone/token/ERC20/IERC20.sol';
-import {SafeERC20} from '@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol';
-// import {ReentrancyGuard} from '@openzeppelin/contracts-newone/security/ReentrancyGuard.sol';
+import { Ownable } from "@openzeppelin/contracts-newone/access/Ownable.sol";
+import { EnumerableSet } from "@openzeppelin/contracts-newone/utils/structs/EnumerableSet.sol";
+import { IERC20 } from "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
 
+// import {ReentrancyGuard} from '@openzeppelin/contracts-newone/security/ReentrancyGuard.sol';
 
 //todo discuss заморозка через оптимизацию array or enumerableSet with depositId
 //todo если решение через depositId - OK то добавляем view методы
@@ -27,7 +27,8 @@ library Errors {
     string public constant ZERO_PROFIT = "ZERO_PROFIT";
 }
 
-contract RelayerPool /*is ReentrancyGuard */{
+/*is ReentrancyGuard */
+contract RelayerPool {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -37,17 +38,17 @@ contract RelayerPool /*is ReentrancyGuard */{
         Fisher
     }
     enum RelayerStatus {
-        Inactive,  // default value
+        Inactive, // default value
         Online,
         Offline,
         BlackListed
     }
     RelayerStatus public relayerStatus;
     // RelayerType internal relayerType;
-    
+
     uint256 public constant MIN_RELAYER_STAKING_TIME = 4 weeks;
     uint256 public constant MIN_STAKING_TIME = 2 weeks;
-    uint256 public constant MIN_RELAYER_COLLATERAL = 10**18;  // todo discuss
+    uint256 public constant MIN_RELAYER_COLLATERAL = 10**18; // todo discuss
 
     uint256 internal nextDepositId;
     mapping(uint256 => Deposit) public deposits; // id -> deposit
@@ -56,8 +57,8 @@ contract RelayerPool /*is ReentrancyGuard */{
     uint256 public totalDeposit;
     mapping(address => uint256) userClaimed;
     uint256 public rewardPerTokenNumerator;
-    uint256 constant REWARD_PER_TOKEN_DENOMINATOR = 10 ** 18;
-    uint256 internal minOwnerCollateral;  // todo discuss shouls i use this in constructor
+    uint256 constant REWARD_PER_TOKEN_DENOMINATOR = 10**18;
+    uint256 internal minOwnerCollateral; // todo discuss shouls i use this in constructor
 
     //   Базой для расчёта начислений нужно считать, что мы закладываем фиксированный годовой процент
     //   эмиссии токена для релееров, обозначим его как Emission rate
@@ -70,14 +71,14 @@ contract RelayerPool /*is ReentrancyGuard */{
     uint256 constant RELAYER_FEE_MIN_NUMERATOR = 100;
     uint256 constant RELAYER_FEE_DENOMINATOR = 10000;
     uint256 public relayerFeeNumerator;
-    uint256 public emissionAnnualRateNumerator;  // reward= period * stake * emissionAnnualRateNumerator / (365*24*3600)
+    uint256 public emissionAnnualRateNumerator; // reward= period * stake * emissionAnnualRateNumerator / (365*24*3600)
     address public owner;
     address public registry;
 
     address public depositToken;
     address public rewardToken;
 
-    address public vault;  // address of the vault with reward tokens
+    address public vault; // address of the vault with reward tokens
 
     struct Deposit {
         address user; // todo optimization it's possible to exclude
@@ -87,11 +88,7 @@ contract RelayerPool /*is ReentrancyGuard */{
 
     event DepositPut(address indexed user, uint256 indexed id, uint256 amount, uint256 lockTill);
     event DepositWithdrawn(address indexed user, uint256 indexed id, uint256 amount, uint256 rest);
-    event UserHarvestReward(
-        address indexed user,
-        uint256 userReward,
-        uint256 userDeposit
-    );
+    event UserHarvestReward(address indexed user, uint256 userReward, uint256 userDeposit);
     event RelayerStatusSet(address indexed sender, RelayerStatus status);
     event RelayerFeeNumeratorSet(address indexed sender, uint256 value);
     event EmissionAnnualRateNumeratorSet(address indexed sender, uint256 value);
@@ -118,8 +115,8 @@ contract RelayerPool /*is ReentrancyGuard */{
         require(_relayerFeeNumerator >= RELAYER_FEE_MIN_NUMERATOR, Errors.FEE_IS_TOO_LOW);
         require(_relayerFeeNumerator <= RELAYER_FEE_DENOMINATOR, Errors.FEE_IS_TOO_HIGH);
         relayerFeeNumerator = _relayerFeeNumerator;
-        require(_emissionAnnualRateNumerator * 10000 >= 365 days, Errors.EMISSION_ANNUAL_RATE_IS_TOO_LOW);  // 0.01%
-        require(_emissionAnnualRateNumerator <= 100 * 365 days, Errors.EMISSION_ANNUAL_RATE_IS_TOO_HIGH);   // 10000%
+        require(_emissionAnnualRateNumerator * 10000 >= 365 days, Errors.EMISSION_ANNUAL_RATE_IS_TOO_LOW); // 0.01%
+        require(_emissionAnnualRateNumerator <= 100 * 365 days, Errors.EMISSION_ANNUAL_RATE_IS_TOO_HIGH); // 10000%
         emissionAnnualRateNumerator = _emissionAnnualRateNumerator;
         require(_rewardToken != address(0), Errors.ZERO_ADDRESS);
         rewardToken = _rewardToken;
@@ -127,7 +124,7 @@ contract RelayerPool /*is ReentrancyGuard */{
         depositToken = _depositToken;
         require(_owner != address(0), Errors.ZERO_ADDRESS);
         owner = _owner;
-        registry = msg.sender;  // todo discuss
+        registry = msg.sender; // todo discuss
         lastHarvestRewardTimestamp = block.timestamp;
         require(_vault != address(0), Errors.ZERO_ADDRESS);
         vault = _vault;
@@ -143,7 +140,15 @@ contract RelayerPool /*is ReentrancyGuard */{
         _;
     }
 
-    function getDeposit(uint256 _depositId) external view returns(address user, uint256 amount, uint256 lockTill) {
+    function getDeposit(uint256 _depositId)
+        external
+        view
+        returns (
+            address user,
+            uint256 amount,
+            uint256 lockTill
+        )
+    {
         Deposit memory _deposit = deposits[_depositId];
         user = _deposit.user;
         amount = _deposit.amount;
@@ -161,10 +166,10 @@ contract RelayerPool /*is ReentrancyGuard */{
         require(block.timestamp >= _deposit.lockTill, Errors.DEPOSIT_IS_LOCKED);
         require(userDepositIds[msg.sender].contains(_depositId), Errors.DATA_INCONSISTENCY);
 
-        _harvestPoolReward();  // ensure pool received reward according to the total deposit
+        _harvestPoolReward(); // ensure pool received reward according to the total deposit
         _harvestMyReward(); // ensure user collected reward
 
-        userClaimed[msg.sender] -= _amount * rewardPerTokenNumerator / REWARD_PER_TOKEN_DENOMINATOR;
+        userClaimed[msg.sender] -= (_amount * rewardPerTokenNumerator) / REWARD_PER_TOKEN_DENOMINATOR;
 
         if (_amount < _deposit.amount) {
             _deposit.amount -= _amount;
@@ -201,11 +206,7 @@ contract RelayerPool /*is ReentrancyGuard */{
         } else {
             lockTill = block.timestamp + MIN_STAKING_TIME;
         }
-        deposits[depositId] = Deposit({
-            user: msg.sender,
-            lockTill: lockTill,
-            amount: _amount
-        });
+        deposits[depositId] = Deposit({ user: msg.sender, lockTill: lockTill, amount: _amount });
         userTotalDeposit[msg.sender] += _amount;
         totalDeposit += _amount;
         userClaimed[msg.sender] += (_amount * rewardPerTokenNumerator) / REWARD_PER_TOKEN_DENOMINATOR;
@@ -225,20 +226,15 @@ contract RelayerPool /*is ReentrancyGuard */{
 
     function _harvestMyReward() internal {
         uint256 userDeposit = userTotalDeposit[msg.sender];
-        uint256 reward = (
-            (rewardPerTokenNumerator * userTotalDeposit[msg.sender]) / REWARD_PER_TOKEN_DENOMINATOR
-            -
+        uint256 reward = ((rewardPerTokenNumerator * userTotalDeposit[msg.sender]) /
+            REWARD_PER_TOKEN_DENOMINATOR -
             userClaimed[msg.sender]);
         if (reward == 0) {
             return;
         }
         IERC20(rewardToken).safeTransfer(msg.sender, reward);
         userClaimed[msg.sender] += reward;
-        emit UserHarvestReward({
-            user: msg.sender,
-            userReward: reward,
-            userDeposit: userDeposit
-        });
+        emit UserHarvestReward({ user: msg.sender, userReward: reward, userDeposit: userDeposit });
     }
 
     function harvestPoolReward() external {
@@ -248,7 +244,7 @@ contract RelayerPool /*is ReentrancyGuard */{
     function _harvestPoolReward() internal {
         // Тогда дневная прибыль валидатора day profit составляет Day profit=Pool Stake*Emission rate/100/365
         uint256 harvestForPeriod = block.timestamp - lastHarvestRewardTimestamp;
-        uint256 profit = totalDeposit * harvestForPeriod * emissionAnnualRateNumerator / 365 days;
+        uint256 profit = (totalDeposit * harvestForPeriod * emissionAnnualRateNumerator) / 365 days;
         if (profit == 0) {
             return;
         }
@@ -263,7 +259,7 @@ contract RelayerPool /*is ReentrancyGuard */{
         rewardPerTokenNumerator += (rewardForPool * REWARD_PER_TOKEN_DENOMINATOR) / totalDeposit;
         IERC20(rewardToken).safeTransferFrom(address(vault), address(this), profit);
         if (fee > 0) {
-            IERC20(rewardToken).safeTransferFrom(address(vault), owner, fee);  // todo discuss fee receiver
+            IERC20(rewardToken).safeTransferFrom(address(vault), owner, fee); // todo discuss fee receiver
         }
 
         emit HarvestPoolReward({
@@ -293,8 +289,8 @@ contract RelayerPool /*is ReentrancyGuard */{
     }
 
     function setEmissionAnnualRateNumerator(uint256 _value) external onlyOwner {
-        require(_value * 10000 >= 365 days, Errors.EMISSION_ANNUAL_RATE_IS_TOO_LOW);  // 0.01%
-        require(_value <= 100 * 365 days, Errors.EMISSION_ANNUAL_RATE_IS_TOO_HIGH);   // 10000%
+        require(_value * 10000 >= 365 days, Errors.EMISSION_ANNUAL_RATE_IS_TOO_LOW); // 0.01%
+        require(_value <= 100 * 365 days, Errors.EMISSION_ANNUAL_RATE_IS_TOO_HIGH); // 10000%
         emissionAnnualRateNumerator = _value;
         emit EmissionAnnualRateNumeratorSet(msg.sender, _value);
     }
