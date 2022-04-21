@@ -21,13 +21,6 @@ contract NodeRegistry is Bridge {
         uint256 nodeId;    // absolute sequential number
     }
 
-    // struct NodeInitParams {
-    //     uint256 relayerFeeNumerator;
-    //     uint256 emissionRateNumerator;
-    //     address rewardToken;
-    //     address vault;
-    // }
-
     struct Snapshot {
         uint256 snapNum;
         bytes[] blsPubKeys;
@@ -42,6 +35,7 @@ contract NodeRegistry is Bridge {
     mapping(address => Node) public ownedNodes;
     mapping(string => address) public hostIds;
     Snapshot public snapshot;
+    mapping(address => bool) public poaOwnersWhiteList;
 
     event NewSnapshot(uint256 snapNum);
     event CreatedRelayer(
@@ -121,50 +115,11 @@ contract NodeRegistry is Bridge {
     // return ownedNodes[_owner].status == 1;
     }
 
-    function createRelayer(
-        Node memory _node,
-     // NodeInitParams memory _params,
-        uint256 _deadline,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    ) external {
-        RelayerPool relayerPool = RelayerPoolFactory.create(
-            _node.owner,   // node owner
-            address(EYWA), // depositToken
-            address(EYWA), // rewardToken            (test only)
-            100,           // relayerFeeNumerator    (test only)
-            4000,          // emissionRateNumerator  (test only)
-            _node.owner    // vault                  (test only)
-        );
-        uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
-        require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");
-        IERC20Permit(EYWA).permit(_msgSender(), address(this), nodeBalance, _deadline, _v, _r, _s);
-        IERC20Upgradeable(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
-        _node.pool = address(relayerPool);
+    function createRelayer(Node memory _node) external {
+        require(_node.owner == _msgSender(), "only node owner can create node");
+        require(poaOwnersWhiteList[_msgSender()], "is not whitelisted");
         addNode(_node);
     }
-
-
-    function createRelayerPermitted(
-        Node memory _node,
-        uint256 _deadline
-    ) external {
-        RelayerPool relayerPool = RelayerPoolFactory.create(
-            _node.owner,   // node owner
-            address(EYWA), // depositToken
-            address(EYWA), // rewardToken            (test only)
-            100,           // relayerFeeNumerator    (test only)
-            4000,          // emissionRateNumerator  (test only)
-            _node.owner    // vault                  (test only)
-        );
-        uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
-        require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");
-        IERC20Upgradeable(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
-        _node.pool = address(relayerPool);
-        addNode(_node);
-    }
-
 
     function getSnapshot() external view returns (bytes[] memory, string[] memory, uint256) {
         return (snapshot.blsPubKeys, snapshot.hostIds, snapshot.snapNum);
@@ -200,5 +155,13 @@ contract NodeRegistry is Bridge {
 
         snapshot.snapNum = Bridge.epochNum + 1;
         emit NewSnapshot(snapshot.snapNum);
+    }
+
+    function addPoaOwner(address _nodeOwner) public onlyOwner{
+        poaOwnersWhiteList[_nodeOwner] = true;
+    }
+    
+    function removePoaOwner(address _nodeOwner) public onlyOwner{
+        poaOwnersWhiteList[_nodeOwner] = false;
     }
 }
