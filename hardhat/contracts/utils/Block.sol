@@ -63,7 +63,7 @@ library Block {
     ) internal view {
         Bls.E2Point memory votersPubKey = Bls.decodeE2Point(_votersPubKey);
         Bls.E1Point memory votersSignature = Bls.decodeE1Point(_votersSignature);
-        require(popcnt(_votersMask) >= (uint256(_epochParticipantsNum) * 2) / 3, "not enough participants");
+        require(popcnt(_votersMask) > (uint256(_epochParticipantsNum) * 2) / 3, "not enough participants");
         require(_epochParticipantsNum == 255 || _votersMask < (1 << _epochParticipantsNum), "bitmask too big");
         require(
             Bls.verifyMultisig(_epochKey, votersPubKey, _blockHeader, votersSignature, _votersMask),
