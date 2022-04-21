@@ -1,5 +1,22 @@
 wrappers/
-truffle/node_modules
+**/node_modules
 truffle/build/contracts
 !wrappers/go.mod
 !wrappers/go.sum
+#Hardhat files
+**/cache
+**/artifacts
+**/artifacts-types
+**/factories
+/hardhat/yarn.lock
+/hardhat/yarn-error.log
+**/.env
+networks_env
+wrappers-builder-gsn/wrappers-builder-gsn
+wrappers-builder/wrappers-builder
+
+.idea
+.vscode
+*.swp
+hardhat/helper-hardhat-config.json
+hardhat/.openzeppelin/

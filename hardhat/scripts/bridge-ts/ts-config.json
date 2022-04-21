@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "declarationDir": "./dist",
+        "outDir": "./dist",
+        "typeRoots": [
+            "./node_modules/@types"
+        ],
+        "resolveJsonModule": true,
+        "lib": [
+            "es2015"
+        ],
+        "rootDir": ".",
+        "target": "es5",
+        "esModuleInterop": true,
+        "moduleResolution": "node"
+    },
+    "include": [
+        "./package.json",
+        "./index.ts"
+    ],
+    "exclude": [
+        "artifacts-types",
+        "dist",
+        "node_modules"
+    ]
+}

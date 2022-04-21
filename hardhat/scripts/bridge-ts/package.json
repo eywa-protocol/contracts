@@ -1,0 +1,31 @@
+{
+    "name": "@eywa-fi/eth-solana-wrapper",
+    "version": "0.0.10",
+    "description": "Eywa EVM contracts wrapper for Solana",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "pub": "npm version patch && npm run build && npm publish --access=public",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "engines": {
+        "node": ">=14.0.0"
+    },
+    "author": "DigiU team",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/chai": "^4.2.22",
+        "@types/mocha": "^9.0.0",
+        "@types/node": "^16.11.6",
+        "chai": "^4.3.4",
+        "ts-mocha": "^8.0.0",
+        "ts-node": "^10.4.0",
+        "typescript": "^4.5.4"
+    },
+    "dependencies": {
+        "@solana/spl-token": "~0.1.8",
+        "@solana/web3.js": "^1.35.1",
+        "ethers": "^5.4.1"
+    }
+}
