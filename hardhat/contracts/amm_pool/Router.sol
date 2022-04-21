@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-newone/access/Ownable.sol";
-import "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/draft-EIP712.sol";
