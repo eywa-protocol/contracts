@@ -1,25 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-library ReqIdFilter {
-    struct Data {
-        mapping(bytes32 => bool) filter;
-        bytes32[] used;
-    }
+contract ReqIdFilter {
+    mapping(bytes32 => bool) filter;
+    address public owner = msg.sender;
 
-    function length(Data storage data) internal view returns(uint256) {
-        return data.used.length;
-    }
-
-    function testAndSet(Data storage data, bytes32 id) internal returns(bool) {
-        if (data.filter[id]) return true;
-        data.filter[id] = true;
-        data.used.push(id);
+    function testAndSet(bytes32 id) public returns(bool) {
+        require(msg.sender == owner, "not owner");
+        if (filter[id]) return true;
+        filter[id] = true;
         return false;
     }
 
-    function clear(Data storage data) internal {
-        for (uint256 i = 0; i < data.used.length; i++) data.filter[data.used[i]] = false;
-        delete data.used;
+    function destroy() public {
+        require(msg.sender == owner, "not owner");
+        selfdestruct(payable(owner));
     }
 }

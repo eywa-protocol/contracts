@@ -15,15 +15,13 @@ import "./interface/INodeRegistry.sol";
 
 contract Bridge is BridgeCore, RelayRecipient, Typecast {
     using AddressUpgradeable for address;
-    using ReqIdFilter for ReqIdFilter.Data;
 
     string public versionRecipient;
-    Bls.E2Point private epochKey; // Aggregated public key of all paricipants of the current epoch
-    address public dao; // Address of the DAO
+    Bls.E2Point private epochKey;      // Aggregated public key of all paricipants of the current epoch
+    address public dao;                // Address of the DAO
     uint8 public epochParticipantsNum; // Number of participants contributed to the epochKey
-    uint32 public epochNum; // Sequential number of the epoch
-
-    ReqIdFilter.Data private reqIdFilter; // Filteres request ID against repetition
+    uint32 public epochNum;            // Sequential number of the epoch
+    ReqIdFilter public reqIdFilter;    // Filteres received request IDs against replay
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
 
@@ -35,6 +33,7 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
 
         versionRecipient = "2.2.3";
         dao = _msgSender();
+        reqIdFilter = new ReqIdFilter();
         _setTrustedForwarder(forwarder);
     }
 
@@ -76,10 +75,6 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         return (abi.encode(epochKey), epochParticipantsNum, epochNum);
     }
 
-    function statFilterLen() external view returns (uint256) {
-        return reqIdFilter.length();
-    }
-
     /**
      * @dev Updates current epoch.
      * @param _blockHeader block header serialization
@@ -107,7 +102,8 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         epochKey = newKey;
         epochParticipantsNum = txNewEpochParticipantsNum; // TODO: require minimum
         epochNum = txNewEpochNum;
-        reqIdFilter.clear();
+        reqIdFilter.destroy();
+        reqIdFilter = new ReqIdFilter();
         emit NewEpoch(abi.encode(epochKey), abi.encode(newKey), false, txNewEpochNum);
     }
 
