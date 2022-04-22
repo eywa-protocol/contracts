@@ -120,7 +120,26 @@ contract NodeRegistry is Bridge {
         addNode(_node);
     }
 
-      function getSnapshot()
+        function createRelayerPermitted(
+        Node memory _node,
+        uint256 _deadline
+    ) external {
+        RelayerPool relayerPool = RelayerPoolFactory.create(
+            _node.owner, // node owner
+            address(EYWA), // depositToken
+            address(EYWA), // rewardToken            (test only)
+            100, // relayerFeeNumerator    (test only)
+            4000, // emissionRateNumerator  (test only)
+            _node.owner // vault                  (test only)
+        );
+        uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
+        require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");
+        IERC20Upgradeable(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
+        _node.pool = address(relayerPool);
+        addNode(_node);
+    }
+
+    function getSnapshot()
         external
         view
         returns (
