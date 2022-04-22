@@ -23,7 +23,7 @@ async function main() {
     await tx.wait();
   }
 
-  const eywa_addr = networkConfig[name].eywa;
+  const eywa_addr = networkConfig[name].tokenPoa;
   if (eywa_addr === undefined || eywa_addr === "0x0000000000000000000000000000000000000000") {
     console.log("Eywa contract not deployed on this network, skipping.");
     return;
