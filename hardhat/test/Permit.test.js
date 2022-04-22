@@ -12,6 +12,8 @@ const Web3 = require('web3');
 let web3 = new Web3(null);
 // const provider = ganache.provider();
 // const web3 = new Web3(provider);
+const abi = require('ethereumjs-abi');
+
 
 
 
@@ -97,25 +99,30 @@ describe('Permit tests', () => {
 
         let currentNonce = await tokenErc20.nonces(ownerAddress);
         console.log("nonce current = ", currentNonce)
-        let structHash = web3.utils.soliditySha3(
-            _PERMIT_TYPEHASH,
-            ownerAddress, // owner
-            addr2.address, // spender
-            100, // value
-            currentNonce,
-            deadline
-        );
-        let typeHash = web3.utils.soliditySha3("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
-        let nameHash = web3.utils.soliditySha3("EYWA-Token");
-        let versionHash = web3.utils.soliditySha3("1");
 
-        let domainSeparatorV4 = web3.utils.soliditySha3(
-            typeHash,
-            nameHash,
-            versionHash,
-            harmonyChainID,
-            await tokenErc20.address
+        let thisABI = web3.eth.abi.encodeParameters(
+            [
+                'bytes32',
+                'address', 
+                'address', 
+                'uint256',
+                'uint256',
+                'uint256'
+            ],
+            [
+                _PERMIT_TYPEHASH,
+                ownerAddress, // owner
+                addr2.address, // spender
+                100, // value
+                currentNonce,
+                deadline
+            ]
         );
+        let structHash = web3.utils.soliditySha3(
+            thisABI
+        );
+
+        let domainSeparatorV4 = await tokenErc20.DOMAIN_SEPARATOR();
         let toTypedDataHash = web3.utils.soliditySha3(
             "\x19\x01",
             domainSeparatorV4,
@@ -126,22 +133,8 @@ describe('Permit tests', () => {
         let r = ethUtil.bufferToHex(sigObj.r);
         let s = ethUtil.bufferToHex(sigObj.s);
         let v = sigObj.v;
-        console.log("v = ", v);
-        console.log("r = ", r);
-        console.log("s = ", s);
 
-        // var publicKey = ethUtil.ecrecover(web3.utils.hexToBytes(toTypedDataHash), v, r, s);
-        // var sender = ethUtil.publicToAddress(publicKey);
-        // var publicKey2 = ethUtil.ecrecover(web3.utils.hexToBytes(toTypedDataHash), sigObj.v, sigObj.r, sigObj.s);
-        // var sender2 = ethUtil.publicToAddress(publicKey2);
-        // console.log("ownerAddress = ", ownerAddress);
-        // console.log("sender = ", sender);
-        // console.log("sender = ", sender2);
-
-        await tokenErc20.permit666(
-            structHash,
-            toTypedDataHash,
-
+        await tokenErc20.permit(
             ownerAddress,
             addr2.address,
             100,
@@ -151,7 +144,17 @@ describe('Permit tests', () => {
             s
         );
 
-        console.log("new nonce = ", await tokenErc20.nonces(ownerAddress))
+        expect(await tokenErc20.nonces(ownerAddress)).to.be.equal(1);
+
+        await expect(tokenErc20.permit(
+            ownerAddress,
+            addr2.address,
+            100,
+            deadline,
+            v,
+            r,
+            s
+        )).to.be.revertedWith('ERC20Permit: invalid signature');;
     });
 
 

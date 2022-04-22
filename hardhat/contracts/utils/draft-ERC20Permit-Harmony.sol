@@ -66,38 +66,6 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, EIP712 {
 
         _approve(owner, spender, value);
     }
-    function permit666(
-        //
-        bytes32 structHash666,
-        bytes32 toTypedDataHash,
-        //
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    // ) public virtual override {
-    ) public {
-        require(block.timestamp <= deadline, "ERC20Permit: expired deadline");
-
-        bytes32 structHash = keccak256(abi.encode(_PERMIT_TYPEHASH, owner, spender, value, _useNonce(owner), deadline));
-        // bytes32 structHash = keccak256(abi.encodePacked(_PERMIT_TYPEHASH, owner, spender, value, _useNonce(owner), deadline));
-        //
-        require(keccak256(abi.encodePacked(structHash)) == keccak256(abi.encodePacked(structHash666)), "STRUCTHASH IS SHIT");
-        //
-
-        bytes32 hash = _hashTypedDataV4(structHash);
-
-        require(keccak256(abi.encodePacked(hash)) == keccak256(abi.encodePacked(toTypedDataHash)), "toTypedDataHash IS SHIT");
-
-
-        address signer = ECDSA.recover(hash, v, r, s);
-        require(signer == owner, "ERC20Permit: invalid signature");
-
-        _approve(owner, spender, value);
-    }
 
     /**
      * @dev See {IERC20Permit-nonces}.
