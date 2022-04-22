@@ -65,7 +65,8 @@
     "@opengsn/contracts": "^2.2.2",
     "@openzeppelin/contracts": "3.4.1",
     "@openzeppelin/contracts-newone": "npm:@openzeppelin/contracts@4.1.0",
-    "@openzeppelin/contracts-upgradeable": "^4.4.1"
+    "@openzeppelin/contracts-upgradeable": "^4.4.1",
+    "ganache-cli": "^6.12.2"
   },
   "engines": {
     "node": ">=14.0.0"
