@@ -8,7 +8,7 @@ import "./RelayRecipient.sol";
 import "./SolanaSerialize.sol";
 import "../utils/Typecast.sol";
 import "./RequestIdLib.sol";
-import "../interfaces/PortalInterfaces.sol";
+import "../interfaces/IERC20.sol";
 
 contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     mapping(address => uint256) public balanceOf;

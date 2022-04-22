@@ -6,7 +6,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "./RelayRecipient.sol";
 import "./IStableSwapPool.sol";
-import "../interfaces/CurveProxyInterfaces.sol";
+import "../interfaces/ISynthesis.sol";
+import "../interfaces/IERC20WithPermit.sol";
 
 contract CurveProxy is Initializable, RelayRecipient {
     using SafeERC20Upgradeable for IERC20Upgradeable;

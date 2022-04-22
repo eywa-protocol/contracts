@@ -7,7 +7,10 @@ import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts-newone/utils/Counters.sol";
 import "hardhat/console.sol";
-import "../interfaces/RouterInterfaces.sol";
+import "../interfaces/IPortal.sol";
+import "../interfaces/ISynthesis.sol";
+import "../interfaces/ICurveProxy.sol";
+import "../interfaces/IERC20WithPermit.sol";
 
 contract Router is EIP712, Ownable {
     using Counters for Counters.Counter;
