@@ -120,7 +120,7 @@ contract NodeRegistry is Bridge {
         addNode(_node);
     }
 
-    function getSnapshot()
+      function getSnapshot()
         external
         view
         returns (
