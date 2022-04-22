@@ -50,7 +50,11 @@ abstract contract EIP712 {
      * NOTE: These parameters cannot be changed except through a xref:learn::upgrading-smart-contracts.adoc[smart
      * contract upgrade].
      */
-    constructor(string memory name, string memory version, uint256 harmonyChainId) {
+    constructor(
+        string memory name,
+        string memory version,
+        uint256 harmonyChainId
+    ) {
         bytes32 hashedName = keccak256(bytes(name));
         bytes32 hashedVersion = keccak256(bytes(version));
         bytes32 typeHash = keccak256(
@@ -69,7 +73,8 @@ abstract contract EIP712 {
      * @dev Returns the domain separator for the current chain.
      */
     function _domainSeparatorV4() internal view returns (bytes32) {
-        if (address(this) == _CACHED_THIS && block.chainid == _CACHED_CHAIN_ID) {
+        // if (address(this) == _CACHED_THIS && block.chainid == _CACHED_CHAIN_ID) {
+        if (address(this) == _CACHED_THIS) {
             return _CACHED_DOMAIN_SEPARATOR;
         } else {
             return _buildDomainSeparator(_TYPE_HASH, _HASHED_NAME, _HASHED_VERSION);
@@ -81,7 +86,7 @@ abstract contract EIP712 {
         bytes32 nameHash,
         bytes32 versionHash
     ) private view returns (bytes32) {
-        return keccak256(abi.encode(typeHash, nameHash, versionHash, block.chainid, address(this)));
+        return keccak256(abi.encode(typeHash, nameHash, versionHash, _CACHED_CHAIN_ID, address(this)));
     }
 
     /**
@@ -101,5 +106,9 @@ abstract contract EIP712 {
      */
     function _hashTypedDataV4(bytes32 structHash) internal view virtual returns (bytes32) {
         return ECDSA.toTypedDataHash(_domainSeparatorV4(), structHash);
+    }
+
+    function getHarmonyChainID() external view returns (uint256) {
+        return _CACHED_CHAIN_ID;
     }
 }
