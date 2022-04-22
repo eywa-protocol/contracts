@@ -15,13 +15,13 @@ async function main() {
     let  EYWA = null;
     let tokenPoa = null;
     if (network.name.includes("network") || network.name === 'harmonylocal' || network.name === 'harmonytestnet'){
-        _TokenPOA = await ethers.getContractFactory("PermitERC20");
-        tokenPoa = await _TokenPOA.deploy("EYWA-POA", "POAT");
+        _TokenPOA = await ethers.getContractFactory("TokenPOA");
+        tokenPoa = await _TokenPOA.deploy("EYWA-POA", "POAT", "1666700000");
         _ERC20Permit = await ethers.getContractFactory("TestTokenPermit");
         EYWA = await _ERC20Permit.deploy("EYWA-TOKEN", "EYWA");
     }else{
-        _TokenPOA = await ethers.getContractFactory("PermitERC20");
-        tokenPoa = await _TokenPOA.deploy("EYWA-POA", "POAT");
+        _TokenPOA = await ethers.getContractFactory("TokenPOA");
+        tokenPoa = await _TokenPOA.deploy("EYWA-POA", "POAT", "1666700000");
         _ERC20Permit = await ethers.getContractFactory("EywaToken");
         EYWA = await _ERC20Permit.deploy(deployer.address, "1666700000");
     }
