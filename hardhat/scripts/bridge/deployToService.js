@@ -11,8 +11,12 @@ async function main() {
 
     // Deploy EYWA Test token with permit
     let _ERC20Permit = null;
+    let _TokenPOA = null;
     let  EYWA = null;
+    let tokenPoa = null;
     if (network.name.includes("network") || network.name === 'harmonylocal' || network.name === 'harmonytestnet'){
+        _TokenPOA = await ethers.getContractFactory("PermitERC20");
+        tokenPoa = await _TokenPOA.deploy("EYWA-POA", "POAT");
         _ERC20Permit = await ethers.getContractFactory("TestTokenPermit");
         EYWA = await _ERC20Permit.deploy("EYWA-TOKEN", "EYWA");
     }else{
@@ -52,7 +56,7 @@ async function main() {
     // const bridge = await _NodeRegistry.deploy({gasLimit: 5_000_000});
     const bridge = await upgrades.deployProxy(
         _NodeRegistry,
-        [EYWA.address, forwarder.address],
+        [tokenPoa.address, forwarder.address],
         { initializer: 'initialize2', unsafeAllow: ['external-library-linking'] },
     );
     await bridge.deployed();
