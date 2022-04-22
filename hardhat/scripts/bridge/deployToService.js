@@ -16,13 +16,17 @@ async function main() {
         _ERC20Permit = await ethers.getContractFactory("TestTokenPermit");
         EYWA = await _ERC20Permit.deploy("EYWA-TOKEN", "EYWA");
     }else{
+        _TokenPOA = await ethers.getContractFactory("PermitERC20");
+        tokenPoa = await _TokenPOA.deploy("EYWA-POA", "POAT");
         _ERC20Permit = await ethers.getContractFactory("EywaToken");
         EYWA = await _ERC20Permit.deploy(deployer.address, "1666700000");
     }
 
     await EYWA.deployed();
     networkConfig[network.name].eywa = EYWA.address;
+    networkConfig[network.name].token.push({address: tokenPoa.address, name:"EYWA-POA", symbol: "POAT"});
     console.log("EYWA ERC20 address:", EYWA.address);
+    console.log("POA ERC20 address:", tokenPoa.address);
 
     // Deploy Forwarder
     const _Forwarder = await ethers.getContractFactory("Forwarder");
