@@ -69,6 +69,28 @@ contract MockDexPool is SolanaSerialize {
         emit RequestSent(requestId);
     }
 
+
+
+    function sendRequestTestV2Unsafe(
+        uint256 testData_,
+        address secondPartPool,
+        address oppBridge,
+        uint256 chainId,
+        bytes32 requestId,
+        uint256 nonce
+    ) external {
+        require(secondPartPool != address(0), "BAD ADDRESS");
+
+        bytes memory output = abi.encodeWithSelector(
+            bytes4(keccak256(bytes("receiveRequestTest(uint256,bytes32)"))),
+            testData_,
+            requestId
+        );
+        Bridge(bridge).transmitRequestV2(output, secondPartPool, oppBridge, chainId, requestId, msg.sender, nonce);
+
+        emit RequestSent(requestId);
+    }
+
     /**
      * @notice receive request on the second part of pool
      *
@@ -139,6 +161,9 @@ contract MockDexPool is SolanaSerialize {
         emit RequestSent(requestId);
     }
 
+
+
+
     function sigHash(string memory _data) public pure returns (bytes8) {
         return bytes8(sha256(bytes(_data)));
     }
@@ -154,5 +179,21 @@ contract MockDexPool is SolanaSerialize {
     function clearStats() public {
         delete doubleRequestIds;
         totalRequests = 0;
+    }
+
+    function calcRequestId(
+        address secondPartPool,
+        address oppBridge,
+        uint256 chainId
+    ) external view returns(bytes32, uint256){
+        uint256 nonce = Bridge(bridge).getNonce(msg.sender);
+        bytes32 reqId = RequestIdLib.prepareRqId(
+            bytes32(uint256(uint160(oppBridge))),
+            chainId,
+            bytes32(uint256(uint160(secondPartPool))),
+            bytes32(uint256(uint160(msg.sender))),
+            nonce
+        );
+        return (reqId, nonce);
     }
 }

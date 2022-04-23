@@ -2,11 +2,12 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-newone/access/Ownable.sol";
-import "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "@openzeppelin/contracts-newone/token/ERC20/extensions/ERC20Burnable.sol";
+import "../utils/draft-ERC20Permit-Harmony.sol";
 
-contract PermitERC20 is  Ownable, ERC20Permit {
+contract TokenPOA is  Ownable, ERC20Permit {
 
-    constructor (string memory name_, string memory symbol_) ERC20Permit("EYWA") ERC20(name_,symbol_) {}
+    constructor (string memory name_, string memory symbol_, uint256 harmonyChainID_) ERC20Permit("EYWA", harmonyChainID_) ERC20(name_,symbol_) {}
 
     function mint(address account, uint256 amount) external onlyOwner {
         _mint(account, amount);
