@@ -21,9 +21,9 @@ async function main() {
         EYWA = await _ERC20Permit.deploy("EYWA-TOKEN", "EYWA");
     }else{
         _TokenPOA = await ethers.getContractFactory("TokenPOA");
-        tokenPoa = await _TokenPOA.deploy("EYWA-POA", "POAT", "1666700000");
+        tokenPoa = await _TokenPOA.deploy("EYWA-POA", "POAT", networkConfig[network.name].chainId);
         _ERC20Permit = await ethers.getContractFactory("EywaToken");
-        EYWA = await _ERC20Permit.deploy(deployer.address, "1666700000");
+        EYWA = await _ERC20Permit.deploy(deployer.address, networkConfig[network.name].chainId);
     }
 
     await EYWA.deployed();
