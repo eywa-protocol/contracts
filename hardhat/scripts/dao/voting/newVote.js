@@ -10,7 +10,7 @@ async function genHexString(interface, sig, argList) {
 
 async function delegateData(ContractName, sig, argList) {
 
-    // Bridge address
+    // @todo Bridge address
     let bridgeAddress = '0x...';
     const ContractInstance = await hre.ethers.getContractFactory(ContractName);
     const Contract = await ContractInstance.attach(bridgeAddress);
