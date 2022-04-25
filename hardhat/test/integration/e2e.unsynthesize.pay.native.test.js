@@ -90,7 +90,7 @@ contract('Router', () => {
                 { from: userNet1, gas: 1000_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
             await this.synthB.approve(this.routerB.address, amount, { from: userNet2, gas: 300_000 })
 
             const executionHash = await this.routerB._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
@@ -132,7 +132,7 @@ contract('Router', () => {
                 },
                 { from: userNet2, gas: 1000_000, value: workerExecutionPrice }
             )
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthB.balanceOf(userNet2)
             assert(this.oldBalance.eq(newBalance))
         })
@@ -165,7 +165,7 @@ contract('Router', () => {
                 { from: userNet3, gas: 1000_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
             await this.synthB.approve(this.routerB.address, amount, { from: userNet2, gas: 300_000 })
 
             const executionHash = await this.routerB._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
@@ -207,7 +207,7 @@ contract('Router', () => {
                 },
                 { from: userNet2, gas: 1000_000, value: workerExecutionPrice }
             )
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthB.balanceOf(userNet2)
             assert(this.oldBalance.eq(newBalance))
         })
@@ -241,7 +241,7 @@ contract('Router', () => {
                 { from: userNet2, gas: 1000_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
             await this.synthA.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
 
             const executionHash = await this.routerA._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
@@ -283,7 +283,7 @@ contract('Router', () => {
                 },
                 { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
             )
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthA.balanceOf(userNet1)
             assert(oldBalance.eq(newBalance))
         })
@@ -317,7 +317,7 @@ contract('Router', () => {
                 { from: userNet2, gas: 1000_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
             await this.synthA.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
 
 
@@ -360,7 +360,7 @@ contract('Router', () => {
                 },
                 { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
             )
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthA.balanceOf(userNet1)
             assert(oldBalance.eq(newBalance))
         })
@@ -395,7 +395,7 @@ contract('Router', () => {
                 { from: userNet1, gas: 1000_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
             await this.synthC.approve(this.routerC.address, amount, { from: userNet3, gas: 300_000 })
 
             const executionHash = await this.routerC._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
@@ -437,7 +437,7 @@ contract('Router', () => {
                 },
                 { from: userNet3, gas: 1000_000, value: workerExecutionPrice }
             )
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthC.balanceOf(userNet3)
             assert(oldBalance.eq(newBalance))
         })
@@ -472,7 +472,7 @@ contract('Router', () => {
                 { from: userNet1, gas: 1000_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
             await this.synthC.approve(this.routerC.address, amount, { from: userNet3, gas: 300_000 })
 
             const executionHash = await this.routerC._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
@@ -514,7 +514,7 @@ contract('Router', () => {
                 },
                 { from: userNet3, gas: 1000_000, value: workerExecutionPrice }
             )
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthC.balanceOf(userNet3)
             assert(oldBalance.eq(newBalance))
         })

@@ -280,7 +280,7 @@ contract('Router', () => {
             //     { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
             // ))).to.emit(this.routerA.address, 'CrosschainPaymentEvent').withArgs(userNet1, userNet1, workerExecutionPrice);
             
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthB.balanceOf(userNet2)
             assert(oldBalance.lt(newBalance))
         })
@@ -360,7 +360,7 @@ contract('Router', () => {
             //     { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
             // )).to.emit(this.routerA.address, 'CrosschainPaymentEvent').withArgs(userNet1, userNet1, workerExecutionPrice);
             
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthC.balanceOf(userNet3)
             assert(oldBalance.lt(newBalance))
         })
@@ -440,7 +440,7 @@ contract('Router', () => {
             //     { from: userNet2, gas: 1000_000, value: workerExecutionPrice }
             // )).to.emit(this.routerB.address, 'CrosschainPaymentEvent').withArgs(userNet2, userNet2, workerExecutionPrice);
             
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthC.balanceOf(userNet3)
             assert(oldBalance.lt(newBalance))
         })
@@ -520,7 +520,7 @@ contract('Router', () => {
             //     { from: userNet2, gas: 1000_000, value: workerExecutionPrice }
             // )).to.emit(this.routerB.address, 'CrosschainPaymentEvent').withArgs(userNet2, userNet2, workerExecutionPrice);
             
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthA.balanceOf(userNet1)
             assert(oldBalance.lt(newBalance))
         })
@@ -600,7 +600,7 @@ contract('Router', () => {
             //     { from: userNet3, gas: 1000_000, value: workerExecutionPrice }
             // )).to.emit(this.routerC.address, 'CrosschainPaymentEvent').withArgs(userNet3, userNet3, workerExecutionPrice);
             
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthA.balanceOf(userNet1)
             assert(oldBalance.lt(newBalance))
         })
@@ -680,7 +680,7 @@ contract('Router', () => {
             //     { from: userNet3, gas: 1000_000, value: workerExecutionPrice }
             // )).to.emit(this.routerC.address, 'CrosschainPaymentEvent').withArgs(userNet3, userNet3, workerExecutionPrice);
             
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthB.balanceOf(userNet2)
             assert(oldBalance.lt(newBalance))
         })
