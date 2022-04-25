@@ -37,6 +37,7 @@ async function main() {
 
     let contractName = 'Bridge';
     let sig = 'addContractBind';
+    // @todo replace names by params
     let argList = ['from','oppositeBridge','to'];
 
     let specId = 1;
