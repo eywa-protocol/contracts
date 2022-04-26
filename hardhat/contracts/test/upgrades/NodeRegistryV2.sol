@@ -6,18 +6,7 @@ import { SafeERC20Upgradeable, IERC20Upgradeable } from "@openzeppelin/contracts
 import { ERC20Permit, IERC20Permit } from "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol";
 import { IERC20 } from "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
 import "../../bridge/Bridge.sol";
-import "../../bridge/RelayerPool.sol";
-
-interface IRelayerPoolFactory {
-    function create(
-        address _owner,
-        address _rewardToken,
-        address _depositToken,
-        uint256 _relayerFeeNumerator,
-        uint256 _emissionAnnualRateNumerator,
-        address _vault
-    ) external returns (RelayerPool);
-}
+import "../../bridge/RelayerPoolFactory.sol";
 
 contract NodeRegistryV2 is Bridge {
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -41,7 +30,6 @@ contract NodeRegistryV2 is Bridge {
     uint256 public constant MIN_COLLATERAL = 1 ether; // TODO discuss
 
     address public EYWA;
-    address public poolFactory;
     EnumerableSet.AddressSet nodes;
     mapping(address => Node) public ownedNodes;
     mapping(string => address) public hostIds;
@@ -51,9 +39,9 @@ contract NodeRegistryV2 is Bridge {
     event NewSnapshot(uint256 snapNum);
     event CreatedRelayer(address indexed owner, address relayerPool, string hostId, bytes blsPubKey, uint256 nodeId);
 
-    function initialize2(address _EYWA, address _forwarder,address _poolFactory) public initializer {
+    function initialize2(address _EYWA, address _forwarder) public initializer {
         require(_EYWA != address(0), Errors.ZERO_ADDRESS);
-        poolFactory = _poolFactory;
+
         EYWA = _EYWA;
         Bridge.initialize(_forwarder);
     }
@@ -117,7 +105,7 @@ contract NodeRegistryV2 is Bridge {
         bytes32 _r,
         bytes32 _s
     ) external {
-        RelayerPool relayerPool = IRelayerPoolFactory(poolFactory).create(
+        RelayerPool relayerPool = RelayerPoolFactory.create(
             _node.owner, // node owner
             address(EYWA), // depositToken
             address(EYWA), // rewardToken            (test only)
@@ -137,7 +125,7 @@ contract NodeRegistryV2 is Bridge {
         Node memory _node,
         uint256 _deadline
     ) external {
-        RelayerPool relayerPool = IRelayerPoolFactory(poolFactory).create(
+        RelayerPool relayerPool = RelayerPoolFactory.create(
             _node.owner, // node owner
             address(EYWA), // depositToken
             address(EYWA), // rewardToken            (test only)

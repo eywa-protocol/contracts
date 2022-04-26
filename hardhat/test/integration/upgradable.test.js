@@ -55,7 +55,7 @@ contract('Contracts upgrade', () => {
             console.log(testValue.toString())
             expect(testValue > 0);
         })
-        
+
         it("NodeRegistry upgrade", async function () {
             const _RelayerPoolFactory = await ethers.getContractFactory("RelayerPoolFactory");
             const relayerPoolFactory = await _RelayerPoolFactory.deploy();
@@ -88,5 +88,6 @@ contract('Contracts upgrade', () => {
             const testValue = await nodeRegistryV2.testValue();
             console.log(testValue.toString())
             expect(testValue > 0);
+        })
     })
 })
