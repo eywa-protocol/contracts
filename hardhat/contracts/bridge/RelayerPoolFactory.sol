@@ -1,21 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-newone/access/Ownable.sol";
 import "./RelayerPool.sol";
 
-contract RelayerPoolFactory is Ownable {
-    address public nodeRegistry;
-
-    modifier isNodeRegistry(){
-        require(msg.sender == nodeRegistry);
-        _;
-    }
-
-    function setNodeRegistry(address _nodeRegistry) external onlyOwner{
-        nodeRegistry = _nodeRegistry;
-    }
-
+library RelayerPoolFactory {
     function create(
         address _owner,
         address _rewardToken,
@@ -23,7 +11,7 @@ contract RelayerPoolFactory is Ownable {
         uint256 _relayerFeeNumerator,
         uint256 _emissionAnnualRateNumerator,
         address _vault
-    ) external isNodeRegistry returns (RelayerPool) {
+    ) external returns (RelayerPool) {
         return new RelayerPool(
             _owner,
             _rewardToken,
