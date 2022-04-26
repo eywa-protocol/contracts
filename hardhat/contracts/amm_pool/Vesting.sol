@@ -59,6 +59,8 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         uint256[] calldata _initialSupplyAddresses
     ) external onlyOwner {
         require(started == 0, "Contract is already initialized");
+        require(_started != 0, "_started can't be equal zero value");
+        require(_started >= block.timestamp, "_started is less then current block.timestamp");
 
         claimWithAllowanceTimeStamp = _claimWithAllowanceTimeStamp;
         claimAllowanceContract = _claimAllowanceContract;
