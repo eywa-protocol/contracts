@@ -55,5 +55,24 @@ contract('Contracts upgrade', () => {
             console.log(testValue.toString())
             expect(testValue > 0);
         })
+
+        it("NodeRegistry upgrade", async function () {
+            const _NodeRegistry = await ethers.getContractFactory("NodeRegistry")
+            const _NodeRegistryV2 = await ethers.getContractFactory("NodeRegistryV2")
+            const _RelayerPoolFactory = await ethers.getContractFactory("RelayerPoolFactory")
+            const poolFactory = await _RelayerPoolFactory.deploy();
+            console.log(poolFactory.address)
+            const nodeRegistry = await upgrades.deployProxy(_NodeRegistry, [deployInfo["network1"].localToken[0].address,deployInfo["network1"].forwarder,poolFactory.address], 
+                { initializer: 'initialize2' }
+                );
+            await nodeRegistry.deployed();
+            console.log("Bridge address:", nodeRegistry.address);
+
+            const nodeRegistryV2 = await upgrades.upgradeProxy(nodeRegistry.address, _NodeRegistryV2)
+            const testValue2 = await nodeRegistryV2.testFunc();
+            const testValue = await nodeRegistryV2.testValue();
+            console.log(testValue.toString())
+            expect(testValue > 0);
+        })
     })
 })

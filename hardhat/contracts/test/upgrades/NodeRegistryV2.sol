@@ -5,8 +5,8 @@ import { EnumerableSet } from "@openzeppelin/contracts-newone/utils/structs/Enum
 import { SafeERC20Upgradeable, IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import { ERC20Permit, IERC20Permit } from "@openzeppelin/contracts-newone/token/ERC20/extensions/draft-ERC20Permit.sol";
 import { IERC20 } from "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
-import "./Bridge.sol";
-import "./RelayerPool.sol";
+import "../../bridge/Bridge.sol";
+import "../../bridge/RelayerPool.sol";
 
 interface IRelayerPoolFactory {
     function create(
@@ -19,7 +19,7 @@ interface IRelayerPoolFactory {
     ) external returns (RelayerPool);
 }
 
-contract NodeRegistry is Bridge {
+contract NodeRegistryV2 is Bridge {
     using EnumerableSet for EnumerableSet.AddressSet;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -46,6 +46,7 @@ contract NodeRegistry is Bridge {
     mapping(address => Node) public ownedNodes;
     mapping(string => address) public hostIds;
     Snapshot public snapshot;
+    uint256 public testValue;
 
     event NewSnapshot(uint256 snapNum);
     event CreatedRelayer(address indexed owner, address relayerPool, string hostId, bytes blsPubKey, uint256 nodeId);
@@ -199,5 +200,9 @@ contract NodeRegistry is Bridge {
 
     function setUtilityToken(address _token) public onlyOwner {
         EYWA = _token;
+    }
+
+    function testFunc() external {
+        testValue++;
     }
 }
