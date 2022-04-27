@@ -37,11 +37,11 @@ async function main() {
         networkConfig[network.name].synthesis,
         networkConfig[network.name].bridge
     ], { initializer: 'initialize' });
-    await curveProxy.deployed()
+    await curveProxy.deployed();
     console.log(`CurveProxy address: ${curveProxy.address}`);
     // initial Curve proxy setup
-    await synthesis.setCurveProxy(curveProxy.address);
-
+    let tx_ = await synthesis.setCurveProxy(curveProxy.address);
+    await tx_.wait();
 
 
     //Deploy Router
