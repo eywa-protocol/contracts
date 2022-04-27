@@ -7,12 +7,12 @@ import "./RelayerPool.sol";
 contract RelayerPoolFactory is Ownable {
     address public nodeRegistry;
 
-    modifier isNodeRegistry(){
+    modifier isNodeRegistry() {
         require(msg.sender == nodeRegistry);
         _;
     }
 
-    function setNodeRegistry(address _nodeRegistry) external onlyOwner{
+    function setNodeRegistry(address _nodeRegistry) external onlyOwner {
         nodeRegistry = _nodeRegistry;
     }
 
@@ -24,13 +24,14 @@ contract RelayerPoolFactory is Ownable {
         uint256 _emissionAnnualRateNumerator,
         address _vault
     ) external isNodeRegistry returns (RelayerPool) {
-        return new RelayerPool(
-            _owner,
-            _rewardToken,
-            _depositToken,
-            _relayerFeeNumerator,
-            _emissionAnnualRateNumerator,
-            _vault
-        );
+        return
+            new RelayerPool(
+                _owner,
+                _rewardToken,
+                _depositToken,
+                _relayerFeeNumerator,
+                _emissionAnnualRateNumerator,
+                _vault
+            );
     }
 }

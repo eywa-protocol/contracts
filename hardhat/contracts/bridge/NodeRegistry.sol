@@ -50,7 +50,7 @@ contract NodeRegistry is Bridge {
     event NewSnapshot(uint256 snapNum);
     event CreatedRelayer(address indexed owner, address relayerPool, string hostId, bytes blsPubKey, uint256 nodeId);
 
-    function initialize2(address _EYWA, address _forwarder,address _poolFactory) public initializer {
+    function initialize2(address _EYWA, address _forwarder, address _poolFactory) public initializer {
         require(_EYWA != address(0), Errors.ZERO_ADDRESS);
         poolFactory = _poolFactory;
         EYWA = _EYWA;
