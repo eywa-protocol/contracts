@@ -134,8 +134,9 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         uint256[] calldata _initialSupplyAddresses
     ) external onlyOwner {
         require(started == 0, "Contract is already initialized");
-        require(_started != 0, "'started' can't be equal zero value");
-        require(_started >= block.timestamp, "'started' is less then current block.timestamp");
+        require(_started != 0, "_started can't be equal zero value");
+        require(_started >= block.timestamp, "_started is less then current block.timestamp");
+
         claimWithAllowanceTimeStamp = _claimWithAllowanceTimeStamp;
         claimAllowanceContract = _claimAllowanceContract;
         started = _started;
@@ -224,7 +225,6 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
      * @dev Returns number of token available to claim for tokenOwner in the time.
      * @param time - timestamp
      * @param tokenOwner - address of token owner
-     * @param amount - number of decrease amount
      *
      */
     function available(uint256 time, address tokenOwner) public view returns (uint256) {
@@ -315,9 +315,9 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         require(started <= block.timestamp, "It is not started time yet");
         bool result;
         if (block.timestamp < started + permissionlessTimeStamp) {
-            uint256 maxStakinPermission = max(transferPermission[msg.sender][address(0)], transferPermission[address(0)][recipient]);
-            uint256 permissionAmount = max(transferPermission[msg.sender][recipient], maxStakinPermission);
-            require(permissionAmount <= transferPermission[msg.sender][recipient], "This early transfer doesn't have permission");
+            uint256 maxStakinPermission = Math.max(transferPermission[msg.sender][address(0)], transferPermission[address(0)][recipient]);
+            uint256 permissionAmount = Math.max(transferPermission[msg.sender][recipient], maxStakinPermission);
+            require(amount <= permissionAmount, "This early transfer doesn't have permission");
             if (transferPermission[msg.sender][recipient] > maxStakinPermission){
                 transferPermission[msg.sender][recipient] = transferPermission[msg.sender][recipient].sub(amount);
             }
@@ -339,9 +339,9 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         require(started <= block.timestamp, "It is not started time yet");
         bool result;
         if (block.timestamp < started + permissionlessTimeStamp) {
-            uint256 maxStakinPermission = max(transferPermission[sender][address(0)], transferPermission[address(0)][recipient]);
-            uint256 permissionAmount = max(transferPermission[sender][recipient], maxStakinPermission);
-            require(permissionAmount <= transferPermission[sender][recipient], "This early transfer doesn't have permission");
+            uint256 maxStakinPermission = Math.max(transferPermission[sender][address(0)], transferPermission[address(0)][recipient]);
+            uint256 permissionAmount = Math.max(transferPermission[sender][recipient], maxStakinPermission);
+            require(amount <= permissionAmount, "This early transfer doesn't have permission");
             if (transferPermission[sender][recipient] > maxStakinPermission){
                 transferPermission[sender][recipient] = transferPermission[sender][recipient].sub(amount);
             }
