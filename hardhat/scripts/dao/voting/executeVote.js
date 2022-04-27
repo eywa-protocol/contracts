@@ -4,16 +4,13 @@ const abi = require('ethereumjs-abi')
 const network = hre.network.name;
 
 async function main() {
-    // todo
+    // todo add vote id and voting address
     let voteId = 0;
+    let votingAddress = '';
 
     let votingContractName = "Voting";
-    const dir = "networks/";
-    const fileName = `${votingContractName}_` + `${network}.json`;
-    const data = JSON.parse(await fs.readFileSync(dir + fileName, { encoding: "utf8" }));
-
     const VotingInstance = await hre.ethers.getContractFactory(votingContractName);
-    const Voting = await VotingInstance.attach(data[votingContractName]);
+    const Voting = await VotingInstance.attach(votingAddress);
 
     const tx = await Voting.executeVote(voteId);
     console.log(tx);
