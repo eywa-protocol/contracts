@@ -169,6 +169,13 @@ describe('Vesting tests. Part 1', () => {
         await expect(vesting.connect(addr1).claim(1)).to.be.revertedWith('the amount is not available');
     });
 
+    it('cannot claim before cliff', async function () {
+        await increaseTime(day_in_seconds + 1);
+        await vesting.connect(addr2).transfer(addr1.address, await vesting.balanceOf(addr2.address))
+        await vesting.connect(addr3).transfer(addr1.address, await vesting.balanceOf(addr3.address))
+        await expect(vesting.connect(addr1).claim(1)).to.be.revertedWith('the amount is not available');
+    });
+
     it('cannot claim who doesnt have tokens', async function () {
         await increaseTime(day_in_seconds * 51);
         blockNumBefore = await ethers.provider.getBlockNumber();

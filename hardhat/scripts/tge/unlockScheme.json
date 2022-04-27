@@ -1,6 +1,17 @@
 {
   "allVestingRounds": [
     {
+      "name": "!TEST! round",
+      "tokenAmount": "100000",
+      "period": "2",
+      "cliffPeriod": "1",
+      "cliffPercent": "10",
+      "permissionlessTimeStamp": "0",
+      "claimWithAllowanceTimeStamp": "0",
+      "stepAmount": "1",
+      "address": ""
+    },
+    {
       "name": "Pre-seed round",
       "tokenAmount": "50000000",
       "period": "24",

@@ -78,8 +78,8 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         IERC20(eywaToken).safeTransferFrom(msg.sender, address(this), vEywaInitialSupply);
     }
 
-    function renounceClaimAllowanceContract(IVestingPolicy newConatract) external onlyOwner {
-        claimAllowanceContract = newConatract;
+    function renounceClaimAllowanceContract(IVestingPolicy newContract) external onlyOwner {
+        claimAllowanceContract = newContract;
     }
 
     function permittedAmountToClaim(address tokenOwner) public view returns (uint256) {
