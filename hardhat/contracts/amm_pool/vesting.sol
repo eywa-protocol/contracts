@@ -21,6 +21,7 @@ interface IVestingPolicy {
      */
     function permittedForClaim(address) external view returns (uint256);
 
+
      /**
      * @dev Decrease permitted amount of tokens to claim
      * for this address.
@@ -34,43 +35,91 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
     using Counters for Counters.Counter;
 
-    uint256 public permissionlessTimeStamp; // timestamp for transfer without permission
-    uint256 public started; // start timestamp of vesting period
-    IERC20 public immutable eywaToken; // the token you claim
-    uint256 public cliffDuration; // timestamp cliff duration
-    uint256 public stepDuration; // linear step duration
-    uint256 public cliffAmount; // realeseble number of tokens after cliff
-    // uint256 totalSteps; // number of steps in linear or discrete unlock period
+    // Relative timestamp to use transfer/transferFrom without permission
+    uint256 public permissionlessTimeStamp; 
 
-    uint256 public numOfSteps; // number of linear steps
+    // Absolute timestamp of vesting period start 
+    uint256 public started;
 
-    IVestingPolicy public claimAllowanceContract;  // policy contract for permission for claim.
-    uint256 claimWithAllowanceTimeStamp; // timestamp to claim without permission
+    // Token which is vested on this contract
+    IERC20 public immutable eywaToken;
 
+    // Relative timestamp cliff duration    
+    uint256 public cliffDuration; 
+
+    // Duration of one linear or discrete step
+    uint256 public stepDuration; 
+
+    // Claimable number of tokens after cliff period
+    uint256 public cliffAmount; 
+
+    // Number linear or discrete steps
+    uint256 public numOfSteps; 
+
+    // Relative timestamp to claim without permission
+    uint256 claimWithAllowanceTimeStamp;
+
+    // Contract which gives permission to claim before claimWithAllowanceTimeStamp
+    IVestingPolicy public claimAllowanceContract;
+    
+    /**
+     * The number of claimed tokens in ``address``'s account.
+     * Note: it doesn't necessary represent how much ``address`` claimed
+     * because after transfer/transfer from, it also changes this number proportionately.
+     * Note: it is used for math calculation of available to claim tokens.
+     */
     mapping(address => uint256) public claimed; // how much already claimed
-    uint256 public vEywaInitialSupply; // initial total amount of vesting tokens
 
-    // balance of tokens owners excluding burn tokens,
-    // used for calculation right amount claimable tokens after transfer
-    mapping(address => uint256) public unburnBalanceOf; 
+    // Initial amount of eywa vested on this contract
+    uint256 public vEywaInitialSupply;
 
-    // permitted amount of token for token owner for trasnfer
+    /**
+     * The number of tokens in ``address``'s account as if there were no burning tokens
+     * Note: it is used for math calculation of available to claim tokens
+     */
+    mapping(address => uint256) public unburnBalanceOf;
+
+    /**
+     * The number of tokens allowed for transfer/transferFrom 
+     * from ``address``'s account to another ``address``'s account.
+     * Note: It uses address(0) for permission for staking to staking contract
+     * or to unstake from it.
+     */
     mapping(address => mapping(address => uint256)) public transferPermission;
 
     /**
-     * @dev Emitted number released tokens after claim from the address.
-     *
+     * @dev Emitted when address`from` claimed amount `amount` tokens.
      */
     event ReleasedAfterClaim(address indexed from, uint256 indexed amount);
 
+
+    /**
+     * @dev Initializes the contract by setting a `name` and a `symbol` of the token
+     * and also sets eywa token's address.
+     */
     constructor(IERC20 _eywaToken) ERC20("Vested Eywa", "vEYWA") {
         eywaToken = _eywaToken;
     }
 
     /**
-     * @dev Initialize vesting parameters.
+     * @dev Initializes main parameters for vesting period 
+     * @param _claimAllowanceContract - address of contract which gives permission to claim before claimWithAllowanceTimeStamp
+     * @param _claimWithAllowanceTimeStamp - relative timestamp to claim without permission
+     * @param _started - absolute timestamp of vesting period start 
+     * @param _cliffDuration - relative timestamp cliff duration   
+     * @param _stepDuration - duration of one linear or discrete step
+     * @param _cliffAmount - claimable number of tokens after cliff period
+     * @param _allStepsDuration - duration of all linear or discrete steps
+     * @param _permissionlessTimeStamp - relative timestamp to use transfer/transferFrom without permission
+     * @param _initialAddresses - intitial token owners list
+     * @param _initialSupplyAddresses - intitial token owners balances list
      *
-      * Note can be used only once.
+     * Requirements:
+     * - can be used only once
+     * - _started should not be equal to 0
+     * - _started should not be equal or bigger than current timestamp
+     * - can be used only by owner
+     *
      */
     function initialize(
         IVestingPolicy _claimAllowanceContract,
@@ -81,10 +130,12 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         uint256 _cliffAmount,
         uint256 _allStepsDuration,
         uint256 _permissionlessTimeStamp,
-        address[] calldata _initialAddresses, // initial vesting tokens owners
-        uint256[] calldata _initialSupplyAddresses // initial balances of vesting tokens owners
+        address[] calldata _initialAddresses,
+        uint256[] calldata _initialSupplyAddresses
     ) external onlyOwner {
         require(started == 0, "Contract is already initialized");
+        require(_started != 0, "_started can't be equal zero value");
+        require(_started >= block.timestamp, "_started is less then current block.timestamp");
 
         claimWithAllowanceTimeStamp = _claimWithAllowanceTimeStamp;
         claimAllowanceContract = _claimAllowanceContract;
@@ -99,27 +150,51 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
             vEywaInitialSupply = vEywaInitialSupply + _initialSupplyAddresses[i];
             unburnBalanceOf[_initialAddresses[i]] = _initialSupplyAddresses[i];
         }
-
-        // Total steps of linear/discrete unlock.
-        // Note: if there is a reminder, it can be claimed after (vesting period + 1sec)
-        numOfSteps = _allStepsDuration / stepDuration; 
-        // totalSteps = _allStepsDuration / _stepDuration;
+        numOfSteps = _allStepsDuration / _stepDuration;
         IERC20(eywaToken).safeTransferFrom(msg.sender, address(this), vEywaInitialSupply);
     }
 
-    
-    function renounceClaimAllowanceContract(IVestingPolicy newConatract) external onlyOwner {
-        claimAllowanceContract = newConatract;
+    /**
+     * @dev Change vesting policy contract
+     * @param newContract - set new contract for vesting policy
+     *
+     * Requirements:
+     * - can be used only by owner
+     *
+     */
+    function renounceClaimAllowanceContract(IVestingPolicy newContract) external onlyOwner {
+        claimAllowanceContract = newContract;
     }
 
+    /**
+     * @dev Returns permitted by vesting policy contract amount to claim 
+     * @param tokenOwner - token owner
+     *
+     */
     function permittedAmountToClaim(address tokenOwner) public view returns (uint256) {
         return IVestingPolicy(claimAllowanceContract).permittedForClaim(tokenOwner);
     }
 
+    /**
+     * @dev Returns permitted amount to transfer 
+     * @param from - sender address
+     * @param to - recepient address
+     *
+     */
     function getCurrentTransferPermission(address from, address to) external view returns (uint256) {
         return transferPermission[from][to];
     }
 
+    /**
+     * @dev Increase permission to send tokens for this pair addresses
+     * @param from - sender address
+     * @param to - recepient address
+     * @param amount - number of increase amount
+     *
+     * Requirements:
+     * - can be used only by owner
+     *
+     */
     function increaseTransferPermission(
         address from,
         address to,
@@ -128,6 +203,16 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         transferPermission[from][to] = transferPermission[from][to].add(amount);
     }
 
+    /**
+     * @dev Decrease permission to send tokens for this pair addresses
+     * @param from - sender address
+     * @param to - recepient address
+     * @param amount - number of decrease amount
+     *
+     * Requirements:
+     * - can be used only by owner
+     *
+     */
     function decreaseTransferPermission(
         address from,
         address to,
@@ -136,6 +221,12 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         transferPermission[from][to] = transferPermission[from][to].sub(amount);
     }
 
+    /**
+     * @dev Returns number of token available to claim for tokenOwner in the time.
+     * @param time - timestamp
+     * @param tokenOwner - address of token owner
+     *
+     */
     function available(uint256 time, address tokenOwner) public view returns (uint256) {
         if (claimable(time) >= vEywaInitialSupply) {
             return balanceOf(tokenOwner);
@@ -147,6 +238,14 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         }
     }
 
+    /**
+     * @dev Updates claimed and unburnBalanceOf mappings for math calculation next available amount of tokens
+     * after transfer/transferFrom functions
+     * @param sender - sender address
+     * @param recipient - recepient address
+     * @param amount - number of transfer amount
+     *
+     */
     function updateUnburnBalanceAndClaimed(
         address sender,
         address recipient,
@@ -163,6 +262,13 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         unburnBalanceOf[recipient] = unburnBalanceOf[recipient] + amount;
     }
 
+    /**
+     * @dev Returns total amount is claimable for the time
+     * @param time - timestamp
+     *
+     * Note: it doesn't include burn amount in calculation.
+     *
+     */
     function claimable(uint256 time) public view returns (uint256) {
         if (time == 0) {
             return 0;
@@ -178,6 +284,17 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         return cliffAmount.add((vEywaInitialSupply.sub(cliffAmount)).mul(stepsPassed).div(numOfSteps));
     }
 
+    /**
+     * @dev Claim to release certain amount of vested tokens
+     * @param claimedAmount - number of tokens to release
+     *
+     * Requirements:
+     * - claimedAmount should be less or equal to available amount
+     * - if there is not claimWithAllowanceTimeStampm you should have permission for it
+     *
+     * Emits an {ReleasedAfterClaim} event.
+     *
+     */
     function claim(uint256 claimedAmount) external nonReentrant {
         uint256 availableAmount = available(block.timestamp, msg.sender);
         if (started + claimWithAllowanceTimeStamp > block.timestamp) {
@@ -198,8 +315,12 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         require(started <= block.timestamp, "It is not started time yet");
         bool result;
         if (block.timestamp < started + permissionlessTimeStamp) {
-            require(amount <= transferPermission[msg.sender][recipient], "This early transfer doesn't have permission");
-            transferPermission[msg.sender][recipient] = transferPermission[msg.sender][recipient].sub(amount);
+            uint256 maxStakinPermission = Math.max(transferPermission[msg.sender][address(0)], transferPermission[address(0)][recipient]);
+            uint256 permissionAmount = Math.max(transferPermission[msg.sender][recipient], maxStakinPermission);
+            require(amount <= permissionAmount, "This early transfer doesn't have permission");
+            if (transferPermission[msg.sender][recipient] > maxStakinPermission){
+                transferPermission[msg.sender][recipient] = transferPermission[msg.sender][recipient].sub(amount);
+            }
             updateUnburnBalanceAndClaimed(msg.sender, recipient, amount);
             result = super.transfer(recipient, amount);
             return result;
@@ -218,8 +339,12 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         require(started <= block.timestamp, "It is not started time yet");
         bool result;
         if (block.timestamp < started + permissionlessTimeStamp) {
-            require(amount <= transferPermission[sender][recipient], "This early transfer doesn't have permission");
-            transferPermission[sender][recipient] = transferPermission[sender][recipient].sub(amount);
+            uint256 maxStakinPermission = Math.max(transferPermission[sender][address(0)], transferPermission[address(0)][recipient]);
+            uint256 permissionAmount = Math.max(transferPermission[sender][recipient], maxStakinPermission);
+            require(amount <= permissionAmount, "This early transfer doesn't have permission");
+            if (transferPermission[sender][recipient] > maxStakinPermission){
+                transferPermission[sender][recipient] = transferPermission[sender][recipient].sub(amount);
+            }
             updateUnburnBalanceAndClaimed(sender, recipient, amount);
             result = super.transferFrom(sender, recipient, amount);
             return result;
