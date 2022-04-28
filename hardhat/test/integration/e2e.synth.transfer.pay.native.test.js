@@ -101,7 +101,7 @@ contract('Router', () => {
                 { from: userNet1, gas: 300_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
 
             const executionHash = await routerB._SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH()
             const workerExecutionPrice = ethers.utils.parseEther("1.0")
@@ -144,7 +144,7 @@ contract('Router', () => {
                 { from: userNet2, gas: 300_000, value: workerExecutionPrice }
             )
 
-            await timeout(15000)
+            await timeout(25000)
 
             //check balance
             newSynthBalance = await this.synthTokenC1.balanceOf(userNet3)
@@ -174,7 +174,7 @@ contract('Router', () => {
                 { from: userNet3, gas: 300_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
 
             const executionHash = await routerB._SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH()
             const workerExecutionPrice = ethers.utils.parseEther("1.0")
@@ -218,7 +218,7 @@ contract('Router', () => {
                 { from: userNet2, gas: 300_000, value: workerExecutionPrice }
             )
 
-            await timeout(15000)
+            await timeout(25000)
 
             //check balance
             newSynthBalance = await this.synthTokenA1.balanceOf(userNet1)
@@ -248,7 +248,7 @@ contract('Router', () => {
                 { from: userNet3, gas: 300_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
 
             const executionHash = await routerA._SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH()
             const workerExecutionPrice = ethers.utils.parseEther("1.0")
@@ -292,7 +292,7 @@ contract('Router', () => {
                 { from: userNet1, gas: 300_000, value: workerExecutionPrice }
             )
 
-            await timeout(15000)
+            await timeout(25000)
 
             //check balance
             newSynthBalance = await this.synthTokenB1.balanceOf(userNet2)
@@ -323,7 +323,7 @@ contract('Router', () => {
                 { from: userNet1, gas: 300_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
 
             const executionHash = await routerC._SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH()
             const workerExecutionPrice = ethers.utils.parseEther("1.0")
@@ -367,7 +367,7 @@ contract('Router', () => {
                 { from: userNet3, gas: 300_000, value: workerExecutionPrice }
             )
 
-            await timeout(15000)
+            await timeout(25000)
 
             //check balance
             newSynthBalance = await this.synthTokenB1.balanceOf(userNet2)
@@ -397,7 +397,7 @@ contract('Router', () => {
                 { from: userNet2, gas: 300_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
 
             const executionHash = await routerC._SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH()
             const workerExecutionPrice = ethers.utils.parseEther("1.0")
@@ -441,7 +441,7 @@ contract('Router', () => {
                 { from: userNet3, gas: 300_000, value: workerExecutionPrice }
             )
 
-            await timeout(15000)
+            await timeout(25000)
 
             //check balance
             newSynthBalance = await this.synthTokenA1.balanceOf(userNet1)

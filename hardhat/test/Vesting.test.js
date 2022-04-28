@@ -608,6 +608,16 @@ describe('Vesting tests. Part 3. If step is 1sec', () => {
         expect(allowedNumberCurrent).to.be.equal(10);
 
     });
+
+    it('Permission check to staking', async function () {
+        await increaseTime(day_in_seconds * 7); 
+        let addr0 = "0x0000000000000000000000000000000000000000";
+        await vesting.connect(adminDeployer).increaseTransferPermission(addr0, addr2.address, 1000000000);
+        await vesting.connect(adminDeployer).increaseTransferPermission(addr2.address, addr0, 1000000000);
+        await vesting.connect(addr1).transfer(addr2.address, 100000);
+        await vesting.connect(addr2).transfer(addr3.address, 100000);
+    }); 
+    
     it('Linear unlock vesting checks', async function () {
         await increaseTime(cliffDuration);
         await increaseTime(day_in_seconds - 1);

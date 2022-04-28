@@ -48,8 +48,7 @@ module.exports = {
     },
     polygon:{
       url: networkConfig.polygon.rpcUrl2,
-      accounts: [PRIVATE_KEY_POLYGON],
-      gasPrice: 2_000_000_000
+      accounts: [PRIVATE_KEY_POLYGON]
     },
     bsc: {
       url: networkConfig.bsc.rpcUrl2,

@@ -8,7 +8,7 @@
       "networks_env/env_connect_to_harmony.env",
       "networks_env/env_test_for_harmony.env"
     ],
-    "chainId": 1666600000,
+    "chainId": 1666600001,
     "relayHub":  "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
@@ -47,8 +47,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "polygon": {
-    "rpcUrl": "wss://ws.polygon.mainnet.eywa.fi",
-    "rpcUrl2": "https://polygon.mainnet.eywa.fi",
+    "rpcUrl": "wss://ws-nd-658-849-590.p2pify.com/96ffbe1fc42be191fb68a40a94685a39",
+    "rpcUrl2": "https://nd-658-849-590.p2pify.com/96ffbe1fc42be191fb68a40a94685a39",
     "n": "POLYGON",
     "netwiker": "POL",
     "env_file": [
