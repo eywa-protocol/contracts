@@ -2,6 +2,7 @@ const ethers = require('ethers');
 const fs = require('fs');
 const abi = require('ethereumjs-abi')
 const network = hre.network.name;
+// const networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
 
 async function genHexString(interface, sig, argList) {
     let funcHex = await interface.encodeFunctionData(sig, argList);
@@ -11,11 +12,11 @@ async function genHexString(interface, sig, argList) {
 async function delegateData(ContractName, sig, argList) {
 
     // @todo Bridge address
-    let bridgeAddress = '0x...';
+    let bridgeAddress = '0x18a6Da5D7cA6e542C96FC0ba7418a886264403ab';
     const ContractInstance = await hre.ethers.getContractFactory(ContractName);
-    const Contract = await ContractInstance.attach(bridgeAddress);
+    const contract = await ContractInstance.attach(bridgeAddress);
 
-    let callDataBytes = await genHexString(Contract.interface, sig, argList);
+    let callDataBytes = await genHexString(contract.interface, sig, argList);
 
     return [bridgeAddress, callDataBytes.toLowerCase()];
 }
@@ -33,24 +34,24 @@ function encodeCallScript(actions, specId = 1) {
 
 async function main() {
     // @todo
-    let votingAddress = '0x...'
+    let votingAddress = '0x287b073e286ccd4a7d3d7e1b7f8f20ca4432ee51'
 
     let contractName = 'Bridge';
     let sig = 'addContractBind';
     // @todo replace names by params
-    let argList = ['from','oppositeBridge','to'];
+    let argList = [votingAddress, votingAddress, votingAddress];
 
     let specId = 1;
     [callAddress, callDataBytes] = await delegateData(contractName, sig, argList);
-    let completeCallBytes = await encodeCallScript([{ to: callAddress, calldata:  callDataBytes}], specId)
+    let completeCallBytes = await encodeCallScript([{ to: callAddress, calldata: callDataBytes }], specId)
     console.log(completeCallBytes.toString());
 
     let votingContractName = "Voting";
 
     const VotingInstance = await hre.ethers.getContractFactory(votingContractName);
-    const Voting = await VotingInstance.attach(votingAddress);
+    const voting = await VotingInstance.attach(votingAddress);
 
-    const tx = await Voting.functions["newVote(bytes,string,bool,bool)"](completeCallBytes, argList, false, false);
+    const tx = await voting.functions["newVote(bytes,string,bool,bool)"](completeCallBytes, argList, false, false);
     console.log(tx.hash);
     await tx.wait();
 }
