@@ -59,7 +59,8 @@
     "ts-node": "^10.4.0",
     "typechain": "^6.0.2",
     "typescript": "^4.4.4",
-    "web3": "^1.4.0"
+    "web3": "^1.4.0",
+    "ethereumjs-abi": "^0.6.8"
   },
   "dependencies": {
     "@opengsn/contracts": "^2.2.2",
