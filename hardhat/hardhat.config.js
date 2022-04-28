@@ -58,7 +58,7 @@ module.exports = {
     harmony:{
       url: networkConfig.harmony.rpcUrl2,
       accounts: [PRIVATE_KEY_HARMONY]
-    },    
+    },
     harmonytestnet:{
       url: networkConfig.harmonytestnet.rpcUrl2,
       accounts: [PRIVATE_KEY_HARMONYTESTNET]
@@ -143,6 +143,14 @@ module.exports = {
       }
     }, {
       version: "0.8.2",
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200
+        }
+      }
+    }, {
+      version: "0.4.24",
       settings: {
         optimizer: {
           enabled: true,
