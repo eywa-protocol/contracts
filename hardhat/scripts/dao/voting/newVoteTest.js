@@ -29,7 +29,7 @@ async function main() {
     // prefix for aragon contract
     let specId = 1;
     // @todo add addresses
-    const testAddress = "0x1f0032B275d2B257f14243ce694D5024b4cf9Bac";
+    const testAddress = "0x056444216bD664528317fb2e78D2ABdBb3A3afaA";
     
     // const from = "0x287b073e286ccd4a7d3d7e1b7f8f20ca4432ee51";
     // const oppositeBridge = "0x287b073e286ccd4a7d3d7e1b7f8f20ca4432ee51";
