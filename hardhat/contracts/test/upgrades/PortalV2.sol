@@ -3,14 +3,14 @@ pragma solidity 0.8.10;
 
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
-import "./IBridge.sol";
-import "./RelayRecipient.sol";
-import "./SolanaSerialize.sol";
-import "../utils/Typecast.sol";
-import "./RequestIdLib.sol";
-import "../interfaces/IERC20.sol";
+import "../../amm_pool/IBridge.sol";
+import "../../amm_pool/RelayRecipient.sol";
+import "../../amm_pool/SolanaSerialize.sol";
+import "../../utils/Typecast.sol";
+import "../../amm_pool/RequestIdLib.sol";
+import "../../interfaces/IERC20.sol";
 
-contract Portal is RelayRecipient, SolanaSerialize, Typecast {
+contract PortalV2 is RelayRecipient, SolanaSerialize, Typecast {
     mapping(address => uint256) public balanceOf;
     string public versionRecipient;
     address public bridge;
@@ -77,6 +77,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => UnsynthesizeState) public unsynthesizeStates;
     mapping(bytes32 => TokenInfo) public tokenDecimalsData;
+    uint256 public testValue;
 
     event SynthesizeRequest(
         bytes32 indexed id,
@@ -102,6 +103,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         __Context_init_unchained();
         __Ownable_init_unchained();
         versionRecipient = "2.2.3";
+        testValue = 33;
         bridge = _bridge;
         _setTrustedForwarder(_trustedForwarder);
     }
@@ -616,5 +618,9 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             _from,
             generalNonce
         );
+    }
+
+    function testFunc() external {
+        testValue++;
     }
 }

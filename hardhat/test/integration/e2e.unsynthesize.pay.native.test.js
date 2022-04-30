@@ -62,7 +62,7 @@ contract('Router', () => {
 
         })
 
-        it("Unsynthsize: network2 -> network1 ", async function () {
+        it("Unsynthesize(pay native): network2 -> network1 ", async function () {
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.routerA = await RouterA.at(deployInfo["network1"].router)
             this.routerB = await RouterB.at(deployInfo["network2"].router)
@@ -90,7 +90,7 @@ contract('Router', () => {
                 { from: userNet1, gas: 1000_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
             await this.synthB.approve(this.routerB.address, amount, { from: userNet2, gas: 300_000 })
 
             const executionHash = await this.routerB._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
@@ -132,28 +132,28 @@ contract('Router', () => {
                 },
                 { from: userNet2, gas: 1000_000, value: workerExecutionPrice }
             )
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthB.balanceOf(userNet2)
             assert(this.oldBalance.eq(newBalance))
         })
 
-        it("Unsynthsize: network2 -> network3 ", async function () {
-            this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
-            this.routerA = await RouterA.at(deployInfo["network1"].router)
+        it("Unsynthesize(pay native): network2 -> network3 ", async function () {
+            this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
+            this.routerC = await RouterC.at(deployInfo["network3"].router)
             this.routerB = await RouterB.at(deployInfo["network2"].router)
-            const synthAddress = await synthesisB.getRepresentation(addressToBytes32(this.tokenA1.address))
+            const synthAddress = await synthesisB.getRepresentation(addressToBytes32(this.tokenC1.address))
             this.synthB = await SynthB.at(synthAddress)
             this.oldBalance = await this.synthB.balanceOf(userNet2)
-            const tokenToSynth = this.tokenA1.address
+            const tokenToSynth = this.tokenC1.address
             const receiveSideB = deployInfo["network2"].synthesis
             const oppositeBridge = deployInfo["network2"].bridge
             const chainIdB = deployInfo["network2"].chainId
 
-            await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
-            await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
-            await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
+            await this.tokenC1.mint(userNet3, amount, { from: userNet3, gas: 300_000 })
+            await this.tokenC1.approve(this.routerC.address, amount, { from: userNet3, gas: 300_000 })
+            await this.routerC.setTrustedWorker(userNet3, { from: userNet3, gas: 300_000 })
 
-            await this.routerA.tokenSynthesizeRequest(
+            await this.routerC.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet2,
@@ -162,10 +162,10 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
                 },
-                { from: userNet1, gas: 1000_000 }
+                { from: userNet3, gas: 1000_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
             await this.synthB.approve(this.routerB.address, amount, { from: userNet2, gas: 300_000 })
 
             const executionHash = await this.routerB._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
@@ -189,7 +189,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            await this.routerB.unsynthesizeRequest(
+            await this.routerB.unsynthesizeRequestPayNative(
                 this.synthB.address,
                 amount,
                 userTo,
@@ -207,12 +207,12 @@ contract('Router', () => {
                 },
                 { from: userNet2, gas: 1000_000, value: workerExecutionPrice }
             )
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthB.balanceOf(userNet2)
             assert(this.oldBalance.eq(newBalance))
         })
 
-        it("Unsynthesize: network1 -> network2", async function () {
+        it("Unsynthesize(pay native): network1 -> network2", async function () {
 
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.routerB = await RouterB.at(deployInfo["network2"].router)
@@ -241,7 +241,7 @@ contract('Router', () => {
                 { from: userNet2, gas: 1000_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
             await this.synthA.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
 
             const executionHash = await this.routerA._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
@@ -265,7 +265,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            await this.routerA.unsynthesizeRequest(
+            await this.routerA.unsynthesizeRequestPayNative(
                 this.synthA.address,
                 amount,
                 userTo,
@@ -283,12 +283,12 @@ contract('Router', () => {
                 },
                 { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
             )
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthA.balanceOf(userNet1)
             assert(oldBalance.eq(newBalance))
         })
 
-        it("Unsynthesize: network1 -> network3", async function () {
+        it("Unsynthesize(pay native): network1 -> network3", async function () {
 
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
             this.routerB = await RouterB.at(deployInfo["network2"].router)
@@ -317,7 +317,7 @@ contract('Router', () => {
                 { from: userNet2, gas: 1000_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
             await this.synthA.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
 
 
@@ -342,7 +342,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            await this.routerA.unsynthesizeRequest(
+            await this.routerA.unsynthesizeRequestPayNative(
                 this.synthA.address,
                 amount,
                 userTo,
@@ -360,12 +360,12 @@ contract('Router', () => {
                 },
                 { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
             )
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthA.balanceOf(userNet1)
             assert(oldBalance.eq(newBalance))
         })
 
-        it("Unsynthesize: network3 -> network2", async function () {
+        it("Unsynthesize(pay native): network3 -> network2", async function () {
 
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.routerA = await RouterA.at(deployInfo["network1"].router)
@@ -395,7 +395,7 @@ contract('Router', () => {
                 { from: userNet1, gas: 1000_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
             await this.synthC.approve(this.routerC.address, amount, { from: userNet3, gas: 300_000 })
 
             const executionHash = await this.routerC._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
@@ -419,7 +419,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            await this.routerC.unsynthesizeRequest(
+            await this.routerC.unsynthesizeRequestPayNative(
                 this.synthC.address,
                 amount,
                 userTo,
@@ -437,12 +437,12 @@ contract('Router', () => {
                 },
                 { from: userNet3, gas: 1000_000, value: workerExecutionPrice }
             )
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthC.balanceOf(userNet3)
             assert(oldBalance.eq(newBalance))
         })
 
-        it("Unsynthesize: network3 -> network1", async function () {
+        it("Unsynthesize(pay native): network3 -> network1", async function () {
 
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             this.routerA = await RouterA.at(deployInfo["network1"].router)
@@ -472,7 +472,7 @@ contract('Router', () => {
                 { from: userNet1, gas: 1000_000 }
             )
 
-            await timeout(15000)
+            await timeout(25000)
             await this.synthC.approve(this.routerC.address, amount, { from: userNet3, gas: 300_000 })
 
             const executionHash = await this.routerC._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
@@ -496,7 +496,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            await this.routerC.unsynthesizeRequest(
+            await this.routerC.unsynthesizeRequestPayNative(
                 this.synthC.address,
                 amount,
                 userTo,
@@ -514,7 +514,7 @@ contract('Router', () => {
                 },
                 { from: userNet3, gas: 1000_000, value: workerExecutionPrice }
             )
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthC.balanceOf(userNet3)
             assert(oldBalance.eq(newBalance))
         })

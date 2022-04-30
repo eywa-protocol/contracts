@@ -4,15 +4,15 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-newone/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-newone/utils/Create2.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
-import "./IBridge.sol";
-import "./ISyntERC20.sol";
-import "./SyntERC20.sol";
-import "./RelayRecipient.sol";
-import "./SolanaSerialize.sol";
-import "../utils/Typecast.sol";
-import "./RequestIdLib.sol";
+import "../../amm_pool/IBridge.sol";
+import "../../amm_pool/ISyntERC20.sol";
+import "../../amm_pool/SyntERC20.sol";
+import "../../amm_pool/RelayRecipient.sol";
+import "../../amm_pool/SolanaSerialize.sol";
+import "../../utils/Typecast.sol";
+import "../../amm_pool/RequestIdLib.sol";
 
-contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
+contract SynthesisV2 is RelayRecipient, SolanaSerialize, Typecast {
     mapping(address => bytes32) public representationReal;
     mapping(bytes32 => address) public representationSynt;
     mapping(bytes32 => uint8) public tokenDecimals;
@@ -27,6 +27,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         abi.encodePacked(uint8(115), uint8(234), uint8(111), uint8(109), uint8(131), uint8(167), uint8(37), uint8(70));
     bytes public constant sighashEmergencyUnsynthesize =
         abi.encodePacked(uint8(102), uint8(107), uint8(151), uint8(50), uint8(141), uint8(172), uint8(244), uint8(63));
+    uint256 public testValue;
 
     enum UnsynthesizePubkeys {
         receiveSide,
@@ -530,45 +531,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
                 type(SyntERC20).creationCode,
                 abi.encode(
                     string(abi.encodePacked("e", _name)),
-                    string(abi.encodePacked("e", _symbol,"(",_chainSymbol,")")),
-                    _decimals,
-                    _chainId,
-                    _rtoken,
-                    _chainSymbol
-                )
-            )
-        );
-        setRepresentation(_rtoken, stoken, _decimals);
-        emit CreatedRepresentation(_rtoken, stoken);
-    }
-
-    /**
-     * @dev Creates a custom representation with the given arguments.
-     * @param _rtoken real token address
-     * @param _name real token name
-     * @param _decimals real token decimals number
-     * @param _symbol real token symbol
-     * @param _chainId real token chain id
-     * @param _chainSymbol real token chain symbol
-     */
-    function createCustomRepresentation(
-        bytes32 _rtoken,
-        uint8 _decimals,
-        string memory _name,
-        string memory _symbol,
-        uint256 _chainId,
-        string memory _chainSymbol
-    ) external onlyOwner {
-        require(representationSynt[_rtoken] == address(0), "Synthesis: representation already exists");
-        require(representationReal[castToAddress(_rtoken)] == 0, "Synthesis: representation already exists");
-        address stoken = Create2.deploy(
-            0,
-            keccak256(abi.encodePacked(_rtoken)),
-            abi.encodePacked(
-                type(SyntERC20).creationCode,
-                abi.encode(
-                    _name,
-                    _symbol,
+                    string(abi.encodePacked("e", _symbol)),
                     _decimals,
                     _chainId,
                     _rtoken,
@@ -630,5 +593,9 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
      */
     function setTrustedForwarder(address _forwarder) external onlyOwner {
         return _setTrustedForwarder(_forwarder);
+    }
+
+    function testFunc() external {
+        testValue++;
     }
 }

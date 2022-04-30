@@ -243,8 +243,7 @@ contract('Router', () => {
                 userNonce,
                 workerDeadline
             )
-
-            expect(await this.routerA.synthesizeRequestPayNative(
+            await this.routerA.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 userTo,
@@ -261,9 +260,27 @@ contract('Router', () => {
                     s: workerSignature.s
                 },
                 { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
-            )).to.emit(this.routerA.address, 'CrosschainPaymentEvent').withArgs(userNet1, userNet1, workerExecutionPrice);
+            )
+            // expect((await this.routerA.synthesizeRequestPayNative(
+            //     tokenToSynth,
+            //     amount,
+            //     userTo,
+            //     {
+            //         receiveSide: receiveSideB,
+            //         oppositeBridge: oppositeBridge,
+            //         chainId: chainIdTo,
+            //     },
+            //     {
+            //         executionPrice: workerExecutionPrice,
+            //         deadline: workerDeadline,
+            //         v: workerSignature.v,
+            //         r: workerSignature.r,
+            //         s: workerSignature.s
+            //     },
+            //     { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
+            // ))).to.emit(this.routerA.address, 'CrosschainPaymentEvent').withArgs(userNet1, userNet1, workerExecutionPrice);
             
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthB.balanceOf(userNet2)
             assert(oldBalance.lt(newBalance))
         })
@@ -305,7 +322,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            expect(await this.routerA.synthesizeRequestPayNative(
+            await this.routerA.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 userTo,
@@ -322,9 +339,28 @@ contract('Router', () => {
                     s: workerSignature.s
                 },
                 { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
-            )).to.emit(this.routerA.address, 'CrosschainPaymentEvent').withArgs(userNet1, userNet1, workerExecutionPrice);
+            )
+
+            // expect(await this.routerA.synthesizeRequestPayNative(
+            //     tokenToSynth,
+            //     amount,
+            //     userTo,
+            //     {
+            //         receiveSide: receiveSideC,
+            //         oppositeBridge: oppositeBridge,
+            //         chainId: chainIdTo,
+            //     },
+            //     {
+            //         executionPrice: workerExecutionPrice,
+            //         deadline: workerDeadline,
+            //         v: workerSignature.v,
+            //         r: workerSignature.r,
+            //         s: workerSignature.s
+            //     },
+            //     { from: userNet1, gas: 1000_000, value: workerExecutionPrice }
+            // )).to.emit(this.routerA.address, 'CrosschainPaymentEvent').withArgs(userNet1, userNet1, workerExecutionPrice);
             
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthC.balanceOf(userNet3)
             assert(oldBalance.lt(newBalance))
         })
@@ -366,7 +402,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            expect(await this.routerB.synthesizeRequestPayNative(
+            await this.routerB.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 userTo,
@@ -383,9 +419,28 @@ contract('Router', () => {
                     s: workerSignature.s
                 },
                 { from: userNet2, gas: 1000_000, value: workerExecutionPrice }
-            )).to.emit(this.routerB.address, 'CrosschainPaymentEvent').withArgs(userNet2, userNet2, workerExecutionPrice);
+            )
+
+            // expect(await this.routerB.synthesizeRequestPayNative(
+            //     tokenToSynth,
+            //     amount,
+            //     userTo,
+            //     {
+            //         receiveSide: receiveSideC,
+            //         oppositeBridge: oppositeBridge,
+            //         chainId: chainIdTo,
+            //     },
+            //     {
+            //         executionPrice: workerExecutionPrice,
+            //         deadline: workerDeadline,
+            //         v: workerSignature.v,
+            //         r: workerSignature.r,
+            //         s: workerSignature.s
+            //     },
+            //     { from: userNet2, gas: 1000_000, value: workerExecutionPrice }
+            // )).to.emit(this.routerB.address, 'CrosschainPaymentEvent').withArgs(userNet2, userNet2, workerExecutionPrice);
             
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthC.balanceOf(userNet3)
             assert(oldBalance.lt(newBalance))
         })
@@ -427,7 +482,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            expect(await this.routerB.synthesizeRequestPayNative(
+            await this.routerB.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 userTo,
@@ -444,9 +499,28 @@ contract('Router', () => {
                     s: workerSignature.s
                 },
                 { from: userNet2, gas: 1000_000, value: workerExecutionPrice }
-            )).to.emit(this.routerB.address, 'CrosschainPaymentEvent').withArgs(userNet2, userNet2, workerExecutionPrice);
+            )
+
+            // expect(await this.routerB.synthesizeRequestPayNative(
+            //     tokenToSynth,
+            //     amount,
+            //     userTo,
+            //     {
+            //         receiveSide: receiveSideA,
+            //         oppositeBridge: oppositeBridge,
+            //         chainId: chainIdTo,
+            //     },
+            //     {
+            //         executionPrice: workerExecutionPrice,
+            //         deadline: workerDeadline,
+            //         v: workerSignature.v,
+            //         r: workerSignature.r,
+            //         s: workerSignature.s
+            //     },
+            //     { from: userNet2, gas: 1000_000, value: workerExecutionPrice }
+            // )).to.emit(this.routerB.address, 'CrosschainPaymentEvent').withArgs(userNet2, userNet2, workerExecutionPrice);
             
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthA.balanceOf(userNet1)
             assert(oldBalance.lt(newBalance))
         })
@@ -488,7 +562,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            expect(await this.routerC.synthesizeRequestPayNative(
+            await this.routerC.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 userTo,
@@ -505,9 +579,28 @@ contract('Router', () => {
                     s: workerSignature.s
                 },
                 { from: userNet3, gas: 1000_000, value: workerExecutionPrice }
-            )).to.emit(this.routerC.address, 'CrosschainPaymentEvent').withArgs(userNet3, userNet3, workerExecutionPrice);
+            )
+
+            // expect(await this.routerC.synthesizeRequestPayNative(
+            //     tokenToSynth,
+            //     amount,
+            //     userTo,
+            //     {
+            //         receiveSide: receiveSideA,
+            //         oppositeBridge: oppositeBridge,
+            //         chainId: chainIdTo,
+            //     },
+            //     {
+            //         executionPrice: workerExecutionPrice,
+            //         deadline: workerDeadline,
+            //         v: workerSignature.v,
+            //         r: workerSignature.r,
+            //         s: workerSignature.s
+            //     },
+            //     { from: userNet3, gas: 1000_000, value: workerExecutionPrice }
+            // )).to.emit(this.routerC.address, 'CrosschainPaymentEvent').withArgs(userNet3, userNet3, workerExecutionPrice);
             
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthA.balanceOf(userNet1)
             assert(oldBalance.lt(newBalance))
         })
@@ -549,7 +642,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            expect(await this.routerC.synthesizeRequestPayNative(
+            await this.routerC.synthesizeRequestPayNative(
                 tokenToSynth,
                 amount,
                 userTo,
@@ -566,9 +659,28 @@ contract('Router', () => {
                     s: workerSignature.s
                 },
                 { from: userNet3, gas: 1000_000, value: workerExecutionPrice }
-            )).to.emit(this.routerC.address, 'CrosschainPaymentEvent').withArgs(userNet3, userNet3, workerExecutionPrice);
+            )
+
+            // expect(await this.routerC.synthesizeRequestPayNative(
+            //     tokenToSynth,
+            //     amount,
+            //     userTo,
+            //     {
+            //         receiveSide: receiveSideB,
+            //         oppositeBridge: oppositeBridge,
+            //         chainId: chainIdTo,
+            //     },
+            //     {
+            //         executionPrice: workerExecutionPrice,
+            //         deadline: workerDeadline,
+            //         v: workerSignature.v,
+            //         r: workerSignature.r,
+            //         s: workerSignature.s
+            //     },
+            //     { from: userNet3, gas: 1000_000, value: workerExecutionPrice }
+            // )).to.emit(this.routerC.address, 'CrosschainPaymentEvent').withArgs(userNet3, userNet3, workerExecutionPrice);
             
-            await timeout(15000)
+            await timeout(25000)
             const newBalance = await this.synthB.balanceOf(userNet2)
             assert(oldBalance.lt(newBalance))
         })
