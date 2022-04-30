@@ -113,6 +113,20 @@ const getRepresentation = async (realToken, decimals, chainId, netwiker, synthes
     ))
 }
 
+const getCustomRepresentation = async (address, name, symbol, decimals, chainId, netwiker, synthesisAddress) => {
+    const SyntERC20 = await ethers.getContractFactory('SyntERC20')
+    const bytecodeWithParams = SyntERC20.bytecode + web3.eth.abi.encodeParameters(
+        ['string', 'string', 'uint8', 'uint256', 'bytes32', 'string'],
+        [name, symbol, decimals, chainId, addressToBytes32(address), netwiker]
+    ).slice(2)
+    const salt = web3.utils.keccak256(addressToBytes32(address))
+    return web3.utils.toChecksumAddress(getCreate2Address(
+        synthesisAddress,
+        salt,
+        bytecodeWithParams
+    ))
+}
+
 const getTxId = (userFrom, nonce, chainIdOpposite, chainIdCurrent, receiveSide, oppositeBridge) => {
     return web3.utils.soliditySha3(
         { type: 'bytes32', value:addressToBytes32(userFrom)},
