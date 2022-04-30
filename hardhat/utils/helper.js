@@ -202,5 +202,6 @@ module.exports = {
     getCreate2Address,
     getRepresentation,
     getTxId,
-    signWorkerPermit
+    signWorkerPermit,
+    getCustomRepresentation
 };
