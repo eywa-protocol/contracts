@@ -4,7 +4,8 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-newone/access/Ownable.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts-newone/utils/cryptography/draft-EIP712.sol";
+// import "@openzeppelin/contracts-newone/utils/cryptography/draft-EIP712.sol";
+import "../utils/draft-EIP-712-Harmony.sol";
 import "@openzeppelin/contracts-newone/utils/Counters.sol";
 import "../interfaces/ICurveProxy.sol";
 import "../interfaces/IPortal.sol";
@@ -42,8 +43,9 @@ contract Router is EIP712, Ownable {
     constructor(
         address portal,
         address synthesis,
-        address curveProxy
-    ) EIP712("EYWA", "1") {
+        address curveProxy,
+        uint256 chainID
+    ) EIP712("EYWA", "1", chainID) {
         _portal = portal;
         _synthesis = synthesis;
         _curveProxy = curveProxy;
