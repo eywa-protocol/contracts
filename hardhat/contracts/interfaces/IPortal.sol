@@ -49,15 +49,6 @@ interface IPortal {
         uint256 chainId
     ) external;
 
-    function synthesizeBatchWithDataTransit(
-        address[] memory token,
-        uint256[] memory amount,
-        address from,
-        address to,
-        SynthParams memory synthParams,
-        TransitData memory transitData
-    ) external;
-
     function emergencyUnburnRequest(
         bytes32 txID,
         address receiveSide,
