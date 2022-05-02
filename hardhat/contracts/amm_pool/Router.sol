@@ -4,7 +4,6 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-newone/access/Ownable.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
-// import "@openzeppelin/contracts-newone/utils/cryptography/draft-EIP712.sol";
 import "../utils/draft-EIP-712-Harmony.sol";
 import "@openzeppelin/contracts-newone/utils/Counters.sol";
 import "../interfaces/ICurveProxy.sol";
@@ -259,41 +258,6 @@ contract Router is EIP712, Ownable {
     ) external {
         SafeERC20.safeTransferFrom(IERC20(token), msg.sender, _portal, amount);
         IPortal(_portal).synthesizeToSolana(token, amount, msg.sender, pubkeys, txStateBump, chainId);
-    }
-
-    /**
-     * @dev  Direct batch synthesize request with data transition.
-     * @param token token addresses to synthesize
-     * @param amount amounts to synthesize
-     * @param transitData transit data
-     * @param synthParams synthesize parameters
-     * @param permitData permit operation params
-     */
-    function batchSynthesizeRequestWithDataTransit(
-        address[] calldata token,
-        uint256[] calldata amount, // set a positive amount in order to initiate a synthesize request
-        address to,
-        IPortal.TransitData calldata transitData,
-        IPortal.SynthParams calldata synthParams,
-        IPortal.PermitData[] calldata permitData
-    ) external {
-        for (uint256 i = 0; i < token.length; i++) {
-            if (amount[i] > 0) {
-                if (permitData[i].v != 0) {
-                    IERC20WithPermit(token[i]).permit(
-                        msg.sender,
-                        address(this),
-                        permitData[i].approveMax ? uint256(2**256 - 1) : amount[i],
-                        permitData[i].deadline,
-                        permitData[i].v,
-                        permitData[i].r,
-                        permitData[i].s
-                    );
-                }
-                SafeERC20.safeTransferFrom(IERC20(token[i]), msg.sender, _portal, amount[i]);
-            }
-        }
-        IPortal(_portal).synthesizeBatchWithDataTransit(token, amount, msg.sender, to, synthParams, transitData);
     }
 
     /**
