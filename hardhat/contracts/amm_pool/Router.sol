@@ -44,6 +44,9 @@ contract Router is EIP712, Ownable {
         address curveProxy,
         uint256 chainID
     ) EIP712("EYWA", "1", chainID) {
+        require(portal != address(0), "Router: portal zero address");
+        require(synthesis != address(0), "Router: synthesis zero address");
+        require(curveProxy != address(0), "Router: curveProxy zero address");
         _portal = portal;
         _synthesis = synthesis;
         _curveProxy = curveProxy;
@@ -86,9 +89,9 @@ contract Router is EIP712, Ownable {
 
     function _proceedFees(uint256 executionPrice, address worker) internal {
         // worker fee
-        require(msg.value >= executionPrice, "Invalid amount");
+        require(msg.value >= executionPrice, "Router: invalid amount");
         (bool sent, ) = worker.call{ value: msg.value }("");
-        require(sent, "Failed to send Ether");
+        require(sent, "Router: failed to send Ether");
 
         emit CrosschainPaymentEvent(msg.sender, worker, executionPrice);
     }
