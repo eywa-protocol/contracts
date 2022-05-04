@@ -8,7 +8,15 @@ interface ISynthesis {
         uint256 chainId;
     }
 
-     function mintSyntheticToken(
+    struct PermitData {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+        uint256 deadline;
+        bool approveMax;
+    }
+
+    function mintSyntheticToken(
         bytes32 txId,
         address tokenReal,
         uint256 amount,
@@ -26,7 +34,7 @@ interface ISynthesis {
     function getTxId() external returns (bytes32);
 
     function synthTransfer(
-        bytes32 tokenReal,
+        address tokenSynth,
         uint256 amount,
         address from,
         address to,

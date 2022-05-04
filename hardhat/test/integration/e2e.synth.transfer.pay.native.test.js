@@ -1,7 +1,6 @@
 let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
 const { checkoutProvider, timeout, addressToBytes32, signWorkerPermit } = require("../../utils/helper");
 const { ethers } = require("hardhat");
-const { parseBytes32String } = require("ethers/lib/utils");
 const { expect } = require("chai");
 
 contract('Router', () => {
@@ -76,6 +75,9 @@ contract('Router', () => {
             routerB = await RouterB.at(deployInfo["network2"].router)
             routerC = await RouterC.at(deployInfo["network3"].router)
 
+            await routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
+            await routerB.setTrustedWorker(userNet2, { from: userNet2, gas: 300_000 })
+            await routerC.setTrustedWorker(userNet3, { from: userNet3, gas: 300_000 })
         })
 
         it("Synth Transfer (pay native): network1 -> network3", async function () {
@@ -113,6 +115,7 @@ contract('Router', () => {
             const chainIdTo = deployInfo["network3"].chainId
             const signerUserNet2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK2)
 
+
             const workerSignature = await signWorkerPermit(
                 signerUserNet2,
                 routerB.address,
@@ -123,9 +126,9 @@ contract('Router', () => {
                 userNonce,
                 workerDeadline
             )
+
             //B->C
             await routerB.synthTransferRequestPayNative(
-                addressToBytes32(deployInfo["network1"].localToken[0].address),
                 this.synthTokenB1.address,
                 amount,
                 userTo,
@@ -199,7 +202,6 @@ contract('Router', () => {
 
             //B->A
             await routerB.synthTransferRequestPayNative(
-                addressToBytes32(deployInfo["network3"].localToken[0].address),
                 this.synthTokenB1.address,
                 amount,
                 userTo,
@@ -273,7 +275,6 @@ contract('Router', () => {
 
             //A->B
             await routerA.synthTransferRequestPayNative(
-                addressToBytes32(deployInfo["network3"].localToken[0].address),
                 this.synthTokenA1.address,
                 amount,
                 userTo,
@@ -348,7 +349,6 @@ contract('Router', () => {
 
             //C->B
             await routerC.synthTransferRequestPayNative(
-                addressToBytes32(deployInfo["network1"].localToken[0].address),
                 this.synthTokenC1.address,
                 amount,
                 userTo,
@@ -422,7 +422,6 @@ contract('Router', () => {
 
             //C->A
             await routerC.synthTransferRequestPayNative(
-                addressToBytes32(deployInfo["network2"].localToken[0].address),
                 this.synthTokenC1.address,
                 amount,
                 userTo,

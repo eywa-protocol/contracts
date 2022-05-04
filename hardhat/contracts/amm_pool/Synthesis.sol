@@ -131,26 +131,26 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
 
     /**
      * @dev Transfers synthetic token to another chain.
-     * @param _tokenReal real token address
+     * @param _tokenSynth synth token address
      * @param _amount amount to transfer
      * @param _to recipient address
      * @param _from msg sender address
      * @param _synthParams synth transfer parameters
      */
     function synthTransfer(
-        bytes32 _tokenReal,
+        address _tokenSynth,
         uint256 _amount,
         address _from,
         address _to,
         SynthParams calldata _synthParams
     ) external {
-        address synth = representationSynt[_tokenReal];
-        require(synth != address(0), "Synthesis: synth not found");
+        bytes32 tokenReal = representationReal[_tokenSynth];
+        require(_tokenSynth != address(0), "Synthesis: synth not found");
         require(
-            ISyntERC20(synth).getChainId() != _synthParams.chainId,
+            ISyntERC20(_tokenSynth).getChainId() != _synthParams.chainId,
             "Synthesis: can not synthesize in the intial chain"
         );
-        ISyntERC20(synth).burn(_msgSender(), _amount);
+        ISyntERC20(_tokenSynth).burn(_msgSender(), _amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_from);
         bytes32 txID = RequestIdLib.prepareRqId(
@@ -164,7 +164,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         bytes memory out = abi.encodeWithSelector(
             bytes4(keccak256(bytes("mintSyntheticToken(bytes32,address,uint256,address)"))),
             txID,
-            _tokenReal,
+            tokenReal,
             _amount,
             _to
         );
@@ -181,11 +181,11 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         TxState storage txState = requests[txID];
         txState.from = castToBytes32(_from);
         txState.to = castToBytes32(_to);
-        txState.stoken = synth;
+        txState.stoken = _tokenSynth;
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
-        emit SynthTransfer(txID, _from, _to, _amount, _tokenReal);
+        emit SynthTransfer(txID, _from, _to, _amount, tokenReal);
     }
 
     /**
