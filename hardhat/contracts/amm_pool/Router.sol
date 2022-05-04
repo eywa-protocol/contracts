@@ -4,13 +4,12 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-newone/access/Ownable.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
-import "../utils/draft-EIP-712-Harmony.sol";
 import "@openzeppelin/contracts-newone/utils/Counters.sol";
+import "../utils/draft-EIP-712-Harmony.sol";
 import "../interfaces/ICurveProxy.sol";
 import "../interfaces/IPortal.sol";
 import "../interfaces/ISynthesis.sol";
 import "../interfaces/IERC20WithPermit.sol";
-
 
 contract Router is EIP712, Ownable {
     using Counters for Counters.Counter;
@@ -24,7 +23,7 @@ contract Router is EIP712, Ownable {
     bytes32 public constant _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH =
         keccak256(abi.encodePacked("unsynthesizeRequest(address,uint256,address,address,[address,address,uint256])"));
     bytes32 public constant _SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH =
-        keccak256(abi.encodePacked("synthTransferRequest(bytes32,uint256,address,address,[address,address,uint256])"));
+        keccak256(abi.encodePacked("synthTransferRequest(address,uint256,address,address,[address,address,uint256])"));
 
     mapping(address => bool) public _trustedWorker;
     mapping(address => Counters.Counter) private _nonces;
@@ -100,7 +99,7 @@ contract Router is EIP712, Ownable {
      * @param token token address to synthesize
      * @param amount amount to synthesize
      * @param to amount recipient address
-     * @param synthParams synth params
+     * @param synthParams crosschain parameters
      * @param receipt delegated call receipt from worker
      */
     function synthesizeRequestPayNative(
@@ -121,7 +120,7 @@ contract Router is EIP712, Ownable {
      * @param token token address to synthesize
      * @param amount amount to synthesize
      * @param to amount recipient address
-     * @param synthParams synth params
+     * @param synthParams crosschain parameters
      * @param permitData permit data
      * @param receipt delegated call receipt from worker
      */
@@ -152,15 +151,13 @@ contract Router is EIP712, Ownable {
     //==============================SYNTHESIS==============================
     /**
      * @dev Synthetic token transfer request to another EVM chain via native payment.
-     * @param tokenReal real token address
      * @param tokenSynth synth token address
      * @param amount amount to transfer
      * @param to recipient address
-     * @param synthParams synthesize parameters
+     * @param synthParams crosschain parameters
      * @param receipt delegated call receipt from worker
      */
     function synthTransferRequestPayNative(
-        bytes32 tokenReal,
         address tokenSynth,
         uint256 amount,
         address to,
@@ -171,7 +168,40 @@ contract Router is EIP712, Ownable {
         _proceedFees(receipt.executionPrice, worker);
         SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
         IERC20(tokenSynth).approve(_synthesis, amount);
-        ISynthesis(_synthesis).synthTransfer(tokenReal, amount, msg.sender, to, synthParams);
+        ISynthesis(_synthesis).synthTransfer(tokenSynth, amount, msg.sender, to, synthParams);
+    }
+
+    /**
+     * @dev Synthetic token transfer request with permit to another EVM chain via native payment.
+     * @param tokenSynth synth token address
+     * @param amount amount to transfer
+     * @param to recipient address
+     * @param synthParams crosschain parameters
+     * @param permitData permit data
+     * @param receipt delegated call receipt from worker
+     */
+    function synthTransferRequestWithPermitPayNative(
+        address tokenSynth,
+        uint256 amount,
+        address to,
+        ISynthesis.SynthParams calldata synthParams,
+        ISynthesis.PermitData calldata permitData,
+        DelegatedCallReceipt calldata receipt
+    ) external payable {
+        address worker = _checkWorkerSignature(synthParams.chainId, _SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH, receipt);
+        _proceedFees(receipt.executionPrice, worker);
+        IERC20WithPermit(tokenSynth).permit(
+            msg.sender,
+            address(this),
+            permitData.approveMax ? uint256(2**256 - 1) : amount,
+            permitData.deadline,
+            permitData.v,
+            permitData.r,
+            permitData.s
+        );
+        SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
+        IERC20(tokenSynth).approve(_synthesis, amount);
+        ISynthesis(_synthesis).synthTransfer(tokenSynth, amount, msg.sender, to, synthParams);
     }
 
     /**
@@ -179,7 +209,7 @@ contract Router is EIP712, Ownable {
      * @param tokenSynth synthetic token address for unsynthesize
      * @param amount amount to unsynth
      * @param to recipient address
-     * @param synthParams transfer params
+     * @param synthParams crosschain parameters
      * @param receipt delegated call receipt from worker
      */
     function unsynthesizeRequestPayNative(
@@ -196,13 +226,46 @@ contract Router is EIP712, Ownable {
         ISynthesis(_synthesis).burnSyntheticToken(tokenSynth, amount, msg.sender, to, synthParams);
     }
 
+    /**
+     * @dev Unsynthesize request to another EVM chain via native payment.
+     * @param tokenSynth synthetic token address for unsynthesize
+     * @param amount amount to unsynth
+     * @param to recipient address
+     * @param synthParams crosschain parameters
+     * @param permitData permit data
+     * @param receipt delegated call receipt from worker
+     */
+    function unsynthesizeRequestWithPermitPayNative(
+        address tokenSynth,
+        uint256 amount,
+        address to,
+        ISynthesis.SynthParams calldata synthParams,
+        ISynthesis.PermitData calldata permitData,
+        DelegatedCallReceipt calldata receipt
+    ) external payable {
+        address worker = _checkWorkerSignature(synthParams.chainId, _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH, receipt);
+        _proceedFees(receipt.executionPrice, worker);
+        IERC20WithPermit(tokenSynth).permit(
+            msg.sender,
+            address(this),
+            permitData.approveMax ? uint256(2**256 - 1) : amount,
+            permitData.deadline,
+            permitData.v,
+            permitData.r,
+            permitData.s
+        );
+        SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
+        IERC20(tokenSynth).approve(_synthesis, amount);
+        ISynthesis(_synthesis).burnSyntheticToken(tokenSynth, amount, msg.sender, to, synthParams);
+    }
+
     //.........................DIRECT-METHODS...........................
     //=============================PORTAL===============================
     /**
      * @dev Direct token synthesize request.
      * @param token token address to synthesize
      * @param amount amount to synthesize
-     * @param synthParams transfer params
+     * @param synthParams crosschain parameters
      */
     function tokenSynthesizeRequest(
         address token,
@@ -218,7 +281,7 @@ contract Router is EIP712, Ownable {
      * @dev Direct token synthesize request with permit.
      * @param token token address to synthesize
      * @param amount amount to synthesize
-     * @param synthParams synthesize parameters
+     * @param synthParams crosschain parameters
      * @param permitData permit data
      */
     function tokenSynthesizeRequestWithPermit(
@@ -349,21 +412,49 @@ contract Router is EIP712, Ownable {
     //==============================SYNTHESIS==============================
     /**
      * @dev Direct synthetic token transfer request to another chain.
-     * @param rtoken real token address
+     * @param stoken synth token address
      * @param amount amount to transfer
      * @param to recipient address
-     * @param synthParams synthesize parameters
+     * @param synthParams crosschain parameters
      */
     function synthTransferRequest(
-        bytes32 rtoken,
+        address stoken,
         uint256 amount,
         address to,
         ISynthesis.SynthParams calldata synthParams
     ) external {
-        address stoken = ISynthesis(_synthesis).getRepresentation(rtoken);
         SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
         IERC20(stoken).approve(_synthesis, amount);
-        ISynthesis(_synthesis).synthTransfer(rtoken, amount, msg.sender, to, synthParams);
+        ISynthesis(_synthesis).synthTransfer(stoken, amount, msg.sender, to, synthParams);
+    }
+
+    /**
+     * @dev Direct synthetic token transfer request with permit.
+     * @param stoken synth token address
+     * @param amount amount to transfer
+     * @param to recipient address
+     * @param synthParams crosschain parameters
+     * @param permitData permit data
+     */
+    function synthTransferRequestWithPermit(
+        address stoken,
+        uint256 amount,
+        address to,
+        ISynthesis.SynthParams calldata synthParams,
+        ISynthesis.PermitData calldata permitData
+    ) external {
+        IERC20WithPermit(stoken).permit(
+            msg.sender,
+            address(this),
+            permitData.approveMax ? uint256(2**256 - 1) : amount,
+            permitData.deadline,
+            permitData.v,
+            permitData.r,
+            permitData.s
+        );
+        SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
+        IERC20(stoken).approve(_synthesis, amount);
+        ISynthesis(_synthesis).synthTransfer(stoken, amount, msg.sender, to, synthParams);
     }
 
     /**
@@ -371,7 +462,7 @@ contract Router is EIP712, Ownable {
      * @param stoken synthetic token address for unsynthesize
      * @param amount amount to unsynth
      * @param to recipient address
-     * @param synthParams transfer params
+     * @param synthParams crosschain parameters
      */
     function unsynthesizeRequest(
         address stoken,
@@ -379,6 +470,35 @@ contract Router is EIP712, Ownable {
         address to,
         ISynthesis.SynthParams calldata synthParams
     ) external {
+        SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
+        IERC20(stoken).approve(_synthesis, amount);
+        ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, msg.sender, to, synthParams);
+    }
+
+    /**
+     * @dev Direct unsynthesize request with permit.
+     * @param stoken synthetic token address for unsynthesize
+     * @param amount amount to unsynth
+     * @param to recipient address
+     * @param synthParams crosschain parameters
+     * @param permitData permit data
+     */
+    function unsynthesizeRequestWithPermit(
+        address stoken,
+        uint256 amount,
+        address to,
+        ISynthesis.SynthParams calldata synthParams,
+        ISynthesis.PermitData calldata permitData
+    ) external {
+        IERC20WithPermit(stoken).permit(
+            msg.sender,
+            address(this),
+            permitData.approveMax ? uint256(2**256 - 1) : amount,
+            permitData.deadline,
+            permitData.v,
+            permitData.r,
+            permitData.s
+        );
         SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
         IERC20(stoken).approve(_synthesis, amount);
         ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, msg.sender, to, synthParams);
