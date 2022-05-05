@@ -2,6 +2,7 @@
 pragma solidity 0.8.10;
 
 interface ISynthesis {
+    //receiveSide receive chain synthesis contract address
     struct SynthParams {
         address receiveSide;
         address oppositeBridge;
