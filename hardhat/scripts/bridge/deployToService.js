@@ -29,7 +29,9 @@ async function main() {
     await EYWA.deployed();
     networkConfig[network.name].eywa = EYWA.address;
     networkConfig[network.name].tokenPoa = tokenPoa.address;
-    networkConfig[network.name].token.push({address: tokenPoa.address, name:"EYWA-POA", symbol: "POAT"});
+    networkConfig[network.name].token[networkConfig[network.name].token.findIndex(x => x.name === 'EYWA-POA')]
+    ? networkConfig[network.name].token[networkConfig[network.name].token.findIndex(x => x.name === 'EYWA-POA')] = {address: tokenPoa.address, name:"EYWA-POA", symbol: "POAT"}
+    : networkConfig[network.name].token.push({address: tokenPoa.address, name:"EYWA-POA", symbol: "POAT"});
     console.log("EYWA ERC20 address:", EYWA.address);
     console.log("POA ERC20 address:", tokenPoa.address);
 
