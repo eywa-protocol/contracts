@@ -6,7 +6,10 @@ cd $DIR
 cd ../../
 pwd
 
-for net in network3 network2 network1 harmonylocal
-do
-    npx hardhat run --no-compile scripts/bridge/updateEpoch.js --network ${net}
-done
+if [ $NEED_RESET ]; then
+    for net in network3 network2 network1 harmonylocal; do
+        npx hardhat run --no-compile scripts/bridge/updateEpoch.js --network ${net}
+    done
+else
+    npx hardhat run --no-compile scripts/bridge/updateEpoch.js --network harmonylocal
+fi
