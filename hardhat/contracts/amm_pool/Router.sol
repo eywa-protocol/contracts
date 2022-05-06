@@ -170,7 +170,6 @@ contract Router is EIP712, Ownable {
         address worker = _checkWorkerSignature(synthParams.chainId, _SYNTH_TRANSFER_REQUEST_SIGNATURE_HASH, receipt);
         _proceedFees(receipt.executionPrice, worker);
         SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
-        IERC20(tokenSynth).approve(_synthesis, amount);
         ISynthesis(_synthesis).synthTransfer(tokenSynth, amount, msg.sender, to, synthParams);
     }
 
@@ -203,7 +202,6 @@ contract Router is EIP712, Ownable {
             permitData.s
         );
         SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
-        IERC20(tokenSynth).approve(_synthesis, amount);
         ISynthesis(_synthesis).synthTransfer(tokenSynth, amount, msg.sender, to, synthParams);
     }
 
@@ -225,7 +223,6 @@ contract Router is EIP712, Ownable {
         address worker = _checkWorkerSignature(synthParams.chainId, _UNSYNTHESIZE_REQUEST_SIGNATURE_HASH, receipt);
         _proceedFees(receipt.executionPrice, worker);
         SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
-        IERC20(tokenSynth).approve(_synthesis, amount);
         ISynthesis(_synthesis).burnSyntheticToken(tokenSynth, amount, msg.sender, to, synthParams);
     }
 
@@ -258,7 +255,6 @@ contract Router is EIP712, Ownable {
             permitData.s
         );
         SafeERC20.safeTransferFrom(IERC20(tokenSynth), msg.sender, address(this), amount);
-        IERC20(tokenSynth).approve(_synthesis, amount);
         ISynthesis(_synthesis).burnSyntheticToken(tokenSynth, amount, msg.sender, to, synthParams);
     }
 
@@ -427,7 +423,6 @@ contract Router is EIP712, Ownable {
         ISynthesis.SynthParams calldata synthParams
     ) external {
         SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
-        IERC20(stoken).approve(_synthesis, amount);
         ISynthesis(_synthesis).synthTransfer(stoken, amount, msg.sender, to, synthParams);
     }
 
@@ -456,7 +451,6 @@ contract Router is EIP712, Ownable {
             permitData.s
         );
         SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
-        IERC20(stoken).approve(_synthesis, amount);
         ISynthesis(_synthesis).synthTransfer(stoken, amount, msg.sender, to, synthParams);
     }
 
@@ -474,7 +468,6 @@ contract Router is EIP712, Ownable {
         ISynthesis.SynthParams calldata synthParams
     ) external {
         SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
-        IERC20(stoken).approve(_synthesis, amount);
         ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, msg.sender, to, synthParams);
     }
 
@@ -503,7 +496,6 @@ contract Router is EIP712, Ownable {
             permitData.s
         );
         SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
-        IERC20(stoken).approve(_synthesis, amount);
         ISynthesis(_synthesis).burnSyntheticToken(stoken, amount, msg.sender, to, synthParams);
     }
 
@@ -521,7 +513,6 @@ contract Router is EIP712, Ownable {
         uint256 chainId
     ) external {
         SafeERC20.safeTransferFrom(IERC20(stoken), msg.sender, address(this), amount);
-        IERC20(stoken).approve(_synthesis, amount);
         ISynthesis(_synthesis).burnSyntheticTokenToSolana(stoken, msg.sender, pubkeys, amount, chainId);
     }
 

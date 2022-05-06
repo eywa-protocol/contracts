@@ -27,21 +27,20 @@ describe('Permit tests', () => {
     let prKeyAddress = accForSing.privateKey;
 
     before(async () => {
-        [ addr1 ] = await ethers.getSigners();
+        [addr1] = await ethers.getSigners();
 
         const EywaToken = await ethers.getContractFactory('EywaToken');
         tokenErc20 = await EywaToken.deploy(ownerAddress, harmonyChainID);
         await tokenErc20.deployed();
-        console.log("EYWA:",tokenErc20.address)
+        console.log("EYWA:", tokenErc20.address)
     });
     it('ChainID is right', async function () {
-        expect(await tokenErc20.getHarmonyChainID()).to.be.equal(harmonyChainID);
+        expect(await tokenErc20.getCachedChainId()).to.be.equal(harmonyChainID);
     });
     it('Signature is working right', async function () {
         let blockNumBefore = await ethers.provider.getBlockNumber();
         let blockBefore = await ethers.provider.getBlock(blockNumBefore);
         let deadline = blockBefore.timestamp + 100000;
-
 
         let _PERMIT_TYPEHASH = await web3.utils.soliditySha3("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
