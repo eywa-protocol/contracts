@@ -144,8 +144,9 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         address _to,
         SynthParams calldata _synthParams
     ) external {
+        require(_tokenSynth != address(0), "Synthesis: synth address zero");
         bytes32 tokenReal = representationReal[_tokenSynth];
-        require(_tokenSynth != address(0), "Synthesis: synth not found");
+        require(tokenReal != 0, "Synthesis: real token not found");
         require(
             ISyntERC20(_tokenSynth).getChainId() != _synthParams.chainId,
             "Synthesis: can not synthesize in the intial chain"
