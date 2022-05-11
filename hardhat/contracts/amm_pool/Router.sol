@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-newone/access/Ownable.sol";
 import "@openzeppelin/contracts-newone/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-newone/utils/Counters.sol";
-import "../utils/draft-EIP-712-Harmony.sol";
+import "../utils/draft-EIP-712.sol";
 import "../interfaces/ICurveProxy.sol";
 import "../interfaces/IPortal.sol";
 import "../interfaces/ISynthesis.sol";

@@ -3,7 +3,7 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-newone/access/Ownable.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/extensions/ERC20Burnable.sol";
-import "../utils/draft-ERC20Permit-Harmony.sol";
+import "../utils/draft-ERC20Permit.sol";
 
 contract TokenPOA is  Ownable, ERC20Permit {
 
