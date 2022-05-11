@@ -50,7 +50,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         RequestState state;
     }
 
-    //receiveSide receive chain synthesis contract address
     struct SynthParams {
         address receiveSide;
         address oppositeBridge;

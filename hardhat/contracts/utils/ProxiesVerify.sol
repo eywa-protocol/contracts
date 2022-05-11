@@ -12,6 +12,4 @@ contract TransparentUpgradeableProxyHelper is TransparentUpgradeableProxy {
     ) TransparentUpgradeableProxy(_logic, admin_, _data) {}
 }
 
-contract ProxyAdminHelper is ProxyAdmin {
-
-}
+contract ProxyAdminHelper is ProxyAdmin {}

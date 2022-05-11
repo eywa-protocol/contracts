@@ -38,11 +38,11 @@ async function main() {
     let contractName = 'Bridge';
     let sig = 'addContractBind';
     // @todo replace names by params
-    let argList = ['from','oppositeBridge','to'];
+    let argList = ['from', 'oppositeBridge', 'to'];
 
     let specId = 1;
     [callAddress, callDataBytes] = await delegateData(contractName, sig, argList);
-    let completeCallBytes = await encodeCallScript([{ to: callAddress, calldata:  callDataBytes}], specId)
+    let completeCallBytes = await encodeCallScript([{ to: callAddress, calldata: callDataBytes }], specId)
     console.log(completeCallBytes.toString());
 
     let votingContractName = "Voting";

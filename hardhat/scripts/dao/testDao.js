@@ -64,7 +64,7 @@ async function main() {
     await minter.deployed()
     await eywa.set_minter(minter.address)
 
-    console.log( ethers.utils.formatEther(await eywa.totalSupply()))
+    console.log(ethers.utils.formatEther(await eywa.totalSupply()))
 
     let lpToken = await TestToken.deploy("TestToken", "TT")
     let lpToken1 = await TestToken.deploy("TestToken", "TT")

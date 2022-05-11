@@ -5,15 +5,22 @@ import "@openzeppelin/contracts-newone/access/Ownable.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/extensions/ERC20Burnable.sol";
 import "../utils/draft-ERC20Permit.sol";
 
-contract TokenPOA is  Ownable, ERC20Permit {
-
-    constructor (string memory name_, string memory symbol_, uint256 harmonyChainID_) ERC20Permit("EYWA", harmonyChainID_) ERC20(name_,symbol_) {}
+contract TokenPOA is Ownable, ERC20Permit {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint256 harmonyChainID_
+    ) ERC20Permit("EYWA", harmonyChainID_) ERC20(name_, symbol_) {}
 
     function mint(address account, uint256 amount) external onlyOwner {
         _mint(account, amount);
     }
 
-    function mintWithAllowance(address account, address spender, uint256 amount) external onlyOwner {
+    function mintWithAllowance(
+        address account,
+        address spender,
+        uint256 amount
+    ) external onlyOwner {
         _mint(account, amount);
         _approve(account, spender, allowance(account, spender) + amount);
     }
@@ -22,7 +29,11 @@ contract TokenPOA is  Ownable, ERC20Permit {
         _burn(account, amount);
     }
 
-    function burnWithAllowanceDecrease(address account, address spender, uint256 amount) external onlyOwner {
+    function burnWithAllowanceDecrease(
+        address account,
+        address spender,
+        uint256 amount
+    ) external onlyOwner {
         uint256 currentAllowance = allowance(account, spender);
         require(currentAllowance >= amount, "ERC20: decreased allowance below zero");
 

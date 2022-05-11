@@ -13,15 +13,15 @@ library Bls {
     using ModUtils for uint256;
 
     struct E1Point {
-        uint x;
-        uint y;
+        uint256 x;
+        uint256 y;
     }
 
     // Note that the ordering of the elements in each array needs to be the reverse of what you would
     // normally have, to match the ordering expected by the precompile.
     struct E2Point {
-        uint[2] x;
-        uint[2] y;
+        uint256[2] x;
+        uint256[2] y;
     }
 
     // p is a prime over which we form a basic field
@@ -81,18 +81,21 @@ library Bls {
         E2Point memory _partPublicKey,
         bytes memory _message,
         E1Point memory _partSignature,
-        uint _signersBitmask
+        uint256 _signersBitmask
     ) internal view returns (bool) {
         E1Point memory sum = E1Point(0, 0);
-        uint index = 0;
-        uint mask = 1;
+        uint256 index = 0;
+        uint256 mask = 1;
         while (_signersBitmask != 0) {
             if (_signersBitmask & mask != 0) {
                 _signersBitmask -= mask;
-                sum = addCurveE1(sum, hashToCurveE1(abi.encodePacked(_aggregatedPublicKey.x, _aggregatedPublicKey.y, index)));
+                sum = addCurveE1(
+                    sum,
+                    hashToCurveE1(abi.encodePacked(_aggregatedPublicKey.x, _aggregatedPublicKey.y, index))
+                );
             }
             mask <<= 1;
-            index ++;
+            index++;
         }
 
         E1Point[] memory e1points = new E1Point[](3);
@@ -117,19 +120,18 @@ library Bls {
      * @return The generator of E2.
      */
     function G2() private pure returns (E2Point memory) {
-        return E2Point({
-            x: [
-                11559732032986387107991004021392285783925812861821192530917403151452391805634,
-                10857046999023057135944570762232829481370756359578518086990519993285655852781
-            ],
-            y: [
-                 4082367875863433681332203403145435568316851327593401208105741076214120093531,
-                 8495653923123431417604973247489272438418190587263600148770280649306958101930
-            ]
-          });
+        return
+            E2Point({
+                x: [
+                    11559732032986387107991004021392285783925812861821192530917403151452391805634,
+                    10857046999023057135944570762232829481370756359578518086990519993285655852781
+                ],
+                y: [
+                    4082367875863433681332203403145435568316851327593401208105741076214120093531,
+                    8495653923123431417604973247489272438418190587263600148770280649306958101930
+                ]
+            });
     }
-
-
 
     /**
      * Negate a point: Assuming the point isn't at infinity, the negation is same x value with -y.
@@ -155,11 +157,11 @@ library Bls {
     function pairing(E1Point[] memory _e1points, E2Point[] memory _e2points) private view returns (bool) {
         require(_e1points.length == _e2points.length, "Point count mismatch.");
 
-        uint elements = _e1points.length;
-        uint inputSize = elements * 6;
-        uint[] memory input = new uint[](inputSize);
+        uint256 elements = _e1points.length;
+        uint256 inputSize = elements * 6;
+        uint256[] memory input = new uint256[](inputSize);
 
-        for (uint i = 0; i < elements; i++) {
+        for (uint256 i = 0; i < elements; i++) {
             input[i * 6 + 0] = _e1points[i].x;
             input[i * 6 + 1] = _e1points[i].y;
             input[i * 6 + 2] = _e2points[i].x[0];
@@ -168,7 +170,7 @@ library Bls {
             input[i * 6 + 5] = _e2points[i].y[1];
         }
 
-        uint[1] memory out;
+        uint256[1] memory out;
         bool success;
         assembly {
             // Start at memory offset 0x20 rather than 0 as input is a variable length array.
@@ -187,8 +189,8 @@ library Bls {
      * @param _scalar Scalar to multiply.
      * @return The resulting E1 point.
      */
-    function curveMul(E1Point memory _point, uint _scalar) private view returns (E1Point memory) {
-        uint[3] memory input;
+    function curveMul(E1Point memory _point, uint256 _scalar) private view returns (E1Point memory) {
+        uint256[3] memory input;
         input[0] = _point.x;
         input[1] = _point.y;
         input[2] = _scalar;
@@ -208,7 +210,7 @@ library Bls {
      * @param _point a point on E1.
      * @return true if the point is the point at infinity.
      */
-    function isAtInfinity(E1Point memory _point) private pure returns (bool){
+    function isAtInfinity(E1Point memory _point) private pure returns (bool) {
         return (_point.x == 0 && _point.y == 0);
     }
 
@@ -218,10 +220,7 @@ library Bls {
      * lower gas cost on the EVM, rather than good distribution of points on
      * G1.
      */
-    function hashToCurveE1(bytes memory m)
-        internal
-        view returns(E1Point memory)
-    {
+    function hashToCurveE1(bytes memory m) internal view returns (E1Point memory) {
         bytes32 h = sha256(m);
         uint256 x = uint256(h) % p;
         uint256 y;
@@ -242,17 +241,13 @@ library Bls {
      * given X, and allows a point on the curve to be represented by just
      * an X value + a sign bit.
      */
-    function YFromX(uint256 x)
-        internal
-        view returns(uint256)
-    {
+    function YFromX(uint256 x) internal view returns (uint256) {
         return ((x.modExp(3, p) + 3) % p).modSqrt(p);
     }
 
-
     /// @dev return the sum of two points of G1
     function addCurveE1(E1Point memory _p1, E1Point memory _p2) internal view returns (E1Point memory res) {
-        uint[4] memory input;
+        uint256[4] memory input;
         input[0] = _p1.x;
         input[1] = _p1.y;
         input[2] = _p2.x;

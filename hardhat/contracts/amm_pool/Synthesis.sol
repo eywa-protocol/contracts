@@ -94,12 +94,11 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         bytes32 from;
         bytes32 to;
         uint256 amount;
-        bytes32 token; //TODO
+        bytes32 token;
         address stoken;
         RequestState state;
     }
 
-    //receiveSide receive chain synthesis contract address
     struct SynthParams {
         address receiveSide;
         address oppositeBridge;
@@ -532,7 +531,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
                 type(SyntERC20).creationCode,
                 abi.encode(
                     string(abi.encodePacked("e", _name)),
-                    string(abi.encodePacked("e", _symbol,"(",_chainSymbol,")")),
+                    string(abi.encodePacked("e", _symbol, "(", _chainSymbol, ")")),
                     _decimals,
                     _chainId,
                     _rtoken,
@@ -568,14 +567,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
             keccak256(abi.encodePacked(_rtoken)),
             abi.encodePacked(
                 type(SyntERC20).creationCode,
-                abi.encode(
-                    _name,
-                    _symbol,
-                    _decimals,
-                    _chainId,
-                    _rtoken,
-                    _chainSymbol
-                )
+                abi.encode(_name, _symbol, _decimals, _chainId, _rtoken, _chainSymbol)
             )
         );
         setRepresentation(_rtoken, stoken, _decimals);

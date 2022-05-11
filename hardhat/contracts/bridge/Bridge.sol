@@ -17,11 +17,11 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
     using AddressUpgradeable for address;
 
     string public versionRecipient;
-    Bls.E2Point private epochKey;      // Aggregated public key of all paricipants of the current epoch
-    address public dao;                // Address of the DAO
+    Bls.E2Point private epochKey; // Aggregated public key of all paricipants of the current epoch
+    address public dao; // Address of the DAO
     uint8 public epochParticipantsNum; // Number of participants contributed to the epochKey
-    uint32 public epochNum;            // Sequential number of the epoch
-    ReqIdFilter public reqIdFilter;    // Filteres received request IDs against replay
+    uint32 public epochNum; // Sequential number of the epoch
+    ReqIdFilter public reqIdFilter; // Filteres received request IDs against replay
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
 
@@ -61,7 +61,7 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
     }
 
     /**
-    * @dev Get current epoch
+     * @dev Get current epoch
      */
     function getEpoch()
         public

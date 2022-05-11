@@ -39,7 +39,7 @@ abstract contract BridgeCore {
     function addContractBind(
         bytes32 from,
         bytes32 oppositeBridge,
-        bytes32 to 
+        bytes32 to
     ) external virtual {
         require(to != "", "Bridge: invalid 'to' address");
         require(from != "", "Bridge: invalid 'from' address");

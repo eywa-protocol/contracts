@@ -1,20 +1,8 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat');
-const { constants, expectEvent, expectRevert, BN } = require('@openzeppelin/test-helpers');
-const { parseEvent } = require('typechain');
-const { ZERO_ADDRESS } = constants;
-const { getAddress } = require('ethers').utils;
-
-
 const ethUtil = require('ethereumjs-util');
-// const ganache = require('ganache-cli');
 const Web3 = require('web3');
 let web3 = new Web3(null);
-// const provider = ganache.provider();
-// const web3 = new Web3(provider);
-const abi = require('ethereumjs-abi');
-
-const EywaToken = artifacts.require('EywaToken');
 
 
 describe('Permit tests', () => {
