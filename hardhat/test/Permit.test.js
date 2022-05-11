@@ -1,20 +1,8 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat');
-const { constants, expectEvent, expectRevert, BN } = require('@openzeppelin/test-helpers');
-const { parseEvent } = require('typechain');
-const { ZERO_ADDRESS } = constants;
-const { getAddress } = require('ethers').utils;
-
-
 const ethUtil = require('ethereumjs-util');
-// const ganache = require('ganache-cli');
 const Web3 = require('web3');
 let web3 = new Web3(null);
-// const provider = ganache.provider();
-// const web3 = new Web3(provider);
-const abi = require('ethereumjs-abi');
-
-const EywaToken = artifacts.require('EywaToken');
 
 
 describe('Permit tests', () => {
@@ -27,21 +15,20 @@ describe('Permit tests', () => {
     let prKeyAddress = accForSing.privateKey;
 
     before(async () => {
-        [ addr1 ] = await ethers.getSigners();
+        [addr1] = await ethers.getSigners();
 
         const EywaToken = await ethers.getContractFactory('EywaToken');
         tokenErc20 = await EywaToken.deploy(ownerAddress, harmonyChainID);
         await tokenErc20.deployed();
-        console.log("EYWA:",tokenErc20.address)
+        console.log("EYWA:", tokenErc20.address)
     });
     it('ChainID is right', async function () {
-        expect(await tokenErc20.getHarmonyChainID()).to.be.equal(harmonyChainID);
+        expect(await tokenErc20.getCachedChainId()).to.be.equal(harmonyChainID);
     });
     it('Signature is working right', async function () {
         let blockNumBefore = await ethers.provider.getBlockNumber();
         let blockBefore = await ethers.provider.getBlock(blockNumBefore);
         let deadline = blockBefore.timestamp + 100000;
-
 
         let _PERMIT_TYPEHASH = await web3.utils.soliditySha3("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 

@@ -1,5 +1,5 @@
 let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
-const { checkoutProvider, addressToBytes32, timeout } = require("../../utils/helper"); 
+const { checkoutProvider, addressToBytes32, timeout } = require("../../utils/helper");
 const { ethers } = require("hardhat");
 
 contract('Router', () => {
@@ -59,7 +59,7 @@ contract('Router', () => {
             this.synthB = await SynthB.at(synthAddress)
             const oldBalance = await this.synthB.balanceOf(userNet2)
             const amount = ethers.utils.parseEther("0.5")
-            
+
             const tokenToSynth = this.tokenA1.address
             const receiveSideB = deployInfo["network2"].synthesis
             const oppositeBridge = deployInfo["network2"].bridge
@@ -80,12 +80,12 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
                 },
-                
+
                 { from: userNet1, gas: 1000_000 }
             )
             await timeout(15000)
             const newBalance = await this.synthB.balanceOf(userNet2)
-            assert(oldBalance.lt(newBalance))    
+            assert(oldBalance.lt(newBalance))
         })
 
         it("Synthesize: network1 -> network3", async function () {
@@ -117,7 +117,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
                 },
-                
+
                 { from: userNet1, gas: 1000_000 }
             )
             await timeout(15000)
@@ -154,7 +154,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
                 },
-                
+
                 { from: userNet2, gas: 1000_000 }
             )
             await timeout(15000)
@@ -191,7 +191,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
                 },
-                
+
                 { from: userNet2, gas: 1000_000 }
             )
             await timeout(15000)
@@ -228,7 +228,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
                 },
-                
+
                 { from: userNet3, gas: 1000_000 }
             )
             await timeout(15000)
@@ -243,7 +243,7 @@ contract('Router', () => {
             this.synthB = await SynthB.at(synthAddress)
             const oldBalance = await this.synthB.balanceOf(userNet2)
             const amount = ethers.utils.parseEther("0.5")
-            
+
             const tokenToSynth = this.tokenC1.address
             const receiveSideB = deployInfo["network2"].synthesis
             const oppositeBridge = deployInfo["network2"].bridge
@@ -264,7 +264,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
                 },
-                
+
                 { from: userNet3, gas: 1000_000 }
             )
             await timeout(15000)

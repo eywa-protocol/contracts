@@ -4,7 +4,6 @@ pragma solidity 0.8.10;
 pragma experimental ABIEncoderV2; //FIXME: remove it?
 
 interface IForwarder {
-
     struct ForwardRequest {
         address from;
         address to;
@@ -14,9 +13,7 @@ interface IForwarder {
         bytes data;
     }
 
-    function getNonce(address from)
-    external view
-    returns(uint256);
+    function getNonce(address from) external view returns (uint256);
 
     /**
      * verify the transaction would execute.
@@ -50,9 +47,7 @@ interface IForwarder {
         bytes32 requestTypeHash,
         bytes calldata suffixData,
         bytes calldata signature
-    )
-    external payable
-    returns (bool success, bytes memory ret);
+    ) external payable returns (bool success, bytes memory ret);
 
     /**
      * Register a new Request typehash.

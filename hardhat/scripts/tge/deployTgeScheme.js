@@ -44,7 +44,7 @@ async function main() {
 
     console.log("claimAllowanceContract = ", claimAllowanceContract);
     console.log("claimWithAllowanceTimeStamp = ", claimWithAllowanceTimeStamp);
-    console.log("startTimeStamp = ", startTimeStamp+startTimeStamp);
+    console.log("startTimeStamp = ", startTimeStamp + startTimeStamp);
     console.log("cliffDuration = ", cliffDuration);
     console.log("cliffTime = ", cliffDuration);
     console.log("stepDuration = ", stepDuration);

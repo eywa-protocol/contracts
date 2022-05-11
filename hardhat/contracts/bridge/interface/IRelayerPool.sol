@@ -14,8 +14,8 @@ interface IRelayerPool {
     }
 
     struct Deposit {
-        address user; 
-        uint256 lockTill; 
+        address user;
+        uint256 lockTill;
         uint256 amount;
     }
 

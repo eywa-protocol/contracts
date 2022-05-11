@@ -53,7 +53,7 @@ abstract contract EIP712 {
     constructor(
         string memory name,
         string memory version,
-        uint256 harmonyChainId
+        uint256 chainId
     ) {
         bytes32 hashedName = keccak256(bytes(name));
         bytes32 hashedVersion = keccak256(bytes(version));
@@ -62,8 +62,7 @@ abstract contract EIP712 {
         );
         _HASHED_NAME = hashedName;
         _HASHED_VERSION = hashedVersion;
-        // _CACHED_CHAIN_ID = block.chainid;
-        _CACHED_CHAIN_ID = harmonyChainId;
+        _CACHED_CHAIN_ID = chainId;
         _CACHED_DOMAIN_SEPARATOR = _buildDomainSeparator(typeHash, hashedName, hashedVersion);
         _CACHED_THIS = address(this);
         _TYPE_HASH = typeHash;
@@ -73,7 +72,6 @@ abstract contract EIP712 {
      * @dev Returns the domain separator for the current chain.
      */
     function _domainSeparatorV4() internal view returns (bytes32) {
-        // if (address(this) == _CACHED_THIS && block.chainid == _CACHED_CHAIN_ID) {
         if (address(this) == _CACHED_THIS) {
             return _CACHED_DOMAIN_SEPARATOR;
         } else {
@@ -108,7 +106,7 @@ abstract contract EIP712 {
         return ECDSA.toTypedDataHash(_domainSeparatorV4(), structHash);
     }
 
-    function getHarmonyChainID() external view returns (uint256) {
+    function getCachedChainId() external view returns (uint256) {
         return _CACHED_CHAIN_ID;
     }
 }

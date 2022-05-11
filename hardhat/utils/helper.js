@@ -27,7 +27,7 @@ const checkoutProvider = (argv) => {
 
         let web3Net3_l;
 
-        if (argv.net3 === undefined || argv.net3 === void 0 ) {
+        if (argv.net3 === undefined || argv.net3 === void 0) {
             web3Net3_l = void 0;
         } else {
             web3Net3_l = new HDWalletProvider(env.parsed[getPk(argv.net3)], network[argv.net3].rpcUrl);
@@ -129,12 +129,12 @@ const getCustomRepresentation = async (address, name, symbol, decimals, chainId,
 
 const getTxId = (userFrom, nonce, chainIdOpposite, chainIdCurrent, receiveSide, oppositeBridge) => {
     return web3.utils.soliditySha3(
-        { type: 'bytes32', value:addressToBytes32(userFrom)},
-        { type: 'uint256', value:nonce},
-        { type: 'uint256', value:chainIdOpposite},
-        { type: 'uint256', value:chainIdCurrent},
-        { type: 'bytes32', value:addressToBytes32(receiveSide)},
-        { type: 'bytes32', value:addressToBytes32(oppositeBridge)},
+        { type: 'bytes32', value: addressToBytes32(userFrom) },
+        { type: 'uint256', value: nonce },
+        { type: 'uint256', value: chainIdOpposite },
+        { type: 'uint256', value: chainIdCurrent },
+        { type: 'bytes32', value: addressToBytes32(receiveSide) },
+        { type: 'bytes32', value: addressToBytes32(oppositeBridge) },
     );
 }
 
@@ -147,7 +147,7 @@ const signWorkerPermit = async (
     chainIdTo,
     userNonce,
     workerDeadline
-)  => {
+) => {
     const hashedName = ethers.utils.solidityKeccak256(
         ['string'],
         ["EYWA"]
@@ -186,7 +186,7 @@ const signWorkerPermit = async (
         ['string', 'bytes32', 'bytes32'],
         ['\x19\x01', domainSeparatorHash, workerStructHash]
     );
-    
+
     return ethers.utils.splitSignature(await userFrom.signMessage(ethers.utils.arrayify(workerMsgHash)));
 }
 
