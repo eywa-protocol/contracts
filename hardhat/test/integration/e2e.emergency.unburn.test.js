@@ -120,9 +120,11 @@ contract('Router', () => {
                 synthAddress,
                 amount,
                 userNet1,
-                deployInfo["network1"].synthesis,
-                deployInfo["network1"].bridge,
-                deployInfo["network1"].chainId,
+                {
+                    receiveSide: deployInfo["network1"].synthesis,
+                    oppositeBridge: deployInfo["network1"].bridge,
+                    chainId: deployInfo["network1"].chainId,
+                },
                 { from: userNet2, gas: 1000_000 }
             )
 
@@ -194,9 +196,11 @@ contract('Router', () => {
                 synthAddress,
                 amount,
                 userNet1,
-                deployInfo["network1"].synthesis,
-                deployInfo["network1"].bridge,
-                deployInfo["network1"].chainId,
+                {
+                    receiveSide: deployInfo["network1"].synthesis,
+                    oppositeBridge: deployInfo["network1"].bridge,
+                    chainId: deployInfo["network1"].chainId,
+                },
                 { from: userNet3, gas: 1000_000 }
             )
 
@@ -268,9 +272,11 @@ contract('Router', () => {
                 synthAddress,
                 amount,
                 userNet2,
-                deployInfo["network2"].synthesis,
-                deployInfo["network2"].bridge,
-                deployInfo["network2"].chainId,
+                {
+                    receiveSide: deployInfo["network2"].synthesis,
+                    oppositeBridge: deployInfo["network2"].bridge,
+                    chainId: deployInfo["network2"].chainId,
+                },
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -343,9 +349,11 @@ contract('Router', () => {
                 synthAddress,
                 amount,
                 userNet2,
-                deployInfo["network2"].synthesis,
-                deployInfo["network2"].bridge,
-                deployInfo["network2"].chainId,
+                {
+                    receiveSide: deployInfo["network2"].synthesis,
+                    oppositeBridge: deployInfo["network2"].bridge,
+                    chainId: deployInfo["network2"].chainId,
+                },
                 { from: userNet3, gas: 1000_000 }
             )
 
@@ -418,9 +426,11 @@ contract('Router', () => {
                 synthAddress,
                 amount,
                 userNet3,
-                deployInfo["network3"].synthesis,
-                deployInfo["network3"].bridge,
-                deployInfo["network3"].chainId,
+                {
+                    receiveSide: deployInfo["network3"].synthesis,
+                    oppositeBridge: deployInfo["network3"].bridge,
+                    chainId: deployInfo["network3"].chainId,
+                },
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -492,9 +502,11 @@ contract('Router', () => {
                 synthAddress,
                 amount,
                 userNet3,
-                deployInfo["network3"].synthesis,
-                deployInfo["network3"].bridge,
-                deployInfo["network3"].chainId,
+                {
+                    receiveSide: deployInfo["network3"].synthesis,
+                    oppositeBridge: deployInfo["network3"].bridge,
+                    chainId: deployInfo["network3"].chainId,
+                },
                 { from: userNet2, gas: 1000_000 }
             )
 

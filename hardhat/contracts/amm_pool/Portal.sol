@@ -50,6 +50,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         RequestState state;
     }
 
+    //receiveSide receive chain synthesis contract address
     struct SynthParams {
         address receiveSide;
         address oppositeBridge;
@@ -353,7 +354,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     /**
      * @dev Revert burnSyntheticToken() operation, can be called several times.
      * @param _txID transaction ID to unburn
-     * @param _receiveSide receiver contract address
+     * @param _receiveSide receiver chain synthesis contract address
      * @param _oppositeBridge opposite bridge address
      * @param _chainId opposite chain ID
      */
