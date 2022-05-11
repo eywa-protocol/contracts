@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.10;
 
-import "../utils/draft-ERC20Permit-Harmony.sol";
 import "@openzeppelin/contracts-newone/token/ERC20/extensions/ERC20Burnable.sol";
+import "../utils/draft-ERC20Permit.sol";
 
 contract EywaToken is ERC20Permit, ERC20Burnable {
     string public _name = "EYWA-Token";

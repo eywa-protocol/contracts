@@ -148,7 +148,7 @@ contract CurveProxy is Initializable, RelayRecipient {
     function setPool(
         address _pool,
         address _lpToken,
-        address[] calldata _coins 
+        address[] calldata _coins
     ) public onlyOwner {
         for (uint256 i = 0; i < _coins.length; i++) {
             pool[_pool].add(_coins[i]);
@@ -504,7 +504,11 @@ contract CurveProxy is Initializable, RelayRecipient {
         );
         if (_params.chainId != 0) {
             IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).approve(synthesis, thisBalance);
-            ISynthesis.SynthParams memory synthParams = ISynthesis.SynthParams(_params.receiveSide,_params.oppositeBridge,_params.chainId);
+            ISynthesis.SynthParams memory synthParams = ISynthesis.SynthParams(
+                _params.receiveSide,
+                _params.oppositeBridge,
+                _params.chainId
+            );
             ISynthesis(synthesis).burnSyntheticToken(
                 pool[_params.remove].at(uint256(int256(_params.x))),
                 thisBalance,
@@ -676,7 +680,11 @@ contract CurveProxy is Initializable, RelayRecipient {
             );
             if (_params.chainId != 0) {
                 IERC20Upgradeable(pool[_params.remove].at(uint256(int256(_params.x)))).approve(synthesis, thisBalance);
-                ISynthesis.SynthParams memory synthParams = ISynthesis.SynthParams(_params.receiveSide,_params.oppositeBridge,_params.chainId);
+                ISynthesis.SynthParams memory synthParams = ISynthesis.SynthParams(
+                    _params.receiveSide,
+                    _params.oppositeBridge,
+                    _params.chainId
+                );
                 ISynthesis(synthesis).burnSyntheticToken(
                     pool[_params.remove].at(uint256(int256(_params.x))),
                     thisBalance,
@@ -799,7 +807,11 @@ contract CurveProxy is Initializable, RelayRecipient {
                     synthesis,
                     thisBalance
                 );
-                ISynthesis.SynthParams memory synthParams = ISynthesis.SynthParams(_receiveSide,_oppositeBridge,_chainId);
+                ISynthesis.SynthParams memory synthParams = ISynthesis.SynthParams(
+                    _receiveSide,
+                    _oppositeBridge,
+                    _chainId
+                );
                 ISynthesis(synthesis).burnSyntheticToken(
                     pool[_params.removeAtCrosschainPool].at(uint256(int256(_params.x))),
                     thisBalance,

@@ -95,16 +95,16 @@ async function main() {
             await txMint.wait();
             await (await ERC20.attach(deployInfo[network.name].localToken[i].address).approve(deployInfo[network.name].localPool.address, totalSupply)).wait();
         }
-        
+
         const amounts = new Array(3).fill(ethers.utils.parseEther("100000000.0"));
         let min_mint_amount = 0;
 
         this.tx = await localPool.add_liquidity(
-          amounts,
-          min_mint_amount,
-          {
-            gasLimit: '5000000'
-          }
+            amounts,
+            min_mint_amount,
+            {
+                gasLimit: '5000000'
+            }
         );
         console.log("add_liquidity to local pool:", this.tx.hash);
 

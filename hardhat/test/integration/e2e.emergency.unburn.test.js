@@ -1,5 +1,5 @@
 let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
-const { checkoutProvider, addressToBytes32, timeout, getTxId } = require("../../utils/helper"); 
+const { checkoutProvider, addressToBytes32, timeout, getTxId } = require("../../utils/helper");
 const { ethers } = require("hardhat");
 
 contract('Router', () => {
@@ -85,7 +85,7 @@ contract('Router', () => {
             this.synthB = await SynthB.at(synthAddress)
             const oldBalance = await this.synthB.balanceOf(userNet2)
             const amount = ethers.utils.parseEther("0.5")
-            
+
             const tokenToSynth = this.tokenA1.address
             const receiveSideB = deployInfo["network2"].synthesis
             const oppositeBridge = deployInfo["network2"].bridge
@@ -109,7 +109,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
                 },
-                
+
                 { from: userNet1, gas: 1000_000 }
             )
             await timeout(15000)
@@ -120,9 +120,11 @@ contract('Router', () => {
                 synthAddress,
                 amount,
                 userNet1,
-                deployInfo["network1"].synthesis,
-                deployInfo["network1"].bridge,
-                deployInfo["network1"].chainId,
+                {
+                    receiveSide: deployInfo["network1"].synthesis,
+                    oppositeBridge: deployInfo["network1"].bridge,
+                    chainId: deployInfo["network1"].chainId,
+                },
                 { from: userNet2, gas: 1000_000 }
             )
 
@@ -130,7 +132,7 @@ contract('Router', () => {
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
-                [txID, userNet1, chainIdB,"emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"]
+                [txID, userNet1, chainIdB, "emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"]
             );
 
             const unburnSig = ethers.utils.splitSignature(await signerUserNet2.signMessage(ethers.utils.arrayify(emergencyHash)));
@@ -147,7 +149,7 @@ contract('Router', () => {
             )
             await timeout(15000)
             const newBalance = await this.synthB.balanceOf(userNet2)
-            assert(oldBalance.lt(newBalance))    
+            assert(oldBalance.lt(newBalance))
         })
 
         it("Emergency Unburn: network1 -> network3", async function () {
@@ -183,7 +185,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
                 },
-                
+
                 { from: userNet1, gas: 1000_000 }
             )
             await timeout(15000)
@@ -194,9 +196,11 @@ contract('Router', () => {
                 synthAddress,
                 amount,
                 userNet1,
-                deployInfo["network1"].synthesis,
-                deployInfo["network1"].bridge,
-                deployInfo["network1"].chainId,
+                {
+                    receiveSide: deployInfo["network1"].synthesis,
+                    oppositeBridge: deployInfo["network1"].bridge,
+                    chainId: deployInfo["network1"].chainId,
+                },
                 { from: userNet3, gas: 1000_000 }
             )
 
@@ -204,7 +208,7 @@ contract('Router', () => {
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
-                [txID, userNet1, chainIdC,"emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"]
+                [txID, userNet1, chainIdC, "emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"]
             );
 
             const unburnSig = ethers.utils.splitSignature(await signerUserNet3.signMessage(ethers.utils.arrayify(emergencyHash)));
@@ -257,7 +261,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
                 },
-                
+
                 { from: userNet2, gas: 1000_000 }
             )
             await timeout(15000)
@@ -268,9 +272,11 @@ contract('Router', () => {
                 synthAddress,
                 amount,
                 userNet2,
-                deployInfo["network2"].synthesis,
-                deployInfo["network2"].bridge,
-                deployInfo["network2"].chainId,
+                {
+                    receiveSide: deployInfo["network2"].synthesis,
+                    oppositeBridge: deployInfo["network2"].bridge,
+                    chainId: deployInfo["network2"].chainId,
+                },
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -278,7 +284,7 @@ contract('Router', () => {
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
-                [txID, userNet2, chainIdA,"emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"]
+                [txID, userNet2, chainIdA, "emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"]
             );
 
             const unburnSig = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(emergencyHash)));
@@ -332,7 +338,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
                 },
-                
+
                 { from: userNet2, gas: 1000_000 }
             )
             await timeout(15000)
@@ -343,9 +349,11 @@ contract('Router', () => {
                 synthAddress,
                 amount,
                 userNet2,
-                deployInfo["network2"].synthesis,
-                deployInfo["network2"].bridge,
-                deployInfo["network2"].chainId,
+                {
+                    receiveSide: deployInfo["network2"].synthesis,
+                    oppositeBridge: deployInfo["network2"].bridge,
+                    chainId: deployInfo["network2"].chainId,
+                },
                 { from: userNet3, gas: 1000_000 }
             )
 
@@ -353,7 +361,7 @@ contract('Router', () => {
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
-                [txID, userNet2, chainIdC,"emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"]
+                [txID, userNet2, chainIdC, "emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"]
             );
 
             const unburnSig = ethers.utils.splitSignature(await signerUserNet3.signMessage(ethers.utils.arrayify(emergencyHash)));
@@ -407,7 +415,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
                 },
-                
+
                 { from: userNet3, gas: 1000_000 }
             )
             await timeout(15000)
@@ -418,9 +426,11 @@ contract('Router', () => {
                 synthAddress,
                 amount,
                 userNet3,
-                deployInfo["network3"].synthesis,
-                deployInfo["network3"].bridge,
-                deployInfo["network3"].chainId,
+                {
+                    receiveSide: deployInfo["network3"].synthesis,
+                    oppositeBridge: deployInfo["network3"].bridge,
+                    chainId: deployInfo["network3"].chainId,
+                },
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -428,7 +438,7 @@ contract('Router', () => {
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
-                [txID, userNet3, chainIdA,"emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"]
+                [txID, userNet3, chainIdA, "emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"]
             );
 
             const unburnSig = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(emergencyHash)));
@@ -458,7 +468,7 @@ contract('Router', () => {
             this.synthB = await SynthB.at(synthAddress)
             const oldBalance = await this.synthB.balanceOf(userNet2)
             const amount = ethers.utils.parseEther("0.5")
-            
+
             const tokenToSynth = this.tokenC1.address
             const receiveSideB = deployInfo["network2"].synthesis
             const oppositeBridge = deployInfo["network2"].bridge
@@ -481,7 +491,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
                 },
-                
+
                 { from: userNet3, gas: 1000_000 }
             )
             await timeout(15000)
@@ -492,9 +502,11 @@ contract('Router', () => {
                 synthAddress,
                 amount,
                 userNet3,
-                deployInfo["network3"].synthesis,
-                deployInfo["network3"].bridge,
-                deployInfo["network3"].chainId,
+                {
+                    receiveSide: deployInfo["network3"].synthesis,
+                    oppositeBridge: deployInfo["network3"].bridge,
+                    chainId: deployInfo["network3"].chainId,
+                },
                 { from: userNet2, gas: 1000_000 }
             )
 
@@ -502,7 +514,7 @@ contract('Router', () => {
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
-                [txID, userNet3, chainIdB,"emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"]
+                [txID, userNet3, chainIdB, "emergencyUnburn(bytes32,address,uint8,bytes32,bytes32)"]
             );
 
             const unburnSig = ethers.utils.splitSignature(await signerUserNet2.signMessage(ethers.utils.arrayify(emergencyHash)));

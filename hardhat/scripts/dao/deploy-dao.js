@@ -77,7 +77,7 @@ async function main() {
             // await gauge.self
 
             //register gauge
-            let tx_ = await gaugeController.add_gauge(gauge.address, 0, "10000000000000000000"/*weight*/,{ gasLimit: 1000000 });
+            let tx_ = await gaugeController.add_gauge(gauge.address, 0, "10000000000000000000"/*weight*/, { gasLimit: 1000000 });
             await tx_.wait();
         }
 
@@ -86,7 +86,7 @@ async function main() {
         await gaugeLocal.deployed();
         await gaugeLocal.deployTransaction.wait();
 
-        let txGC = await gaugeController.add_gauge(gaugeLocal.address, 0, "10000000000000000000"/*weight*/,{ gasLimit: 1000000 });
+        let txGC = await gaugeController.add_gauge(gaugeLocal.address, 0, "10000000000000000000"/*weight*/, { gasLimit: 1000000 });
         await txGC.wait();
         deployInfo[network.name].localPool.gauge = gaugeLocal.address;
 
@@ -94,7 +94,7 @@ async function main() {
         const _Treasury = await ethers.getContractFactory("EywaTreasury");
         const treasury = await _Treasury.deploy();
         await treasury.deployed();
-        console.log("Treasury address:", treasury.address) 
+        console.log("Treasury address:", treasury.address)
         deployInfo[network.name].treasury = treasury.address;
     }
 

@@ -4,11 +4,11 @@ const fs = require("fs");
 const networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
 const hre = require("hardhat");
 
-const name  = hre.network.name;
+const name = hre.network.name;
 
 async function main() {
   const [deployer] = await ethers.getSigners();
-  const balance  = await deployer.getBalance();
+  const balance = await deployer.getBalance();
   // @todo replace new owner
   const newOwner = '0xA274C37FD645B4389c2D601c85C4908f7e46f203';
   console.log('New Owner address: ', newOwner);
