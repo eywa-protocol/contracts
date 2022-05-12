@@ -13,7 +13,7 @@ async function main() {
     try {
         await hre.run("verify:verify", {
             address: networkConfig[network.name].eywa,
-            constructorArguments: ["EYWA", "EYWA"],
+            constructorArguments: ["EYWA-TOKEN", "EYWA"],
             contract: "contracts/bridge/test/TestERC20Permit.sol:TestTokenPermit"
         });
     } catch (e) {
