@@ -13,7 +13,18 @@ async function main() {
     try {
         await hre.run("verify:verify", {
             address: networkConfig[network.name].eywa,
-            constructorArguments: ["EYWA", "EYWA"],
+            constructorArguments: ["EYWA-TOKEN", "EYWA"],
+            contract: "contracts/bridge/test/TestERC20Permit.sol:TestTokenPermit"
+        });
+    } catch (e) {
+        console.log(e);
+    }
+
+    // EYWA-POA Test token with permit verify
+    try {
+        await hre.run("verify:verify", {
+            address: networkConfig[network.name].tokenPoa,
+            constructorArguments: ["EYWA-POA", "POAT"],
             contract: "contracts/bridge/test/TestERC20Permit.sol:TestTokenPermit"
         });
     } catch (e) {
