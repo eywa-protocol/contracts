@@ -1,4 +1,4 @@
-// npx hardhat run scripts/bridge/deployToService.js --network rinkeby
+// npx hardhat run scripts/bridge/deployToService.js --network bscTestnet
 const fs = require("fs");
 let networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json')
 const hre = require("hardhat");
@@ -35,41 +35,41 @@ async function main() {
     console.log("EYWA ERC20 address:", EYWA.address);
     console.log("POA ERC20 address:", tokenPoa.address);
 
-    // Deploy Forwarder
-    const _Forwarder = await ethers.getContractFactory("Forwarder");
-    const forwarder = await _Forwarder.deploy();
-    await forwarder.deployed();
-    networkConfig[network.name].forwarder = forwarder.address;
-    console.log("Forwarder address:", forwarder.address);
-
-    // Deploy RelayerPoolFactory library
-    const _RelayerPoolFactory = await ethers.getContractFactory("RelayerPoolFactory");
-    const relayerPoolFactory = await _RelayerPoolFactory.deploy();
-    await relayerPoolFactory.deployed();
-    networkConfig[network.name].relayerPoolFactory = relayerPoolFactory.address;
-    console.log("RelayerPoolFactory address:", relayerPoolFactory.address);
-
-    // Deploy NodeRegistry (contains Bridge)
-    const _NodeRegistry = await ethers.getContractFactory("NodeRegistry");
-
-    // const bridge = await _NodeRegistry.deploy({gasLimit: 5_000_000});
-    const bridge = await upgrades.deployProxy(
-        _NodeRegistry,
-        [tokenPoa.address, forwarder.address, relayerPoolFactory.address],
-        { initializer: 'initialize2' },
-    );
-    await bridge.deployed();
-    await relayerPoolFactory.setNodeRegistry(bridge.address);
-    networkConfig[network.name].nodeRegistry = bridge.address;
-    networkConfig[network.name].bridge = bridge.address;
-    console.log("NodeRegistry address:", bridge.address);
-
-    // Deploy MockDexPool
-    const _MockDexPool = await ethers.getContractFactory("MockDexPool");
-    const mockDexPool = await _MockDexPool.deploy(bridge.address);
-    await mockDexPool.deployed();
-    networkConfig[network.name].mockDexPool = mockDexPool.address;
-    console.log(`MockDexPool address: ${mockDexPool.address}`);
+    // // Deploy Forwarder
+    // const _Forwarder = await ethers.getContractFactory("Forwarder");
+    // const forwarder = await _Forwarder.deploy();
+    // await forwarder.deployed();
+    // networkConfig[network.name].forwarder = forwarder.address;
+    // console.log("Forwarder address:", forwarder.address);
+    //
+    // // Deploy RelayerPoolFactory library
+    // const _RelayerPoolFactory = await ethers.getContractFactory("RelayerPoolFactory");
+    // const relayerPoolFactory = await _RelayerPoolFactory.deploy();
+    // await relayerPoolFactory.deployed();
+    // networkConfig[network.name].relayerPoolFactory = relayerPoolFactory.address;
+    // console.log("RelayerPoolFactory address:", relayerPoolFactory.address);
+    //
+    // // Deploy NodeRegistry (contains Bridge)
+    // const _NodeRegistry = await ethers.getContractFactory("NodeRegistry");
+    //
+    // // const bridge = await _NodeRegistry.deploy({gasLimit: 5_000_000});
+    // const bridge = await upgrades.deployProxy(
+    //     _NodeRegistry,
+    //     [tokenPoa.address, forwarder.address, relayerPoolFactory.address],
+    //     { initializer: 'initialize2' },
+    // );
+    // await bridge.deployed();
+    // await relayerPoolFactory.setNodeRegistry(bridge.address);
+    // networkConfig[network.name].nodeRegistry = bridge.address;
+    // networkConfig[network.name].bridge = bridge.address;
+    // console.log("NodeRegistry address:", bridge.address);
+    //
+    // // Deploy MockDexPool
+    // const _MockDexPool = await ethers.getContractFactory("MockDexPool");
+    // const mockDexPool = await _MockDexPool.deploy(bridge.address);
+    // await mockDexPool.deployed();
+    // networkConfig[network.name].mockDexPool = mockDexPool.address;
+    // console.log(`MockDexPool address: ${mockDexPool.address}`);
 
     // Write deployed contracts addresses to config
     fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
