@@ -1,4 +1,3 @@
-// npx hardhat run scripts/bridge/deployToService.js --network bscTestnet
 const fs = require("fs");
 let networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json')
 const hre = require("hardhat");
