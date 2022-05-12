@@ -54,86 +54,86 @@ async function main() {
             console.log(e);
         }
     }
-    // // forwarder verify
-    // try {
-    //     await hre.run("verify:verify", {
-    //         address: networkConfig[network.name].forwarder,
-    //         constructorArguments: [],
-    //         contract: "contracts/bridge/Forwarder.sol:Forwarder"
-    //     });
-    // } catch (e) {
-    //     console.log(e);
-    // }
-    //
-    // // RelayerPoolFactory
-    // try {
-    //     await hre.run("verify:verify", {
-    //         address: networkConfig[network.name].relayerPoolFactory,
-    //         constructorArguments: [],
-    //         contract: "contracts/bridge/RelayerPoolFactory.sol:RelayerPoolFactory"
-    //     });
-    // } catch (e) {
-    //     console.log(e);
-    // }
-    //
-    // let proxyAdminAddress = (await upgrades.admin.getInstance()).address;
-    // console.log('ProxyAdmin', proxyAdminAddress);
-    //
-    // // verify proxy admin from upgrades
-    // try {
-    //     await hre.run("verify:verify", {
-    //         address: proxyAdminAddress,
-    //         constructorArguments: [],
-    //         contract: "contracts/utils/ProxiesVerify.sol:ProxyAdminHelper"
-    //     });
-    // } catch (e) {
-    //     console.log(e);
-    // }
-    //
-    // let proxyNodeRegistryAddress = networkConfig[network.name].nodeRegistry;
-    //
-    // const ProxyAdminHelper = await hre.ethers.getContractFactory('ProxyAdminHelper');
-    // const proxyAdmin = await ProxyAdminHelper.attach(proxyAdminAddress);
-    //
-    // let implementationNodeRegistry = await proxyAdmin.getProxyImplementation(proxyNodeRegistryAddress);
-    //
-    // console.log('NodeRegistry proxy', proxyNodeRegistryAddress);
-    // console.log('NodeRegistry implementation', implementationNodeRegistry);
-    //
-    // // implementation verify
-    // try {
-    //     await hre.run("verify:verify", {
-    //         address: implementationNodeRegistry,
-    //         constructorArguments: [],
-    //         contract: "contracts/bridge/NodeRegistry.sol:NodeRegistry"
-    //     });
-    // } catch (e) {
-    //     console.log(e);
-    // }
-    //
-    // let data = '0x000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000449434b989000000000000000000000000d557158282f401079000fb53d87fb3024330468d0000000000000000000000001d4c7d1b03ac81047f077ee8fdcbd14e45fd22cf00000000000000000000000000000000000000000000000000000000';
-    //
-    // // proxy for NodeRegistry
-    // try {
-    //     await hre.run("verify:verify", {
-    //         address: networkConfig[network.name].nodeRegistry,
-    //         constructorArguments: [implementationNodeRegistry, proxyAdminAddress, data],
-    //         contract: "contracts/utils/ProxiesVerify.sol:TransparentUpgradeableProxyHelper"
-    //     });
-    // } catch (e) {
-    //     console.log(e);
-    // }
-    //
-    // // MockDexPool verify
-    // try {
-    //     await hre.run("verify:verify", {
-    //         address: networkConfig[network.name].mockDexPool,
-    //         constructorArguments: [proxyNodeRegistryAddress],
-    //         contract: "contracts/bridge/mocks/MockDexPool.sol:MockDexPool"
-    //     });
-    // } catch (e) {
-    //     console.log(e);
-    // }
+    // forwarder verify
+    try {
+        await hre.run("verify:verify", {
+            address: networkConfig[network.name].forwarder,
+            constructorArguments: [],
+            contract: "contracts/bridge/Forwarder.sol:Forwarder"
+        });
+    } catch (e) {
+        console.log(e);
+    }
+
+    // RelayerPoolFactory
+    try {
+        await hre.run("verify:verify", {
+            address: networkConfig[network.name].relayerPoolFactory,
+            constructorArguments: [],
+            contract: "contracts/bridge/RelayerPoolFactory.sol:RelayerPoolFactory"
+        });
+    } catch (e) {
+        console.log(e);
+    }
+
+    let proxyAdminAddress = (await upgrades.admin.getInstance()).address;
+    console.log('ProxyAdmin', proxyAdminAddress);
+
+    // verify proxy admin from upgrades
+    try {
+        await hre.run("verify:verify", {
+            address: proxyAdminAddress,
+            constructorArguments: [],
+            contract: "contracts/utils/ProxiesVerify.sol:ProxyAdminHelper"
+        });
+    } catch (e) {
+        console.log(e);
+    }
+
+    let proxyNodeRegistryAddress = networkConfig[network.name].nodeRegistry;
+
+    const ProxyAdminHelper = await hre.ethers.getContractFactory('ProxyAdminHelper');
+    const proxyAdmin = await ProxyAdminHelper.attach(proxyAdminAddress);
+
+    let implementationNodeRegistry = await proxyAdmin.getProxyImplementation(proxyNodeRegistryAddress);
+
+    console.log('NodeRegistry proxy', proxyNodeRegistryAddress);
+    console.log('NodeRegistry implementation', implementationNodeRegistry);
+
+    // implementation verify
+    try {
+        await hre.run("verify:verify", {
+            address: implementationNodeRegistry,
+            constructorArguments: [],
+            contract: "contracts/bridge/NodeRegistry.sol:NodeRegistry"
+        });
+    } catch (e) {
+        console.log(e);
+    }
+
+    let data = '0x000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000449434b989000000000000000000000000d557158282f401079000fb53d87fb3024330468d0000000000000000000000001d4c7d1b03ac81047f077ee8fdcbd14e45fd22cf00000000000000000000000000000000000000000000000000000000';
+
+    // proxy for NodeRegistry
+    try {
+        await hre.run("verify:verify", {
+            address: networkConfig[network.name].nodeRegistry,
+            constructorArguments: [implementationNodeRegistry, proxyAdminAddress, data],
+            contract: "contracts/utils/ProxiesVerify.sol:TransparentUpgradeableProxyHelper"
+        });
+    } catch (e) {
+        console.log(e);
+    }
+
+    // MockDexPool verify
+    try {
+        await hre.run("verify:verify", {
+            address: networkConfig[network.name].mockDexPool,
+            constructorArguments: [proxyNodeRegistryAddress],
+            contract: "contracts/bridge/mocks/MockDexPool.sol:MockDexPool"
+        });
+    } catch (e) {
+        console.log(e);
+    }
 
 }
 
