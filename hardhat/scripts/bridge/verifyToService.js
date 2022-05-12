@@ -20,6 +20,17 @@ async function main() {
         console.log(e);
     }
 
+    // EYWA-POA Test token with permit verify
+    try {
+        await hre.run("verify:verify", {
+            address: networkConfig[network.name].tokenPoa,
+            constructorArguments: ["EYWA-POA", "POAT"],
+            contract: "contracts/bridge/test/TestERC20Permit.sol:TestTokenPermit"
+        });
+    } catch (e) {
+        console.log(e);
+    }
+
     // forwarder verify
     try {
         await hre.run("verify:verify", {
