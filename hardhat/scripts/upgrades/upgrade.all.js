@@ -34,10 +34,10 @@ contract('Contracts upgrade', () => {
         })
 
         it("CurveProxy upgrade", async function () {
-            const _CurveProxyV2 = await ethers.getContractFactory("NodeRegistry")
+            const _CurveProxyV2 = await ethers.getContractFactory("CurveProxy")
 
-            let curveProxy = deployInfo[network.name].nodeRegistry
-            const nodeRegistryV2 = await upgrades.upgradeProxy(curveProxy, _CurveProxyV2)
+            let curveProxy = deployInfo[network.name].curveProxy
+            const curveProxyV2 = await upgrades.upgradeProxy(curveProxy, _CurveProxyV2)
         })
 
     })
