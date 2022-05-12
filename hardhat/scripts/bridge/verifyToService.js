@@ -1,4 +1,4 @@
-// npx hardhat run scripts/bridge/verifyToService.js --network rinkeby
+// npx hardhat run scripts/bridge/verifyToService.js --network bscTestnet
 
 // verify EYWA Test token, forwarder, proxy NodeRegistry and MockDexPool
 let networkConfig = require('../../helper-hardhat-config.json')
@@ -9,28 +9,51 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     console.log("Owner:", deployer.address);
 
-    // EYWA Test token with permit verify
-    try {
-        await hre.run("verify:verify", {
-            address: networkConfig[network.name].eywa,
-            constructorArguments: ["EYWA-TOKEN", "EYWA"],
-            contract: "contracts/bridge/test/TestERC20Permit.sol:TestTokenPermit"
-        });
-    } catch (e) {
-        console.log(e);
-    }
+    if (network.name.includes("network") || network.name === 'harmonylocal' || network.name === 'harmonytestnet') {
+        // EYWA Test token with permit verify
+        try {
+            await hre.run("verify:verify", {
+                address: networkConfig[network.name].eywa,
+                constructorArguments: ["EYWA-TOKEN", "EYWA"],
+                contract: "contracts/bridge/test/TestERC20Permit.sol:TestTokenPermit"
+            });
+        } catch (e) {
+            console.log(e);
+        }
 
-    // EYWA-POA Test token with permit verify
-    try {
-        await hre.run("verify:verify", {
-            address: networkConfig[network.name].tokenPoa,
-            constructorArguments: ["EYWA-POA", "POAT"],
-            contract: "contracts/bridge/test/TestERC20Permit.sol:TestTokenPermit"
-        });
-    } catch (e) {
-        console.log(e);
-    }
+        // EYWA-POA Test token with permit verify
+        try {
+            await hre.run("verify:verify", {
+                address: networkConfig[network.name].tokenPoa,
+                constructorArguments: ["EYWA-POA", "POAT"],
+                contract: "contracts/bridge/test/TestERC20Permit.sol:TestTokenPermit"
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    } else {
+        // EYWA Test token with permit verify
+        try {
+            await hre.run("verify:verify", {
+                address: networkConfig[network.name].eywa,
+                constructorArguments: [deployer.address, networkConfig[network.name].chainId],
+                contract: "contracts/dao/EywaToken.sol:EywaToken"
+            });
+        } catch (e) {
+            console.log(e);
+        }
 
+        // EYWA-POA Test token with permit verify
+        try {
+            await hre.run("verify:verify", {
+                address: networkConfig[network.name].tokenPoa,
+                constructorArguments: ["EYWA-POA", "POAT", networkConfig[network.name].chainId],
+                contract: "contracts/amm_pool/TokenPOA.sol:TokenPOA"
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    }
     // forwarder verify
     try {
         await hre.run("verify:verify", {
