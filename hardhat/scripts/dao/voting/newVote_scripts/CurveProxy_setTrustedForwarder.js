@@ -1,7 +1,12 @@
 const ethers = require('ethers');
-const fs = require('fs');
 const abi = require('ethereumjs-abi')
 const network = hre.network.name;
+
+let TARGET_ADDRESS = '0x..'; // CurveProxy address
+let targetContractName = 'CurveProxy'; /// CurveProxy name
+let targetFuncSig = 'setTrustedForwarder'; // CurveProxy function
+let targetArgList = ['0x..']; // params for setTrustedForwarder function
+let aragonVotingAddress = '0x287b073e286ccd4a7d3d7e1b7f8f20ca4432ee51';
 
 async function genHexString(interface, sig, argList) {
     let funcHex = await interface.encodeFunctionData(sig, argList);
@@ -9,15 +14,12 @@ async function genHexString(interface, sig, argList) {
 }
 
 async function delegateData(ContractName, sig, argList) {
-
-    // @todo Bridge address
-    let bridgeAddress = '0x...';
     const ContractInstance = await hre.ethers.getContractFactory(ContractName);
-    const Contract = await ContractInstance.attach(bridgeAddress);
+    const contract = await ContractInstance.attach(TARGET_ADDRESS);
 
-    let callDataBytes = await genHexString(Contract.interface, sig, argList);
+    let callDataBytes = await genHexString(contract.interface, sig, argList);
 
-    return [bridgeAddress, callDataBytes.toLowerCase()];
+    return [TARGET_ADDRESS, callDataBytes.toLowerCase()];
 }
 
 const createExecutorId = id => `0x${String(id).padStart(8, '0')}`
@@ -32,25 +34,16 @@ function encodeCallScript(actions, specId = 1) {
 
 
 async function main() {
-    // @todo
-    let votingAddress = '0x...'
-
-    let contractName = 'Bridge';
-    let sig = 'addContractBind';
-    // @todo replace names by params
-    let argList = ['from', 'oppositeBridge', 'to'];
-
     let specId = 1;
-    [callAddress, callDataBytes] = await delegateData(contractName, sig, argList);
+    [callAddress, callDataBytes] = await delegateData(targetContractName, targetFuncSig, targetArgList);
     let completeCallBytes = await encodeCallScript([{ to: callAddress, calldata: callDataBytes }], specId)
     console.log(completeCallBytes.toString());
 
     let votingContractName = "Voting";
-
     const VotingInstance = await hre.ethers.getContractFactory(votingContractName);
-    const Voting = await VotingInstance.attach(votingAddress);
+    const voting = await VotingInstance.attach(aragonVotingAddress);
 
-    const tx = await Voting.functions["newVote(bytes,string,bool,bool)"](completeCallBytes, argList, false, false);
+    const tx = await voting.functions["newVote(bytes,string,bool,bool)"](completeCallBytes, targetArgList, false, false);
     console.log(tx.hash);
     await tx.wait();
 }
