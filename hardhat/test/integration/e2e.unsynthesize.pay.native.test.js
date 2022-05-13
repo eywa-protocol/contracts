@@ -58,14 +58,22 @@ contract('Router', () => {
             SynthB.setProvider(factoryProvider.web3Net2)
             SynthC.setProvider(factoryProvider.web3Net3)
 
+            routerA = await RouterA.at(deployInfo["network1"].router)
+            routerB = await RouterB.at(deployInfo["network2"].router)
+            routerC = await RouterC.at(deployInfo["network3"].router)
+
+            await routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
+            await routerB.setTrustedWorker(userNet2, { from: userNet2, gas: 300_000 })
+            await routerC.setTrustedWorker(userNet3, { from: userNet3, gas: 300_000 })
+
             amount = ethers.utils.parseEther(Math.floor((Math.random() * 10) + 1) + ".0")
 
         })
 
         it("Unsynthesize(pay native): network2 -> network1 ", async function () {
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
-            this.routerA = await RouterA.at(deployInfo["network1"].router)
-            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            routerA = await RouterA.at(deployInfo["network1"].router)
+            routerB = await RouterB.at(deployInfo["network2"].router)
             const synthAddress = await synthesisB.getRepresentation(addressToBytes32(this.tokenA1.address))
             this.synthB = await SynthB.at(synthAddress)
             this.oldBalance = await this.synthB.balanceOf(userNet2)
@@ -75,10 +83,9 @@ contract('Router', () => {
             const chainIdB = deployInfo["network2"].chainId
 
             await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
-            await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
-            await this.routerB.setTrustedWorker(userNet2, { from: userNet2, gas: 300_000 })
+            await this.tokenA1.approve(routerA.address, amount, { from: userNet1, gas: 300_000 })
 
-            await this.routerA.tokenSynthesizeRequest(
+            await routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet2,
@@ -91,21 +98,21 @@ contract('Router', () => {
             )
 
             await timeout(25000)
-            await this.synthB.approve(this.routerB.address, amount, { from: userNet2, gas: 300_000 })
+            await this.synthB.approve(routerB.address, amount, { from: userNet2, gas: 300_000 })
 
-            const executionHash = await this.routerB._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
+            const executionHash = await routerB._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
             const workerExecutionPrice = ethers.utils.parseEther("1.0")
             const workerDeadline = "100000000000"
             const userFrom = userNet2
             const userTo = userNet1
-            const userNonce = await this.routerB.nonces(userFrom)
+            const userNonce = await routerB.nonces(userFrom)
             const chainIdFrom = deployInfo["network2"].chainId
             const chainIdTo = deployInfo["network1"].chainId
             const signerUserNet2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK2)
 
             const workerSignature = await signWorkerPermit(
                 signerUserNet2,
-                this.routerB.address,
+                routerB.address,
                 workerExecutionPrice,
                 executionHash,
                 chainIdFrom,
@@ -114,7 +121,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            await this.routerB.unsynthesizeRequestPayNative(
+            await routerB.unsynthesizeRequestPayNative(
                 this.synthB.address,
                 amount,
                 userTo,
@@ -139,8 +146,8 @@ contract('Router', () => {
 
         it("Unsynthesize(pay native): network2 -> network3 ", async function () {
             this.tokenC1 = await ERC20C.at(deployInfo["network3"].localToken[0].address)
-            this.routerC = await RouterC.at(deployInfo["network3"].router)
-            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            routerC = await RouterC.at(deployInfo["network3"].router)
+            routerB = await RouterB.at(deployInfo["network2"].router)
             const synthAddress = await synthesisB.getRepresentation(addressToBytes32(this.tokenC1.address))
             this.synthB = await SynthB.at(synthAddress)
             this.oldBalance = await this.synthB.balanceOf(userNet2)
@@ -150,10 +157,9 @@ contract('Router', () => {
             const chainIdB = deployInfo["network2"].chainId
 
             await this.tokenC1.mint(userNet3, amount, { from: userNet3, gas: 300_000 })
-            await this.tokenC1.approve(this.routerC.address, amount, { from: userNet3, gas: 300_000 })
-            await this.routerC.setTrustedWorker(userNet3, { from: userNet3, gas: 300_000 })
+            await this.tokenC1.approve(routerC.address, amount, { from: userNet3, gas: 300_000 })
 
-            await this.routerC.tokenSynthesizeRequest(
+            await routerC.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet2,
@@ -166,21 +172,21 @@ contract('Router', () => {
             )
 
             await timeout(25000)
-            await this.synthB.approve(this.routerB.address, amount, { from: userNet2, gas: 300_000 })
+            await this.synthB.approve(routerB.address, amount, { from: userNet2, gas: 300_000 })
 
-            const executionHash = await this.routerB._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
+            const executionHash = await routerB._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
             const workerExecutionPrice = ethers.utils.parseEther("1.0")
             const workerDeadline = "100000000000"
             const userFrom = userNet2
             const userTo = userNet3
-            const userNonce = await this.routerB.nonces(userFrom)
+            const userNonce = await routerB.nonces(userFrom)
             const chainIdFrom = deployInfo["network2"].chainId
             const chainIdTo = deployInfo["network3"].chainId
             const signerUserNet2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK2)
 
             const workerSignature = await signWorkerPermit(
                 signerUserNet2,
-                this.routerB.address,
+                routerB.address,
                 workerExecutionPrice,
                 executionHash,
                 chainIdFrom,
@@ -189,7 +195,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            await this.routerB.unsynthesizeRequestPayNative(
+            await routerB.unsynthesizeRequestPayNative(
                 this.synthB.address,
                 amount,
                 userTo,
@@ -215,7 +221,7 @@ contract('Router', () => {
         it("Unsynthesize(pay native): network1 -> network2", async function () {
 
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
-            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            routerB = await RouterB.at(deployInfo["network2"].router)
             const synthAddress = await synthesisA.getRepresentation(addressToBytes32(this.tokenB1.address))
             this.synthA = await SynthA.at(synthAddress)
             const oldBalance = await this.synthA.balanceOf(userNet1)
@@ -225,10 +231,9 @@ contract('Router', () => {
             const chainIdA = deployInfo["network1"].chainId
 
             await this.tokenB1.mint(userNet2, amount, { from: userNet2, gas: 300_000 })
-            await this.tokenB1.approve(this.routerB.address, amount, { from: userNet2, gas: 300_000 })
-            await this.routerB.setTrustedWorker(userNet2, { from: userNet2, gas: 300_000 })
+            await this.tokenB1.approve(routerB.address, amount, { from: userNet2, gas: 300_000 })
 
-            await this.routerB.tokenSynthesizeRequest(
+            await routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet1,
@@ -242,21 +247,21 @@ contract('Router', () => {
             )
 
             await timeout(25000)
-            await this.synthA.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
+            await this.synthA.approve(routerA.address, amount, { from: userNet1, gas: 300_000 })
 
-            const executionHash = await this.routerA._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
+            const executionHash = await routerA._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
             const workerExecutionPrice = ethers.utils.parseEther("1.0")
             const workerDeadline = "100000000000"
             const userFrom = userNet1
             const userTo = userNet2
-            const userNonce = await this.routerA.nonces(userFrom)
+            const userNonce = await routerA.nonces(userFrom)
             const chainIdFrom = deployInfo["network1"].chainId
             const chainIdTo = deployInfo["network2"].chainId
             const signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
 
             const workerSignature = await signWorkerPermit(
                 signerUserNet1,
-                this.routerA.address,
+                routerA.address,
                 workerExecutionPrice,
                 executionHash,
                 chainIdFrom,
@@ -265,7 +270,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            await this.routerA.unsynthesizeRequestPayNative(
+            await routerA.unsynthesizeRequestPayNative(
                 this.synthA.address,
                 amount,
                 userTo,
@@ -291,7 +296,7 @@ contract('Router', () => {
         it("Unsynthesize(pay native): network1 -> network3", async function () {
 
             this.tokenB1 = await ERC20B.at(deployInfo["network2"].localToken[0].address)
-            this.routerB = await RouterB.at(deployInfo["network2"].router)
+            routerB = await RouterB.at(deployInfo["network2"].router)
             const synthAddress = await synthesisA.getRepresentation(addressToBytes32(this.tokenB1.address))
             this.synthA = await SynthA.at(synthAddress)
             const oldBalance = await this.synthA.balanceOf(userNet1)
@@ -301,10 +306,9 @@ contract('Router', () => {
             const chainIdA = deployInfo["network1"].chainId
 
             await this.tokenB1.mint(userNet2, amount, { from: userNet2, gas: 300_000 })
-            await this.tokenB1.approve(this.routerB.address, amount, { from: userNet2, gas: 300_000 })
-            await this.routerB.setTrustedWorker(userNet2, { from: userNet2, gas: 300_000 })
+            await this.tokenB1.approve(routerB.address, amount, { from: userNet2, gas: 300_000 })
 
-            await this.routerB.tokenSynthesizeRequest(
+            await routerB.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet1,
@@ -318,22 +322,22 @@ contract('Router', () => {
             )
 
             await timeout(25000)
-            await this.synthA.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
+            await this.synthA.approve(routerA.address, amount, { from: userNet1, gas: 300_000 })
 
 
-            const executionHash = await this.routerA._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
+            const executionHash = await routerA._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
             const workerExecutionPrice = ethers.utils.parseEther("1.0")
             const workerDeadline = "100000000000"
             const userFrom = userNet1
             const userTo = userNet3
-            const userNonce = await this.routerA.nonces(userFrom)
+            const userNonce = await routerA.nonces(userFrom)
             const chainIdFrom = deployInfo["network1"].chainId
             const chainIdTo = deployInfo["network3"].chainId
             const signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
 
             const workerSignature = await signWorkerPermit(
                 signerUserNet1,
-                this.routerA.address,
+                routerA.address,
                 workerExecutionPrice,
                 executionHash,
                 chainIdFrom,
@@ -342,7 +346,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            await this.routerA.unsynthesizeRequestPayNative(
+            await routerA.unsynthesizeRequestPayNative(
                 this.synthA.address,
                 amount,
                 userTo,
@@ -368,8 +372,8 @@ contract('Router', () => {
         it("Unsynthesize(pay native): network3 -> network2", async function () {
 
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
-            this.routerA = await RouterA.at(deployInfo["network1"].router)
-            this.routerC = await RouterC.at(deployInfo["network3"].router)
+            routerA = await RouterA.at(deployInfo["network1"].router)
+            routerC = await RouterC.at(deployInfo["network3"].router)
             const synthAddress = await synthesisC.getRepresentation(addressToBytes32(this.tokenA1.address))
             this.synthC = await SynthC.at(synthAddress)
             const oldBalance = await this.synthC.balanceOf(userNet3)
@@ -379,10 +383,9 @@ contract('Router', () => {
             const chainIdC = deployInfo["network3"].chainId
 
             await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
-            await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
-            await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
+            await this.tokenA1.approve(routerA.address, amount, { from: userNet1, gas: 300_000 })
 
-            await this.routerA.tokenSynthesizeRequest(
+            await routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet3,
@@ -396,21 +399,21 @@ contract('Router', () => {
             )
 
             await timeout(25000)
-            await this.synthC.approve(this.routerC.address, amount, { from: userNet3, gas: 300_000 })
+            await this.synthC.approve(routerC.address, amount, { from: userNet3, gas: 300_000 })
 
-            const executionHash = await this.routerC._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
+            const executionHash = await routerC._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
             const workerExecutionPrice = ethers.utils.parseEther("1.0")
             const workerDeadline = "100000000000"
             const userFrom = userNet3
             const userTo = userNet2
-            const userNonce = await this.routerC.nonces(userFrom)
+            const userNonce = await routerC.nonces(userFrom)
             const chainIdFrom = deployInfo["network3"].chainId
             const chainIdTo = deployInfo["network2"].chainId
             const signerUserNet3 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK3)
 
             const workerSignature = await signWorkerPermit(
                 signerUserNet3,
-                this.routerC.address,
+                routerC.address,
                 workerExecutionPrice,
                 executionHash,
                 chainIdFrom,
@@ -419,7 +422,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            await this.routerC.unsynthesizeRequestPayNative(
+            await routerC.unsynthesizeRequestPayNative(
                 this.synthC.address,
                 amount,
                 userTo,
@@ -445,8 +448,8 @@ contract('Router', () => {
         it("Unsynthesize(pay native): network3 -> network1", async function () {
 
             this.tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
-            this.routerA = await RouterA.at(deployInfo["network1"].router)
-            this.routerC = await RouterC.at(deployInfo["network3"].router)
+            routerA = await RouterA.at(deployInfo["network1"].router)
+            routerC = await RouterC.at(deployInfo["network3"].router)
             const synthAddress = await synthesisC.getRepresentation(addressToBytes32(this.tokenA1.address))
             this.synthC = await SynthC.at(synthAddress)
             const oldBalance = await this.synthC.balanceOf(userNet3)
@@ -456,10 +459,9 @@ contract('Router', () => {
             const chainIdC = deployInfo["network3"].chainId
 
             await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
-            await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
-            await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
+            await this.tokenA1.approve(routerA.address, amount, { from: userNet1, gas: 300_000 })
 
-            await this.routerA.tokenSynthesizeRequest(
+            await routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
                 userNet3,
@@ -473,21 +475,21 @@ contract('Router', () => {
             )
 
             await timeout(25000)
-            await this.synthC.approve(this.routerC.address, amount, { from: userNet3, gas: 300_000 })
+            await this.synthC.approve(routerC.address, amount, { from: userNet3, gas: 300_000 })
 
-            const executionHash = await this.routerC._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
+            const executionHash = await routerC._UNSYNTHESIZE_REQUEST_SIGNATURE_HASH()
             const workerExecutionPrice = ethers.utils.parseEther("1.0")
             const workerDeadline = "100000000000"
             const userFrom = userNet3
             const userTo = userNet1
-            const userNonce = await this.routerC.nonces(userFrom)
+            const userNonce = await routerC.nonces(userFrom)
             const chainIdFrom = deployInfo["network3"].chainId
             const chainIdTo = deployInfo["network1"].chainId
             const signerUserNet3 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK3)
 
             const workerSignature = await signWorkerPermit(
                 signerUserNet3,
-                this.routerC.address,
+                routerC.address,
                 workerExecutionPrice,
                 executionHash,
                 chainIdFrom,
@@ -496,7 +498,7 @@ contract('Router', () => {
                 workerDeadline
             )
 
-            await this.routerC.unsynthesizeRequestPayNative(
+            await routerC.unsynthesizeRequestPayNative(
                 this.synthC.address,
                 amount,
                 userTo,

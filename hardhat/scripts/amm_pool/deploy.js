@@ -10,15 +10,15 @@ async function main() {
 
     const _Portal = await ethers.getContractFactory("Portal")
     //const portal  = await _Portal.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
-    const portal = await upgrades.deployProxy(_Portal, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder], 
+    const portal = await upgrades.deployProxy(_Portal, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder],
         { initializer: 'initializeFunc' }
-        );
+    );
     await portal.deployed();
     console.log("Portal address:", portal.address);
 
     const _Synthesis = await ethers.getContractFactory("Synthesis");
     //const synthesis  = await _Synthesis.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
-    const synthesis = await upgrades.deployProxy(_Synthesis, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder], { initializer: 'initializeFunc'});
+    const synthesis = await upgrades.deployProxy(_Synthesis, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder], { initializer: 'initializeFunc' });
     await synthesis.deployed();
     console.log("Synthesis address:", synthesis.address);
 
@@ -46,7 +46,7 @@ async function main() {
 
     //Deploy Router
     const _Router = await ethers.getContractFactory("Router");
-    const router = await _Router.deploy(portal.address, synthesis.address, curveProxy.address);
+    const router = await _Router.deploy(portal.address, synthesis.address, curveProxy.address, networkConfig[network.name].chainId);
     await router.deployed();
     console.log(`Router address: ${router.address}`);
 

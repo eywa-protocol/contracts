@@ -87,12 +87,12 @@ contract('CurveProxy', () => {
                 addAtHubPool: deployInfo["network2"].hubPool.address,
                 expectedMinMintAmountH: 0,
                 to: userNet2,
-                initialBridge:deployInfo["network2"].bridge,
-                initialChainID:deployInfo["network2"].chainId
+                initialBridge: deployInfo["network2"].bridge,
+                initialChainID: deployInfo["network2"].chainId
             }
 
             const encodedTransitData = web3.eth.abi.encodeParameters(
-                ["address", "uint256", "uint256", "address", "uint256", "address","address","uint256"],
+                ["address", "uint256", "uint256", "address", "uint256", "address", "address", "uint256"],
                 [mintEUSDparams.addAtCrosschainPool,
                 mintEUSDparams.expectedMinMintAmountC,
                 mintEUSDparams.lpIndex,
@@ -172,12 +172,12 @@ contract('CurveProxy', () => {
                 addAtHubPool: deployInfo["network2"].hubPool.address,
                 expectedMinMintAmountH: 0,
                 to: userNet2,
-                initialBridge:deployInfo["network3"].bridge,
-                initialChainID:deployInfo["network3"].chainId
+                initialBridge: deployInfo["network3"].bridge,
+                initialChainID: deployInfo["network3"].chainId
             }
 
             const encodedTransitData = web3.eth.abi.encodeParameters(
-                ["address", "uint256", "uint256", "address", "uint256", "address","address","uint256"],
+                ["address", "uint256", "uint256", "address", "uint256", "address", "address", "uint256"],
                 [mintEUSDparams.addAtCrosschainPool,
                 mintEUSDparams.expectedMinMintAmountC,
                 mintEUSDparams.lpIndex,
@@ -243,8 +243,8 @@ contract('CurveProxy', () => {
                 addAtHubPool: deployInfo["network2"].hubPool.address,
                 expectedMinMintAmountH: 0,
                 to: userNet2,
-                initialBridge:deployInfo["network2"].bridge,
-                initialChainID:deployInfo["network2"].chainId
+                initialBridge: deployInfo["network2"].bridge,
+                initialChainID: deployInfo["network2"].chainId
             }
 
             //unused in this case
@@ -502,13 +502,13 @@ contract('CurveProxy', () => {
                 receiveSide: deployInfo["network3"].portal,
                 oppositeBridge: deployInfo["network3"].bridge,
                 chainId: deployInfo["network3"].chainId,
-                initialBridge:deployInfo["network1"].bridge,
-                initialChainID:deployInfo["network1"].chainId
+                initialBridge: deployInfo["network1"].bridge,
+                initialChainID: deployInfo["network1"].chainId
             }
 
             const encodedTransitData = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256', 'int128', 'int128', 'uint256', 'int128', 'uint256',
-                 'address', 'address', 'address', 'address', 'uint256','address','uint256'],
+                    'address', 'address', 'address', 'address', 'uint256', 'address', 'uint256'],
                 [metaExchangeParams.add,
                 metaExchangeParams.exchange,
                 metaExchangeParams.remove,
@@ -609,8 +609,8 @@ contract('CurveProxy', () => {
                 receiveSide: deployInfo["network1"].portal,
                 oppositeBridge: deployInfo["network1"].bridge,
                 chainId: deployInfo["network1"].chainId,
-                initialBridge:deployInfo["network3"].bridge,
-                initialChainID:deployInfo["network3"].chainId
+                initialBridge: deployInfo["network3"].bridge,
+                initialChainID: deployInfo["network3"].chainId
             }
 
             //unused in this case
@@ -624,7 +624,7 @@ contract('CurveProxy', () => {
 
             const encodedTransitData = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256', 'int128', 'int128', 'uint256', 'int128', 'uint256',
-                 'address', 'address', 'address', 'address', 'uint256','address','uint256'],
+                    'address', 'address', 'address', 'address', 'uint256', 'address', 'uint256'],
                 [metaExchangeParams.add,
                 metaExchangeParams.exchange,
                 metaExchangeParams.remove,
@@ -705,8 +705,8 @@ contract('CurveProxy', () => {
                 receiveSide: deployInfo["network1"].portal,
                 oppositeBridge: deployInfo["network1"].bridge,
                 chainId: deployInfo["network1"].chainId,
-                initialBridge:deployInfo["network2"].bridge,
-                initialChainID:deployInfo["network2"].chainId
+                initialBridge: deployInfo["network2"].bridge,
+                initialChainID: deployInfo["network2"].chainId
             }
 
             //unused in this case
@@ -769,8 +769,8 @@ contract('CurveProxy', () => {
                 receiveSide: deployInfo["network3"].portal,
                 oppositeBridge: deployInfo["network3"].bridge,
                 chainId: deployInfo["network3"].chainId,
-                initialBridge:deployInfo["network2"].bridge,
-                initialChainID:deployInfo["network2"].chainId
+                initialBridge: deployInfo["network2"].bridge,
+                initialChainID: deployInfo["network2"].chainId
             }
 
             //unused in this case
@@ -845,8 +845,8 @@ contract('CurveProxy', () => {
                 receiveSide: ethers.constants.AddressZero,
                 oppositeBridge: ethers.constants.AddressZero,
                 chainId: 0,
-                initialBridge:deployInfo["network1"].bridge,
-                initialChainID:deployInfo["network1"].chainId
+                initialBridge: deployInfo["network1"].bridge,
+                initialChainID: deployInfo["network1"].chainId
             }
 
             //unused in this case
@@ -860,7 +860,7 @@ contract('CurveProxy', () => {
 
             const encodedTransitData = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256', 'int128', 'int128', 'uint256', 'int128', 'uint256',
-                 'address', 'address', 'address', 'address', 'uint256','address','uint256'],
+                    'address', 'address', 'address', 'address', 'uint256', 'address', 'uint256'],
                 [metaExchangeParams.add,
                 metaExchangeParams.exchange,
                 metaExchangeParams.remove,
@@ -952,8 +952,8 @@ contract('CurveProxy', () => {
                 receiveSide: ethers.constants.AddressZero,
                 oppositeBridge: ethers.constants.AddressZero,
                 chainId: 0,
-                initialBridge:deployInfo["network3"].bridge,
-                initialChainID:deployInfo["network3"].chainId
+                initialBridge: deployInfo["network3"].bridge,
+                initialChainID: deployInfo["network3"].chainId
             }
 
             //unused in this case
@@ -967,7 +967,7 @@ contract('CurveProxy', () => {
 
             const encodedTransitData = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256', 'int128', 'int128', 'uint256', 'int128', 'uint256',
-                 'address', 'address', 'address', 'address', 'uint256','address','uint256'],
+                    'address', 'address', 'address', 'address', 'uint256', 'address', 'uint256'],
                 [metaExchangeParams.add,
                 metaExchangeParams.exchange,
                 metaExchangeParams.remove,

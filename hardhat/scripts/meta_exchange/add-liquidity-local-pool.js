@@ -15,32 +15,32 @@ async function main() {
 
   const ERC20 = await ethers.getContractFactory('ERC20Mock');
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool');
-  
+
   const totalSupply = ethers.utils.parseEther("100000000000.0");
 
 
   if (network.name == "network2" || network.name == "mumbai") {
     for (let i = 0; i < deployInfo[network.name].localToken.length; i++) {
       let locTk = await ERC20.attach(deployInfo[network.name].localToken[i].address);
-      let tx    = await locTk.mint(owner.address, totalSupply);
+      let tx = await locTk.mint(owner.address, totalSupply);
       await tx.wait();
       // approve for localPool
       tx = await locTk.approve(deployInfo[network.name].localPool.address, totalSupply);
       await tx.wait();
 
       console.log("minted ETH token", tx.hash);
-      
+
     }
 
     // add liquidity
     const amountEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"));
     const min_mint_amount = 0;
     let tx = await StableSwap3Pool.attach(deployInfo[network.name].localPool.address).add_liquidity(
-        amountEth,
-        min_mint_amount,
-        {
-          gasLimit: '5000000'
-        }
+      amountEth,
+      min_mint_amount,
+      {
+        gasLimit: '5000000'
+      }
     );
     await tx.wait();
     console.log("local pool has been filled:", tx.hash);

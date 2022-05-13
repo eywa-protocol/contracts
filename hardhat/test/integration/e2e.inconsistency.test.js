@@ -57,11 +57,11 @@ describe("E2E CurveProxy local test", () => {
         EUSD = await ERC20B.at(deployInfo["network2"].hubPool.lp)
     })
 
- it("Exchange: Inconsistency - min_mint_amount", async function () {
+    it("Exchange: Inconsistency - min_mint_amount", async function () {
         selectorMetaExchange = web3.eth.abi.encodeFunctionSignature(
             'transiSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256,address,uint256),address[3],uint256[3],bytes32[3])'
         )
-        
+
         this.balanceA2 = (await tokenA2.balanceOf(userNet1))
 
         //synthesize params
@@ -92,13 +92,13 @@ describe("E2E CurveProxy local test", () => {
             receiveSide: deployInfo["network1"].portal,
             oppositeBridge: deployInfo["network1"].bridge,
             chainId: deployInfo["network1"].chainId,
-            initialBridge:deployInfo["network3"].bridge,
-            initialChainID:deployInfo["network3"].chainId
+            initialBridge: deployInfo["network3"].bridge,
+            initialChainID: deployInfo["network3"].chainId
         }
 
         const encodedTransitData = web3.eth.abi.encodeParameters(
             ['address', 'address', 'address', 'uint256', 'int128', 'int128', 'uint256', 'int128', 'uint256',
-             'address', 'address', 'address', 'address', 'uint256', 'address', 'uint256'],
+                'address', 'address', 'address', 'address', 'uint256', 'address', 'uint256'],
             [metaExchangeParams.add,
             metaExchangeParams.exchange,
             metaExchangeParams.remove,
@@ -133,7 +133,7 @@ describe("E2E CurveProxy local test", () => {
 
         await tokenC1.approve(portalC.address, totalSupply, { from: userNet3, gas: 300_000 })
         const tokensToSynth = [tokenC1.address, tokenC2.address, tokenC3.address]
-        
+
         await portalC.synthesizeBatchWithDataTransit(
             tokensToSynth,
             amounts,
@@ -145,7 +145,7 @@ describe("E2E CurveProxy local test", () => {
         )
 
         await timeout(25000)
-        
+
         assert(this.balanceA2.eq(await tokenA2.balanceOf(userNet1)))
     })
 
@@ -184,13 +184,13 @@ describe("E2E CurveProxy local test", () => {
             receiveSide: deployInfo["network1"].portal,
             oppositeBridge: deployInfo["network1"].bridge,
             chainId: deployInfo["network1"].chainId,
-            initialBridge:deployInfo["network3"].bridge,
-            initialChainID:deployInfo["network3"].chainId
+            initialBridge: deployInfo["network3"].bridge,
+            initialChainID: deployInfo["network3"].chainId
         }
 
         const encodedTransitData = web3.eth.abi.encodeParameters(
             ['address', 'address', 'address', 'uint256', 'int128', 'int128', 'uint256', 'int128', 'uint256',
-             'address', 'address', 'address', 'address', 'uint256', 'address', 'uint256'],
+                'address', 'address', 'address', 'address', 'uint256', 'address', 'uint256'],
             [metaExchangeParams.add,
             metaExchangeParams.exchange,
             metaExchangeParams.remove,
@@ -237,7 +237,7 @@ describe("E2E CurveProxy local test", () => {
         )
 
         await timeout(25000)
-        
+
         assert(this.balanceA2.eq(await tokenA2.balanceOf(userNet1)))
     })
 
@@ -276,13 +276,13 @@ describe("E2E CurveProxy local test", () => {
             receiveSide: deployInfo["network1"].portal,
             oppositeBridge: deployInfo["network1"].bridge,
             chainId: deployInfo["network1"].chainId,
-            initialBridge:deployInfo["network3"].bridge,
-            initialChainID:deployInfo["network3"].chainId
+            initialBridge: deployInfo["network3"].bridge,
+            initialChainID: deployInfo["network3"].chainId
         }
 
         const encodedTransitData = web3.eth.abi.encodeParameters(
             ['address', 'address', 'address', 'uint256', 'int128', 'int128', 'uint256', 'int128', 'uint256',
-             'address', 'address', 'address', 'address', 'uint256', 'address', 'uint256'],
+                'address', 'address', 'address', 'address', 'uint256', 'address', 'uint256'],
             [metaExchangeParams.add,
             metaExchangeParams.exchange,
             metaExchangeParams.remove,
@@ -329,7 +329,7 @@ describe("E2E CurveProxy local test", () => {
         )
 
         await timeout(25000)
-        
+
         assert(this.balanceA2.eq(await tokenA2.balanceOf(userNet1)))
     })
 
@@ -357,8 +357,8 @@ describe("E2E CurveProxy local test", () => {
             addAtHubPool: deployInfo["network2"].hubPool.address,
             expectedMinMintAmountH: 0,
             to: userNet2,
-            initialBridge:deployInfo["network2"].bridge,
-            initialChainID:deployInfo["network2"].chainId
+            initialBridge: deployInfo["network2"].bridge,
+            initialChainID: deployInfo["network2"].chainId
         }
 
         const encodedTransitData = web3.eth.abi.encodeParameters(
@@ -418,8 +418,8 @@ describe("E2E CurveProxy local test", () => {
             receiveSide: deployInfo["network2"].curveProxy,
             oppositeBridge: deployInfo["network2"].bridge,
             chainId: deployInfo["network2"].chainId,
-            initialBridge:deployInfo["network2"].bridge,
-            initialChainID:deployInfo["network2"].chainId
+            initialBridge: deployInfo["network2"].bridge,
+            initialChainID: deployInfo["network2"].chainId
         }
 
         const mintEUSDparams = {
@@ -431,8 +431,8 @@ describe("E2E CurveProxy local test", () => {
             addAtHubPool: deployInfo["network2"].hubPool.address,
             expectedMinMintAmountH: ethers.constants.MaxUint256,
             to: userNet2,
-            initialBridge:deployInfo["network2"].bridge,
-            initialChainID:deployInfo["network2"].chainId
+            initialBridge: deployInfo["network2"].bridge,
+            initialChainID: deployInfo["network2"].chainId
         }
 
         const encodedTransitData = web3.eth.abi.encodeParameters(

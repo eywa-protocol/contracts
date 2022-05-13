@@ -1,7 +1,6 @@
 let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
 const { checkoutProvider, timeout, addressToBytes32 } = require("../../utils/helper");
 const { ethers } = require("hardhat");
-const { parseBytes32String } = require("ethers/lib/utils");
 const { expect } = require("chai");
 
 contract('Router', () => {
@@ -105,7 +104,7 @@ contract('Router', () => {
 
             //B->C
             await routerB.synthTransferRequest(
-                addressToBytes32(deployInfo["network1"].localToken[0].address),
+                synthAddressB1,
                 amount,
                 userNet3,
                 {
@@ -150,7 +149,7 @@ contract('Router', () => {
 
             //B->A
             await routerB.synthTransferRequest(
-                addressToBytes32(deployInfo["network3"].localToken[0].address),
+                synthAddressB1,
                 amount,
                 userNet1,
                 {
@@ -195,7 +194,7 @@ contract('Router', () => {
 
             //A->B
             await routerA.synthTransferRequest(
-                addressToBytes32(deployInfo["network3"].localToken[0].address),
+                synthAddressA1,
                 amount,
                 userNet2,
                 {
@@ -241,7 +240,7 @@ contract('Router', () => {
 
             //C->B
             await routerC.synthTransferRequest(
-                addressToBytes32(deployInfo["network1"].localToken[0].address),
+                synthAddressC1,
                 amount,
                 userNet2,
                 {
@@ -286,7 +285,7 @@ contract('Router', () => {
 
             //C->A
             await routerC.synthTransferRequest(
-                addressToBytes32(deployInfo["network2"].localToken[0].address),
+                synthAddressC1,
                 amount,
                 userNet1,
                 {
@@ -328,7 +327,7 @@ contract('Router', () => {
 
             //A->C
             await expect(routerA.synthTransferRequest(
-                addressToBytes32(deployInfo["network3"].localToken[0].address),
+                synthAddressA1,
                 amount,
                 userNet3,
                 {

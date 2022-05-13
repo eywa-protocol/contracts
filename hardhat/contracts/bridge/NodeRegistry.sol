@@ -50,7 +50,11 @@ contract NodeRegistry is Bridge {
     event NewSnapshot(uint256 snapNum);
     event CreatedRelayer(address indexed owner, address relayerPool, string hostId, bytes blsPubKey, uint256 nodeId);
 
-    function initialize2(address _EYWA, address _forwarder, address _poolFactory) public initializer {
+    function initialize2(
+        address _EYWA,
+        address _forwarder,
+        address _poolFactory
+    ) public initializer {
         require(_EYWA != address(0), Errors.ZERO_ADDRESS);
         poolFactory = _poolFactory;
         EYWA = _EYWA;
@@ -132,10 +136,7 @@ contract NodeRegistry is Bridge {
         addNode(_node);
     }
 
-        function createRelayerPermitted(
-        Node memory _node,
-        uint256 _deadline
-    ) external {
+    function createRelayerPermitted(Node memory _node, uint256 _deadline) external {
         RelayerPool relayerPool = IRelayerPoolFactory(poolFactory).create(
             _node.owner, // node owner
             address(EYWA), // depositToken

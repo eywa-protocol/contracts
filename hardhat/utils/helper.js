@@ -27,7 +27,7 @@ const checkoutProvider = (argv) => {
 
         let web3Net3_l;
 
-        if (argv.net3 === undefined || argv.net3 === void 0 ) {
+        if (argv.net3 === undefined || argv.net3 === void 0) {
             web3Net3_l = void 0;
         } else {
             web3Net3_l = new HDWalletProvider(env.parsed[getPk(argv.net3)], network[argv.net3].rpcUrl);
@@ -113,14 +113,28 @@ const getRepresentation = async (realToken, decimals, chainId, netwiker, synthes
     ))
 }
 
+const getCustomRepresentation = async (address, name, symbol, decimals, chainId, netwiker, synthesisAddress) => {
+    const SyntERC20 = await ethers.getContractFactory('SyntERC20')
+    const bytecodeWithParams = SyntERC20.bytecode + web3.eth.abi.encodeParameters(
+        ['string', 'string', 'uint8', 'uint256', 'bytes32', 'string'],
+        [name, symbol, decimals, chainId, addressToBytes32(address), netwiker]
+    ).slice(2)
+    const salt = web3.utils.keccak256(addressToBytes32(address))
+    return web3.utils.toChecksumAddress(getCreate2Address(
+        synthesisAddress,
+        salt,
+        bytecodeWithParams
+    ))
+}
+
 const getTxId = (userFrom, nonce, chainIdOpposite, chainIdCurrent, receiveSide, oppositeBridge) => {
     return web3.utils.soliditySha3(
-        { type: 'bytes32', value:addressToBytes32(userFrom)},
-        { type: 'uint256', value:nonce},
-        { type: 'uint256', value:chainIdOpposite},
-        { type: 'uint256', value:chainIdCurrent},
-        { type: 'bytes32', value:addressToBytes32(receiveSide)},
-        { type: 'bytes32', value:addressToBytes32(oppositeBridge)},
+        { type: 'bytes32', value: addressToBytes32(userFrom) },
+        { type: 'uint256', value: nonce },
+        { type: 'uint256', value: chainIdOpposite },
+        { type: 'uint256', value: chainIdCurrent },
+        { type: 'bytes32', value: addressToBytes32(receiveSide) },
+        { type: 'bytes32', value: addressToBytes32(oppositeBridge) },
     );
 }
 
@@ -133,7 +147,7 @@ const signWorkerPermit = async (
     chainIdTo,
     userNonce,
     workerDeadline
-)  => {
+) => {
     const hashedName = ethers.utils.solidityKeccak256(
         ['string'],
         ["EYWA"]
@@ -172,7 +186,7 @@ const signWorkerPermit = async (
         ['string', 'bytes32', 'bytes32'],
         ['\x19\x01', domainSeparatorHash, workerStructHash]
     );
-    
+
     return ethers.utils.splitSignature(await userFrom.signMessage(ethers.utils.arrayify(workerMsgHash)));
 }
 
@@ -188,5 +202,6 @@ module.exports = {
     getCreate2Address,
     getRepresentation,
     getTxId,
-    signWorkerPermit
+    signWorkerPermit,
+    getCustomRepresentation
 };

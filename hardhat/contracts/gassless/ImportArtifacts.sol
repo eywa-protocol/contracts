@@ -11,13 +11,14 @@ import "@opengsn/contracts/src/forwarder/IForwarder.sol";
 // a minimal subset from 0x/LibBytes
 /* solhint-disable no-inline-assembly */
 library MinLibBytes {
-
     //truncate the given parameter (in-place) if its length is above the given maximum length
     // do nothing otherwise.
     //NOTE: solidity warns unless the method is marked "pure", but it DOES modify its parameter.
     function truncateInPlace(bytes memory data, uint256 maxlen) internal pure {
         if (data.length > maxlen) {
-            assembly { mstore(data, maxlen) }
+            assembly {
+                mstore(data, maxlen)
+            }
         }
     }
 
@@ -25,15 +26,8 @@ library MinLibBytes {
     /// @param b Byte array containing an address.
     /// @param index Index in byte array of address.
     /// @return result address from byte array.
-    function readAddress(
-        bytes memory b,
-        uint256 index
-    )
-        internal
-        pure
-        returns (address result)
-    {
-        require (b.length >= index + 20, "readAddress: data too short");
+    function readAddress(bytes memory b, uint256 index) internal pure returns (address result) {
+        require(b.length >= index + 20, "readAddress: data too short");
 
         // Add offset to index:
         // 1. Arrays are prefixed by 32-byte length parameter (add 32 to index)
@@ -42,27 +36,20 @@ library MinLibBytes {
 
         // Read address from array memory
         assembly {
-        // 1. Add index to address of bytes array
-        // 2. Load 32-byte word from memory
-        // 3. Apply 20-byte mask to obtain address
+            // 1. Add index to address of bytes array
+            // 2. Load 32-byte word from memory
+            // 3. Apply 20-byte mask to obtain address
             result := and(mload(add(b, index)), 0xffffffffffffffffffffffffffffffffffffffff)
         }
         return result;
     }
 
-    function readBytes32(
-        bytes memory b,
-        uint256 index
-    )
-        internal
-        pure
-        returns (bytes32 result)
-    {
-        require(b.length >= index + 32, "readBytes32: data too short" );
+    function readBytes32(bytes memory b, uint256 index) internal pure returns (bytes32 result) {
+        require(b.length >= index + 32, "readBytes32: data too short");
 
         // Read the bytes32 from array memory
         assembly {
-            result := mload(add(b, add(index,32)))
+            result := mload(add(b, add(index, 32)))
         }
         return result;
     }
@@ -71,33 +58,19 @@ library MinLibBytes {
     /// @param b Byte array containing a uint256 value.
     /// @param index Index in byte array of uint256 value.
     /// @return result uint256 value from byte array.
-    function readUint256(
-        bytes memory b,
-        uint256 index
-    )
-        internal
-        pure
-        returns (uint256 result)
-    {
+    function readUint256(bytes memory b, uint256 index) internal pure returns (uint256 result) {
         result = uint256(readBytes32(b, index));
         return result;
     }
 
-    function readBytes4(
-        bytes memory b,
-        uint256 index
-    )
-        internal
-        pure
-        returns (bytes4 result)
-    {
+    function readBytes4(bytes memory b, uint256 index) internal pure returns (bytes4 result) {
         require(b.length >= index + 4, "readBytes4: data too short");
 
         // Read the bytes4 from array memory
         assembly {
-            result := mload(add(b, add(index,32)))
-        // Solidity does not require us to clean the trailing bytes.
-        // We do it anyway
+            result := mload(add(b, add(index, 32)))
+            // Solidity does not require us to clean the trailing bytes.
+            // We do it anyway
             result := and(result, 0xFFFFFFFF00000000000000000000000000000000000000000000000000000000)
         }
         return result;
@@ -133,13 +106,12 @@ interface GsnTypes {
  * It is better to inherit the BaseRelayRecipient as its implementation.
  */
 abstract contract IRelayRecipient {
-
     /**
      * return if the forwarder is trusted to forward relayed transactions to us.
      * the forwarder is required to verify the sender's signature, and verify
      * the call is not a replay.
      */
-    function isTrustedForwarder(address forwarder) public virtual view returns(bool);
+    function isTrustedForwarder(address forwarder) public view virtual returns (bool);
 
     /**
      * return the sender of this call.
@@ -148,7 +120,7 @@ abstract contract IRelayRecipient {
      * otherwise, return `msg.sender`
      * should be used in the contract anywhere instead of msg.sender
      */
-    function _msgSender() internal virtual view returns (address payable);
+    function _msgSender() internal view virtual returns (address payable);
 
     /**
      * return the msg.data of this call.
@@ -157,9 +129,9 @@ abstract contract IRelayRecipient {
      * otherwise (if the call was made directly and not through the forwarder), return `msg.data`
      * should be used in the contract instead of msg.data, where this difference matters.
      */
-    function _msgData() internal virtual view returns (bytes memory);
+    function _msgData() internal view virtual returns (bytes memory);
 
-    function versionRecipient() external virtual view returns (string memory);
+    function versionRecipient() external view virtual returns (string memory);
 }
 
 // File: @opengsn/contracts/src/utils/GsnEip712Library.sol
@@ -172,19 +144,20 @@ library GsnEip712Library {
     uint256 private constant MAX_RETURN_SIZE = 1024;
 
     //copied from Forwarder (can't reference string constants even from another library)
-    string public constant GENERIC_PARAMS = "address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data,uint256 validUntil";
+    string public constant GENERIC_PARAMS =
+        "address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data,uint256 validUntil";
 
-    bytes public constant RELAYDATA_TYPE = "RelayData(uint256 gasPrice,uint256 pctRelayFee,uint256 baseRelayFee,address relayWorker,address paymaster,address forwarder,bytes paymasterData,uint256 clientId)";
+    bytes public constant RELAYDATA_TYPE =
+        "RelayData(uint256 gasPrice,uint256 pctRelayFee,uint256 baseRelayFee,address relayWorker,address paymaster,address forwarder,bytes paymasterData,uint256 clientId)";
 
     string public constant RELAY_REQUEST_NAME = "RelayRequest";
     string public constant RELAY_REQUEST_SUFFIX = string(abi.encodePacked("RelayData relayData)", RELAYDATA_TYPE));
 
-    bytes public constant RELAY_REQUEST_TYPE = abi.encodePacked(
-        RELAY_REQUEST_NAME,"(",GENERIC_PARAMS,",", RELAY_REQUEST_SUFFIX);
+    bytes public constant RELAY_REQUEST_TYPE =
+        abi.encodePacked(RELAY_REQUEST_NAME, "(", GENERIC_PARAMS, ",", RELAY_REQUEST_SUFFIX);
 
     bytes32 public constant RELAYDATA_TYPEHASH = keccak256(RELAYDATA_TYPE);
     bytes32 public constant RELAY_REQUEST_TYPEHASH = keccak256(RELAY_REQUEST_TYPE);
-
 
     struct EIP712Domain {
         string name;
@@ -193,28 +166,18 @@ library GsnEip712Library {
         address verifyingContract;
     }
 
-    bytes32 public constant EIP712DOMAIN_TYPEHASH = keccak256(
-        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-    );
+    bytes32 public constant EIP712DOMAIN_TYPEHASH =
+        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
 
-    function splitRequest(
-        GsnTypes.RelayRequest calldata req
-    )
-        internal
-        pure
-        returns (bytes memory suffixData)
-    {
-        suffixData = abi.encode(
-            hashRelayData(req.relayData));
+    function splitRequest(GsnTypes.RelayRequest calldata req) internal pure returns (bytes memory suffixData) {
+        suffixData = abi.encode(hashRelayData(req.relayData));
     }
 
     //verify that the recipient trusts the given forwarder
     // MUST be called by paymaster
     function verifyForwarderTrusted(GsnTypes.RelayRequest calldata relayRequest) internal view {
         (bool success, bytes memory ret) = relayRequest.request.to.staticcall(
-            abi.encodeWithSelector(
-                IRelayRecipient.isTrustedForwarder.selector, relayRequest.relayData.forwarder
-            )
+            abi.encodeWithSelector(IRelayRecipient.isTrustedForwarder.selector, relayRequest.relayData.forwarder)
         );
         require(success, "isTrustedForwarder: reverted");
         require(ret.length == 32, "isTrustedForwarder: bad response");
@@ -222,7 +185,7 @@ library GsnEip712Library {
     }
 
     function verifySignature(GsnTypes.RelayRequest calldata relayRequest, bytes calldata signature) internal view {
-        (bytes memory suffixData) = splitRequest(relayRequest);
+        bytes memory suffixData = splitRequest(relayRequest);
         bytes32 _domainSeparator = domainSeparator(relayRequest.relayData.forwarder);
         IForwarder forwarder = IForwarder(payable(relayRequest.relayData.forwarder));
         forwarder.verify(relayRequest.request, _domainSeparator, RELAY_REQUEST_TYPEHASH, suffixData, signature);
@@ -233,16 +196,28 @@ library GsnEip712Library {
         verifySignature(relayRequest, signature);
     }
 
-    function execute(GsnTypes.RelayRequest calldata relayRequest, bytes calldata signature) internal returns (bool forwarderSuccess, bool callSuccess, bytes memory ret) {
-        (bytes memory suffixData) = splitRequest(relayRequest);
+    function execute(GsnTypes.RelayRequest calldata relayRequest, bytes calldata signature)
+        internal
+        returns (
+            bool forwarderSuccess,
+            bool callSuccess,
+            bytes memory ret
+        )
+    {
+        bytes memory suffixData = splitRequest(relayRequest);
         bytes32 _domainSeparator = domainSeparator(relayRequest.relayData.forwarder);
         /* solhint-disable-next-line avoid-low-level-calls */
         (forwarderSuccess, ret) = relayRequest.relayData.forwarder.call(
-            abi.encodeWithSelector(IForwarder.execute.selector,
-            relayRequest.request, _domainSeparator, RELAY_REQUEST_TYPEHASH, suffixData, signature
-            ));
-        if ( forwarderSuccess ) {
-
+            abi.encodeWithSelector(
+                IForwarder.execute.selector,
+                relayRequest.request,
+                _domainSeparator,
+                RELAY_REQUEST_TYPEHASH,
+                suffixData,
+                signature
+            )
+        );
+        if (forwarderSuccess) {
             //decode return value of execute:
             (callSuccess, ret) = abi.decode(ret, (bool, bytes));
         }
@@ -257,12 +232,15 @@ library GsnEip712Library {
     }
 
     function domainSeparator(address forwarder) internal view returns (bytes32) {
-        return hashDomain(EIP712Domain({
-            name : "GSN Relayed Transaction",
-            version : "2",
-            chainId : getChainID(),
-            verifyingContract : forwarder
-            }));
+        return
+            hashDomain(
+                EIP712Domain({
+                    name: "GSN Relayed Transaction",
+                    version: "2",
+                    chainId: getChainID(),
+                    verifyingContract: forwarder
+                })
+            );
     }
 
     function getChainID() internal view returns (uint256 id) {
@@ -273,33 +251,39 @@ library GsnEip712Library {
     }
 
     function hashDomain(EIP712Domain memory req) internal pure returns (bytes32) {
-        return keccak256(abi.encode(
-                EIP712DOMAIN_TYPEHASH,
-                keccak256(bytes(req.name)),
-                keccak256(bytes(req.version)),
-                req.chainId,
-                req.verifyingContract));
+        return
+            keccak256(
+                abi.encode(
+                    EIP712DOMAIN_TYPEHASH,
+                    keccak256(bytes(req.name)),
+                    keccak256(bytes(req.version)),
+                    req.chainId,
+                    req.verifyingContract
+                )
+            );
     }
 
     function hashRelayData(GsnTypes.RelayData calldata req) internal pure returns (bytes32) {
-        return keccak256(abi.encode(
-                RELAYDATA_TYPEHASH,
-                req.gasPrice,
-                req.pctRelayFee,
-                req.baseRelayFee,
-                req.relayWorker,
-                req.paymaster,
-                req.forwarder,
-                keccak256(req.paymasterData),
-                req.clientId
-            ));
+        return
+            keccak256(
+                abi.encode(
+                    RELAYDATA_TYPEHASH,
+                    req.gasPrice,
+                    req.pctRelayFee,
+                    req.baseRelayFee,
+                    req.relayWorker,
+                    req.paymaster,
+                    req.forwarder,
+                    keccak256(req.paymasterData),
+                    req.clientId
+                )
+            );
     }
 }
 
 // File: @opengsn/contracts/src/utils/RelayHubValidator.sol
 
 library RelayHubValidator {
-
     // validate that encoded relayCall is properly packed without any extra bytes
     function verifyTransactionPacking(
         GsnTypes.RelayRequest calldata relayRequest,
@@ -315,19 +299,21 @@ library RelayHubValidator {
         // relayData 8 members
         // ForwardRequest: 7 members
         // total 22 32-byte words if all dynamic params are zero-length.
-        uint expectedMsgDataLen = 4 + 22 * 32 +
-        dynamicParamSize(signature) +
-        dynamicParamSize(approvalData) +
-        dynamicParamSize(relayRequest.request.data) +
-        dynamicParamSize(relayRequest.relayData.paymasterData);
+        uint256 expectedMsgDataLen = 4 +
+            22 *
+            32 +
+            dynamicParamSize(signature) +
+            dynamicParamSize(approvalData) +
+            dynamicParamSize(relayRequest.request.data) +
+            dynamicParamSize(relayRequest.relayData.paymasterData);
         require(signature.length <= 65, "invalid signature length");
-        require(expectedMsgDataLen == msg.data.length, "extra msg.data bytes" );
+        require(expectedMsgDataLen == msg.data.length, "extra msg.data bytes");
     }
 
     // helper method for verifyTransactionPacking:
     // size (in bytes) of the given "bytes" parameter. size include the length (32-byte word),
     // and actual data size, rounded up to full 32-byte words
-    function dynamicParamSize(bytes calldata buf) internal pure returns (uint) {
+    function dynamicParamSize(bytes calldata buf) internal pure returns (uint256) {
         return 32 + ((buf.length + 31) & (type(uint256).max - 31));
     }
 }
@@ -335,51 +321,23 @@ library RelayHubValidator {
 // File: @opengsn/contracts/src/interfaces/IStakeManager.sol
 
 interface IStakeManager {
-
     /// Emitted when a stake or unstakeDelay are initialized or increased
-    event StakeAdded(
-        address indexed relayManager,
-        address indexed owner,
-        uint256 stake,
-        uint256 unstakeDelay
-    );
+    event StakeAdded(address indexed relayManager, address indexed owner, uint256 stake, uint256 unstakeDelay);
 
     /// Emitted once a stake is scheduled for withdrawal
-    event StakeUnlocked(
-        address indexed relayManager,
-        address indexed owner,
-        uint256 withdrawBlock
-    );
+    event StakeUnlocked(address indexed relayManager, address indexed owner, uint256 withdrawBlock);
 
     /// Emitted when owner withdraws relayManager funds
-    event StakeWithdrawn(
-        address indexed relayManager,
-        address indexed owner,
-        uint256 amount
-    );
+    event StakeWithdrawn(address indexed relayManager, address indexed owner, uint256 amount);
 
     /// Emitted when an authorized Relay Hub penalizes a relayManager
-    event StakePenalized(
-        address indexed relayManager,
-        address indexed beneficiary,
-        uint256 reward
-    );
+    event StakePenalized(address indexed relayManager, address indexed beneficiary, uint256 reward);
 
-    event HubAuthorized(
-        address indexed relayManager,
-        address indexed relayHub
-    );
+    event HubAuthorized(address indexed relayManager, address indexed relayHub);
 
-    event HubUnauthorized(
-        address indexed relayManager,
-        address indexed relayHub,
-        uint256 removalBlock
-    );
+    event HubUnauthorized(address indexed relayManager, address indexed relayHub, uint256 removalBlock);
 
-    event OwnerSet(
-        address indexed relayManager,
-        address indexed owner
-    );
+    event OwnerSet(address indexed relayManager, address indexed owner);
 
     /// @param stake - amount of ether staked for this relay
     /// @param unstakeDelay - number of blocks to elapse before the owner can retrieve the stake after calling 'unlock'
@@ -418,16 +376,22 @@ interface IStakeManager {
 
     function unauthorizeHubByManager(address relayHub) external;
 
-    function isRelayManagerStaked(address relayManager, address relayHub, uint256 minAmount, uint256 minUnstakeDelay)
-    external
-    view
-    returns (bool);
+    function isRelayManagerStaked(
+        address relayManager,
+        address relayHub,
+        uint256 minAmount,
+        uint256 minUnstakeDelay
+    ) external view returns (bool);
 
     /// Slash the stake of the relay relayManager. In order to prevent stake kidnapping, burns half of stake on the way.
     /// @param relayManager - entry to penalize
     /// @param beneficiary - address that receives half of the penalty amount
     /// @param amount - amount to withdraw from stake
-    function penalizeRelayManager(address relayManager, address payable beneficiary, uint256 amount) external;
+    function penalizeRelayManager(
+        address relayManager,
+        address payable beneficiary,
+        uint256 amount
+    ) external;
 
     function getStakeInfo(address relayManager) external view returns (StakeInfo memory stakeInfo);
 
@@ -473,25 +437,13 @@ interface IRelayHub {
     );
 
     /// Emitted when relays are added by a relayManager
-    event RelayWorkersAdded(
-        address indexed relayManager,
-        address[] newRelayWorkers,
-        uint256 workersCount
-    );
+    event RelayWorkersAdded(address indexed relayManager, address[] newRelayWorkers, uint256 workersCount);
 
     /// Emitted when an account withdraws funds from RelayHub.
-    event Withdrawn(
-        address indexed account,
-        address indexed dest,
-        uint256 amount
-    );
+    event Withdrawn(address indexed account, address indexed dest, uint256 amount);
 
     /// Emitted when depositFor is called, including the amount and account that was funded.
-    event Deposited(
-        address indexed paymaster,
-        address indexed from,
-        uint256 amount
-    );
+    event Deposited(address indexed paymaster, address indexed from, uint256 amount);
 
     /// Emitted when an attempt to relay a call fails and Paymaster does not accept the transaction.
     /// The actual relayed call was not executed, and the recipient not charged.
@@ -522,10 +474,7 @@ interface IRelayHub {
         uint256 charge
     );
 
-    event TransactionResult(
-        RelayCallStatus status,
-        bytes returnValue
-    );
+    event TransactionResult(RelayCallStatus status, bytes returnValue);
 
     event HubDeprecated(uint256 fromBlock);
 
@@ -551,7 +500,11 @@ interface IRelayHub {
     /// This function can be called multiple times, emitting new events
     function addRelayWorkers(address[] calldata newRelayWorkers) external;
 
-    function registerRelayServer(uint256 baseRelayFee, uint256 pctRelayFee, string calldata url) external;
+    function registerRelayServer(
+        uint256 baseRelayFee,
+        uint256 pctRelayFee,
+        string calldata url
+    ) external;
 
     // Balance management
 
@@ -566,7 +519,6 @@ interface IRelayHub {
     function withdraw(uint256 amount, address payable dest) external;
 
     // Relaying
-
 
     /// Relays a transaction. For this to succeed, multiple conditions must be met:
     ///  - Paymaster's "preRelayCall" method must succeed and not revert
@@ -587,14 +539,12 @@ interface IRelayHub {
     ///
     /// Emits a TransactionRelayed event.
     function relayCall(
-        uint maxAcceptanceBudget,
+        uint256 maxAcceptanceBudget,
         GsnTypes.RelayRequest calldata relayRequest,
         bytes calldata signature,
         bytes calldata approvalData,
-        uint externalGasLimit
-    )
-    external
-    returns (bool paymasterAccepted, bytes memory returnValue);
+        uint256 externalGasLimit
+    ) external returns (bool paymasterAccepted, bytes memory returnValue);
 
     function penalize(address relayWorker, address payable beneficiary) external;
 
@@ -616,9 +566,9 @@ interface IRelayHub {
 
     function calldataGasCost(uint256 length) external view returns (uint256);
 
-    function workerToManager(address worker) external view returns(address);
+    function workerToManager(address worker) external view returns (address);
 
-    function workerCount(address manager) external view returns(uint256);
+    function workerCount(address manager) external view returns (uint256);
 
     /// Returns an account's deposits. It can be either a deposit of a paymaster, or a revenue of a relay manager.
     function balanceOf(address target) external view returns (uint256);
@@ -629,7 +579,7 @@ interface IRelayHub {
 
     /// Uses StakeManager info to decide if the Relay Manager can be considered staked
     /// @return true if stake size and delay satisfy all requirements
-    function isRelayManagerStaked(address relayManager) external view returns(bool);
+    function isRelayManagerStaked(address relayManager) external view returns (bool);
 
     // Checks hubs' deprecation status
     function isDeprecated() external view returns (bool);
@@ -644,7 +594,6 @@ interface IRelayHub {
 // File: @opengsn/contracts/src/interfaces/IPaymaster.sol
 
 interface IPaymaster {
-
     /**
      * @param acceptanceBudget -
      *      Paymaster expected gas budget to accept (or reject) a request
@@ -679,12 +628,7 @@ interface IPaymaster {
     /**
      * Return the Gas Limits and msg.data max size constants used by the Paymaster.
      */
-    function getGasAndDataLimits()
-    external
-    view
-    returns (
-        GasAndDataLimits memory limits
-    );
+    function getGasAndDataLimits() external view returns (GasAndDataLimits memory limits);
 
     function trustedForwarder() external view returns (IForwarder);
 
@@ -736,9 +680,7 @@ interface IPaymaster {
         bytes calldata signature,
         bytes calldata approvalData,
         uint256 maxPossibleGas
-    )
-    external
-    returns (bytes memory context, bool rejectOnRecipientRevert);
+    ) external returns (bytes memory context, bool rejectOnRecipientRevert);
 
     /**
      * This method is called after the actual relayed function call.
@@ -774,15 +716,14 @@ interface IPaymaster {
 /* solhint-disable bracket-align */
 
 contract RelayHub is IRelayHub, Ownable {
-
     string public override versionHub = "2.2.0+opengsn.hub.irelayhub";
 
-    IStakeManager immutable override public stakeManager;
-    address immutable override public penalizer;
+    IStakeManager public immutable override stakeManager;
+    address public immutable override penalizer;
 
     RelayHubConfig private config;
 
-    function getConfiguration() public override view returns (RelayHubConfig memory) {
+    function getConfiguration() public view override returns (RelayHubConfig memory) {
         return config;
     }
 
@@ -801,9 +742,9 @@ contract RelayHub is IRelayHub, Ownable {
 
     mapping(address => uint256) private balances;
 
-    uint256 public override deprecationBlock = type(uint).max;
+    uint256 public override deprecationBlock = type(uint256).max;
 
-    constructor (
+    constructor(
         IStakeManager _stakeManager,
         address _penalizer,
         uint256 _maxWorkerCount,
@@ -818,25 +759,28 @@ contract RelayHub is IRelayHub, Ownable {
     ) {
         stakeManager = _stakeManager;
         penalizer = _penalizer;
-        setConfiguration(RelayHubConfig(
-        _maxWorkerCount,
-        _gasReserve,
-        _postOverhead,
-        _gasOverhead,
-        _maximumRecipientDeposit,
-        _minimumUnstakeDelay,
-        _minimumStake,
-        _dataGasCostPerByte,
-        _externalCallDataCostOverhead
-        ));
+        setConfiguration(
+            RelayHubConfig(
+                _maxWorkerCount,
+                _gasReserve,
+                _postOverhead,
+                _gasOverhead,
+                _maximumRecipientDeposit,
+                _minimumUnstakeDelay,
+                _minimumStake,
+                _dataGasCostPerByte,
+                _externalCallDataCostOverhead
+            )
+        );
     }
 
-    function registerRelayServer(uint256 baseRelayFee, uint256 pctRelayFee, string calldata url) external override {
+    function registerRelayServer(
+        uint256 baseRelayFee,
+        uint256 pctRelayFee,
+        string calldata url
+    ) external override {
         address relayManager = msg.sender;
-        require(
-            isRelayManagerStaked(relayManager),
-            "relay manager not staked"
-        );
+        require(isRelayManagerStaked(relayManager), "relay manager not staked");
         require(workerCount[relayManager] > 0, "no relay workers");
         emit RelayServerRegistered(relayManager, baseRelayFee, pctRelayFee, url);
     }
@@ -847,10 +791,7 @@ contract RelayHub is IRelayHub, Ownable {
         workerCount[relayManager] = newWorkerCount;
         require(newWorkerCount <= config.maxWorkerCount, "too many workers");
 
-        require(
-            isRelayManagerStaked(relayManager),
-            "relay manager not staked"
-        );
+        require(isRelayManagerStaked(relayManager), "relay manager not staked");
 
         for (uint256 i = 0; i < newRelayWorkers.length; i++) {
             require(workerToManager[newRelayWorkers[i]] == address(0), "this worker has a manager");
@@ -860,7 +801,7 @@ contract RelayHub is IRelayHub, Ownable {
         emit RelayWorkersAdded(relayManager, newRelayWorkers, newWorkerCount);
     }
 
-    function depositFor(address target) public override payable {
+    function depositFor(address target) public payable override {
         uint256 amount = msg.value;
         require(amount <= config.maximumRecipientDeposit, "deposit too big");
 
@@ -869,7 +810,7 @@ contract RelayHub is IRelayHub, Ownable {
         emit Deposited(target, msg.sender, amount);
     }
 
-    function balanceOf(address target) external override view returns (uint256) {
+    function balanceOf(address target) external view override returns (uint256) {
         return balances[target];
     }
 
@@ -883,7 +824,7 @@ contract RelayHub is IRelayHub, Ownable {
         emit Withdrawn(account, dest, amount);
     }
 
-    function calldataGasCost(uint256 length) public override view returns (uint256) {
+    function calldataGasCost(uint256 length) public view override returns (uint256) {
         return config.dataGasCostPerByte * length;
     }
 
@@ -892,44 +833,37 @@ contract RelayHub is IRelayHub, Ownable {
         GsnTypes.RelayRequest calldata relayRequest,
         uint256 initialGasLeft,
         uint256 externalGasLimit
-    )
-    private
-    view
-    returns (IPaymaster.GasAndDataLimits memory gasAndDataLimits, uint256 maxPossibleGas) {
-        gasAndDataLimits =
-        IPaymaster(relayRequest.relayData.paymaster).getGasAndDataLimits{gas:50000}();
-        require(msg.data.length <= gasAndDataLimits.calldataSizeLimit, "msg.data exceeded limit" );
+    ) private view returns (IPaymaster.GasAndDataLimits memory gasAndDataLimits, uint256 maxPossibleGas) {
+        gasAndDataLimits = IPaymaster(relayRequest.relayData.paymaster).getGasAndDataLimits{ gas: 50000 }();
+        require(msg.data.length <= gasAndDataLimits.calldataSizeLimit, "msg.data exceeded limit");
         uint256 dataGasCost = calldataGasCost(msg.data.length);
         uint256 externalCallDataCost = externalGasLimit - initialGasLeft - config.externalCallDataCostOverhead;
-        uint256 txDataCostPerByte = externalCallDataCost/msg.data.length;
+        uint256 txDataCostPerByte = externalCallDataCost / msg.data.length;
         require(txDataCostPerByte <= G_NONZERO, "invalid externalGasLimit");
 
         require(maxAcceptanceBudget >= gasAndDataLimits.acceptanceBudget, "acceptance budget too high");
-        require(gasAndDataLimits.acceptanceBudget >= gasAndDataLimits.preRelayedCallGasLimit, "acceptance budget too low");
+        require(
+            gasAndDataLimits.acceptanceBudget >= gasAndDataLimits.preRelayedCallGasLimit,
+            "acceptance budget too low"
+        );
 
-        maxPossibleGas = config.gasOverhead
-            + gasAndDataLimits.preRelayedCallGasLimit
-            + gasAndDataLimits.postRelayedCallGasLimit
-            + relayRequest.request.gas
-            + dataGasCost
-            + externalCallDataCost;
+        maxPossibleGas =
+            config.gasOverhead +
+            gasAndDataLimits.preRelayedCallGasLimit +
+            gasAndDataLimits.postRelayedCallGasLimit +
+            relayRequest.request.gas +
+            dataGasCost +
+            externalCallDataCost;
 
         // This transaction must have enough gas to forward the call to the recipient with the requested amount, and not
         // run out of gas later in this function.
-        require(
-            externalGasLimit >= maxPossibleGas,
-            "no gas for innerRelayCall"
-        );
+        require(externalGasLimit >= maxPossibleGas, "no gas for innerRelayCall");
 
-        uint256 maxPossibleCharge = calculateCharge(
-            maxPossibleGas,
-            relayRequest.relayData
-        );
+        uint256 maxPossibleCharge = calculateCharge(maxPossibleGas, relayRequest.relayData);
 
         // We don't yet know how much gas will be used by the recipient, so we make sure there are enough funds to pay
         // for the maximum possible charge.
-        require(maxPossibleCharge <= balances[relayRequest.relayData.paymaster],
-        "Paymaster balance too low");
+        require(maxPossibleCharge <= balances[relayRequest.relayData.paymaster], "Paymaster balance too low");
     }
 
     struct RelayCallData {
@@ -949,105 +883,107 @@ contract RelayHub is IRelayHub, Ownable {
     }
 
     function relayCall(
-        uint maxAcceptanceBudget,
+        uint256 maxAcceptanceBudget,
         GsnTypes.RelayRequest calldata relayRequest,
         bytes calldata signature,
         bytes calldata approvalData,
-        uint externalGasLimit
-    )
-    external
-    override
-    returns (bool paymasterAccepted, bytes memory returnValue)
-    {
+        uint256 externalGasLimit
+    ) external override returns (bool paymasterAccepted, bytes memory returnValue) {
         RelayCallData memory vars;
         vars.initialGasLeft = gasleft();
         require(!isDeprecated(), "hub deprecated");
-        vars.functionSelector = relayRequest.request.data.length>=4 ? MinLibBytes.readBytes4(relayRequest.request.data, 0) : bytes4(0);
+        vars.functionSelector = relayRequest.request.data.length >= 4
+            ? MinLibBytes.readBytes4(relayRequest.request.data, 0)
+            : bytes4(0);
         require(msg.sender == tx.origin, "relay worker must be EOA");
         vars.relayManager = workerToManager[msg.sender];
         require(vars.relayManager != address(0), "Unknown relay worker");
         require(relayRequest.relayData.relayWorker == msg.sender, "Not a right worker");
-        require(
-        isRelayManagerStaked(vars.relayManager),
-        "relay manager not staked"
-        );
+        require(isRelayManagerStaked(vars.relayManager), "relay manager not staked");
         require(relayRequest.relayData.gasPrice <= tx.gasprice, "Invalid gas price");
         require(externalGasLimit <= block.gaslimit, "Impossible gas limit");
 
-        (vars.gasAndDataLimits, vars.maxPossibleGas) =
-        verifyGasAndDataLimits(maxAcceptanceBudget, relayRequest, vars.initialGasLeft, externalGasLimit);
-
-        RelayHubValidator.verifyTransactionPacking(relayRequest,signature,approvalData);
-
-    {
-
-        //How much gas to pass down to innerRelayCall. must be lower than the default 63/64
-        // actually, min(gasleft*63/64, gasleft-GAS_RESERVE) might be enough.
-        uint256 innerGasLimit = gasleft()*63/64- config.gasReserve;
-        vars.gasBeforeInner = gasleft();
-
-        uint256 _tmpInitialGas = innerGasLimit + externalGasLimit + config.gasOverhead + config.postOverhead;
-        // Calls to the recipient are performed atomically inside an inner transaction which may revert in case of
-        // errors in the recipient. In either case (revert or regular execution) the return data encodes the
-        // RelayCallStatus value.
-        (bool success, bytes memory relayCallStatus) = address(this).call{gas:innerGasLimit}(
-            abi.encodeWithSelector(RelayHub.innerRelayCall.selector, relayRequest, signature, approvalData, vars.gasAndDataLimits,
-            _tmpInitialGas - gasleft(),
-            vars.maxPossibleGas
-            )
+        (vars.gasAndDataLimits, vars.maxPossibleGas) = verifyGasAndDataLimits(
+            maxAcceptanceBudget,
+            relayRequest,
+            vars.initialGasLeft,
+            externalGasLimit
         );
-        vars.success = success;
-        vars.innerGasUsed = vars.gasBeforeInner-gasleft();
-        (vars.status, vars.relayedCallReturnValue) = abi.decode(relayCallStatus, (RelayCallStatus, bytes));
-        if ( vars.relayedCallReturnValue.length>0 ) {
-            emit TransactionResult(vars.status, vars.relayedCallReturnValue);
-        }
-    }
-    {
-        vars.dataGasCost = calldataGasCost(msg.data.length);
-        if (!vars.success) {
-        //Failure cases where the PM doesn't pay
-        if (
-            vars.status == RelayCallStatus.RejectedByPreRelayed ||
-            vars.innerGasUsed <= vars.gasAndDataLimits.acceptanceBudget + vars.dataGasCost && 
-            (
-                vars.status == RelayCallStatus.RejectedByForwarder ||
-                vars.status == RelayCallStatus.RejectedByRecipientRevert  //can only be thrown if rejectOnRecipientRevert==true
-            )
-        ) {
-            paymasterAccepted=false;
 
-            emit TransactionRejectedByPaymaster(
+        RelayHubValidator.verifyTransactionPacking(relayRequest, signature, approvalData);
+
+        {
+            //How much gas to pass down to innerRelayCall. must be lower than the default 63/64
+            // actually, min(gasleft*63/64, gasleft-GAS_RESERVE) might be enough.
+            uint256 innerGasLimit = (gasleft() * 63) / 64 - config.gasReserve;
+            vars.gasBeforeInner = gasleft();
+
+            uint256 _tmpInitialGas = innerGasLimit + externalGasLimit + config.gasOverhead + config.postOverhead;
+            // Calls to the recipient are performed atomically inside an inner transaction which may revert in case of
+            // errors in the recipient. In either case (revert or regular execution) the return data encodes the
+            // RelayCallStatus value.
+            (bool success, bytes memory relayCallStatus) = address(this).call{ gas: innerGasLimit }(
+                abi.encodeWithSelector(
+                    RelayHub.innerRelayCall.selector,
+                    relayRequest,
+                    signature,
+                    approvalData,
+                    vars.gasAndDataLimits,
+                    _tmpInitialGas - gasleft(),
+                    vars.maxPossibleGas
+                )
+            );
+            vars.success = success;
+            vars.innerGasUsed = vars.gasBeforeInner - gasleft();
+            (vars.status, vars.relayedCallReturnValue) = abi.decode(relayCallStatus, (RelayCallStatus, bytes));
+            if (vars.relayedCallReturnValue.length > 0) {
+                emit TransactionResult(vars.status, vars.relayedCallReturnValue);
+            }
+        }
+        {
+            vars.dataGasCost = calldataGasCost(msg.data.length);
+            if (!vars.success) {
+                //Failure cases where the PM doesn't pay
+                if (
+                    vars.status == RelayCallStatus.RejectedByPreRelayed || //can only be thrown if rejectOnRecipientRevert==true
+                    (vars.innerGasUsed <= vars.gasAndDataLimits.acceptanceBudget + vars.dataGasCost &&
+                        (vars.status == RelayCallStatus.RejectedByForwarder ||
+                            vars.status == RelayCallStatus.RejectedByRecipientRevert))
+                ) {
+                    paymasterAccepted = false;
+
+                    emit TransactionRejectedByPaymaster(
+                        vars.relayManager,
+                        relayRequest.relayData.paymaster,
+                        relayRequest.request.from,
+                        relayRequest.request.to,
+                        msg.sender,
+                        vars.functionSelector,
+                        vars.innerGasUsed,
+                        vars.relayedCallReturnValue
+                    );
+                    return (false, vars.relayedCallReturnValue);
+                }
+            }
+            // We now perform the actual charge calculation, based on the measured gas used
+            uint256 gasUsed = (externalGasLimit - gasleft()) + config.gasOverhead;
+            uint256 charge = calculateCharge(gasUsed, relayRequest.relayData);
+
+            balances[relayRequest.relayData.paymaster] -= charge;
+            balances[vars.relayManager] += charge;
+
+            emit TransactionRelayed(
                 vars.relayManager,
-                relayRequest.relayData.paymaster,
+                msg.sender,
                 relayRequest.request.from,
                 relayRequest.request.to,
-                msg.sender,
+                relayRequest.relayData.paymaster,
                 vars.functionSelector,
-                vars.innerGasUsed,
-                vars.relayedCallReturnValue);
-            return (false, vars.relayedCallReturnValue);
+                vars.status,
+                charge
+            );
+            return (true, "");
         }
-    }
-        // We now perform the actual charge calculation, based on the measured gas used
-        uint256 gasUsed = (externalGasLimit - gasleft()) + config.gasOverhead;
-        uint256 charge = calculateCharge(gasUsed, relayRequest.relayData);
-
-        balances[relayRequest.relayData.paymaster] -= charge;
-        balances[vars.relayManager] += charge;
-
-        emit TransactionRelayed(
-            vars.relayManager,
-            msg.sender,
-            relayRequest.request.from,
-            relayRequest.request.to,
-            relayRequest.relayData.paymaster,
-            vars.functionSelector,
-            vars.status,
-            charge
-        );
-        return (true, "");
-    }
     }
 
     struct InnerRelayCallData {
@@ -1067,10 +1003,7 @@ contract RelayHub is IRelayHub, Ownable {
         IPaymaster.GasAndDataLimits calldata gasAndDataLimits,
         uint256 totalInitialGas,
         uint256 maxPossibleGas
-    )
-    external
-    returns (RelayCallStatus, bytes memory)
-    {
+    ) external returns (RelayCallStatus, bytes memory) {
         InnerRelayCallData memory vars;
         // A new gas measurement is performed inside innerRelayCall, since
         // due to EIP150 available gas amounts cannot be directly compared across external calls
@@ -1090,25 +1023,33 @@ contract RelayHub is IRelayHub, Ownable {
         // Note: we open a new block to avoid growing the stack too much.
         vars.data = abi.encodeWithSelector(
             IPaymaster.preRelayedCall.selector,
-            relayRequest, signature, approvalData, maxPossibleGas
+            relayRequest,
+            signature,
+            approvalData,
+            maxPossibleGas
         );
         {
             bool success;
             bytes memory retData;
-            (success, retData) = relayRequest.relayData.paymaster.call{gas:gasAndDataLimits.preRelayedCallGasLimit}(vars.data);
+            (success, retData) = relayRequest.relayData.paymaster.call{ gas: gasAndDataLimits.preRelayedCallGasLimit }(
+                vars.data
+            );
             if (!success) {
                 GsnEip712Library.truncateInPlace(retData);
                 revertWithStatus(RelayCallStatus.RejectedByPreRelayed, retData);
             }
-            (vars.recipientContext, vars.rejectOnRecipientRevert) = abi.decode(retData, (bytes,bool));
+            (vars.recipientContext, vars.rejectOnRecipientRevert) = abi.decode(retData, (bytes, bool));
         }
 
         // The actual relayed call is now executed. The sender's address is appended at the end of the transaction data
 
         {
             bool forwarderSuccess;
-            (forwarderSuccess, vars.relayedCallSuccess, vars.relayedCallReturnValue) = GsnEip712Library.execute(relayRequest, signature);
-            if ( !forwarderSuccess ) {
+            (forwarderSuccess, vars.relayedCallSuccess, vars.relayedCallReturnValue) = GsnEip712Library.execute(
+                relayRequest,
+                signature
+            );
+            if (!forwarderSuccess) {
                 revertWithStatus(RelayCallStatus.RejectedByForwarder, vars.relayedCallReturnValue);
             }
 
@@ -1129,7 +1070,9 @@ contract RelayHub is IRelayHub, Ownable {
         );
 
         {
-            (bool successPost,bytes memory ret) = relayRequest.relayData.paymaster.call{gas:gasAndDataLimits.postRelayedCallGasLimit}(vars.data);
+            (bool successPost, bytes memory ret) = relayRequest.relayData.paymaster.call{
+                gas: gasAndDataLimits.postRelayedCallGasLimit
+            }(vars.data);
 
             if (!successPost) {
                 revertWithStatus(RelayCallStatus.PostRelayedFailed, ret);
@@ -1140,7 +1083,10 @@ contract RelayHub is IRelayHub, Ownable {
             revertWithStatus(RelayCallStatus.PaymasterBalanceChanged, "");
         }
 
-        return (vars.relayedCallSuccess ? RelayCallStatus.OK : RelayCallStatus.RelayedCallFailed, vars.relayedCallReturnValue);
+        return (
+            vars.relayedCallSuccess ? RelayCallStatus.OK : RelayCallStatus.RelayedCallFailed,
+            vars.relayedCallReturnValue
+        );
     }
 
     /**
@@ -1158,21 +1104,27 @@ contract RelayHub is IRelayHub, Ownable {
         }
     }
 
-    function calculateCharge(uint256 gasUsed, GsnTypes.RelayData calldata relayData) public override virtual view returns (uint256) {
+    function calculateCharge(uint256 gasUsed, GsnTypes.RelayData calldata relayData)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         //return relayData.baseRelayFee.add((gasUsed.mul(relayData.gasPrice).mul(relayData.pctRelayFee.add(100))).div(100));
-        
+
         // FIXME: Check this please!
-        return relayData.baseRelayFee 
-            + (
-                gasUsed
-                * relayData.gasPrice
-                * (relayData.pctRelayFee + 100)
-                / 100
-            );
+        return relayData.baseRelayFee + ((gasUsed * relayData.gasPrice * (relayData.pctRelayFee + 100)) / 100);
     }
 
-    function isRelayManagerStaked(address relayManager) public override view returns (bool) {
-        return stakeManager.isRelayManagerStaked(relayManager, address(this), config.minimumStake, config.minimumUnstakeDelay);
+    function isRelayManagerStaked(address relayManager) public view override returns (bool) {
+        return
+            stakeManager.isRelayManagerStaked(
+                relayManager,
+                address(this),
+                config.minimumStake,
+                config.minimumUnstakeDelay
+            );
     }
 
     function deprecateHub(uint256 fromBlock) public override onlyOwner {
@@ -1181,11 +1133,11 @@ contract RelayHub is IRelayHub, Ownable {
         emit HubDeprecated(fromBlock);
     }
 
-    function isDeprecated() public override view returns (bool) {
+    function isDeprecated() public view override returns (bool) {
         return block.number >= deprecationBlock;
     }
 
-    modifier penalizerOnly () {
+    modifier penalizerOnly() {
         require(msg.sender == penalizer, "Not penalizer");
         _;
     }
@@ -1194,54 +1146,42 @@ contract RelayHub is IRelayHub, Ownable {
         address relayManager = workerToManager[relayWorker];
         // The worker must be controlled by a manager with a locked stake
         require(relayManager != address(0), "Unknown relay worker");
-        require(
-        isRelayManagerStaked(relayManager),
-        "relay manager not staked"
-        );
+        require(isRelayManagerStaked(relayManager), "relay manager not staked");
         IStakeManager.StakeInfo memory stakeInfo = stakeManager.getStakeInfo(relayManager);
         stakeManager.penalizeRelayManager(relayManager, beneficiary, stakeInfo.stake);
     }
 }
 
 abstract contract BasePaymaster is IPaymaster, Ownable {
-
     IRelayHub internal relayHub;
     IForwarder public override trustedForwarder;
 
-    function getHubAddr() public override view returns (address) {
+    function getHubAddr() public view override returns (address) {
         return address(relayHub);
     }
 
     //overhead of forwarder verify+signature, plus hub overhead.
-    uint256 constant public FORWARDER_HUB_OVERHEAD = 50000;
+    uint256 public constant FORWARDER_HUB_OVERHEAD = 50000;
 
     //These parameters are documented in IPaymaster.GasAndDataLimits
-    uint256 constant public PRE_RELAYED_CALL_GAS_LIMIT = 100000;
-    uint256 constant public POST_RELAYED_CALL_GAS_LIMIT = 110000;
-    uint256 constant public PAYMASTER_ACCEPTANCE_BUDGET = PRE_RELAYED_CALL_GAS_LIMIT + FORWARDER_HUB_OVERHEAD;
-    uint256 constant public CALLDATA_SIZE_LIMIT = 10500;
+    uint256 public constant PRE_RELAYED_CALL_GAS_LIMIT = 100000;
+    uint256 public constant POST_RELAYED_CALL_GAS_LIMIT = 110000;
+    uint256 public constant PAYMASTER_ACCEPTANCE_BUDGET = PRE_RELAYED_CALL_GAS_LIMIT + FORWARDER_HUB_OVERHEAD;
+    uint256 public constant CALLDATA_SIZE_LIMIT = 10500;
 
-    function getGasAndDataLimits()
-        public
-        override
-        virtual
-        view
-        returns (IPaymaster.GasAndDataLimits memory limits)
-    {
-        return IPaymaster.GasAndDataLimits(
-            PAYMASTER_ACCEPTANCE_BUDGET,
-            PRE_RELAYED_CALL_GAS_LIMIT,
-            POST_RELAYED_CALL_GAS_LIMIT,
-            CALLDATA_SIZE_LIMIT
-        );
+    function getGasAndDataLimits() public view virtual override returns (IPaymaster.GasAndDataLimits memory limits) {
+        return
+            IPaymaster.GasAndDataLimits(
+                PAYMASTER_ACCEPTANCE_BUDGET,
+                PRE_RELAYED_CALL_GAS_LIMIT,
+                POST_RELAYED_CALL_GAS_LIMIT,
+                CALLDATA_SIZE_LIMIT
+            );
     }
 
     // this method must be called from preRelayedCall to validate that the forwarder
     // is approved by the paymaster as well as by the recipient contract.
-    function _verifyForwarder(GsnTypes.RelayRequest calldata relayRequest)
-        public
-        view
-    {
+    function _verifyForwarder(GsnTypes.RelayRequest calldata relayRequest) public view {
         require(address(trustedForwarder) == relayRequest.relayData.forwarder, "Forwarder is not trusted");
         GsnEip712Library.verifyForwarderTrusted(relayRequest);
     }
@@ -1263,29 +1203,22 @@ abstract contract BasePaymaster is IPaymaster, Ownable {
     }
 
     /// check current deposit on relay hub.
-    function getRelayHubDeposit()
-        public
-        override
-        view
-        returns (uint)
-    {
+    function getRelayHubDeposit() public view override returns (uint256) {
         return relayHub.balanceOf(address(this));
     }
 
     // any money moved into the paymaster is transferred as a deposit.
     // This way, we don't need to understand the RelayHub API in order to replenish
     // the paymaster.
-    receive() external virtual payable {
+    receive() external payable virtual {
         require(address(relayHub) != address(0), "relay hub address not set");
-        relayHub.depositFor{value:msg.value}(address(this));
+        relayHub.depositFor{ value: msg.value }(address(this));
     }
 
     /// withdraw deposit from relayHub
-    function withdrawRelayHubDepositTo(uint amount, address payable target) public onlyOwner {
+    function withdrawRelayHubDepositTo(uint256 amount, address payable target) public onlyOwner {
         relayHub.withdraw(amount, target);
     }
 }
 
 // File: contracts/gassless/ImportArtifacts.sol
-
-
