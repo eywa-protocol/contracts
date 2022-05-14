@@ -56,6 +56,8 @@ contract NodeRegistry is Bridge {
         address _poolFactory
     ) public initializer {
         require(_EYWA != address(0), Errors.ZERO_ADDRESS);
+        require(_forwarder != address(0), Errors.ZERO_ADDRESS);
+        require(_poolFactory != address(0), Errors.ZERO_ADDRESS);
         poolFactory = _poolFactory;
         EYWA = _EYWA;
         Bridge.initialize(_forwarder);
@@ -200,5 +202,9 @@ contract NodeRegistry is Bridge {
 
     function setUtilityToken(address _token) public onlyOwner {
         EYWA = _token;
+    }
+
+    function setRelayerPoolFactory(address _poolFactory) public onlyOwner {
+        poolFactory = _poolFactory;
     }
 }
