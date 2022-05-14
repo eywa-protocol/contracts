@@ -83,6 +83,18 @@ async function main() {
   console.log("EYWA transferred to the treasury:", treasuryAmount);
   deployInfo[network.name].dao.treasury = treasury.address;
 
+  //airdrop
+  console.log("Processing airdrop");
+  for (let airdropAllocation of unlockScheme.airdropAllocation) {
+    for (let allocation of airdropAllocation) {
+      console.log(allocation.name);
+      airdropAmount = parseInt(allocation.tokenAmount);
+      let tx = await eywa.connect(deployer).transfer(allocation.recipient, ethers.utils.parseEther(airdropAmount + ".0"));
+      await tx.wait();
+      console.log("EYWA transferred:", tx.hash);
+    };
+  }
+  
   // write out the deploy configuration
   fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
     JSON.stringify(deployInfo, undefined, 2));
