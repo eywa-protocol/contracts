@@ -12,21 +12,20 @@ async function main() {
   const balance = await deployer.getBalance();
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
-  const getPercent = (percentToGet, number) => { (percentToGet / 100) * number };
-
   const Vesting = await ethers.getContractFactory('EywaVesting');
   const EYWA = await ethers.getContractFactory('EywaToken');
   const Treasury = await ethers.getContractFactory('EywaTreasury');
 
-  const eywa = await EYWA.attach(deployInfo[network.name].dao.eywa)
+  // const eywa = await EYWA.attach(deployInfo[network.name].dao.eywa)
+  const eywa = await EYWA.deploy(deployer.address, "1")
 
   let earlyTransferPermissionAdmin;
   const TGE_TIME = 1232124124; // CHANGE!
-  const MONTH = 2629743;
+  const MONTH = 2629743; //unix
 
   let claimAllowanceContract = "0x0000000000000000000000000000000000000000";
 
-
+  console.log("\nProcessing vesting scheme...");
   for (let [index, sale] of unlockScheme.allVestingRounds.entries()) {
     console.log(sale.name);
 
@@ -52,7 +51,7 @@ async function main() {
     console.log("allStepsDuration = ", allStepsDuration);
     console.log("permissionlessTimeStamp = ", permissionlessTimeStamp);
 
-    // deploy contract
+    //deploy Vesting contract
     let vesting = await Vesting.connect(deployer).deploy(eywa.address);
     await vesting.deployed();
     await eywa.connect(deployer).approve(vesting.address, thisRoundSupply);
@@ -66,35 +65,37 @@ async function main() {
       allStepsDuration,
       permissionlessTimeStamp,
       [deployer.address],
-      [thisRoundSupply]
+      [thisRoundSupply],
+      { gasLimit: 1_000_000 }
     );
     console.log("Vesting:", vesting.address + "\n");
     unlockScheme.allVestingRounds[index].address = vesting.address;
   }
 
   //deploy Treasury 
-  console.log("Treasury deployment");
+  console.log("Treasury deployment...");
   const treasury = await Treasury.deploy();
   await treasury.deployed()
   let treasuryAmount = 0;
   for (let allocation of unlockScheme.treasuryAllocation) { treasuryAmount += parseInt(allocation.tokenAmount) };
   let tx = await eywa.connect(deployer).transfer(treasury.address, ethers.utils.parseEther(treasuryAmount + ".0"))
-  console.log("Treasury address:", treasury.address + "\n");
-  console.log("EYWA transferred to the treasury:", treasuryAmount);
+  await tx.wait();
+  console.log("Treasury address:", treasury.address);
+  console.log("EYWA transferred to the treasury: " + treasuryAmount + " Hash: " + tx.hash);
   deployInfo[network.name].dao.treasury = treasury.address;
 
-  //airdrop
-  console.log("Processing airdrop");
+  //EYWA airdrop
+  console.log("\nProcessing airdrop...");
   for (let airdropAllocation of unlockScheme.airdropAllocation) {
-    for (let allocation of airdropAllocation) {
-      console.log(allocation.name);
+    console.log("\n" + airdropAllocation.name);
+    for (let allocation of airdropAllocation.allocation) {
       airdropAmount = parseInt(allocation.tokenAmount);
       let tx = await eywa.connect(deployer).transfer(allocation.recipient, ethers.utils.parseEther(airdropAmount + ".0"));
       await tx.wait();
-      console.log("EYWA transferred:", tx.hash);
+      console.log("EYWA transferred: " + airdropAmount + " Hash: " + tx.hash);
     };
   }
-  
+
   // write out the deploy configuration
   fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
     JSON.stringify(deployInfo, undefined, 2));
