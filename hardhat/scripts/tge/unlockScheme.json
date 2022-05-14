@@ -9,7 +9,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xD445B14Eb3F3a58F3c65822b4Fb4f52b1AB0815c"
+      "address": "0x3a630E4F5d3873a959889C1417252bb94DF400dc"
     },
     {
       "name": "Vesting: Strategic round",
@@ -20,7 +20,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x5649DEd6fadd4dE63f648c5bf0943C8C3afd95A7"
+      "address": "0x8606ba13a15Aa5B5A8A5Fd49C1cff1E785aa2b81"
     },
     {
       "name": "Vesting: Round 1",
@@ -31,7 +31,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x0Ef2210C1dEF691ba907CD51D348857a9D92ac63"
+      "address": "0x565673e0E0d6741654e475D5210596702E34fDDB"
     },
     {
       "name": "Vesting: Round 2",
@@ -42,7 +42,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x2e0d13A5e47E1c0C751298f4a7aAEC8b1d58C50d"
+      "address": "0x8f9572b97DBA7d42E212e37cD64AbC92Fb3b4598"
     },
     {
       "name": "Vesting: KOLs round",
@@ -53,7 +53,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x5cB87ba8A8269439415006D0e4B734a0eb282020"
+      "address": "0x2C86e70f11b9558E0Ac4cb0eC36353fcfd61bdad"
     },
     {
       "name": "Vesting: Round for validators",
@@ -64,7 +64,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x5a6aAC15Caea1e505d6258e31bF61032dBCBb6Aa"
+      "address": "0xFcb8AE380b4cB299E922AD1B541e2c870dD14fC9"
     },
     {
       "name": "Vesting: Round for alpha testers",
@@ -75,7 +75,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xF2F679319f4a023DE2418f0de61aef76Af09964A"
+      "address": "0x5d52A2b7160aB27c145879A68D4d2BF07d5f587c"
     },
     {
       "name": "Vesting: Airdrop for early adopters",
@@ -86,7 +86,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xAA4C5a0000c79E4a42877cB57b4e8489BE925630"
+      "address": "0x196bC80F36cC29C4Cd87079ad0a78F74Ef8A0016"
     },
     {
       "name": "Vesting: Founders and team",
@@ -97,7 +97,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xdC22729d8EaEaC4b685C6fa28576462ae8944A47"
+      "address": "0xAa0a822FE5752d225247AeCAF2054dAcE4af5873"
     },
     {
       "name": "Vesting: Advisers",
@@ -108,7 +108,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x6485f4E04f424Cae5cD8638dc98009d3b7745FF7"
+      "address": "0x01c360D8755Beb47FD9e7a48b9975d88caC21f70"
     },
     {
       "name": "Vesting: Longterm market making (with vesting)",
@@ -119,7 +119,7 @@
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "2629743",
-      "address": "0x7945dafa05D855638025E7493d0d5F9E2B11C093"
+      "address": "0xb68eC3a3aEAfD9C925Ca2220d793BE2f5cA5454e"
     }
   ],
   "treasuryAllocation": [

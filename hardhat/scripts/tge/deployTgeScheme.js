@@ -17,7 +17,9 @@ async function main() {
   const Treasury = await ethers.getContractFactory('EywaTreasury');
 
   // const eywa = await EYWA.attach(deployInfo[network.name].dao.eywa)
-  const eywa = await EYWA.deploy(deployer.address, "1")
+  const eywa = await EYWA.deploy(deployer.address, deployInfo[network.name].chainId);
+  await eywa.deployed();
+  console.log("\nEYWA-Token:", eywa.address);
 
   let earlyTransferPermissionAdmin;
   const TGE_TIME = 1232124124; // CHANGE!
@@ -99,11 +101,8 @@ async function main() {
   // write out the deploy configuration
   fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
     JSON.stringify(deployInfo, undefined, 2));
-  // fs.writeFileSync("./unlockScheme.json", JSON.stringify(unlockScheme, undefined, 2));
   fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./scripts/tge/unlockScheme.json",
     JSON.stringify(unlockScheme, undefined, 2));
-
-  // console.log(unlockScheme)
 }
 
 main()
