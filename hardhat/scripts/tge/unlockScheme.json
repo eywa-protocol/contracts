@@ -109,20 +109,13 @@
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
       "address": "0x25232B7A29E2E7bf23cF4F034DcCc5723F7d6031"
-    },
-    {
-      "name": "Vesting: Longterm market making (with vesting)",
-      "tokenAmount": "50000000",
-      "period": "5",
-      "cliffPeriod": "",
-      "cliffPercent": "",
-      "permissionlessTimeStamp": "0",
-      "claimWithAllowanceTimeStamp": "0",
-      "stepAmount": "2629743",
-      "address": "0x271c9ffdE033c55BDeA92F364952107b0E6618CA"
     }
   ],
   "treasuryAllocation": [
+    {
+      "name": "DAO treasury: Longterm market making (with vesting)",
+      "tokenAmount": "50000000"
+    },
     {
       "name": "DAO treasury: Grants & hackatons rewards",
       "tokenAmount": "50000000"
