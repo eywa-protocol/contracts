@@ -98,6 +98,9 @@ async function main() {
     };
   }
 
+  //check if there is anything left (should be 0)
+  console.log("\nDeployer EYWA balance:", await eywa.connect(deployer).balanceOf(deployer.address))
+
   // write out the deploy configuration
   fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
     JSON.stringify(deployInfo, undefined, 2));
