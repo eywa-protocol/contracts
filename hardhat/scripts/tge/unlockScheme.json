@@ -134,22 +134,53 @@
     {
       "name": "DAO treasury: Public rewards (farming, staking, bonding)",
       "tokenAmount": "400000000"
+    }
+  ],
+  "airdropAllocation": [
+    {
+      "name": "DAO treasury: Marketing & strategic reserve",
+      "allocation": [
+        {
+          "tokenAmount": "40000000",
+          "recipient": ""
+        }
+      ]
     },
     {
       "name": "DAO treasury: TGE - IDO launchpads: MoonEdge on Polygon",
-      "tokenAmount": "350000"
+      "allocation": [
+        {
+          "tokenAmount": "350000",
+          "recipient": ""
+        }
+      ]
     },
     {
       "name": "DAO treasury: TGE - IDO launchpads: Catapult on BSC",
-      "tokenAmount": "250000"
+      "allocation": [
+        {
+          "tokenAmount": "250000",
+          "recipient": ""
+        }
+      ]
     },
     {
       "name": "DAO treasury: TGE - IDO launchpads: Gagarin on BSC",
-      "tokenAmount": "150000"
+      "allocation": [
+        {
+          "tokenAmount": "150000",
+          "recipient": ""
+        }
+      ]
     },
     {
       "name": "DAO treasury: TGE - IDO launchpads: Harmony launcher on Harmony",
-      "tokenAmount": "500000"
+      "allocation": [
+        {
+          "tokenAmount": "500000",
+          "recipient": ""
+        }
+      ]
     }
   ]
 }
