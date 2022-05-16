@@ -24,11 +24,11 @@ contract NodeRegistry is Bridge {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     struct Node {
-        address owner; // address of node signer key
-        address pool; // RelayerPool for this node
-        string hostId; // libp2p host ID
+        address owner;   // address of node signer key
+        address pool;    // RelayerPool for this node
+        string hostId;   // libp2p host ID
         bytes blsPubKey; // BLS public key
-        uint256 nodeId; // absolute sequential number
+        uint256 nodeId;  // absolute sequential number
     }
 
     struct Snapshot {
@@ -64,12 +64,12 @@ contract NodeRegistry is Bridge {
     }
 
     modifier isNewNode(address _owner) {
-        require(ownedNodes[_owner].owner == address(0), string(abi.encodePacked("node already exists")));
+        require(ownedNodes[_owner].owner == address(0), string(abi.encodePacked("NodeRegistry: node already exists")));
         _;
     }
 
     modifier existingNode(address _owner) {
-        require(ownedNodes[_owner].owner != address(0), string(abi.encodePacked("node does not exist")));
+        require(ownedNodes[_owner].owner != address(0), string(abi.encodePacked("NodeRegistry: node does not exist")));
         _;
     }
 
@@ -123,32 +123,16 @@ contract NodeRegistry is Bridge {
         bytes32 _s
     ) external {
         RelayerPool relayerPool = IRelayerPoolFactory(poolFactory).create(
-            _node.owner, // node owner
-            address(EYWA), // depositToken
-            address(EYWA), // rewardToken            (test only)
-            100, // relayerFeeNumerator    (test only)
-            4000, // emissionRateNumerator  (test only)
-            _node.owner // vault                  (test only)
+            _node.owner,    // node owner
+            address(EYWA),  // depositToken
+            address(EYWA),  // rewardToken            (test only)
+            100,            // relayerFeeNumerator    (test only)
+            4000,           // emissionRateNumerator  (test only)
+            _node.owner     // vault                  (test only)
         );
         uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
-        require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");
+        require(nodeBalance >= MIN_COLLATERAL, "NodeRegistry: insufficient funds");
         IERC20Permit(EYWA).permit(_msgSender(), address(this), nodeBalance, _deadline, _v, _r, _s);
-        IERC20Upgradeable(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
-        _node.pool = address(relayerPool);
-        addNode(_node);
-    }
-
-    function createRelayerPermitted(Node memory _node, uint256 _deadline) external {
-        RelayerPool relayerPool = IRelayerPoolFactory(poolFactory).create(
-            _node.owner, // node owner
-            address(EYWA), // depositToken
-            address(EYWA), // rewardToken            (test only)
-            100, // relayerFeeNumerator    (test only)
-            4000, // emissionRateNumerator  (test only)
-            _node.owner // vault                  (test only)
-        );
-        uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
-        require(nodeBalance >= MIN_COLLATERAL, "insufficient funds");
         IERC20Upgradeable(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
         _node.pool = address(relayerPool);
         addNode(_node);
