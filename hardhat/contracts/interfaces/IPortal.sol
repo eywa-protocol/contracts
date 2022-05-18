@@ -10,11 +10,6 @@ interface IPortal {
         bool approveMax;
     }
 
-    struct TransitData {
-        bytes4 selector;
-        bytes data;
-    }
-
     struct SynthParams {
         address receiveSide;
         address oppositeBridge;
