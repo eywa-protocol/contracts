@@ -101,7 +101,7 @@ async function main() {
 
         await timeout(60_000);
         let vestingBalance = await vesting.balanceOf(deployer.address)
-        await vesting.transfer("0x2929C55ACdDE4DFBBFAa2Dd9358A07F3B72A6179", vestingBalance, { gasLimit: "1000000" })
+        await vesting.transfer("0x3353b1b76a969e834403EbDc8C6191fEF7290feA", vestingBalance, { gasLimit: "1000000" })
 
         // try {
         //     await hre.run("verify:verify", {
