@@ -20,7 +20,7 @@ interface IRelayerPoolFactory {
 }
 
 contract NodeRegistry is Bridge {
-    using EnumerableSet for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     struct Node {
@@ -42,8 +42,8 @@ contract NodeRegistry is Bridge {
 
     address public EYWA;
     address public poolFactory;
-    EnumerableSet.AddressSet nodes;
-    mapping(address => Node) public ownedNodes;
+    EnumerableSet.Bytes32Set nodes;
+    mapping(bytes32 => Node) public ownedNodes;
     mapping(string => address) public hostIds;
     Snapshot public snapshot;
 
@@ -63,31 +63,31 @@ contract NodeRegistry is Bridge {
         Bridge.initialize(_forwarder);
     }
 
-    modifier isNewNode(address _owner) {
-        require(ownedNodes[_owner].owner == address(0), string(abi.encodePacked("NodeRegistry: node already exists")));
+    modifier isNewNode(bytes32 _blsPubKey) {
+        require(ownedNodes[_blsPubKey].owner == address(0), string(abi.encodePacked("NodeRegistry: node already exists")));
         _;
     }
 
-    modifier existingNode(address _owner) {
-        require(ownedNodes[_owner].owner != address(0), string(abi.encodePacked("NodeRegistry: node does not exist")));
+    modifier existingNode(bytes32 _blsPubKey) {
+        require(ownedNodes[_blsPubKey].owner != address(0), string(abi.encodePacked("NodeRegistry: node does not exist")));
         _;
     }
 
     //TODO: check: nodeRegistry[_blsPointAddr] == address(0)
-    function addNode(Node memory node) internal isNewNode(node.owner) {
+    function addNode(Node memory node) internal isNewNode(keccak256(node.blsPubKey)) {
         //require(node.owner != address(0), Errors.ZERO_ADDRESS);
         require(node.owner == _msgSender(), Errors.ZERO_ADDRESS);
         require(bytes(node.hostId).length != 0, Errors.ZERO_ADDRESS);
         node.nodeId = nodes.length();
         hostIds[node.hostId] = node.owner;
-        nodes.add(node.owner);
-        ownedNodes[node.owner] = node;
+        nodes.add(keccak256(node.blsPubKey));
+        ownedNodes[keccak256(node.blsPubKey)] = node;
 
         emit CreatedRelayer(node.owner, node.pool, node.hostId, node.blsPubKey, node.nodeId);
     }
 
-    function getNode(address _owner) external view returns (Node memory) {
-        return ownedNodes[_owner];
+    function getNode(bytes32 _blsPubKey) external view returns (Node memory) {
+        return ownedNodes[_blsPubKey];
     }
 
     function getNodes() external view returns (Node[] memory) {
@@ -106,13 +106,12 @@ contract NodeRegistry is Bridge {
         return pubKeys;
     }
 
-    function nodeExists(address _owner) external view returns (bool) {
-        return ownedNodes[_owner].owner != address(0);
+    function nodeExists(bytes32 _blsPubKey) external view returns (bool) {
+        return ownedNodes[_blsPubKey].owner != address(0);
     }
 
-    function checkPermissionTrustList(address _owner) external view returns (bool) {
-        return ownedNodes[_owner].owner == _owner; // (test only)
-        // return ownedNodes[_owner].status == 1;
+    function checkPermissionTrustList(bytes32 _blsPubKey) external view returns (bool) {
+        return ownedNodes[_blsPubKey].owner != address(0); // (test only)
     }
 
     function createRelayer(
@@ -165,7 +164,7 @@ contract NodeRegistry is Bridge {
             indexes[i] = i;
         }
 
-        uint256 rand = uint256(blockhash(block.number - 1)); // TODO unsafe
+        uint256 rand = uint256(vrf());
         uint256 len = nodes.length();
         if (len > SnapshotMaxSize) len = SnapshotMaxSize;
         for (uint256 i = 0; i < len; i++) {
@@ -190,5 +189,17 @@ contract NodeRegistry is Bridge {
 
     function setRelayerPoolFactory(address _poolFactory) public onlyOwner {
         poolFactory = _poolFactory;
+    }
+
+    function vrf() public view returns (bytes32 rand) {
+        uint[1] memory bn;
+        bn[0] = block.number;
+        assembly {
+            let memPtr := mload(0x40)
+            if iszero(staticcall(not(0), 0xff, bn, 0x20, memPtr, 0x20)) {
+                invalid()
+            }
+            rand := mload(memPtr)
+        }
     }
 }
