@@ -19,7 +19,7 @@ contract SyntERC20 is Ownable, ERC20Permit {
         uint256 chainId,
         bytes32 realTokenAddress,
         string memory chainSymbol
-    ) ERC20Permit("SymbiosisGSN") ERC20(name, symbol) {
+    ) ERC20Permit("EYWA") ERC20(name, symbol) {
         _tokenName = name;
         _realTokenAddress = realTokenAddress;
         _chainId = chainId;

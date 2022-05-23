@@ -1,5 +1,5 @@
 let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
-const { checkoutProvider, addressToBytes32, timeout, getTxId } = require("../../utils/helper"); 
+const { checkoutProvider, addressToBytes32, timeout, getTxId } = require("../../utils/helper");
 const { ethers } = require("hardhat");
 
 contract('Synthesize', () => {
@@ -92,7 +92,7 @@ contract('Synthesize', () => {
             const chainIdB = deployInfo["network2"].chainId
             const userFrom = userNet1
             const userTo = userNet2
-            
+
             await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
             await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
             await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
@@ -108,14 +108,14 @@ contract('Synthesize', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
                 },
-                
+
                 { from: userNet1, gas: 1000_000 }
             )
             const txID = getTxId(userNet1, nonce, chainIdB, chainIdA, receiveSideB, oppositeBridge)
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
-                [txID, userNet2, chainIdB,"emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"]
+                [txID, userNet2, chainIdB, "emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"]
             );
 
             const unsynthSig = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(emergencyHash)));
@@ -133,7 +133,7 @@ contract('Synthesize', () => {
 
             await timeout(15000)
             const newBalance = await this.tokenA1.balanceOf(userNet1)
-            assert(oldBalance.eq(newBalance))      
+            assert(oldBalance.eq(newBalance))
         })
 
         it("Emergency unsynthesize: network1 -> network3", async function () {
@@ -168,15 +168,15 @@ contract('Synthesize', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
                 },
-                
+
                 { from: userNet1, gas: 1000_000 }
             )
-            
+
             const txID = getTxId(userNet1, nonce, chainIdC, chainIdA, receiveSideC, oppositeBridge)
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
-                [txID, userNet3, chainIdC,"emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"]
+                [txID, userNet3, chainIdC, "emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"]
             );
 
             const unsynthSig = ethers.utils.splitSignature(await signerUserNet1.signMessage(ethers.utils.arrayify(emergencyHash)));
@@ -229,15 +229,15 @@ contract('Synthesize', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
                 },
-                
+
                 { from: userNet2, gas: 1000_000 }
             )
-            
+
             const txID = getTxId(userNet2, nonce, chainIdA, chainIdB, receiveSideA, oppositeBridge)
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
-                [txID, userNet1, chainIdA,"emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"]
+                [txID, userNet1, chainIdA, "emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"]
             );
 
             const unsynthSig = ethers.utils.splitSignature(await signerUserNet2.signMessage(ethers.utils.arrayify(emergencyHash)));
@@ -290,7 +290,7 @@ contract('Synthesize', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
                 },
-                
+
                 { from: userNet2, gas: 1000_000 }
             )
 
@@ -298,7 +298,7 @@ contract('Synthesize', () => {
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
-                [txID, userNet3, chainIdC,"emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"]
+                [txID, userNet3, chainIdC, "emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"]
             );
 
             const unsynthSig = ethers.utils.splitSignature(await signerUserNet2.signMessage(ethers.utils.arrayify(emergencyHash)));
@@ -351,7 +351,7 @@ contract('Synthesize', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
                 },
-                
+
                 { from: userNet3, gas: 1000_000 }
             )
 
@@ -359,7 +359,7 @@ contract('Synthesize', () => {
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
-                [txID, userNet1, chainIdA,"emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"]
+                [txID, userNet1, chainIdA, "emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"]
             );
 
             const unsynthSig = ethers.utils.splitSignature(await signerUserNet3.signMessage(ethers.utils.arrayify(emergencyHash)));
@@ -387,7 +387,7 @@ contract('Synthesize', () => {
             this.synthB = await SynthB.at(synthAddress)
             const oldBalance = await this.tokenC1.balanceOf(userNet3)
             const amount = ethers.utils.parseEther("0.5")
-            
+
             const tokenToSynth = this.tokenC1.address
             const receiveSideB = deployInfo["network2"].synthesis
             const oppositeBridge = deployInfo["network2"].bridge
@@ -411,7 +411,7 @@ contract('Synthesize', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
                 },
-                
+
                 { from: userNet3, gas: 1000_000 }
             )
 
@@ -419,7 +419,7 @@ contract('Synthesize', () => {
 
             const emergencyHash = ethers.utils.solidityKeccak256(
                 ['bytes32', 'address', 'uint256', 'string'],
-                [txID, userNet2, chainIdB,"emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"]
+                [txID, userNet2, chainIdB, "emergencyUnsynthesize(bytes32,address,uint8,bytes32,bytes32)"]
             );
 
             const unsynthSig = ethers.utils.splitSignature(await signerUserNet3.signMessage(ethers.utils.arrayify(emergencyHash)));

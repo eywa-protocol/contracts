@@ -97,14 +97,16 @@ contract('Router', () => {
                 this.synthB.address,
                 amount,
                 userNet3,
-                deployInfo["network3"].synthesis,
-                deployInfo["network3"].bridge,
-                deployInfo["network3"].chainId,
+                {
+                    receiveSide: deployInfo["network3"].synthesis,
+                    oppositeBridge: deployInfo["network3"].bridge,
+                    chainId: deployInfo["network3"].chainId,
+                },
                 { from: userNet2, gas: 1000_000 }
             )
             await timeout(15000)
             const newBalance = await this.synthB.balanceOf(userNet2)
-            assert(this.oldBalance.eq(newBalance))    
+            assert(this.oldBalance.eq(newBalance))
         })
 
         it("Unsynthsize: network2 -> network1 ", async function () {
@@ -132,7 +134,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdB,
                 },
-                
+
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -143,14 +145,16 @@ contract('Router', () => {
                 this.synthB.address,
                 amount,
                 userNet1,
-                deployInfo["network1"].synthesis,
-                deployInfo["network1"].bridge,
-                deployInfo["network1"].chainId,
+                {
+                    receiveSide: deployInfo["network1"].synthesis,
+                    oppositeBridge: deployInfo["network1"].bridge,
+                    chainId: deployInfo["network1"].chainId,
+                },
                 { from: userNet2, gas: 1000_000 }
             )
             await timeout(15000)
             const newBalance = await this.synthB.balanceOf(userNet2)
-            assert(this.oldBalance.eq(newBalance))    
+            assert(this.oldBalance.eq(newBalance))
         })
 
         it("Unsynthesize: network1 -> network2", async function () {
@@ -178,7 +182,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
                 },
-                
+
                 { from: userNet2, gas: 1000_000 }
             )
 
@@ -189,14 +193,16 @@ contract('Router', () => {
                 this.synthA.address,
                 amount,
                 userNet2,
-                deployInfo["network2"].synthesis,
-                deployInfo["network2"].bridge,
-                deployInfo["network2"].chainId,
+                {
+                    receiveSide: deployInfo["network2"].synthesis,
+                    oppositeBridge: deployInfo["network2"].bridge,
+                    chainId: deployInfo["network2"].chainId,
+                },
                 { from: userNet1, gas: 1000_000 }
             )
             await timeout(15000)
             const newBalance = await this.synthA.balanceOf(userNet1)
-            assert(oldBalance.eq(newBalance))    
+            assert(oldBalance.eq(newBalance))
         })
 
         it("Unsynthesize: network1 -> network3", async function () {
@@ -224,10 +230,10 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdA,
                 },
-                
+
                 { from: userNet2, gas: 1000_000 }
             )
-            
+
             await timeout(15000)
             await this.synthA.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
 
@@ -235,14 +241,16 @@ contract('Router', () => {
                 this.synthA.address,
                 amount,
                 userNet3,
-                deployInfo["network3"].synthesis,
-                deployInfo["network3"].bridge,
-                deployInfo["network3"].chainId,
+                {
+                    receiveSide: deployInfo["network3"].synthesis,
+                    oppositeBridge: deployInfo["network3"].bridge,
+                    chainId: deployInfo["network3"].chainId,
+                },
                 { from: userNet1, gas: 1000_000 }
             )
             await timeout(15000)
             const newBalance = await this.synthA.balanceOf(userNet1)
-            assert(oldBalance.eq(newBalance))    
+            assert(oldBalance.eq(newBalance))
         })
 
         it("Unsynthesize: network3 -> network2", async function () {
@@ -271,7 +279,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
                 },
-                
+
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -282,9 +290,11 @@ contract('Router', () => {
                 this.synthC.address,
                 amount,
                 userNet2,
-                deployInfo["network2"].synthesis,
-                deployInfo["network2"].bridge,
-                deployInfo["network2"].chainId,
+                {
+                    receiveSide: deployInfo["network2"].synthesis,
+                    oppositeBridge: deployInfo["network2"].bridge,
+                    chainId: deployInfo["network2"].chainId,
+                },
                 { from: userNet3, gas: 1000_000 }
             )
             await timeout(15000)
@@ -318,7 +328,7 @@ contract('Router', () => {
                     oppositeBridge: oppositeBridge,
                     chainId: chainIdC,
                 },
-                
+
                 { from: userNet1, gas: 1000_000 }
             )
 
@@ -329,9 +339,11 @@ contract('Router', () => {
                 this.synthC.address,
                 amount,
                 userNet1,
-                deployInfo["network1"].synthesis,
-                deployInfo["network1"].bridge,
-                deployInfo["network1"].chainId,
+                {
+                    receiveSide: deployInfo["network1"].synthesis,
+                    oppositeBridge: deployInfo["network1"].bridge,
+                    chainId: deployInfo["network1"].chainId,
+                },
                 { from: userNet3, gas: 1000_000 }
             )
             await timeout(15000)

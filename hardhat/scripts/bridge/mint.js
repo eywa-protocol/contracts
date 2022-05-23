@@ -2,23 +2,23 @@ const fs = require("fs");
 const networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../helper-hardhat-config.json');
 const hre = require("hardhat");
 
-const name  = hre.network.name;
-const addr  = process.env.ADDR.trim();
+const name = hre.network.name;
+const addr = process.env.ADDR.trim();
 const limit = process.env.AMOUNT.trim();
 
 async function main() {
   const [deployer] = await ethers.getSigners();
-  const balance    = await deployer.getBalance();
+  const balance = await deployer.getBalance();
   console.log("Minting tokens. Network:", name, " Owner:", deployer.address, " Balance deployer: ", ethers.utils.formatEther(balance), " Node:", addr);
   if (ethers.utils.formatEther(balance) <= 1.5) {
     console.warn("\x1b[31m%s\x1b[0m", "> WARN. Does't enough funds! Were skiped.");
     return;
   }
 
-  let recepient         = await ethers.getSigner(addr);
+  let recepient = await ethers.getSigner(addr);
   let recepient_balance = await recepient.getBalance();
   if (ethers.utils.formatEther(recepient_balance) <= limit) {
-    const tx = await deployer.sendTransaction({to: addr, value: ethers.utils.parseEther(limit.toString())});
+    const tx = await deployer.sendTransaction({ to: addr, value: ethers.utils.parseEther(limit.toString()) });
     console.log("Send: ", tx.hash);
     await tx.wait();
   }

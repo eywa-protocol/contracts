@@ -10,11 +10,6 @@ interface IPortal {
         bool approveMax;
     }
 
-    struct TransitData {
-        bytes4 selector;
-        bytes data;
-    }
-
     struct SynthParams {
         address receiveSide;
         address oppositeBridge;
@@ -47,15 +42,6 @@ interface IPortal {
         bytes32[] calldata pubkeys,
         bytes1 txStateBump,
         uint256 chainId
-    ) external;
-
-    function synthesizeBatchWithDataTransit(
-        address[] memory token,
-        uint256[] memory amount,
-        address from,
-        address to,
-        SynthParams memory synthParams,
-        TransitData memory transitData
     ) external;
 
     function emergencyUnburnRequest(

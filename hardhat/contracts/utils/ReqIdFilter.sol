@@ -5,7 +5,7 @@ contract ReqIdFilter {
     mapping(bytes32 => bool) filter;
     address public owner = msg.sender;
 
-    function testAndSet(bytes32 id) public returns(bool) {
+    function testAndSet(bytes32 id) public returns (bool) {
         require(msg.sender == owner, "not owner");
         if (filter[id]) return true;
         filter[id] = true;

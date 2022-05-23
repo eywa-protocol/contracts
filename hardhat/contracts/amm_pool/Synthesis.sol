@@ -94,7 +94,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         bytes32 from;
         bytes32 to;
         uint256 amount;
-        bytes32 token; //TODO
+        bytes32 token;
         address stoken;
         RequestState state;
     }
@@ -131,26 +131,27 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
 
     /**
      * @dev Transfers synthetic token to another chain.
-     * @param _tokenReal real token address
+     * @param _tokenSynth synth token address
      * @param _amount amount to transfer
      * @param _to recipient address
      * @param _from msg sender address
      * @param _synthParams synth transfer parameters
      */
     function synthTransfer(
-        bytes32 _tokenReal,
+        address _tokenSynth,
         uint256 _amount,
         address _from,
         address _to,
         SynthParams calldata _synthParams
     ) external {
-        address synth = representationSynt[_tokenReal];
-        require(synth != address(0), "Synthesis: synth not found");
+        require(_tokenSynth != address(0), "Synthesis: synth address zero");
+        bytes32 tokenReal = representationReal[_tokenSynth];
+        require(tokenReal != 0, "Synthesis: real token not found");
         require(
-            ISyntERC20(synth).getChainId() != _synthParams.chainId,
+            ISyntERC20(_tokenSynth).getChainId() != _synthParams.chainId,
             "Synthesis: can not synthesize in the intial chain"
         );
-        ISyntERC20(synth).burn(_msgSender(), _amount);
+        ISyntERC20(_tokenSynth).burn(_msgSender(), _amount);
 
         uint256 nonce = IBridge(bridge).getNonce(_from);
         bytes32 txID = RequestIdLib.prepareRqId(
@@ -164,7 +165,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         bytes memory out = abi.encodeWithSelector(
             bytes4(keccak256(bytes("mintSyntheticToken(bytes32,address,uint256,address)"))),
             txID,
-            _tokenReal,
+            tokenReal,
             _amount,
             _to
         );
@@ -181,11 +182,11 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         TxState storage txState = requests[txID];
         txState.from = castToBytes32(_from);
         txState.to = castToBytes32(_to);
-        txState.stoken = synth;
+        txState.stoken = _tokenSynth;
         txState.amount = _amount;
         txState.state = RequestState.Sent;
 
-        emit SynthTransfer(txID, _from, _to, _amount, _tokenReal);
+        emit SynthTransfer(txID, _from, _to, _amount, tokenReal);
     }
 
     /**
@@ -530,12 +531,43 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
                 type(SyntERC20).creationCode,
                 abi.encode(
                     string(abi.encodePacked("e", _name)),
-                    string(abi.encodePacked("e", _symbol)),
+                    string(abi.encodePacked("e", _symbol, "(", _chainSymbol, ")")),
                     _decimals,
                     _chainId,
                     _rtoken,
                     _chainSymbol
                 )
+            )
+        );
+        setRepresentation(_rtoken, stoken, _decimals);
+        emit CreatedRepresentation(_rtoken, stoken);
+    }
+
+    /**
+     * @dev Creates a custom representation with the given arguments.
+     * @param _rtoken real token address
+     * @param _name real token name
+     * @param _decimals real token decimals number
+     * @param _symbol real token symbol
+     * @param _chainId real token chain id
+     * @param _chainSymbol real token chain symbol
+     */
+    function createCustomRepresentation(
+        bytes32 _rtoken,
+        uint8 _decimals,
+        string memory _name,
+        string memory _symbol,
+        uint256 _chainId,
+        string memory _chainSymbol
+    ) external onlyOwner {
+        require(representationSynt[_rtoken] == address(0), "Synthesis: representation already exists");
+        require(representationReal[castToAddress(_rtoken)] == 0, "Synthesis: representation already exists");
+        address stoken = Create2.deploy(
+            0,
+            keccak256(abi.encodePacked(_rtoken)),
+            abi.encodePacked(
+                type(SyntERC20).creationCode,
+                abi.encode(_name, _symbol, _decimals, _chainId, _rtoken, _chainSymbol)
             )
         );
         setRepresentation(_rtoken, stoken, _decimals);

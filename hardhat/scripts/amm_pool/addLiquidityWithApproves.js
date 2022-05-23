@@ -44,7 +44,7 @@ async function main() {
         1,
         deployer.address,
         process.env.ADD_LIQUIDITY_DEADLINE_TIMESTAMP,
-        {gasLimit: 1000000}
+        { gasLimit: 1000000 }
     );
 
     await tx.wait();

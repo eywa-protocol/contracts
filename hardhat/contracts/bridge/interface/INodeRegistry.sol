@@ -8,7 +8,7 @@ interface INodeRegistry {
         address owner;
         address pool;
         address nodeIdAddress;
-        string  blsPubKey;
+        string blsPubKey;
         uint256 nodeId;
     }
 

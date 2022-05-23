@@ -3,9 +3,9 @@ pragma solidity 0.8.10;
 
 library Utils {
     /* @notice      Convert the bytes array to bytes32 type, the bytes array length must be 32
-    *  @param _bs   Source bytes array
-    *  @return      bytes32
-    */
+     *  @param _bs   Source bytes array
+     *  @return      bytes32
+     */
     function bytesToBytes32(bytes memory _bs) internal pure returns (bytes32 value) {
         require(_bs.length == 32, "bytes length is not 32.");
         assembly {
@@ -15,9 +15,9 @@ library Utils {
     }
 
     /* @notice      Convert bytes to uint256
-    *  @param _b    Source bytes should have length of 32
-    *  @return      uint256
-    */
+     *  @param _b    Source bytes should have length of 32
+     *  @return      uint256
+     */
     function bytesToUint256(bytes memory _bs) internal pure returns (uint256 value) {
         require(_bs.length == 32, "bytes length is not 32.");
         assembly {
@@ -28,11 +28,14 @@ library Utils {
     }
 
     /* @notice      Convert uint256 to bytes
-    *  @param _b    uint256 that needs to be converted
-    *  @return      bytes
-    */
+     *  @param _b    uint256 that needs to be converted
+     *  @return      bytes
+     */
     function uint256ToBytes(uint256 _value) internal pure returns (bytes memory bs) {
-        require(_value <= 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "Value exceeds the range");
+        require(
+            _value <= 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+            "Value exceeds the range"
+        );
         assembly {
             // Get a location of some free memory and store it in result as
             // Solidity does for memory variables.
@@ -47,25 +50,23 @@ library Utils {
     }
 
     /* @notice      Convert bytes to address
-    *  @param _bs   Source bytes: bytes length must be 20
-    *  @return      Converted address from source bytes
-    */
-    function bytesToAddress(bytes memory _bs) internal pure returns (address addr)
-    {
+     *  @param _bs   Source bytes: bytes length must be 20
+     *  @return      Converted address from source bytes
+     */
+    function bytesToAddress(bytes memory _bs) internal pure returns (address addr) {
         require(_bs.length == 20, "bytes length does not match address");
         assembly {
             // for _bs, first word store _bs.length, second word store _bs.value
             // load 32 bytes from mem[_bs+20], convert it into Uint160, meaning we take last 20 bytes as addr (address).
             addr := mload(add(_bs, 0x14))
         }
-
     }
-    
+
     /* @notice      Convert address to bytes
-    *  @param _addr Address need to be converted
-    *  @return      Converted bytes from address
-    */
-    function addressToBytes(address _addr) internal pure returns (bytes memory bs){
+     *  @param _addr Address need to be converted
+     *  @return      Converted bytes from address
+     */
+    function addressToBytes(address _addr) internal pure returns (bytes memory bs) {
         assembly {
             // Get a location of some free memory and store it in result as
             // Solidity does for memory variables.
@@ -76,7 +77,7 @@ library Utils {
             mstore(add(bs, 0x20), shl(96, _addr))
             // Update the free-memory pointer by padding our last write location to 32 bytes
             mstore(0x40, add(bs, 0x40))
-       }
+        }
     }
 
     /* @notice              Compare if two bytes are equal, which are in storage and memory, seperately
@@ -135,7 +136,9 @@ library Utils {
 
                         // the next line is the loop condition:
                         // while(uint(mc < end) + cb == 2)
-                        for {} eq(add(lt(mc, end), cb), 2) {
+                        for {
+
+                        } eq(add(lt(mc, end), cb), 2) {
                             sc := add(sc, 1)
                             mc := add(mc, 0x20)
                         } {
@@ -166,13 +169,9 @@ library Utils {
     */
     function slice(
         bytes memory _bytes,
-        uint _start,
-        uint _length
-    )
-        internal
-        pure
-        returns (bytes memory)
-    {
+        uint256 _start,
+        uint256 _length
+    ) internal pure returns (bytes memory) {
         require(_bytes.length >= (_start + _length));
 
         bytes memory tempBytes;
@@ -229,16 +228,21 @@ library Utils {
 
         return tempBytes;
     }
+
     /* @notice              Check if the elements number of _signers within _keepers array is no less than _m
-    *  @param _keepers      The array consists of serveral address
-    *  @param _signers      Some specific addresses to be looked into
-    *  @param _m            The number requirement paramter
-    *  @return              True means containment, false meansdo do not contain.
-    */
-    function containMAddresses(address[] memory _keepers, address[] memory _signers, uint _m) internal pure returns (bool){
-        uint m = 0;
-        for(uint i = 0; i < _signers.length; i++){
-            for (uint j = 0; j < _keepers.length; j++) {
+     *  @param _keepers      The array consists of serveral address
+     *  @param _signers      Some specific addresses to be looked into
+     *  @param _m            The number requirement paramter
+     *  @return              True means containment, false meansdo do not contain.
+     */
+    function containMAddresses(
+        address[] memory _keepers,
+        address[] memory _signers,
+        uint256 _m
+    ) internal pure returns (bool) {
+        uint256 m = 0;
+        for (uint256 i = 0; i < _signers.length; i++) {
+            for (uint256 j = 0; j < _keepers.length; j++) {
                 if (_signers[i] == _keepers[j]) {
                     m++;
                     delete _keepers[j];
@@ -249,20 +253,20 @@ library Utils {
     }
 
     /* @notice              TODO
-    *  @param key
-    *  @return
-    */
+     *  @param key
+     *  @return
+     */
     function compressMCPubKey(bytes memory key) internal pure returns (bytes memory newkey) {
-         require(key.length >= 67, "key lenggh is too short");
-         newkey = slice(key, 0, 35);
-         if (uint8(key[66]) % 2 == 0){
-             newkey[2] = 0x02;
-         } else {
-             newkey[2] = 0x03;
-         }
-         return newkey;
+        require(key.length >= 67, "key lenggh is too short");
+        newkey = slice(key, 0, 35);
+        if (uint8(key[66]) % 2 == 0) {
+            newkey[2] = 0x02;
+        } else {
+            newkey[2] = 0x03;
+        }
+        return newkey;
     }
-    
+
     /**
      * @dev Returns true if `account` is a contract.
      *      Refer from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol#L18
@@ -286,7 +290,9 @@ library Utils {
         bytes32 codehash;
         bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         // solhint-disable-next-line no-inline-assembly
-        assembly { codehash := extcodehash(account) }
+        assembly {
+            codehash := extcodehash(account)
+        }
         return (codehash != 0x0 && codehash != accountHash);
     }
 }
