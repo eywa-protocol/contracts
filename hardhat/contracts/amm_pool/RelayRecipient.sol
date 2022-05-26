@@ -14,8 +14,8 @@ abstract contract RelayRecipient is ContextUpgradeable, OwnableUpgradeable {
         return _trustedForwarder;
     }
 
-    function _setTrustedForwarder(address _forwarder) internal {
-        _trustedForwarder = _forwarder;
+    function _setTrustedForwarder(address forwarder) internal {
+        _trustedForwarder = forwarder;
     }
 
     function isTrustedForwarder(address forwarder) public view virtual returns (bool) {
