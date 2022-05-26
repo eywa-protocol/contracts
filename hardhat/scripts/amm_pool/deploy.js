@@ -37,10 +37,11 @@ async function main() {
         networkConfig[network.name].synthesis,
         networkConfig[network.name].bridge
     ], { initializer: 'initialize' });
-    await curveProxy.deployed()
+    await curveProxy.deployed();
     console.log(`CurveProxy address: ${curveProxy.address}`);
     // initial Curve proxy setup
-    await synthesis.setCurveProxy(curveProxy.address);
+    const setCurve = await synthesis.setCurveProxy(curveProxy.address);
+    await setCurve.wait();
 
 
 
@@ -52,7 +53,7 @@ async function main() {
 
     networkConfig[network.name].portal = portal.address;
     networkConfig[network.name].synthesis = synthesis.address;
-    networkConfig[network.name].curveProxy = curveProxy.address
+    networkConfig[network.name].curveProxy = curveProxy.address;
     networkConfig[network.name].router = router.address;
 
     fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",

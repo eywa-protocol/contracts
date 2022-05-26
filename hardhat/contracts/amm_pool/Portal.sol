@@ -64,11 +64,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bool approveMax;
     }
 
-    struct TransitData {
-        bytes4 selector;
-        bytes data;
-    }
-
     struct TokenInfo {
         uint8 tokenDecimals;
         bool isApproved;

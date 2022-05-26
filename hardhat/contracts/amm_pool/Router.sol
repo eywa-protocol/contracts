@@ -83,8 +83,8 @@ contract Router is EIP712, Ownable {
         bytes32 workerHash = ECDSA.toEthSignedMessageHash(_hashTypedDataV4(workerStructHash));
         worker = ECDSA.recover(workerHash, receipt.v, receipt.r, receipt.s);
 
-        require(_trustedWorker[worker], "Router: invalid signature from worker");
         require(block.timestamp <= receipt.deadline, "Router: deadline");
+        require(_trustedWorker[worker], "Router: invalid signature from worker");
     }
 
     function _proceedFees(uint256 executionPrice, address worker) internal {
