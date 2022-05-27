@@ -166,7 +166,7 @@ contract NodeRegistryV2 is Bridge {
 
     function daoUpdateEpochRequest(bool resetEpoch) public override {
         Bridge.daoUpdateEpochRequest(resetEpoch);
-        if (snapshot.snapNum <= Bridge.epochNum) {
+        if (snapshot.snapNum <= Bridge._epochNum) {
             newSnapshot();
         }
     }
@@ -194,7 +194,7 @@ contract NodeRegistryV2 is Bridge {
             indexes[j] = indexes[i];
         }
 
-        snapshot.snapNum = Bridge.epochNum + 1;
+        snapshot.snapNum = Bridge._epochNum + 1;
         emit NewSnapshot(snapshot.snapNum);
     }
 

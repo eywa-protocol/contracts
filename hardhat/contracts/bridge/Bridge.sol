@@ -16,12 +16,12 @@ import "./interface/INodeRegistry.sol";
 contract Bridge is BridgeCore, RelayRecipient, Typecast {
     using AddressUpgradeable for address;
 
-    string public versionRecipient;
-    Bls.E2Point private epochKey; // Aggregated public key of all paricipants of the current epoch
-    address public dao; // Address of the DAO
-    uint8 public epochParticipantsNum; // Number of participants contributed to the epochKey
-    uint32 public epochNum; // Sequential number of the epoch
-    ReqIdFilter public reqIdFilter; // Filteres received request IDs against replay
+    string public _versionRecipient;
+    Bls.E2Point private _epochKey; // Aggregated public key of all paricipants of the current epoch
+    address public _dao; // Address of the DAO
+    uint8 public _epochParticipantsNum; // Number of participants contributed to the epochKey
+    uint32 public _epochNum; // Sequential number of the epoch
+    ReqIdFilter public _reqIdFilter; // Filteres received request IDs against replay
 
     event NewEpoch(bytes oldEpochKey, bytes newEpochKey, bool requested, uint32 epochNum);
 
@@ -31,9 +31,9 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         __Context_init_unchained();
         __Ownable_init_unchained();
 
-        versionRecipient = "2.2.3";
-        dao = _msgSender();
-        reqIdFilter = new ReqIdFilter();
+        _versionRecipient = "2.2.3";
+        _dao = _msgSender();
+        _reqIdFilter = new ReqIdFilter();
         _setTrustedForwarder(forwarder);
     }
 
@@ -56,7 +56,7 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
     }
 
     modifier onlyDao() {
-        require(_msgSender() == dao, "Bridge: only DAO");
+        require(_msgSender() == _dao, "Bridge: only DAO");
         _;
     }
 
@@ -72,44 +72,44 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
             uint32
         )
     {
-        return (abi.encode(epochKey), epochParticipantsNum, epochNum);
+        return (abi.encode(_epochKey), _epochParticipantsNum, _epochNum);
     }
 
     /**
      * @dev Updates current epoch.
-     * @param _blockHeader block header serialization
-     * @param _txMerkleProve EpochEvent transaction payload and its Merkle audit path
-     * @param _votersPubKey aggregated public key of the old epoch participants, who voted for the update
-     * @param _votersSignature aggregated signature of the old epoch participants, who voted for the update
-     * @param _votersMask bitmask of old epoch participants, who voted, amoung all participants
+     * @param blockHeader block header serialization
+     * @param txMerkleProve EpochEvent transaction payload and its Merkle audit path
+     * @param votersPubKey aggregated public key of the old epoch participants, who voted for the update
+     * @param votersSignature aggregated signature of the old epoch participants, who voted for the update
+     * @param votersMask bitmask of old epoch participants, who voted, amoung all participants
      */
     function updateEpoch(
-        bytes calldata _blockHeader,
-        bytes calldata _txMerkleProve,
-        bytes calldata _votersPubKey,
-        bytes calldata _votersSignature,
-        uint256 _votersMask
+        bytes calldata blockHeader,
+        bytes calldata txMerkleProve,
+        bytes calldata votersPubKey,
+        bytes calldata votersSignature,
+        uint256 votersMask
     ) external {
-        if (epochKey.x[0] != 0 || epochKey.x[1] != 0) {
-            Block.verify(_blockHeader, _votersPubKey, _votersSignature, _votersMask, epochKey, epochParticipantsNum);
+        if (_epochKey.x[0] != 0 || _epochKey.x[1] != 0) {
+            Block.verify(blockHeader, votersPubKey, votersSignature, votersMask, _epochKey, _epochParticipantsNum);
         }
 
-        bytes memory payload = Merkle.prove(_txMerkleProve, Block.transactionsRoot(_blockHeader));
-        (uint32 txNewEpochNum, bytes memory txNewKey, uint8 txNewEpochParticipantsNum) = Block.epochRequestTx(payload);
+        bytes memory _payload = Merkle.prove(txMerkleProve, Block.transactionsRoot(blockHeader));
+        (uint32 _txNewEpochNum, bytes memory _txNewKey, uint8 _txNewEpochParticipantsNum) = Block.epochRequestTx(_payload);
 
-        require(epochNum + 1 == txNewEpochNum, "wrong epoch number");
-        Bls.E2Point memory newKey = Bls.decodeE2Point(txNewKey);
-        epochKey = newKey;
-        epochParticipantsNum = txNewEpochParticipantsNum; // TODO: require minimum
-        epochNum = txNewEpochNum;
-        reqIdFilter.destroy();
-        reqIdFilter = new ReqIdFilter();
-        emit NewEpoch(abi.encode(epochKey), abi.encode(newKey), false, txNewEpochNum);
+        require(_epochNum + 1 == _txNewEpochNum, "wrong epoch number");
+        Bls.E2Point memory _newKey = Bls.decodeE2Point(_txNewKey);
+        _epochKey = _newKey;
+        _epochParticipantsNum = _txNewEpochParticipantsNum; // TODO: require minimum
+        _epochNum = _txNewEpochNum;
+        _reqIdFilter.destroy();
+        _reqIdFilter = new ReqIdFilter();
+        emit NewEpoch(abi.encode(_epochKey), abi.encode(_newKey), false, _txNewEpochNum);
     }
 
     /**
      * @dev Transmit crosschain request v2.
-     * @param _selector call data
+     * @param selector call data
      * @param receiveSide receive contract address
      * @param oppositeBridge opposite bridge address
      * @param chainId opposite chain ID
@@ -118,7 +118,7 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
      * @param nonce sender's nonce
      */
     function transmitRequestV2(
-        bytes calldata _selector,
+        bytes calldata selector,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId,
@@ -127,13 +127,13 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
         uint256 nonce
     ) external onlyTrustedContract(receiveSide, oppositeBridge) returns (bool) {
         verifyAndUpdateNonce(sender, nonce);
-        emit OracleRequest("setRequest", address(this), requestId, _selector, receiveSide, oppositeBridge, chainId);
+        emit OracleRequest("setRequest", address(this), requestId, selector, receiveSide, oppositeBridge, chainId);
         return true;
     }
 
     /**
      * @dev Transmit crosschain request v2 with bytes32 to Solana.
-     * @param _selector call data
+     * @param selector call data
      * @param receiveSide receive contract address
      * @param oppositeBridge opposite bridge address
      * @param chainId opposite chain ID
@@ -142,7 +142,7 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
      * @param nonce sender's nonce
      */
     function transmitRequestV2ToSolana(
-        bytes calldata _selector,
+        bytes calldata selector,
         bytes32 receiveSide,
         bytes32 oppositeBridge,
         uint256 chainId,
@@ -155,7 +155,7 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
             "setRequest",
             castToBytes32(address(this)),
             requestId,
-            _selector,
+            selector,
             oppositeBridge,
             chainId
         );
@@ -164,36 +164,36 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
 
     /**
      * @dev Receive crosschain request v2.
-     * @param _blockHeader block header serialization
-     * @param _txMerkleProve OracleRequest transaction payload and its Merkle audit path
-     * @param _votersPubKey aggregated public key of the old epoch participants, who voted for the block
-     * @param _votersSignature aggregated signature of the old epoch participants, who voted for the block
-     * @param _votersMask bitmask of epoch participants, who voted, amoung all participants
+     * @param blockHeader block header serialization
+     * @param txMerkleProve OracleRequest transaction payload and its Merkle audit path
+     * @param votersPubKey aggregated public key of the old epoch participants, who voted for the block
+     * @param votersSignature aggregated signature of the old epoch participants, who voted for the block
+     * @param votersMask bitmask of epoch participants, who voted, amoung all participants
      */
     function receiveRequestV2(
-        bytes calldata _blockHeader,
-        bytes calldata _txMerkleProve,
-        bytes calldata _votersPubKey,
-        bytes calldata _votersSignature,
-        uint256 _votersMask
+        bytes calldata blockHeader,
+        bytes calldata txMerkleProve,
+        bytes calldata votersPubKey,
+        bytes calldata votersSignature,
+        uint256 votersMask
     ) external {
-        require(epochKey.x[0] != 0 || epochKey.x[1] != 0, "epoch not set");
+        require(_epochKey.x[0] != 0 || _epochKey.x[1] != 0, "epoch not set");
 
         // Verify the block signature
-        Block.verify(_blockHeader, _votersPubKey, _votersSignature, _votersMask, epochKey, epochParticipantsNum);
+        Block.verify(blockHeader, votersPubKey, votersSignature, votersMask, _epochKey, _epochParticipantsNum);
 
         // Verify that the transaction is really in the block
-        bytes memory payload = Merkle.prove(_txMerkleProve, Block.transactionsRoot(_blockHeader));
+        bytes memory _payload = Merkle.prove(txMerkleProve, Block.transactionsRoot(blockHeader));
 
         // Make the call
-        (bytes32 reqId, bytes32 bridgeFrom, address receiveSide, bytes memory sel) = Block.oracleRequestTx(payload);
-        require(reqIdFilter.testAndSet(reqId) == false, "Already seen");
-        bytes memory data = receiveSide.functionCall(sel, "Bridge: receiveRequestV2: failed");
+        (bytes32 _reqId, bytes32 _bridgeFrom, address _receiveSide, bytes memory _sel) = Block.oracleRequestTx(_payload);
+        require(_reqIdFilter.testAndSet(_reqId) == false, "Already seen");
+        bytes memory _data = _receiveSide.functionCall(_sel, "Bridge: receiveRequestV2: failed");
         require(
-            data.length == 0 || abi.decode(data, (bool)),
+            _data.length == 0 || abi.decode(_data, (bool)),
             "Bridge: receiveRequestV2: unable to decode returned data"
         );
-        emit ReceiveRequest(reqId, receiveSide, bridgeFrom);
+        emit ReceiveRequest(_reqId, _receiveSide, _bridgeFrom);
     }
 
     /**
@@ -203,12 +203,12 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
      *                   successfully vote for it
      */
     function daoUpdateEpochRequest(bool resetEpoch) public virtual onlyDao {
-        bytes memory epochKeyBytes = abi.encode(epochKey);
+        bytes memory _epochKeyBytes = abi.encode(_epochKey);
         if (resetEpoch) {
-            epochNum++;
-            Bls.E2Point memory zero;
-            emit NewEpoch(epochKeyBytes, abi.encode(zero), true, epochNum);
-            epochKey = zero;
+            _epochNum++;
+            Bls.E2Point memory _zero;
+            emit NewEpoch(_epochKeyBytes, abi.encode(_zero), true, _epochNum);
+            _epochKey = _zero;
         }
     }
 
@@ -216,17 +216,17 @@ contract Bridge is BridgeCore, RelayRecipient, Typecast {
      * @dev Transfer DAO to another address.
      */
     function daoTransferOwnership(address newDao) external {
-        require(dao == address(0) || _msgSender() == dao, "Bridge: only DAO");
-        emit OwnershipTransferred(dao, newDao);
-        dao = newDao;
+        require(_dao == address(0) || _msgSender() == _dao, "Bridge: only DAO");
+        emit OwnershipTransferred(_dao, newDao);
+        _dao = newDao;
     }
 
     /**
      * @dev Sets new trusted forwarder
-     * @param _forwarder new forwarder address
+     * @param forwarder new forwarder address
      */
-    function setTrustedForwarder(address _forwarder) external onlyOwner {
-        return _setTrustedForwarder(_forwarder);
+    function setTrustedForwarder(address forwarder) external onlyOwner {
+        return _setTrustedForwarder(forwarder);
     }
 
     /**

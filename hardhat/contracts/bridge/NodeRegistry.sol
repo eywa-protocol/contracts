@@ -40,36 +40,36 @@ contract NodeRegistry is Bridge {
     uint256 constant SnapshotMaxSize = 50; // maximum epoch participants num
     uint256 public constant MIN_COLLATERAL = 1 ether; // TODO discuss
 
-    address public EYWA;
-    address public poolFactory;
-    EnumerableSet.Bytes32Set nodes;
-    mapping(bytes32 => Node) public ownedNodes;
-    mapping(string => address) public hostIds;
-    Snapshot public snapshot;
+    address public _EYWA;
+    address public _poolFactory;
+    EnumerableSet.Bytes32Set _nodes;
+    mapping(bytes32 => Node) public _ownedNodes;
+    mapping(string => address) public _hostIds;
+    Snapshot public _snapshot;
 
     event NewSnapshot(uint256 snapNum);
     event CreatedRelayer(address indexed owner, address relayerPool, string hostId, bytes blsPubKey, uint256 nodeId);
 
     function initialize2(
-        address _EYWA,
-        address _forwarder,
-        address _poolFactory
+        address EYWA,
+        address forwarder,
+        address poolFactory
     ) public initializer {
-        require(_EYWA != address(0), Errors.ZERO_ADDRESS);
+        require(EYWA != address(0), Errors.ZERO_ADDRESS);
         // require(_forwarder != address(0), Errors.ZERO_ADDRESS);
         // require(_poolFactory != address(0), Errors.ZERO_ADDRESS);
-        poolFactory = _poolFactory;
-        EYWA = _EYWA;
-        Bridge.initialize(_forwarder);
+        _poolFactory = poolFactory;
+        _EYWA = EYWA;
+        Bridge.initialize(forwarder);
     }
 
-    modifier isNewNode(bytes32 _blsPubKey) {
-        require(ownedNodes[_blsPubKey].owner == address(0), string(abi.encodePacked("NodeRegistry: node already exists")));
+    modifier isNewNode(bytes32 blsPubKey) {
+        require(_ownedNodes[blsPubKey].owner == address(0), string(abi.encodePacked("NodeRegistry: node already exists")));
         _;
     }
 
-    modifier existingNode(bytes32 _blsPubKey) {
-        require(ownedNodes[_blsPubKey].owner != address(0), string(abi.encodePacked("NodeRegistry: node does not exist")));
+    modifier existingNode(bytes32 blsPubKey) {
+        require(_ownedNodes[blsPubKey].owner != address(0), string(abi.encodePacked("NodeRegistry: node does not exist")));
         _;
     }
 
@@ -78,63 +78,63 @@ contract NodeRegistry is Bridge {
         //require(node.owner != address(0), Errors.ZERO_ADDRESS);
         require(node.owner == _msgSender(), Errors.ZERO_ADDRESS);
         require(bytes(node.hostId).length != 0, Errors.ZERO_ADDRESS);
-        node.nodeId = nodes.length();
-        hostIds[node.hostId] = node.owner;
-        nodes.add(keccak256(node.blsPubKey));
-        ownedNodes[keccak256(node.blsPubKey)] = node;
+        node.nodeId = _nodes.length();
+        _hostIds[node.hostId] = node.owner;
+        _nodes.add(keccak256(node.blsPubKey));
+        _ownedNodes[keccak256(node.blsPubKey)] = node;
 
         emit CreatedRelayer(node.owner, node.pool, node.hostId, node.blsPubKey, node.nodeId);
     }
 
-    function getNode(bytes32 _blsPubKey) external view returns (Node memory) {
-        return ownedNodes[_blsPubKey];
+    function getNode(bytes32 blsPubKey) external view returns (Node memory) {
+        return _ownedNodes[blsPubKey];
     }
 
     function getNodes() external view returns (Node[] memory) {
-        Node[] memory allNodes = new Node[](nodes.length());
-        for (uint256 i = 0; i < nodes.length(); i++) {
-            allNodes[i] = ownedNodes[nodes.at(i)];
+        Node[] memory allNodes = new Node[](_nodes.length());
+        for (uint256 i = 0; i < _nodes.length(); i++) {
+            allNodes[i] = _ownedNodes[_nodes.at(i)];
         }
         return allNodes;
     }
 
     function getBLSPubKeys() external view returns (bytes[] memory) {
-        bytes[] memory pubKeys = new bytes[](nodes.length());
-        for (uint256 i = 0; i < nodes.length(); i++) {
-            pubKeys[i] = ownedNodes[nodes.at(i)].blsPubKey;
+        bytes[] memory _pubKeys = new bytes[](_nodes.length());
+        for (uint256 i = 0; i < _nodes.length(); i++) {
+            _pubKeys[i] = _ownedNodes[_nodes.at(i)].blsPubKey;
         }
-        return pubKeys;
+        return _pubKeys;
     }
 
-    function nodeExists(bytes32 _blsPubKey) external view returns (bool) {
-        return ownedNodes[_blsPubKey].owner != address(0);
+    function nodeExists(bytes32 blsPubKey) external view returns (bool) {
+        return _ownedNodes[blsPubKey].owner != address(0);
     }
 
-    function checkPermissionTrustList(bytes32 _blsPubKey) external view returns (bool) {
-        return ownedNodes[_blsPubKey].owner != address(0); // (test only)
+    function checkPermissionTrustList(bytes32 blsPubKey) external view returns (bool) {
+        return _ownedNodes[blsPubKey].owner != address(0); // (test only)
     }
 
     function createRelayer(
-        Node memory _node,
-        uint256 _deadline,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
+        Node memory node,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
     ) external {
-        RelayerPool relayerPool = IRelayerPoolFactory(poolFactory).create(
-            _node.owner,    // node owner
-            address(EYWA),  // depositToken
-            address(EYWA),  // rewardToken            (test only)
+        RelayerPool _relayerPool = IRelayerPoolFactory(_poolFactory).create(
+            node.owner,    // node owner
+            address(_EYWA),  // depositToken
+            address(_EYWA),  // rewardToken            (test only)
             100,            // relayerFeeNumerator    (test only)
             4000,           // emissionRateNumerator  (test only)
-            _node.owner     // vault                  (test only)
+            node.owner     // vault                  (test only)
         );
-        uint256 nodeBalance = IERC20(EYWA).balanceOf(_msgSender());
-        require(nodeBalance >= MIN_COLLATERAL, "NodeRegistry: insufficient funds");
-        IERC20Permit(EYWA).permit(_msgSender(), address(this), nodeBalance, _deadline, _v, _r, _s);
-        IERC20Upgradeable(EYWA).safeTransferFrom(_msgSender(), address(relayerPool), nodeBalance);
-        _node.pool = address(relayerPool);
-        addNode(_node);
+        uint256 _nodeBalance = IERC20(_EYWA).balanceOf(_msgSender());
+        require(_nodeBalance >= MIN_COLLATERAL, "NodeRegistry: insufficient funds");
+        IERC20Permit(_EYWA).permit(_msgSender(), address(this), _nodeBalance, deadline, v, r, s);
+        IERC20Upgradeable(_EYWA).safeTransferFrom(_msgSender(), address(_relayerPool), _nodeBalance);
+        node.pool = address(_relayerPool);
+        addNode(node);
     }
 
     function getSnapshot()
@@ -146,49 +146,49 @@ contract NodeRegistry is Bridge {
             uint256
         )
     {
-        return (snapshot.blsPubKeys, snapshot.hostIds, snapshot.snapNum);
+        return (_snapshot.blsPubKeys, _snapshot.hostIds, _snapshot.snapNum);
     }
 
     function daoUpdateEpochRequest(bool resetEpoch) public override {
         Bridge.daoUpdateEpochRequest(resetEpoch);
-        if (snapshot.snapNum <= Bridge.epochNum) {
+        if (_snapshot.snapNum <= Bridge._epochNum) {
             newSnapshot();
         }
     }
 
     function newSnapshot() internal {
-        delete snapshot;
+        delete _snapshot;
 
-        uint256[] memory indexes = new uint256[](nodes.length());
-        for (uint256 i = 0; i < nodes.length(); i++) {
-            indexes[i] = i;
+        uint256[] memory _indexes = new uint256[](_nodes.length());
+        for (uint256 i = 0; i < _nodes.length(); i++) {
+            _indexes[i] = i;
         }
 
         uint256 rand = uint256(vrf());
-        uint256 len = nodes.length();
+        uint256 len = _nodes.length();
         if (len > SnapshotMaxSize) len = SnapshotMaxSize;
         for (uint256 i = 0; i < len; i++) {
             // https://en.wikipedia.org/wiki/Linear_congruential_generator
             unchecked {
                 rand = rand * 6364136223846793005 + 1442695040888963407;
             } // TODO unsafe
-            uint256 j = i + (rand % (nodes.length() - i));
-            Node storage n = ownedNodes[nodes.at(indexes[j])];
-            snapshot.blsPubKeys.push(n.blsPubKey);
-            snapshot.hostIds.push(n.hostId);
-            indexes[j] = indexes[i];
+            uint256 j = i + (rand % (_nodes.length() - i));
+            Node storage n = _ownedNodes[_nodes.at(_indexes[j])];
+            _snapshot.blsPubKeys.push(n.blsPubKey);
+            _snapshot.hostIds.push(n.hostId);
+            _indexes[j] = _indexes[i];
         }
 
-        snapshot.snapNum = Bridge.epochNum + 1;
-        emit NewSnapshot(snapshot.snapNum);
+        _snapshot.snapNum = Bridge._epochNum + 1;
+        emit NewSnapshot(_snapshot.snapNum);
     }
 
-    function setUtilityToken(address _token) public onlyOwner {
-        EYWA = _token;
+    function setUtilityToken(address token) public onlyOwner {
+        _EYWA = token;
     }
 
-    function setRelayerPoolFactory(address _poolFactory) public onlyOwner {
-        poolFactory = _poolFactory;
+    function setRelayerPoolFactory(address poolFactory) public onlyOwner {
+        _poolFactory = poolFactory;
     }
 
     function vrf() public view returns (bytes32 rand) {
