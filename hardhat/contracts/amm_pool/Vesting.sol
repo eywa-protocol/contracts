@@ -20,7 +20,8 @@ interface IVestingPolicy {
      */
     function permittedForClaim(address) external view returns (uint256);
 
-    /**
+
+     /**
      * @dev Decrease permitted amount of tokens to claim
      * for this address.
      *
@@ -33,32 +34,48 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     using Counters for Counters.Counter;
 
     // Relative timestamp to use transfer/transferFrom without permission
-    uint256 public permissionlessTimeStamp;
+    uint256 public permissionlessTimeStamp; 
 
-    // Absolute timestamp of vesting period start
+    // Absolute timestamp of vesting period start 
     uint256 public started;
 
     // Token which is vested on this contract
     IERC20 public immutable eywaToken;
 
-    // Relative timestamp cliff duration
-    uint256 public cliffDuration;
+    struct cliffData{
+        // Relative timestamp first cliff duration    
+        uint256 cliffDuration1; 
+
+        // Claimable number of tokens after first cliff period
+        uint256 cliffAmount1; 
+
+        // Relative timestamp second cliff duration    
+        uint256 cliffDuration2; 
+
+        // Claimable number of tokens after second cliff period
+        uint256 cliffAmount2; 
+
+        // Relative timestamp third cliff duration    
+        uint256 cliffDuration3; 
+
+        // Claimable number of tokens after third cliff period
+        uint256 cliffAmount3; 
+    }
+
+    cliffData public cliffs;
 
     // Duration of one linear or discrete step
-    uint256 public stepDuration;
-
-    // Claimable number of tokens after cliff period
-    uint256 public cliffAmount;
+    uint256 public stepDuration; 
 
     // Number linear or discrete steps
-    uint256 public numOfSteps;
+    uint256 public numOfSteps; 
 
     // Relative timestamp to claim without permission
     uint256 claimWithAllowanceTimeStamp;
 
     // Contract which gives permission to claim before claimWithAllowanceTimeStamp
     IVestingPolicy public claimAllowanceContract;
-
+    
     /**
      * The number of claimed tokens in ``address``'s account.
      * Note: it doesn't necessary represent how much ``address`` claimed
@@ -77,7 +94,7 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     mapping(address => uint256) public unburnBalanceOf;
 
     /**
-     * The number of tokens allowed for transfer/transferFrom
+     * The number of tokens allowed for transfer/transferFrom 
      * from ``address``'s account to another ``address``'s account.
      * Note: It uses address(0) for permission for staking to staking contract
      * or to unstake from it.
@@ -89,6 +106,7 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
      */
     event ReleasedAfterClaim(address indexed from, uint256 indexed amount);
 
+
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` of the token
      * and also sets eywa token's address.
@@ -98,13 +116,12 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev Initializes main parameters for vesting period
+     * @dev Initializes main parameters for vesting period 
      * @param _claimAllowanceContract - address of contract which gives permission to claim before claimWithAllowanceTimeStamp
      * @param _claimWithAllowanceTimeStamp - relative timestamp to claim without permission
-     * @param _started - absolute timestamp of vesting period start
-     * @param _cliffDuration - relative timestamp cliff duration
+     * @param _started - absolute timestamp of vesting period start 
+     * @param _cliffs - data of three cliffs
      * @param _stepDuration - duration of one linear or discrete step
-     * @param _cliffAmount - claimable number of tokens after cliff period
      * @param _allStepsDuration - duration of all linear or discrete steps
      * @param _permissionlessTimeStamp - relative timestamp to use transfer/transferFrom without permission
      * @param _initialAddresses - intitial token owners list
@@ -121,9 +138,8 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         IVestingPolicy _claimAllowanceContract,
         uint256 _claimWithAllowanceTimeStamp,
         uint256 _started,
-        uint256 _cliffDuration,
+        cliffData memory _cliffs,
         uint256 _stepDuration,
-        uint256 _cliffAmount,
         uint256 _allStepsDuration,
         uint256 _permissionlessTimeStamp,
         address[] calldata _initialAddresses,
@@ -136,9 +152,13 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         claimWithAllowanceTimeStamp = _claimWithAllowanceTimeStamp;
         claimAllowanceContract = _claimAllowanceContract;
         started = _started;
-        cliffDuration = _cliffDuration;
+        cliffs.cliffDuration1 = _cliffs.cliffDuration1;
+        cliffs.cliffAmount1 = _cliffs.cliffAmount1;
+        cliffs.cliffDuration2 = _cliffs.cliffDuration2;
+        cliffs.cliffAmount2 = _cliffs.cliffAmount2;
+        cliffs.cliffDuration3 = _cliffs.cliffDuration3;
+        cliffs.cliffAmount3 = _cliffs.cliffAmount3;
         stepDuration = _stepDuration;
-        cliffAmount = _cliffAmount;
         permissionlessTimeStamp = _permissionlessTimeStamp;
 
         for (uint256 i = 0; i < _initialAddresses.length; i++) {
@@ -163,7 +183,7 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev Returns permitted by vesting policy contract amount to claim
+     * @dev Returns permitted by vesting policy contract amount to claim 
      * @param tokenOwner - token owner
      *
      */
@@ -172,7 +192,7 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev Returns permitted amount to transfer
+     * @dev Returns permitted amount to transfer 
      * @param from - sender address
      * @param to - recepient address
      *
@@ -269,15 +289,26 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         if (time == 0) {
             return 0;
         }
-        if (time < started + cliffDuration) {
+        uint256 cliffSum;
+        if (time < started + cliffs.cliffDuration1) {
             return 0;
+        } 
+        if (time >= started + cliffs.cliffDuration1){
+            cliffSum = cliffSum + cliffs.cliffAmount1;
+            if (time >= started + cliffs.cliffDuration1 + cliffs.cliffDuration2){
+                cliffSum = cliffSum + cliffs.cliffAmount2;
+                if (time >= started + cliffs.cliffDuration1 + cliffs.cliffDuration2 + cliffs.cliffDuration3){
+                    cliffSum = cliffSum + cliffs.cliffAmount3;
+                    uint256 passedSinceCliff = time - (started + cliffs.cliffDuration1 + cliffs.cliffDuration2 + cliffs.cliffDuration3);
+                    uint256 stepsPassed = Math.min(numOfSteps, passedSinceCliff / stepDuration);
+                    if (stepsPassed >= numOfSteps) {
+                        return vEywaInitialSupply;
+                    }
+                    return cliffSum + ((vEywaInitialSupply - cliffs.cliffAmount1 - cliffs.cliffAmount2 - cliffs.cliffAmount3) * stepsPassed / numOfSteps);
+                }
+            }
         }
-        uint256 passedSinceCliff = time - (started + cliffDuration);
-        uint256 stepsPassed = Math.min(numOfSteps, passedSinceCliff / stepDuration);
-        if (stepsPassed >= numOfSteps) {
-            return vEywaInitialSupply;
-        }
-        return cliffAmount + ((vEywaInitialSupply - cliffAmount) * stepsPassed / numOfSteps);
+        return cliffSum;
     }
 
     /**
