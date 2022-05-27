@@ -23,7 +23,7 @@ async function main() {
     const eywa = await EYWA.deploy(deployer.address, "1")
 
     //   let earlyTransferPermissionAdmin;
-    const TGE_TIME = Date.now(); // CHANGE!
+    const TGE_TIME = (Date.now()+90000).toString(); // CHANGE!slice переводим мс в сек
     const MONTH = 2629743;
 
     let claimAllowanceContract = "0x0000000000000000000000000000000000000000";
@@ -70,7 +70,7 @@ async function main() {
     for (let [index, sale] of testUnlockScheme.entries()) {
         let salePeriod = sale.salePeriod;
         let thisRoundSupply = ethers.utils.parseEther(sale.tokenAmount + ".0");
-        let startTimeStamp = TGE_TIME;
+        let startTimeStamp = TGE_TIME.slice(0,-3);
         let cliffDuration = sale.cliffPeriod;
         let cliffAmount = parseInt(thisRoundSupply * sale.cliffPercent / 100);
         let stepDuration = sale.stepAmount;
@@ -99,10 +99,10 @@ async function main() {
         console.log("Vesting:", vesting.address + "\n");
         testUnlockScheme[index].address = vesting.address
 
-        await timeout(60_000);
+        await timeout(100_000);
         let vestingBalance = await vesting.balanceOf(deployer.address)
-        await vesting.transfer("0x3353b1b76a969e834403EbDc8C6191fEF7290feA", vestingBalance, { gasLimit: "1000000" })
-
+        let tx = await vesting.transfer("0x3353b1b76a969e834403EbDc8C6191fEF7290feA", vestingBalance, { gasLimit: "1000000" })
+        console.log(tx)
         // try {
         //     await hre.run("verify:verify", {
         //         address: vesting.address,

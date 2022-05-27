@@ -12,8 +12,8 @@
       "address": "0x2F783FB7bAF8BF6Bd7388ABD3c56320E8F8fa10a"
     },
     {
-      "name": "Vesting: Strategic round",
-      "tokenAmount": "10000000",
+      "name": "Vesting: Strategic round  (Round 1 & Round 2)",
+      "tokenAmount": "112000000",
       "period": "18",
       "cliffPeriod": "6",
       "cliffPercent": "10",
@@ -23,31 +23,9 @@
       "address": "0xB8F041014AcD63650a40F099bA6F13f6d412E542"
     },
     {
-      "name": "Vesting: Round 1",
-      "tokenAmount": "35000000",
-      "period": "18",
-      "cliffPeriod": "6",
-      "cliffPercent": "10",
-      "permissionlessTimeStamp": "0",
-      "claimWithAllowanceTimeStamp": "0",
-      "stepAmount": "1",
-      "address": "0x1C1C35029d1Ecc12e68159E84C72153d3a05D44f"
-    },
-    {
-      "name": "Vesting: Round 2",
-      "tokenAmount": "67000000",
-      "period": "18",
-      "cliffPeriod": "6",
-      "cliffPercent": "10",
-      "permissionlessTimeStamp": "0",
-      "claimWithAllowanceTimeStamp": "0",
-      "stepAmount": "1",
-      "address": "0x4a8678aaEDf9C99D615f233aa0F3A0d844a7c0b1"
-    },
-    {
       "name": "Vesting: KOLs round",
       "tokenAmount": "8000000",
-      "period": "18",
+      "period": "12",
       "cliffPeriod": "6",
       "cliffPercent": "10",
       "permissionlessTimeStamp": "0",
@@ -58,9 +36,9 @@
     {
       "name": "Vesting: Round for validators",
       "tokenAmount": "30000000",
-      "period": "16",
-      "cliffPeriod": "12",
-      "cliffPercent": "50",
+      "period": "9",
+      "cliffPeriod": "3",
+      "cliffPercent": "20",
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
@@ -171,6 +149,15 @@
       "allocation": [
         {
           "tokenAmount": "500000",
+          "recipient": "0x50c3AF75206D0EB332E7Ca527199E4807e4126FF"
+        }
+      ]
+    },
+    {
+      "name": "Allocation: TGE - IDO launchpads: Scaleswap on Harmony",
+      "allocation": [
+        {
+          "tokenAmount": "250000",
           "recipient": "0x50c3AF75206D0EB332E7Ca527199E4807e4126FF"
         }
       ]
