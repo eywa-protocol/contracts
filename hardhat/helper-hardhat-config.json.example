@@ -8,7 +8,7 @@
       "networks_env/env_connect_to_harmony.env",
       "networks_env/env_test_for_harmony.env"
     ],
-    "chainId": 1666600001,
+    "chainId": 1666600000,
     "relayHub":  "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
