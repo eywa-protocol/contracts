@@ -16,8 +16,8 @@ async function main() {
     if (network.name.includes("network") || network.name === 'harmonylocal' || network.name === 'harmonytestnet') {
         _TokenPOA = await ethers.getContractFactory("TestTokenPermitHarmony");
         tokenPoa = await _TokenPOA.deploy("EYWA-POA", "POAT", networkConfig[network.name].chainId);
-        _ERC20Permit = await ethers.getContractFactory("TestTokenPermit");
-        EYWA = await _ERC20Permit.deploy("EYWA-TOKEN", "EYWA");
+        _ERC20Permit = await ethers.getContractFactory("TestTokenPermitHarmony");
+        EYWA = await _ERC20Permit.deploy("EYWA-TOKEN", "EYWA", networkConfig[network.name].chainId);
     } else {
         _TokenPOA = await ethers.getContractFactory("TokenPOA");
         tokenPoa = await _TokenPOA.deploy("EYWA-POA", "POAT", networkConfig[network.name].chainId);
