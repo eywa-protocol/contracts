@@ -24,14 +24,14 @@ async function main() {
     let tokens = networkConfig[netw].token;
     for (let t of tokens) {
       let tokenAddressBytes32 = addressToBytes32(t.address);
-        if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
-          this.tx = await synthesis.createRepresentation(tokenAddressBytes32, "18", `${t.name}`, `${t.symbol}`,
-            networkConfig[netw].chainId, networkConfig[netw].netwiker)
-          console.log(`createRepresentation for ${t.name} on ${network.name} source from ${netw}: ${this.tx.hash}`);
-          await this.tx.wait();
-        }
+      if (await synthesis.representationSynt(tokenAddressBytes32) === '0x0000000000000000000000000000000000000000') {
+        this.tx = await synthesis.createRepresentation(tokenAddressBytes32, "18", `${t.name}`, `${t.symbol}`,
+          networkConfig[netw].chainId, networkConfig[netw].netwiker)
+        console.log(`createRepresentation for ${t.name} on ${network.name} source from ${netw}: ${this.tx.hash}`);
+        await this.tx.wait();
       }
     }
+  }
 
   // create representation for crosschain tokens
   for (let netw of this.sourceForRepresentation) {

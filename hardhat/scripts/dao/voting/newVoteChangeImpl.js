@@ -33,7 +33,7 @@ async function main() {
     const ProxyAdminAddress = "";
     const NewImplAddress = "";
     [callAddress, callDataBytes] = await delegateData(ProxyAdminAddress, "upgrade", [ProxyAddress, NewImplAddress]);
-    let completeCallBytes = encodeCallScript([{ to: callAddress, calldata:  callDataBytes}], specId)
+    let completeCallBytes = encodeCallScript([{ to: callAddress, calldata: callDataBytes }], specId)
 
     // todo add voting address
     let votingAddress = '';

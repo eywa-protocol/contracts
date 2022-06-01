@@ -14,7 +14,6 @@ import "./interfaces/IUniswap.sol";
  * - postRelayedCall - refund the caller for the unused gas
  */
 contract TokenPaymasterPermitPaymaster is BasePaymaster {
-
     mapping(address => address) public routersMap;
 
     uint256 public gasUsedByPost;
@@ -101,7 +100,7 @@ contract TokenPaymasterPermitPaymaster is BasePaymaster {
         IERC20 token,
         address account,
         uint256 amount
-    ) external onlyOwner() {
+    ) external onlyOwner {
         uint256 tokenBalance = token.balanceOf(address(this));
         require(amount <= tokenBalance, "TokenPaymaster/Balance to low.");
 
