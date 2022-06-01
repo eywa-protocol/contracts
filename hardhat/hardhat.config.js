@@ -8,6 +8,7 @@ require('@openzeppelin/hardhat-upgrades');
 require('dotenv').config();
 const networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : './helper-hardhat-config.json');
 
+const PRIVATE_KEY_ETHEREUM   = process.env.PRIVATE_KEY_ETHEREUM   || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_RINKEBY  = process.env.PRIVATE_KEY_RINKEBY  || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_BSCTESTNET      = process.env.PRIVATE_KEY_BSCTESTNET      || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_MUMBAI   = process.env.PRIVATE_KEY_MUMBAI   || "0x0000000000000000000000000000000000000000";
@@ -77,6 +78,10 @@ module.exports = {
     avalanchetestnet:{
       url: networkConfig.avalanchetestnet.rpcUrl2,
       accounts: [PRIVATE_KEY_AVALANCHETESTNET]
+    },
+    ethereum: {
+      url: networkConfig.ethereum.rpcUrl.replace('ws','http').replace('ws/',''),
+      accounts: [PRIVATE_KEY_ETHEREUM]
     },
     rinkeby: {
       url: networkConfig.rinkeby.rpcUrl.replace('ws','http').replace('ws/',''),
