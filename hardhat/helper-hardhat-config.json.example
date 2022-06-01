@@ -46,6 +46,57 @@
     "router": "0x0000000000000000000000000000000000000000",
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
+  "ethereum": {
+    "rpcUrl": "https://rpc.ankr.com/eth",
+    "rpcUrl2": "https://rpc.ankr.com/eth",
+    "n": "ETHEREUM",
+    "netwiker": "ETH",
+    "env_file": [
+      "networks_env/env_connect_to_ethereum.env",
+      "networks_env/env_test_for_ethereum.env"
+    ],
+    "chainId": 1,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "bsctestnet",
+      "mumbai",
+      "hecotestnet",
+      "avalanchetestnet",
+      "coinextestnet",
+      "metistestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
   "polygon": {
     "rpcUrl": "wss://ws-nd-658-849-590.p2pify.com/96ffbe1fc42be191fb68a40a94685a39",
     "rpcUrl2": "https://nd-658-849-590.p2pify.com/96ffbe1fc42be191fb68a40a94685a39",
