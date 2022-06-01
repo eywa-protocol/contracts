@@ -33,8 +33,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
+      "ethereum",
+      "bsc",
       "polygon",
-      "bsc"
+      "fantom",
+      "avalanche",
+      "arbitrum"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -80,12 +84,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "bsctestnet",
-      "mumbai",
-      "hecotestnet",
-      "avalanchetestnet",
-      "coinextestnet",
-      "metistestnet"
+      "harmony",
+      "bsc",
+      "polygon",
+      "fantom",
+      "avalanche",
+      "arbitrum"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -131,8 +135,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
+      "harmony",
       "bsc",
-      "harmony"
+      "ethereum",
+      "fantom",
+      "avalanche",
+      "arbitrum"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -178,8 +186,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
+      "harmony",
       "polygon",
-      "harmony"
+      "ethereum",
+      "fantom",
+      "avalanche",
+      "arbitrum"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -225,7 +237,11 @@
       "coins": []
     },
     "sourceForRepresentation": [
+      "harmony",
       "polygon",
+      "ethereum",
+      "fantom",
+      "avalanche",
       "bsc"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
@@ -272,8 +288,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "polygon",
-      "bsc"
+      "avalanchetestnet",
+      "bsctestnet",
+      "fantomtestnet",
+      "harmonytestnet",
+      "mumbai",
+      "rinkeby"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -319,7 +339,11 @@
       "coins": []
     },
     "sourceForRepresentation": [
+      "harmony",
       "polygon",
+      "ethereum",
+      "arbitrum",
+      "avalanche",
       "bsc"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
@@ -366,8 +390,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "polygon",
-      "bsc"
+      "avalanchetestnet",
+      "bsctestnet",
+      "arbitrumtestnet",
+      "harmonytestnet",
+      "mumbai",
+      "rinkeby"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -424,8 +452,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
+      "avalanchetestnet",
+      "bsctestnet",
+      "arbitrumtestnet",
+      "fantomtestnet",
       "mumbai",
-      "bsctestnet"
+      "rinkeby"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -584,8 +616,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
+      "avalanchetestnet",
+      "harmonytestnet",
+      "arbitrumtestnet",
+      "fantomtestnet",
       "mumbai",
-      "harmonytestnet"
+      "rinkeby"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -642,12 +678,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "rinkeby",
       "bsctestnet",
+      "harmonytestnet",
+      "arbitrumtestnet",
+      "fantomtestnet",
       "mumbai",
-      "hecotestnet",
-      "coinextestnet",
-      "metistestnet"
+      "rinkeby"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -694,11 +730,11 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
+      "harmonytestnet",
+      "arbitrumtestnet",
+      "fantomtestnet",
       "mumbai",
-      "hecotestnet",
-      "avalanchetestnet",
-      "coinextestnet",
-      "metistestnet"
+      "avalanchetestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -818,7 +854,11 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
-      "harmonytestnet"
+      "harmonytestnet",
+      "arbitrumtestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "avalanchetestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
