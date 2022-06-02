@@ -1,7 +1,7 @@
 {
   "harmony": {
-    "rpcUrl": "wss://ws.harmony.mainnet.eywa.fi",
-    "rpcUrl2": "https://harmony.mainnet.eywa.fi",
+    "rpcUrl": "wss://ws-nd-548-849-823.p2pify.com/9e1b59aae3c107d74479f65187ca5cd4",
+    "rpcUrl2": "https://nd-548-849-823.p2pify.com/9e1b59aae3c107d74479f65187ca5cd4",
     "n": "HARMONY",
     "netwiker": "HRM",
     "env_file": [
@@ -47,8 +47,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "polygon": {
-    "rpcUrl": "wss://ws-nd-658-849-590.p2pify.com/96ffbe1fc42be191fb68a40a94685a39",
-    "rpcUrl2": "https://nd-658-849-590.p2pify.com/96ffbe1fc42be191fb68a40a94685a39",
+    "rpcUrl": "wss://ws.polygon.mainnet.eywa.fi",
+    "rpcUrl2": "https://polygon.mainnet.eywa.fi",
     "n": "POLYGON",
     "netwiker": "POL",
     "env_file": [
