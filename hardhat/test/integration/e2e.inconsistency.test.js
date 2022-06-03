@@ -19,8 +19,14 @@ describe("E2E CurveProxy local test", () => {
         CurveProxyB = artifacts.require('CurveProxy');
         CurveProxyC = artifacts.require('CurveProxy');
 
-        factoryProvider = checkoutProvider({ 'typenet': 'devstand', 'net1': 'network1', 'net2': 'network2', 'net3': 'network3' })
-        totalSupply = ethers.utils.parseEther("100000000000.0")
+        prov = process.env.SET_TEST_ENVIROMENT === 'testnet' ? { 'typenet': 'teststand', 'net1': 'mumbai', 'net2': 'harmonytestnet', 'net3': 'bsctestnet' } : { 'typenet': 'devstand', 'net1': 'network1', 'net2': 'network2', 'net3': 'network3' }
+        factoryProvider = checkoutProvider(prov)
+        gasAmount = process.env.SET_TEST_ENVIROMENT === 'testnet' ? 300_000 : 1000_000
+        waitDuration = process.env.SET_TEST_ENVIROMENT === 'testnet' ? 65000 : 15000
+        net1 = prov['net1']
+        net2 = prov['net2']
+        net3 = prov['net3']
+        totalSupply = ethers.constants.MaxUint256
 
         CurveProxyA.setProvider(factoryProvider.web3Net1)
         CurveProxyB.setProvider(factoryProvider.web3Net2)

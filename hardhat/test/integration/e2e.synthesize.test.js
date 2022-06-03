@@ -19,14 +19,14 @@ contract('Router', () => {
             SynthesisB = artifacts.require('Synthesis')
             SynthesisC = artifacts.require('Synthesis')
 
-            prov = process.env.TYPE_TEST_PARAMETER === 'testnet' ? { 'typenet': 'teststand', 'net1': 'mumbai', 'net2': 'harmonytestnet', 'net3': 'bsctestnet' } : { 'typenet': 'devstand', 'net1': 'network1', 'net2': 'network2', 'net3': 'network3' }
+            prov = process.env.SET_TEST_ENVIROMENT === 'testnet' ? { 'typenet': 'teststand', 'net1': 'mumbai', 'net2': 'harmonytestnet', 'net3': 'bsctestnet' } : { 'typenet': 'devstand', 'net1': 'network1', 'net2': 'network2', 'net3': 'network3' }
             factoryProvider = checkoutProvider(prov)
-            gasAmount = process.env.TYPE_TEST_PARAMETER === 'testnet' ? 300_000 : 1000_000
-            waitDuration = process.env.TYPE_TEST_PARAMETER === 'testnet' ? 65000 : 15000
+            gasAmount = process.env.SET_TEST_ENVIROMENT === 'testnet' ? 300_000 : 1000_000
+            waitDuration = process.env.SET_TEST_ENVIROMENT === 'testnet' ? 65000 : 15000
             net1 = prov['net1']
             net2 = prov['net2']
             net3 = prov['net3']
-            
+
             totalSupply = ethers.constants.MaxUint256
 
             RouterA.setProvider(factoryProvider.web3Net1)
@@ -60,7 +60,7 @@ contract('Router', () => {
         })
 
         it("Synthesize: network1(mumbai) -> network2(harmony)", async function () {
-            this.tokenA1 = await ERC20A.at(process.env.TYPE_TEST_PARAMETER === 'testnet' ? deployInfo[net1].token[1].address : deployInfo[net1].localToken[0].address)
+            this.tokenA1 = await ERC20A.at(process.env.SET_TEST_ENVIROMENT === 'testnet' ? deployInfo[net1].token[1].address : deployInfo[net1].localToken[0].address)
             this.routerA = await RouterA.at(deployInfo[net1].router)
             const synthAddress = await synthesisB.getRepresentation(addressToBytes32(this.tokenA1.address))
             this.synthB = await SynthB.at(synthAddress)
@@ -74,10 +74,11 @@ contract('Router', () => {
             const userFrom = userNet1
             const userTo = userNet2
 
-            //await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
             await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
-            //await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
-
+            if (process.env.SET_TEST_ENVIROMENT != 'testnet'){
+                await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
+                await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
+            }
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
                 amount,
@@ -97,7 +98,7 @@ contract('Router', () => {
 
         it("Synthesize: network1 -> network3", async function () {
 
-            this.tokenA1 = await ERC20A.at(process.env.TYPE_TEST_PARAMETER === 'testnet' ? deployInfo[net1].token[1].address : deployInfo[net1].localToken[0].address)
+            this.tokenA1 = await ERC20A.at(process.env.SET_TEST_ENVIROMENT === 'testnet' ? deployInfo[net1].token[1].address : deployInfo[net1].localToken[0].address)
             this.routerA = await RouterA.at(deployInfo[net1].router)
             const synthAddress = await synthesisC.getRepresentation(addressToBytes32(this.tokenA1.address))
             this.synthC = await SynthC.at(synthAddress)
@@ -111,9 +112,11 @@ contract('Router', () => {
             const userFrom = userNet1
             const userTo = userNet3
 
-            //await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
             await this.tokenA1.approve(this.routerA.address, amount, { from: userNet1, gas: 300_000 })
-            //await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
+            if (process.env.SET_TEST_ENVIROMENT != 'testnet'){
+                await this.tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
+                await this.routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
+            }
 
             await this.routerA.tokenSynthesizeRequest(
                 tokenToSynth,
@@ -134,7 +137,7 @@ contract('Router', () => {
 
         it("Synthesize: network2 -> network1", async function () {
 
-            this.tokenB1 = await ERC20B.at(process.env.TYPE_TEST_PARAMETER === 'testnet' ? deployInfo[net1].token[1].address : deployInfo[net1].localToken[0].address)
+            this.tokenB1 = await ERC20B.at(process.env.SET_TEST_ENVIROMENT === 'testnet' ? deployInfo[net1].token[1].address : deployInfo[net1].localToken[0].address)
             this.routerB = await RouterB.at(deployInfo[net2].router)
             const synthAddress = await synthesisA.getRepresentation(addressToBytes32(this.tokenB1.address))
             this.synthA = await SynthA.at(synthAddress)
@@ -148,9 +151,11 @@ contract('Router', () => {
             const userFrom = userNet2
             const userTo = userNet1
 
-            //await this.tokenB1.mint(userNet2, amount, { from: userNet2, gas: 300_000 })
             await this.tokenB1.approve(this.routerB.address, amount, { from: userNet2, gas: 300_000 })
-            //await this.routerB.setTrustedWorker(userNet2, { from: userNet2, gas: 300_000 })
+            if (process.env.SET_TEST_ENVIROMENT != 'testnet'){
+                await this.tokenB1.mint(userNet2, amount, { from: userNet2, gas: 300_000 })
+                await this.routerB.setTrustedWorker(userNet2, { from: userNet2, gas: 300_000 })
+            }
 
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
@@ -171,7 +176,7 @@ contract('Router', () => {
 
         it("Synthesize: network2 -> network3", async function () {
 
-            this.tokenB1 = await ERC20B.at(process.env.TYPE_TEST_PARAMETER === 'testnet' ? deployInfo[net1].token[1].address : deployInfo[net1].localToken[0].address)
+            this.tokenB1 = await ERC20B.at(process.env.SET_TEST_ENVIROMENT === 'testnet' ? deployInfo[net1].token[1].address : deployInfo[net1].localToken[0].address)
             this.routerB = await RouterB.at(deployInfo[net2].router)
             const synthAddress = await synthesisC.getRepresentation(addressToBytes32(this.tokenB1.address))
             this.synthC = await SynthC.at(synthAddress)
@@ -185,9 +190,11 @@ contract('Router', () => {
             const userFrom = userNet2
             const userTo = userNet3
 
-            //await this.tokenB1.mint(userNet2, amount, { from: userNet2, gas: 300_000 })
             await this.tokenB1.approve(this.routerB.address, amount, { from: userNet2, gas: 300_000 })
-            //await this.routerB.setTrustedWorker(userNet2, { from: userNet2, gas: 300_000 })
+            if (process.env.SET_TEST_ENVIROMENT != 'testnet'){
+                await this.tokenB1.mint(userNet2, amount, { from: userNet2, gas: 300_000 })
+                await this.routerB.setTrustedWorker(userNet2, { from: userNet2, gas: 300_000 })
+            }
 
             await this.routerB.tokenSynthesizeRequest(
                 tokenToSynth,
@@ -208,7 +215,7 @@ contract('Router', () => {
 
         it("Synthesize: network3(bsc) -> network1(mumbai)", async function () {
 
-            this.tokenC1 = await ERC20C.at(process.env.TYPE_TEST_PARAMETER === 'testnet' ? deployInfo[net3].token[1].address : deployInfo[net3].localToken[0].address)
+            this.tokenC1 = await ERC20C.at(process.env.SET_TEST_ENVIROMENT === 'testnet' ? deployInfo[net3].token[1].address : deployInfo[net3].localToken[0].address)
             this.routerC = await RouterC.at(deployInfo[net3].router)
             const synthAddress = await synthesisA.getRepresentation(addressToBytes32(this.tokenC1.address))
             this.synthA = await SynthA.at(synthAddress)
@@ -222,9 +229,11 @@ contract('Router', () => {
             const userFrom = userNet3
             const userTo = userNet1
 
-            //await this.tokenC1.mint(userNet3, amount, { from: userNet3, gas: 300_000 })
             await this.tokenC1.approve(this.routerC.address, amount, { from: userNet3, gas: 300_000 })
-            //await this.routerC.setTrustedWorker(userNet3, { from: userNet3, gas: 300_000 })
+            if (process.env.SET_TEST_ENVIROMENT != 'testnet'){
+                await this.tokenC1.mint(userNet3, amount, { from: userNet3, gas: 300_000 })
+                await this.routerC.setTrustedWorker(userNet3, { from: userNet3, gas: 300_000 })
+            }
 
             await this.routerC.tokenSynthesizeRequest(
                 tokenToSynth,
@@ -244,7 +253,7 @@ contract('Router', () => {
         })
 
         it("Synthesize: network3 -> network2", async function () {
-            this.tokenC1 = await ERC20C.at(process.env.TYPE_TEST_PARAMETER === 'testnet' ? deployInfo[net3].token[1].address : deployInfo[net3].localToken[0].address)
+            this.tokenC1 = await ERC20C.at(process.env.SET_TEST_ENVIROMENT === 'testnet' ? deployInfo[net3].token[1].address : deployInfo[net3].localToken[0].address)
             this.routerC = await RouterC.at(deployInfo[net3].router)
             const synthAddress = await synthesisB.getRepresentation(addressToBytes32(this.tokenC1.address))
             this.synthB = await SynthB.at(synthAddress)
@@ -258,9 +267,11 @@ contract('Router', () => {
             const userFrom = userNet3
             const userTo = userNet2
 
-            //await this.tokenC1.mint(userNet3, amount, { from: userNet3, gas: 300_000 })
             await this.tokenC1.approve(this.routerC.address, amount, { from: userNet3, gas: 300_000 })
-            //await this.routerC.setTrustedWorker(userNet3, { from: userNet3, gas: 300_000 })
+            if (process.env.SET_TEST_ENVIROMENT != 'testnet'){
+                await this.tokenC1.mint(userNet3, amount, { from: userNet3, gas: 300_000 })
+                await this.routerC.setTrustedWorker(userNet3, { from: userNet3, gas: 300_000 })
+            }
 
             await this.routerC.tokenSynthesizeRequest(
                 tokenToSynth,
