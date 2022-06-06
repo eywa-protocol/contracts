@@ -137,7 +137,7 @@ contract('Router', () => {
 
         it("Synthesize: network2 -> network1", async function () {
 
-            this.tokenB1 = await ERC20B.at(process.env.SET_TEST_ENVIROMENT === 'testnet' ? deployInfo[net1].token[1].address : deployInfo[net1].localToken[0].address)
+            this.tokenB1 = await ERC20B.at(process.env.SET_TEST_ENVIROMENT === 'testnet' ? deployInfo[net1].token[1].address : deployInfo[net2].localToken[0].address)
             this.routerB = await RouterB.at(deployInfo[net2].router)
             const synthAddress = await synthesisA.getRepresentation(addressToBytes32(this.tokenB1.address))
             this.synthA = await SynthA.at(synthAddress)
@@ -176,7 +176,7 @@ contract('Router', () => {
 
         it("Synthesize: network2 -> network3", async function () {
 
-            this.tokenB1 = await ERC20B.at(process.env.SET_TEST_ENVIROMENT === 'testnet' ? deployInfo[net1].token[1].address : deployInfo[net1].localToken[0].address)
+            this.tokenB1 = await ERC20B.at(process.env.SET_TEST_ENVIROMENT === 'testnet' ? deployInfo[net1].token[1].address : deployInfo[net2].localToken[0].address)
             this.routerB = await RouterB.at(deployInfo[net2].router)
             const synthAddress = await synthesisC.getRepresentation(addressToBytes32(this.tokenB1.address))
             this.synthC = await SynthC.at(synthAddress)

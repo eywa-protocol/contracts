@@ -89,8 +89,8 @@ contract('Router', () => {
         })
 
         it("Synth Transfer: network1 -> network3", async function () {
-            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(tokenA1))
-            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(tokenA1))
+            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(tokenA1.address))
+            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(tokenA1.address))
             this.synthTokenC1 = await ERC20C.at(synthAddressC1)
             this.synthTokenB1 = await ERC20B.at(synthAddressB1)
             synthBalance = await this.synthTokenC1.balanceOf(userNet3)
@@ -100,7 +100,7 @@ contract('Router', () => {
 
             //A->B
             await routerA.tokenSynthesizeRequest(
-                tokenA1,
+                tokenA1.address,
                 amount,
                 userNet2,
                 {
@@ -134,8 +134,8 @@ contract('Router', () => {
         })
 
         it("Synth Transfer: network3 -> network1", async function () {
-            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(tokenC1))
-            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(tokenC1))
+            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(tokenC1.address))
+            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(tokenC1.address))
             this.synthTokenA1 = await ERC20A.at(synthAddressA1)
             this.synthTokenB1 = await ERC20B.at(synthAddressB1)
             synthBalance = await this.synthTokenA1.balanceOf(userNet1)
@@ -145,7 +145,7 @@ contract('Router', () => {
 
             //C->B
             await routerC.tokenSynthesizeRequest(
-                tokenC1,
+                tokenC1.address,
                 amount,
                 userNet2,
                 {
@@ -179,8 +179,8 @@ contract('Router', () => {
         })
 
         it("Synth Transfer: network3 -> network2", async function () {
-            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(tokenC1))
-            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(tokenC1))
+            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(tokenC1.address))
+            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(tokenC1.address))
             this.synthTokenA1 = await ERC20A.at(synthAddressA1)
             this.synthTokenB1 = await ERC20B.at(synthAddressB1)
             synthBalance = await this.synthTokenB1.balanceOf(userNet2)
@@ -190,7 +190,7 @@ contract('Router', () => {
 
             //C->A
             await routerC.tokenSynthesizeRequest(
-                tokenC1,
+                tokenC1.address,
                 amount,
                 userNet1,
                 {
@@ -225,8 +225,8 @@ contract('Router', () => {
 
         it("Synth Transfer: network1 -> network2", async function () {
 
-            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(tokenB1))
-            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(tokenB1))
+            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(tokenA1.address))
+            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(tokenA1.address))
             this.synthTokenB1 = await ERC20B.at(synthAddressB1)
             this.synthTokenC1 = await ERC20C.at(synthAddressC1)
             synthBalance = await this.synthTokenB1.balanceOf(userNet2)
@@ -236,7 +236,7 @@ contract('Router', () => {
 
             //A->C
             await routerA.tokenSynthesizeRequest(
-                tokenB1,
+                tokenA1.address,
                 amount,
                 userNet3,
                 {
@@ -270,8 +270,8 @@ contract('Router', () => {
         })
 
         it("Synth Transfer: network2 -> network1", async function () {
-            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(tokenB1))
-            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(tokenB1))
+            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(tokenB1.address))
+            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(tokenB1.address))
             this.synthTokenA1 = await ERC20A.at(synthAddressA1)
             this.synthTokenC1 = await ERC20C.at(synthAddressC1)
             synthBalance = await this.synthTokenA1.balanceOf(userNet1)
@@ -281,7 +281,7 @@ contract('Router', () => {
 
             //B->C
             await routerB.tokenSynthesizeRequest(
-                tokenB1,
+                tokenB1.address,
                 amount,
                 userNet3,
                 {
@@ -315,7 +315,7 @@ contract('Router', () => {
         })
 
         it("Synth Transfer: should not synthesize in the intial chain", async function () {
-            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(tokenC1))
+            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(tokenC1.address))
             this.synthTokenA1 = await ERC20A.at(synthAddressA1)
 
             await tokenC1.approve(routerC.address, totalSupply, { from: userNet3, gas: 300_000 })
@@ -323,7 +323,7 @@ contract('Router', () => {
 
             //C->A
             await routerC.tokenSynthesizeRequest(
-                tokenC1,
+                tokenC1.address,
                 amount,
                 userNet1,
                 {
