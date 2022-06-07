@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 contract ReqIdFilter {
-    mapping(bytes32 => bool) filter;
+    mapping(bytes32 => bool) public filter;
     address public owner = msg.sender;
 
     function testAndSet(bytes32 id) public returns (bool) {
