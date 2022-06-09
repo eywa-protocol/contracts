@@ -154,6 +154,11 @@ describe('Vesting tests. Part 1', () => {
         await restoreSnapshot(snapshot0);
     });
 
+    it('availableAfterFirstCliff function works right', async function () {
+        let tokAmount = await vesting.availableAfterFirstCliff(vestingSupply/10);
+        expect(tokAmount).to.be.equal(cliffAmount/10);
+    });
+
     it('cannot be reInitialize', async function () {
         console.log("sdgdsgdsgsd");
         await expect(vesting.initialize(

@@ -255,6 +255,20 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     }
 
     /**
+     * @dev Returns number of token available to claim after first cliff for address who owns
+     * 'ownedTokens' tokens number.
+     * @param ownedTokens - number of tokens
+     *
+     */
+    function availableAfterFirstCliff(uint256 ownedTokens) public view returns (uint256) {
+        if (ownedTokens == 0) {
+            return 0;
+        }
+        return (claimable(started + cliffs.cliffDuration1) * ownedTokens / vEywaInitialSupply);
+    }
+
+
+    /**
      * @dev Updates claimed and unburnBalanceOf mappings for math calculation next available amount of tokens
      * after transfer/transferFrom functions
      * @param sender - sender address
