@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
+import "@openzeppelin/contracts-newone/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
 
 contract EywaNft is ERC721PresetMinterPauserAutoId {
     string private _name = "EYWA-NFT";

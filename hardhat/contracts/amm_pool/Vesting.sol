@@ -41,7 +41,7 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     // Token which is vested on this contract
     IERC20 public immutable eywaToken;
 
-    struct cliffData {
+    struct CliffData {
         // Relative timestamp first cliff duration
         uint256 cliffDuration1;
         // Claimable number of tokens after first cliff period
@@ -56,7 +56,7 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         uint256 cliffAmount3;
     }
 
-    cliffData public cliffs;
+    CliffData public cliffs;
 
     // Duration of one linear or discrete step
     uint256 public stepDuration;
@@ -131,7 +131,7 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         IVestingPolicy _claimAllowanceContract,
         uint256 _claimWithAllowanceTimeStamp,
         uint256 _started,
-        cliffData memory _cliffs,
+        CliffData memory _cliffs,
         uint256 _stepDuration,
         uint256 _allStepsDuration,
         uint256 _permissionlessTimeStamp,
@@ -161,6 +161,14 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         }
         numOfSteps = _allStepsDuration / _stepDuration;
         IERC20(eywaToken).safeTransferFrom(msg.sender, address(this), vEywaInitialSupply);
+    }
+
+    function getStartTime() public view returns (uint256){
+        return started;
+    }
+
+    function getCliffs() public view returns (CliffData memory){
+        return cliffs;
     }
 
     /**
@@ -245,6 +253,19 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         } else {
             return 0;
         }
+    }
+
+    /**
+     * @dev Returns number of token available to claim after first cliff for address who owns
+     * 'ownedTokens' tokens number.
+     * @param ownedTokens - number of tokens
+     *
+     */
+    function availableAfterFirstCliff(uint256 ownedTokens) public view returns (uint256) {
+        if (ownedTokens == 0) {
+            return 0;
+        }
+        return ((claimable(started + cliffs.cliffDuration1) * ownedTokens) / vEywaInitialSupply);
     }
 
     /**

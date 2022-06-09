@@ -159,6 +159,11 @@ describe('Vesting tests. Part 1', () => {
         await expect(vesting.connect(earlyTransferPermissionAdmin).claim(1)).to.be.revertedWith('the amount is not available');
     });
 
+    it('availableAfterFirstCliff function works right', async function () {
+        let tokAmount = await vesting.availableAfterFirstCliff(vestingSupply/10);
+        expect(tokAmount).to.be.equal(cliffAmount/10);
+    });
+
     it('claim aftercliff is working', async function () {
         await increaseTime(day_in_seconds * 51000);
         blockNumBefore = await ethers.provider.getBlockNumber();
