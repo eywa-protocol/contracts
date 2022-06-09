@@ -15,15 +15,18 @@ async function main() {
     let chainId = networkConfig[network.name].chainId
     let eywa = networkConfig[network.name].eywa
 
-    const EYWA = await ethers.getContractFactory("SyntERC20");
-    const eywaToken = await EYWA.attach("0xbcDEA80c20C906131126cEbe0d5eFdEf7604eC13");
+    // const EYWA = await ethers.getContractFactory("SyntERC20");
+    // const eywaToken = await EYWA.attach("0xF0AA41A080109BBAF5cB7Dc3434FB20b2Cf2D014");
 
     // const Synthesis = await ethers.getContractFactory("Synthesis");
     // const synthesisC = await Synthesis.attach(synthesis);
-    // console.log(await synthesisC.getRepresentation(addressToBytes32("0xd882b5095dd2abd0960267655d8744e4b054eced")))
+    // console.log(await synthesisC.getRepresentation(addressToBytes32("0xF35d39587b9364BDaBA3Fe1E3b929B7877b2986d")))
 
     // console.log(await eywaToken.balanceOf(deployer.address))
-    await eywaToken.mint("0xd882B5095DD2ABD0960267655D8744E4B054EcED", ethers.utils.parseEther("100000000.0"))
+    // await eywaToken.mint("0x3353b1b76a969e834403EbDc8C6191fEF7290feA", ethers.utils.parseEther("100000000.0"))
+
+    const Test = await ethers.getContractFactory("TestTarget");
+    const test = await Test.deploy();
 
     // //Deploy Router
     // const _Router = await ethers.getContractFactory("Router");
@@ -32,9 +35,12 @@ async function main() {
     // console.log(`Router address: ${router.address} on ${network.name}`);
 
     //Set trusted Worker
+    // const _Router = await ethers.getContractFactory("Router");
     // const router = await _Router.attach(networkConfig[network.name].router)
-    // tx = await router.setTrustedWorker("0xec92e5D829f7Ef4793620B47c1e3eCB705b95DAB")
-    // console.log(tx)
+    // tx1 = await router.setTrustedWorker("0xec92e5D829f7Ef4793620B47c1e3eCB705b95DAB")
+    // tx2 = await router.setTrustedWorker("0xA530c0122a16734A2e7e3E4497101eAa17057fe8")
+    // console.log(tx1)
+    // console.log(tx2)
 
     // // verify
     // try {

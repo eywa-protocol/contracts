@@ -8,6 +8,7 @@ require('@openzeppelin/hardhat-upgrades');
 require('dotenv').config();
 const networkConfig = require(process.env.HHC_PASS ? process.env.HHC_PASS : './helper-hardhat-config.json');
 
+const PRIVATE_KEY_ETHEREUM   = process.env.PRIVATE_KEY_ETHEREUM   || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_RINKEBY  = process.env.PRIVATE_KEY_RINKEBY  || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_BSCTESTNET      = process.env.PRIVATE_KEY_BSCTESTNET      || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_MUMBAI   = process.env.PRIVATE_KEY_MUMBAI   || "0x0000000000000000000000000000000000000000";
@@ -21,6 +22,10 @@ const PRIVATE_KEY_HARMONYTESTNET   = process.env.PRIVATE_KEY_HARMONYTESTNET   ||
 const PRIVATE_KEY_HARMONY   = process.env.PRIVATE_KEY_HARMONY   || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_BSC       = process.env.PRIVATE_KEY_BSC       || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_POLYGON   = process.env.PRIVATE_KEY_POLYGON   || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_FANTOMTESTNET   = process.env.PRIVATE_KEY_FANTOMTESTNET   || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_FANTOM   = process.env.PRIVATE_KEY_FANTOM   || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_ARBITRUMTESTNET   = process.env.PRIVATE_KEY_ARBITRUMTESTNET   || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_ARBITRUM   = process.env.PRIVATE_KEY_ARBITRUM   || "0x0000000000000000000000000000000000000000";
 
 task("balanceDeployer", "Print info about balance deployer", async () => {
   const [deployer] = await ethers.getSigners();
@@ -74,6 +79,10 @@ module.exports = {
       url: networkConfig.avalanchetestnet.rpcUrl2,
       accounts: [PRIVATE_KEY_AVALANCHETESTNET]
     },
+    ethereum: {
+      url: networkConfig.ethereum.rpcUrl.replace('ws','http').replace('ws/',''),
+      accounts: [PRIVATE_KEY_ETHEREUM]
+    },
     rinkeby: {
       url: networkConfig.rinkeby.rpcUrl.replace('ws','http').replace('ws/',''),
       accounts: [PRIVATE_KEY_RINKEBY]
@@ -81,6 +90,22 @@ module.exports = {
     bsctestnet: {
       url: networkConfig.bsctestnet.rpcUrl2,
       accounts: [PRIVATE_KEY_BSCTESTNET]
+    },
+    fantomtestnet:{
+      url: networkConfig.fantomtestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_FANTOMTESTNET]
+    },
+    fantom:{
+      url: networkConfig.fantom.rpcUrl2,
+      accounts: [PRIVATE_KEY_FANTOM]
+    },
+    arbitrum:{
+      url: networkConfig.arbitrum.rpcUrl2,
+      accounts: [PRIVATE_KEY_ARBITRUM]
+    },
+    arbitrumtestnet:{
+      url: networkConfig.arbitrumtestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_ARBITRUMTESTNET]
     },
     mumbai:{
         url: networkConfig.mumbai.rpcUrl2,

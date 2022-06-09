@@ -19,6 +19,8 @@ contract MockDexPool is SolanaSerialize {
     mapping(bytes32 => uint256) public requests;
     bytes32[] public doubleRequestIds;
     uint256 public totalRequests = 0;
+    uint256 public thisChainId;
+
 
     event RequestSent(bytes32 reqId);
     event RequestReceived(uint256 data);
@@ -60,6 +62,7 @@ contract MockDexPool is SolanaSerialize {
         bytes32 requestId = RequestIdLib.prepareRqId(
             bytes32(uint256(uint160(oppBridge))),
             chainId,
+            thisChainId,
             bytes32(uint256(uint160(secondPartPool))),
             bytes32(uint256(uint160(msg.sender))),
             nonce
@@ -131,6 +134,7 @@ contract MockDexPool is SolanaSerialize {
         bytes32 requestId = RequestIdLib.prepareRqId(
             testStubPID_,
             chainId,
+            thisChainId,
             dataAcc_,
             bytes32(uint256(uint160(msg.sender))),
             nonce
@@ -190,6 +194,7 @@ contract MockDexPool is SolanaSerialize {
         bytes32 reqId = RequestIdLib.prepareRqId(
             bytes32(uint256(uint160(oppBridge))),
             chainId,
+            thisChainId,
             bytes32(uint256(uint160(secondPartPool))),
             bytes32(uint256(uint160(msg.sender))),
             nonce
