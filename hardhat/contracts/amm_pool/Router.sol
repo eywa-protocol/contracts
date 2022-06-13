@@ -554,4 +554,36 @@ contract Router is EIP712, Ownable {
         current = nonce.current();
         nonce.increment();
     }
+
+    function metaMintRequest(
+        address[] memory _token,
+        uint256[] memory _amount,
+        address _from,
+        IPortal.SynthParams memory _synthParams,
+        ICurveProxy.MetaMintEUSD memory _metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
+    ) external {
+        for (uint256 i = 0; i < _token.length; i++) {
+            if (_amount[i] > 0) {
+                SafeERC20.safeTransferFrom(IERC20(_token[i]), msg.sender, _portal, _amount[i]);
+            }
+        }
+        IPortal(_portal).transitSynthBatchAddLiquidity3PoolMintEUSDRequest(_token, _amount, _from, _synthParams, _metaParams, _unsynthParams);
+    }
+
+    function metaExchangeRequest(
+        address[] memory _token,
+        uint256[] memory _amount,
+        address _from,
+        IPortal.SynthParams memory _synthParams,
+        ICurveProxy.MetaExchangeParams memory _metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
+    ) external {
+        for (uint256 i = 0; i < _token.length; i++) {
+            if (_amount[i] > 0) {
+                SafeERC20.safeTransferFrom(IERC20(_token[i]), msg.sender, _portal, _amount[i]);
+            }
+        }
+        IPortal(_portal).transitSynthBatchMetaExchangeRequest(_token, _amount, _from, _synthParams, _metaParams, _unsynthParams);
+    }
 }
