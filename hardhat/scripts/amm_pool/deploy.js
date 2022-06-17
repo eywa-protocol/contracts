@@ -29,6 +29,9 @@ async function main() {
     networkConfig[network.name].frontHelper = frontHelper.address;
     console.log(`FrontHelper address: ${frontHelper.address}`);
 
+    networkConfig[network.name].portal = portal.address;
+    networkConfig[network.name].synthesis = synthesis.address;
+    
     // deploy Curve Proxy
     const CurveProxy = await ethers.getContractFactory('CurveProxy');
     const curveProxy = await upgrades.deployProxy(CurveProxy, [
@@ -51,8 +54,7 @@ async function main() {
     await router.deployed();
     console.log(`Router address: ${router.address}`);
 
-    networkConfig[network.name].portal = portal.address;
-    networkConfig[network.name].synthesis = synthesis.address;
+    
     networkConfig[network.name].curveProxy = curveProxy.address;
     networkConfig[network.name].router = router.address;
 
