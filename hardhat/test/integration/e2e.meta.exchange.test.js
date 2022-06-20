@@ -48,7 +48,7 @@ contract('CurveProxy', () => {
         it("Exchange: network1 -> network3", async function () {
 
             balanceC2 = await tokenC2.balanceOf(userNet3)
-            console.log((await tokenC2.balanceOf(userNet3)).toString())
+            
 
             //synthesize params
             const synthParams = {
