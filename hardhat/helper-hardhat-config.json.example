@@ -408,8 +408,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "harmonytestnet": {
-    "rpcUrl": "wss://ws.testnet.eywa.fi:17011",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17014",
+    "rpcUrl": "wss://ws.s0.ps.hmny.io",
+    "rpcUrl2": "https://api.s0.ps.hmny.io/",
     "n": "HARMONYTESTNET",
     "netwiker": "HRM",
     "env_file": [
