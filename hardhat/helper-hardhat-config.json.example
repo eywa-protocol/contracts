@@ -408,15 +408,15 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "harmonytestnet": {
-    "rpcUrl": "wss://ws.testnet.eywa.fi:17011",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17012",
+    "rpcUrl": "wss://ws.s0.ps.hmny.io",
+    "rpcUrl2": "https://api.s0.ps.hmny.io/",
     "n": "HARMONYTESTNET",
     "netwiker": "HRM",
     "env_file": [
       "networks_env/env_connect_to_harmonytestnet.env",
       "networks_env/env_test_for_harmonytestnet.env"
     ],
-    "chainId": 1666700000,
+    "chainId": 1666900000,
     "relayHub":  "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
@@ -452,12 +452,8 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "avalanchetestnet",
       "bsctestnet",
-      "arbitrumtestnet",
-      "fantomtestnet",
-      "mumbai",
-      "rinkeby"
+      "mumbai"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -616,12 +612,8 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "avalanchetestnet",
-      "harmonytestnet",
-      "arbitrumtestnet",
-      "fantomtestnet",
       "mumbai",
-      "rinkeby"
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -854,11 +846,7 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
-      "harmonytestnet",
-      "arbitrumtestnet",
-      "fantomtestnet",
-      "rinkeby",
-      "avalanchetestnet"
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
