@@ -510,19 +510,16 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         for (uint256 i = 0; i < _token.length; i++) {
             if (_amount[i] > 0) {
                 require(tokenDecimalsData[castToBytes32(_token[i])].isApproved, "Portal: token must be verified");
-
                 registerNewBalance(_token[i], _amount[i]);
-
                 txId[i] = keccak256(abi.encodePacked(generalTxId, i));
                 TxState storage txState = requests[txId[i]];
-                txState.from = castToBytes32(_from); //change!
+                txState.from = castToBytes32(_from);
                 txState.to = castToBytes32(_metaParams.to);
                 txState.rtoken = castToBytes32(_token[i]);
                 txState.amount = _amount[i];
                 txState.state = RequestState.Sent;
 
                 emit SynthesizeRequest(txId[i], _from, _metaParams.to, _amount[i], _token[i]);
-
                 // break;
             }
         }
@@ -532,7 +529,6 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             bytes4(keccak256(bytes("transitSynthBatchAddLiquidity3PoolMintEUSD((address,uint256,uint256,address,uint256,address),(address,address,uint256,uint8,bytes32,bytes32),address[3],uint256[3],bytes32[3])"))),
             _metaParams,
             _unsynthParams,
-            //////////////
             _token,
             _amount,
             txId
@@ -568,33 +564,27 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
             generalNonce
         );
 
-        //synthesize request
         for (uint256 i = 0; i < _token.length; i++) {
             if (_amount[i] > 0) {
                 require(tokenDecimalsData[castToBytes32(_token[i])].isApproved, "Portal: token must be verified");
-
                 registerNewBalance(_token[i], _amount[i]);
-
                 txId[i] = keccak256(abi.encodePacked(generalTxId, i));
                 TxState storage txState = requests[txId[i]];
-                txState.from = castToBytes32(_from); //change!
+                txState.from = castToBytes32(_from);
                 txState.to = castToBytes32(_metaParams.to);
                 txState.rtoken = castToBytes32(_token[i]);
                 txState.amount = _amount[i];
                 txState.state = RequestState.Sent;
 
                 emit SynthesizeRequest(txId[i], _from, _metaParams.to, _amount[i], _token[i]);
-
                 // break;
             }
         }
 
-        // encode call
         bytes memory out = abi.encodeWithSelector(
             bytes4(keccak256(bytes("transitSynthBatchMetaExchange((address,address,address,uint256,int128,int128,uint256,int128,uint256,address,address,address,address,uint256),(address,address,uint256,uint8,bytes32,bytes32),address[3],uint256[3],bytes32[3])"))),
             _metaParams,
             _unsynthParams,
-            //////////////
             _token,
             _amount,
             txId

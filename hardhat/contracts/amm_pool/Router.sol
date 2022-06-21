@@ -322,6 +322,45 @@ contract Router is EIP712, Ownable {
         IPortal(_portal).synthesizeToSolana(token, amount, msg.sender, pubkeys, txStateBump, chainId);
     }
 
+    function synthBatchAddLiquidity3PoolMintEUSDRequest(
+        address[3] memory token,
+        uint256[3] memory amount,
+        address from,
+        IPortal.SynthParams memory synthParams,
+        ICurveProxy.MetaMintEUSD memory metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory unsynthParams
+    ) external {
+        for (uint256 i = 0; i < token.length; i++) {
+            if (amount[i] > 0) {
+                SafeERC20.safeTransferFrom(IERC20(token[i]), msg.sender, _portal, amount[i]);
+            }
+        }
+        IPortal(_portal).synthBatchAddLiquidity3PoolMintEUSD(
+            token,
+            amount,
+            from,
+            synthParams,
+            metaParams,
+            unsynthParams
+        );
+    }
+
+    function synthBatchMetaExchangeRequest(
+        address[3] memory token,
+        uint256[3] memory amount,
+        address from,
+        IPortal.SynthParams memory synthParams,
+        ICurveProxy.MetaExchangeParams memory metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory unsynthParams
+    ) external {
+        for (uint256 i = 0; i < token.length; i++) {
+            if (amount[i] > 0) {
+                SafeERC20.safeTransferFrom(IERC20(token[i]), msg.sender, _portal, amount[i]);
+            }
+        }
+        IPortal(_portal).synthBatchMetaExchange(token, amount, from, synthParams, metaParams, unsynthParams);
+    }
+
     /**
      * @dev Direct revert burnSyntheticToken() operation, can be called several times.
      * @param txID transaction ID to unburn
@@ -553,37 +592,5 @@ contract Router is EIP712, Ownable {
         Counters.Counter storage nonce = _nonces[owner];
         current = nonce.current();
         nonce.increment();
-    }
-
-    function synthBatchAddLiquidity3PoolMintEUSDRequest(
-        address[3] memory _token,
-        uint256[3] memory _amount,
-        address _from,
-        IPortal.SynthParams memory _synthParams,
-        ICurveProxy.MetaMintEUSD memory _metaParams,
-        ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
-    ) external {
-        for (uint256 i = 0; i < _token.length; i++) {
-            if (_amount[i] > 0) {
-                SafeERC20.safeTransferFrom(IERC20(_token[i]), msg.sender, _portal, _amount[i]);
-            }
-        }
-        IPortal(_portal).synthBatchAddLiquidity3PoolMintEUSD(_token, _amount, _from, _synthParams, _metaParams, _unsynthParams);
-    }
-
-    function synthBatchMetaExchangeRequest(
-        address[3] memory _token,
-        uint256[3] memory _amount,
-        address _from,
-        IPortal.SynthParams memory _synthParams,
-        ICurveProxy.MetaExchangeParams memory _metaParams,
-        ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
-    ) external {
-        for (uint256 i = 0; i < _token.length; i++) {
-            if (_amount[i] > 0) {
-                SafeERC20.safeTransferFrom(IERC20(_token[i]), msg.sender, _portal, _amount[i]);
-            }
-        }
-        IPortal(_portal).synthBatchMetaExchange(_token, _amount, _from, _synthParams, _metaParams, _unsynthParams);
     }
 }
