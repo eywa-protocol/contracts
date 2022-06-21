@@ -9,16 +9,17 @@ import "../../amm_pool/SolanaSerialize.sol";
 import "../../utils/Typecast.sol";
 import "../../amm_pool/RequestIdLib.sol";
 import "../../interfaces/IERC20.sol";
-
 contract PortalV2 is RelayRecipient, SolanaSerialize, Typecast {
     mapping(address => uint256) public balanceOf;
     string public versionRecipient;
     address public bridge;
+    uint256 public thisChainId;
 
     bytes public constant sighashMintSyntheticToken =
         abi.encodePacked(uint8(44), uint8(253), uint8(1), uint8(101), uint8(130), uint8(139), uint8(18), uint8(78));
     bytes public constant sighashEmergencyUnburn =
         abi.encodePacked(uint8(149), uint8(132), uint8(104), uint8(123), uint8(157), uint8(85), uint8(21), uint8(161));
+    uint256 public testValue;
 
     enum SynthesizePubkeys {
         to,
@@ -64,11 +65,6 @@ contract PortalV2 is RelayRecipient, SolanaSerialize, Typecast {
         bool approveMax;
     }
 
-    struct TransitData {
-        bytes4 selector;
-        bytes data;
-    }
-
     struct TokenInfo {
         uint8 tokenDecimals;
         bool isApproved;
@@ -77,7 +73,6 @@ contract PortalV2 is RelayRecipient, SolanaSerialize, Typecast {
     mapping(bytes32 => TxState) public requests;
     mapping(bytes32 => UnsynthesizeState) public unsynthesizeStates;
     mapping(bytes32 => TokenInfo) public tokenDecimalsData;
-    uint256 public testValue;
 
     event SynthesizeRequest(
         bytes32 indexed id,
@@ -99,13 +94,13 @@ contract PortalV2 is RelayRecipient, SolanaSerialize, Typecast {
     event RepresentationRequest(address indexed rtoken);
     event ApprovedRepresentationRequest(bytes32 indexed rtoken);
 
-    function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
+    function initializeFunc(address _bridge, address _trustedForwarder, uint256 _thisChainId) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
         versionRecipient = "2.2.3";
-        testValue = 33;
         bridge = _bridge;
         _setTrustedForwarder(_trustedForwarder);
+        thisChainId = _thisChainId;
     }
 
     modifier onlyBridge() {
@@ -143,6 +138,7 @@ contract PortalV2 is RelayRecipient, SolanaSerialize, Typecast {
         txID = RequestIdLib.prepareRqId(
             castToBytes32(_synthParams.oppositeBridge),
             _synthParams.chainId,
+            thisChainId,
             castToBytes32(_synthParams.receiveSide),
             castToBytes32(_from),
             nonce
@@ -245,6 +241,7 @@ contract PortalV2 is RelayRecipient, SolanaSerialize, Typecast {
         txID = RequestIdLib.prepareRqId(
             _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
+            thisChainId,
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
             castToBytes32(_from),
             nonce
@@ -355,7 +352,7 @@ contract PortalV2 is RelayRecipient, SolanaSerialize, Typecast {
     /**
      * @dev Revert burnSyntheticToken() operation, can be called several times.
      * @param _txID transaction ID to unburn
-     * @param _receiveSide receiver contract address
+     * @param _receiveSide receiver chain synthesis contract address
      * @param _oppositeBridge opposite bridge address
      * @param _chainId opposite chain ID
      */
@@ -387,6 +384,7 @@ contract PortalV2 is RelayRecipient, SolanaSerialize, Typecast {
         bytes32 txID = RequestIdLib.prepareRqId(
             castToBytes32(_oppositeBridge),
             _chainId,
+            thisChainId,
             castToBytes32(_receiveSide),
             castToBytes32(_msgSender()),
             nonce
@@ -420,6 +418,7 @@ contract PortalV2 is RelayRecipient, SolanaSerialize, Typecast {
         bytes32 txID = RequestIdLib.prepareRqId(
             _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
+            thisChainId,
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
             castToBytes32(_msgSender()),
             nonce
@@ -548,76 +547,6 @@ contract PortalV2 is RelayRecipient, SolanaSerialize, Typecast {
      */
     function setTrustedForwarder(address _forwarder) external onlyOwner {
         return _setTrustedForwarder(_forwarder);
-    }
-
-    //TODO: revisit memory location and logic in general (may need to use a single case scenario only)
-    /* *
-     * @dev Batch synthesize request
-     * @param _token tokens to synthesize
-     * @param _amount token amounts to synthesize, set a positive amount in order to initiate a synthesize request
-     * @param _from message sender address
-     * @param _to to address
-     * @param _synthParams synth params
-     * @param _transitData transit data
-     */
-    function synthesizeBatchWithDataTransit(
-        address[] memory _token,
-        uint256[] memory _amount,
-        address _from,
-        address _to,
-        SynthParams memory _synthParams,
-        TransitData memory _transitData
-    ) external {
-        bytes32[] memory txId = new bytes32[](_token.length);
-        uint256 generalNonce = IBridge(bridge).getNonce(_from);
-        bytes32 generalTxId = RequestIdLib.prepareRqId(
-            castToBytes32(_synthParams.oppositeBridge),
-            _synthParams.chainId,
-            castToBytes32(_synthParams.receiveSide),
-            castToBytes32(_from),
-            generalNonce
-        );
-
-        //synthesize request
-        for (uint256 i = 0; i < _token.length; i++) {
-            if (_amount[i] > 0) {
-                require(tokenDecimalsData[castToBytes32(_token[i])].isApproved, "Portal: token must be verified");
-
-                registerNewBalance(_token[i], _amount[i]);
-
-                txId[i] = keccak256(abi.encodePacked(generalTxId, i));
-                TxState storage txState = requests[txId[i]];
-                txState.from = castToBytes32(_from); //change!
-                txState.to = castToBytes32(_to);
-                txState.rtoken = castToBytes32(_token[i]);
-                txState.amount = _amount[i];
-                txState.state = RequestState.Sent;
-
-                emit SynthesizeRequest(txId[i], _from, _to, _amount[i], _token[i]);
-
-                // break;
-            }
-        }
-
-        // encode call
-        bytes memory out = abi.encodePacked(
-            _transitData.selector,
-            _transitData.data,
-            //////////////
-            _token,
-            _amount,
-            txId
-        );
-
-        IBridge(bridge).transmitRequestV2(
-            out,
-            _synthParams.receiveSide,
-            _synthParams.oppositeBridge,
-            _synthParams.chainId,
-            generalTxId,
-            _from,
-            generalNonce
-        );
     }
 
     function testFunc() external {

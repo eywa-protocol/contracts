@@ -1,128 +1,131 @@
 {
   "allVestingRounds": [
     {
-      "name": "Pre-seed round",
+      "name": "Vesting: Pre-seed round",
       "tokenAmount": "50000000",
       "period": "24",
-      "cliffPeriod": "9",
-      "cliffPercent": "10",
+      "cliffPeriod1": "9",
+      "cliffPercent1": "10",
+      "cliffPeriod2": "0",
+      "cliffPercent2": "0",
+      "cliffPeriod3": "0",
+      "cliffPercent3": "0",
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      "address": "0x2F783FB7bAF8BF6Bd7388ABD3c56320E8F8fa10a"
     },
     {
-      "name": "Strategic round",
-      "tokenAmount": "10000000",
+      "name": "Vesting: Strategic round  (Round 1 & Round 2)",
+      "tokenAmount": "112000000",
       "period": "18",
-      "cliffPeriod": "6",
-      "cliffPercent": "10",
+      "cliffPeriod1": "6",
+      "cliffPercent1": "10",
+      "cliffPeriod2": "0",
+      "cliffPercent2": "0",
+      "cliffPeriod3": "0",
+      "cliffPercent3": "0",
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
+      "address": "0xB8F041014AcD63650a40F099bA6F13f6d412E542"
     },
     {
-      "name": "Round 1",
-      "tokenAmount": "35000000",
-      "period": "18",
-      "cliffPeriod": "6",
-      "cliffPercent": "10",
-      "permissionlessTimeStamp": "0",
-      "claimWithAllowanceTimeStamp": "0",
-      "stepAmount": "1",
-      "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853"
-    },
-    {
-      "name": "Round 2",
-      "tokenAmount": "67000000",
-      "period": "18",
-      "cliffPeriod": "6",
-      "cliffPercent": "10",
-      "permissionlessTimeStamp": "0",
-      "claimWithAllowanceTimeStamp": "0",
-      "stepAmount": "1",
-      "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788"
-    },
-    {
-      "name": "KOLs round",
+      "name": "Vesting: KOLs round",
       "tokenAmount": "8000000",
-      "period": "18",
-      "cliffPeriod": "6",
-      "cliffPercent": "10",
+      "period": "12",
+      "cliffPeriod1": "0",
+      "cliffPercent1": "3",
+      "cliffPeriod2": "2",
+      "cliffPercent2": "3",
+      "cliffPeriod3": "2",
+      "cliffPercent3": "4",
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
+      "address": "0xB9A45da5b1f6C3dd2b65A2E1B01632740964934f"
     },
     {
-      "name": "Round for validators",
+      "name": "Vesting: Round for validators",
       "tokenAmount": "30000000",
-      "period": "16",
-      "cliffPeriod": "12",
-      "cliffPercent": "50",
+      "period": "9",
+      "cliffPeriod1": "3",
+      "cliffPercent1": "20",
+      "cliffPeriod2": "0",
+      "cliffPercent2": "0",
+      "cliffPeriod3": "0",
+      "cliffPercent3": "0",
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1"
+      "address": "0xa256b7690da237A9b31e56EC661f0E1F4B300EeF"
     },
     {
-      "name": "Round for alpha testers",
+      "name": "Vesting: Round for alpha testers",
       "tokenAmount": "12750000",
       "period": "6",
-      "cliffPeriod": "2",
-      "cliffPercent": "10",
+      "cliffPeriod1": "2",
+      "cliffPercent1": "10",
+      "cliffPeriod2": "0",
+      "cliffPercent2": "0",
+      "cliffPeriod3": "0",
+      "cliffPercent3": "0",
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c"
+      "address": "0x35E3Aad15ba05dF403C988e1F798b931E2c5AD63"
     },
     {
-      "name": "Airdrop for early adopters",
+      "name": "Vesting: Airdrop for early adopters",
       "tokenAmount": "10000000",
       "period": "12",
-      "cliffPeriod": "",
-      "cliffPercent": "10",
+      "cliffPeriod1": "",
+      "cliffPercent1": "10",
+      "cliffPeriod2": "0",
+      "cliffPercent2": "0",
+      "cliffPeriod3": "0",
+      "cliffPercent3": "0",
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1"
+      "address": "0x2CA6775eF87870164828c79be9836049d79CcD96"
     },
     {
-      "name": "Founders and team",
+      "name": "Vesting: Founders and team",
       "tokenAmount": "170000000",
       "period": "24",
-      "cliffPeriod": "12",
-      "cliffPercent": "10",
+      "cliffPeriod1": "12",
+      "cliffPercent1": "10",
+      "cliffPeriod2": "0",
+      "cliffPercent2": "0",
+      "cliffPeriod3": "0",
+      "cliffPercent3": "0",
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319"
+      "address": "0xd72941bb274597957EB2ebD2e5D2e25391ec3d66"
     },
     {
-      "name": "Advisers",
+      "name": "Vesting: Advisers",
       "tokenAmount": "50000000",
       "period": "24",
-      "cliffPeriod": "12",
-      "cliffPercent": "10",
+      "cliffPeriod1": "12",
+      "cliffPercent1": "10",
+      "cliffPeriod2": "0",
+      "cliffPercent2": "0",
+      "cliffPeriod3": "0",
+      "cliffPercent3": "0",
       "permissionlessTimeStamp": "0",
       "claimWithAllowanceTimeStamp": "0",
       "stepAmount": "1",
-      "address": "0xc5a5C42992dECbae36851359345FE25997F5C42d"
-    },
-    {
-      "name": "Longterm market making (with vesting)",
-      "tokenAmount": "50000000",
-      "period": "5",
-      "cliffPeriod": "",
-      "cliffPercent": "",
-      "permissionlessTimeStamp": "0",
-      "claimWithAllowanceTimeStamp": "0",
-      "stepAmount": "2629743",
-      "address": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690"
+      "address": "0x25232B7A29E2E7bf23cF4F034DcCc5723F7d6031"
     }
   ],
   "treasuryAllocation": [
+    {
+      "name": "DAO treasury: Longterm market making (with vesting)",
+      "tokenAmount": "50000000"
+    },
     {
       "name": "DAO treasury: Grants & hackatons rewards",
       "tokenAmount": "50000000"
@@ -134,22 +137,62 @@
     {
       "name": "DAO treasury: Public rewards (farming, staking, bonding)",
       "tokenAmount": "400000000"
+    }
+  ],
+  "airdropAllocation": [
+    {
+      "name": "Allocation: Market making (on TGE)",
+      "allocation": [
+        {
+          "tokenAmount": "15500000",
+          "recipient": "0x50c3AF75206D0EB332E7Ca527199E4807e4126FF"
+        }
+      ]
     },
     {
-      "name": "DAO treasury: TGE - IDO launchpads: MoonEdge on Polygon",
-      "tokenAmount": "350000"
+      "name": "Allocation: TGE - IDO launchpads: MoonEdge on Polygon",
+      "allocation": [
+        {
+          "tokenAmount": "350000",
+          "recipient": "0x50c3AF75206D0EB332E7Ca527199E4807e4126FF"
+        }
+      ]
     },
     {
-      "name": "DAO treasury: TGE - IDO launchpads: Catapult on BSC",
-      "tokenAmount": "250000"
+      "name": "Allocation: TGE - IDO launchpads: Catapult on BSC",
+      "allocation": [
+        {
+          "tokenAmount": "250000",
+          "recipient": "0x50c3AF75206D0EB332E7Ca527199E4807e4126FF"
+        }
+      ]
     },
     {
-      "name": "DAO treasury: TGE - IDO launchpads: Gagarin on BSC",
-      "tokenAmount": "150000"
+      "name": "Allocation: TGE - IDO launchpads: Gagarin on BSC",
+      "allocation": [
+        {
+          "tokenAmount": "150000",
+          "recipient": "0x50c3AF75206D0EB332E7Ca527199E4807e4126FF"
+        }
+      ]
     },
     {
-      "name": "DAO treasury: TGE - IDO launchpads: Harmony launcher on Harmony",
-      "tokenAmount": "500000"
+      "name": "Allocation: TGE - IDO launchpads: Harmony launcher on Harmony",
+      "allocation": [
+        {
+          "tokenAmount": "500000",
+          "recipient": "0x50c3AF75206D0EB332E7Ca527199E4807e4126FF"
+        }
+      ]
+    },
+    {
+      "name": "Allocation: TGE - IDO launchpads: Scaleswap on Harmony",
+      "allocation": [
+        {
+          "tokenAmount": "250000",
+          "recipient": "0x50c3AF75206D0EB332E7Ca527199E4807e4126FF"
+        }
+      ]
     }
   ]
 }

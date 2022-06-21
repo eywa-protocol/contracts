@@ -16,4 +16,8 @@ contract ReqIdFilter {
         require(msg.sender == owner, "not owner");
         selfdestruct(payable(owner));
     }
+
+    function getReqIdFilter(bytes32 id) public view returns (bool) {
+        return filter[id];
+    }
 }

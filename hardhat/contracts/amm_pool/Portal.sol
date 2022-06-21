@@ -14,6 +14,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     mapping(address => uint256) public balanceOf;
     string public versionRecipient;
     address public bridge;
+    uint256 public thisChainId;
 
     bytes public constant sighashMintSyntheticToken =
         abi.encodePacked(uint8(44), uint8(253), uint8(1), uint8(101), uint8(130), uint8(139), uint8(18), uint8(78));
@@ -93,12 +94,13 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
     event RepresentationRequest(address indexed rtoken);
     event ApprovedRepresentationRequest(bytes32 indexed rtoken);
 
-    function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
+    function initializeFunc(address _bridge, address _trustedForwarder, uint256 _thisChainId) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
         versionRecipient = "2.2.3";
         bridge = _bridge;
         _setTrustedForwarder(_trustedForwarder);
+        thisChainId = _thisChainId;
     }
 
     modifier onlyBridge() {
@@ -136,6 +138,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         txID = RequestIdLib.prepareRqId(
             castToBytes32(_synthParams.oppositeBridge),
             _synthParams.chainId,
+            thisChainId,
             castToBytes32(_synthParams.receiveSide),
             castToBytes32(_from),
             nonce
@@ -238,6 +241,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         txID = RequestIdLib.prepareRqId(
             _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
+            thisChainId,
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
             castToBytes32(_from),
             nonce
@@ -380,6 +384,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bytes32 txID = RequestIdLib.prepareRqId(
             castToBytes32(_oppositeBridge),
             _chainId,
+            thisChainId,
             castToBytes32(_receiveSide),
             castToBytes32(_msgSender()),
             nonce
@@ -413,6 +418,7 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         bytes32 txID = RequestIdLib.prepareRqId(
             _pubkeys[uint256(SynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
+            thisChainId,
             _pubkeys[uint256(SynthesizePubkeys.receiveSide)],
             castToBytes32(_msgSender()),
             nonce

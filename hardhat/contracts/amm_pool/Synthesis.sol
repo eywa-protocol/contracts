@@ -22,6 +22,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     address public bridge;
     address public proxy;
     string public versionRecipient;
+    uint256 public thisChainId;
 
     bytes public constant sighashUnsynthesize =
         abi.encodePacked(uint8(115), uint8(234), uint8(111), uint8(109), uint8(131), uint8(167), uint8(37), uint8(70));
@@ -71,13 +72,14 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     event RevertBurnCompleted(bytes32 indexed id, address indexed to, uint256 amount, address token);
     event CreatedRepresentation(bytes32 indexed rtoken, address indexed stoken);
 
-    function initializeFunc(address _bridge, address _trustedForwarder) public initializer {
+    function initializeFunc(address _bridge, address _trustedForwarder, uint256 _thisChainId) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
 
         versionRecipient = "2.2.3";
         bridge = _bridge;
         _setTrustedForwarder(_trustedForwarder);
+        thisChainId = _thisChainId;
     }
 
     modifier onlyBridge() {
@@ -157,6 +159,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         bytes32 txID = RequestIdLib.prepareRqId(
             castToBytes32(_synthParams.oppositeBridge),
             _synthParams.chainId,
+            thisChainId,
             castToBytes32(_synthParams.receiveSide),
             castToBytes32(_from),
             nonce
@@ -223,6 +226,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         bytes32 txID = RequestIdLib.prepareRqId(
             castToBytes32(_oppositeBridge),
             _chainId,
+            thisChainId,
             castToBytes32(_receiveSide),
             castToBytes32(_msgSender()),
             nonce
@@ -251,6 +255,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         bytes32 txID = RequestIdLib.prepareRqId(
             _pubkeys[uint256(UnsynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
+            thisChainId,
             _pubkeys[uint256(UnsynthesizePubkeys.receiveSide)],
             castToBytes32(_msgSender()),
             nonce
@@ -341,6 +346,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         txID = RequestIdLib.prepareRqId(
             castToBytes32(_synthParams.oppositeBridge),
             _synthParams.chainId,
+            thisChainId,
             castToBytes32(_synthParams.receiveSide),
             castToBytes32(_from),
             nonce
@@ -407,6 +413,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
         txID = RequestIdLib.prepareRqId(
             _pubkeys[uint256(UnsynthesizePubkeys.oppositeBridge)],
             SOLANA_CHAIN_ID,
+            thisChainId,
             _pubkeys[uint256(UnsynthesizePubkeys.receiveSide)],
             castToBytes32(_from),
             nonce

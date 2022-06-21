@@ -8,7 +8,7 @@
       "networks_env/env_connect_to_harmony.env",
       "networks_env/env_test_for_harmony.env"
     ],
-    "chainId": 1666600001,
+    "chainId": 1666600000,
     "relayHub":  "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
@@ -33,8 +33,63 @@
       "coins": []
     },
     "sourceForRepresentation": [
+      "ethereum",
+      "bsc",
       "polygon",
-      "bsc"
+      "fantom",
+      "avalanche",
+      "arbitrum"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+  "ethereum": {
+    "rpcUrl": "https://rpc.ankr.com/eth",
+    "rpcUrl2": "https://rpc.ankr.com/eth",
+    "n": "ETHEREUM",
+    "netwiker": "ETH",
+    "env_file": [
+      "networks_env/env_connect_to_ethereum.env",
+      "networks_env/env_test_for_ethereum.env"
+    ],
+    "chainId": 1,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "harmony",
+      "bsc",
+      "polygon",
+      "fantom",
+      "avalanche",
+      "arbitrum"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -80,8 +135,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
+      "harmony",
       "bsc",
-      "harmony"
+      "ethereum",
+      "fantom",
+      "avalanche",
+      "arbitrum"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -127,8 +186,216 @@
       "coins": []
     },
     "sourceForRepresentation": [
+      "harmony",
       "polygon",
-      "harmony"
+      "ethereum",
+      "fantom",
+      "avalanche",
+      "arbitrum"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+   "arbitrum": {
+    "rpcUrl": "https://arb1.arbitrum.io/rpc",
+    "rpcUrl2": "https://arb1.arbitrum.io/rpc",
+    "n": "ARBITRUM",
+    "netwiker": "AETH",
+    "env_file": [
+      "networks_env/env_connect_to_arbitrum.env",
+      "networks_env/env_test_for_arbitrum.env"
+    ],
+    "chainId": 42161,
+    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":"",
+      "treasury":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "harmony",
+      "polygon",
+      "ethereum",
+      "fantom",
+      "avalanche",
+      "bsc"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+  "arbitrumtestnet": {
+    "rpcUrl": "https://rinkeby.arbitrum.io/rpc",
+    "rpcUrl2": "https://rinkeby.arbitrum.io/rpc",
+    "n": "ARBITRUMTESTNET",
+    "netwiker": "AETH",
+    "env_file": [
+      "networks_env/env_connect_to_arbitrumtestnet.env",
+      "networks_env/env_test_for_arbitrumtestnet.env"
+    ],
+    "chainId": 421611,
+    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":"",
+      "treasury":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "avalanchetestnet",
+      "bsctestnet",
+      "fantomtestnet",
+      "harmonytestnet",
+      "mumbai",
+      "rinkeby"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+   "fantom": {
+    "rpcUrl": "https://rpc.ftm.tools/",
+    "rpcUrl2": "https://rpc.ftm.tools/",
+    "n": "FANTOM",
+    "netwiker": "FTM",
+    "env_file": [
+      "networks_env/env_connect_to_fantom.env",
+      "networks_env/env_test_for_fantom..env"
+    ],
+    "chainId": 250,
+    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":"",
+      "treasury":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "harmony",
+      "polygon",
+      "ethereum",
+      "arbitrum",
+      "avalanche",
+      "bsc"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+   "fantomtestnet": {
+    "rpcUrl": "https://rpc.testnet.fantom.network/",
+    "rpcUrl2": "https://rpc.testnet.fantom.network/",
+    "n": "FANTOMTESTNET",
+    "netwiker": "FTM",
+    "env_file": [
+      "networks_env/env_connect_to_fantomtestnet.env",
+      "networks_env/env_test_for_fantomtestnet.env"
+    ],
+    "chainId": 4002,
+    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":"",
+      "treasury":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "avalanchetestnet",
+      "bsctestnet",
+      "arbitrumtestnet",
+      "harmonytestnet",
+      "mumbai",
+      "rinkeby"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -142,7 +409,7 @@
   },
   "harmonytestnet": {
     "rpcUrl": "wss://ws.testnet.eywa.fi:17011",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17012",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17014",
     "n": "HARMONYTESTNET",
     "netwiker": "HRM",
     "env_file": [
@@ -185,8 +452,8 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "mumbai",
-      "bsctestnet"
+      "bsctestnet",
+      "mumbai"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -403,12 +670,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "rinkeby",
       "bsctestnet",
+      "harmonytestnet",
+      "arbitrumtestnet",
+      "fantomtestnet",
       "mumbai",
-      "hecotestnet",
-      "coinextestnet",
-      "metistestnet"
+      "rinkeby"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -455,11 +722,11 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
+      "harmonytestnet",
+      "arbitrumtestnet",
+      "fantomtestnet",
       "mumbai",
-      "hecotestnet",
-      "avalanchetestnet",
-      "coinextestnet",
-      "metistestnet"
+      "avalanchetestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
