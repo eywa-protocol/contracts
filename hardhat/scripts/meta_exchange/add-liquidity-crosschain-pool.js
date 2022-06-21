@@ -41,9 +41,8 @@ async function main() {
       tx = await Router.attach(deployInfo[network.name].router).tokenSynthesizeRequest(
         coinToSynth,
         amount,
-        from,
+        to,
         {
-          to: to,
           receiveSide: receiveSide,
           oppositeBridge: oppositeBridge,
           chainId: chainId
@@ -68,7 +67,7 @@ async function main() {
         console.log(await ERC20.attach(deployInfo[network.name].crosschainPool[x].coins[i]).balanceOf(owner.address));
       }
     }
-
+    
     // add liquidity
     for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
       const amountEth = new Array(3).fill(ethers.utils.parseEther("100000000.0"));

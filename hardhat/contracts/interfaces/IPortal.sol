@@ -63,18 +63,18 @@ interface IPortal {
         uint256 chainId
     ) external;
 
-    function transitSynthBatchMetaExchangeRequest(
-        address[] memory _token,
-        uint256[] memory _amount,
+    function synthBatchMetaExchange(
+        address[3] memory _token,
+        uint256[3] memory _amount,
         address _from,
         SynthParams memory _synthParams,
         ICurveProxy.MetaExchangeParams memory _metaParams,
         ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
     ) external;
 
-    function transitSynthBatchAddLiquidity3PoolMintEUSDRequest(
-        address[] memory _token,
-        uint256[] memory _amount,
+    function synthBatchAddLiquidity3PoolMintEUSD(
+        address[3] memory _token,
+        uint256[3] memory _amount,
         address _from,
         SynthParams memory _synthParams,
         ICurveProxy.MetaMintEUSD memory _metaParams,

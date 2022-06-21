@@ -555,9 +555,9 @@ contract Router is EIP712, Ownable {
         nonce.increment();
     }
 
-    function metaMintRequest(
-        address[] memory _token,
-        uint256[] memory _amount,
+    function synthBatchAddLiquidity3PoolMintEUSDRequest(
+        address[3] memory _token,
+        uint256[3] memory _amount,
         address _from,
         IPortal.SynthParams memory _synthParams,
         ICurveProxy.MetaMintEUSD memory _metaParams,
@@ -568,12 +568,12 @@ contract Router is EIP712, Ownable {
                 SafeERC20.safeTransferFrom(IERC20(_token[i]), msg.sender, _portal, _amount[i]);
             }
         }
-        IPortal(_portal).transitSynthBatchAddLiquidity3PoolMintEUSDRequest(_token, _amount, _from, _synthParams, _metaParams, _unsynthParams);
+        IPortal(_portal).synthBatchAddLiquidity3PoolMintEUSD(_token, _amount, _from, _synthParams, _metaParams, _unsynthParams);
     }
 
-    function metaExchangeRequest(
-        address[] memory _token,
-        uint256[] memory _amount,
+    function synthBatchMetaExchangeRequest(
+        address[3] memory _token,
+        uint256[3] memory _amount,
         address _from,
         IPortal.SynthParams memory _synthParams,
         ICurveProxy.MetaExchangeParams memory _metaParams,
@@ -584,6 +584,6 @@ contract Router is EIP712, Ownable {
                 SafeERC20.safeTransferFrom(IERC20(_token[i]), msg.sender, _portal, _amount[i]);
             }
         }
-        IPortal(_portal).transitSynthBatchMetaExchangeRequest(_token, _amount, _from, _synthParams, _metaParams, _unsynthParams);
+        IPortal(_portal).synthBatchMetaExchange(_token, _amount, _from, _synthParams, _metaParams, _unsynthParams);
     }
 }

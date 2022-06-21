@@ -11,27 +11,12 @@ contract('CurveProxy', () => {
             ERC20B = artifacts.require('ERC20Mock')
             ERC20C = artifacts.require('ERC20Mock')
 
-            PortalA = artifacts.require('Portal')
-            PortalB = artifacts.require('Portal')
-            PortalC = artifacts.require('Portal')
-
             RouterA = artifacts.require('Router')
             RouterB = artifacts.require('Router')
             RouterC = artifacts.require('Router')
 
-            CurveProxyA = artifacts.require('CurveProxy');
-            CurveProxyB = artifacts.require('CurveProxy');
-            CurveProxyC = artifacts.require('CurveProxy');
-
-            StableSwap2Pool = artifacts.require('StableSwap2Pool')
-            StableSwap3Pool = artifacts.require('StableSwap3Pool')
-
             factoryProvider = checkoutProvider({ 'typenet': 'devstand', 'net1': 'network1', 'net2': 'network2', 'net3': 'network3' })
             totalSupply = ethers.constants.MaxUint256
-
-            CurveProxyA.setProvider(factoryProvider.web3Net1)
-            CurveProxyB.setProvider(factoryProvider.web3Net2)
-            CurveProxyC.setProvider(factoryProvider.web3Net3)
 
             RouterA.setProvider(factoryProvider.web3Net1)
             RouterB.setProvider(factoryProvider.web3Net2)
@@ -41,13 +26,9 @@ contract('CurveProxy', () => {
             ERC20B.setProvider(factoryProvider.web3Net2)
             ERC20C.setProvider(factoryProvider.web3Net3)
 
-            PortalA.setProvider(factoryProvider.web3Net1)
-            PortalB.setProvider(factoryProvider.web3Net2)
-            PortalC.setProvider(factoryProvider.web3Net3)
-
-            userNet1 = (await CurveProxyA.web3.eth.getAccounts())[0];
-            userNet2 = (await CurveProxyB.web3.eth.getAccounts())[0];
-            userNet3 = (await CurveProxyC.web3.eth.getAccounts())[0];
+            userNet1 = (await RouterA.web3.eth.getAccounts())[0];
+            userNet2 = (await RouterB.web3.eth.getAccounts())[0];
+            userNet3 = (await RouterC.web3.eth.getAccounts())[0];
 
             tokenA1 = await ERC20A.at(deployInfo["network1"].localToken[0].address)
             tokenA2 = await ERC20A.at(deployInfo["network1"].localToken[1].address)
@@ -62,12 +43,12 @@ contract('CurveProxy', () => {
             tokenC2 = await ERC20C.at(deployInfo["network3"].localToken[1].address)
             tokenC3 = await ERC20C.at(deployInfo["network3"].localToken[2].address)
 
-
         })
 
         it("Exchange: network1 -> network3", async function () {
 
             balanceC2 = await tokenC2.balanceOf(userNet3)
+            
 
             //synthesize params
             const synthParams = {
@@ -114,7 +95,7 @@ contract('CurveProxy', () => {
             amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
             const tokensToSynth = [tokenA1.address, tokenA2.address, tokenA3.address]
 
-            await routerA.metaExchangeRequest(
+            await routerA.synthBatchMetaExchangeRequest(
                 tokensToSynth,
                 amounts,
                 userNet1,
@@ -130,7 +111,7 @@ contract('CurveProxy', () => {
 
 
         it("Exchange: network3 -> network1", async function () {
-            balanceA2 = await tokenA2.balanceOf(userNet1)
+            balanceA2 = (await tokenA2.balanceOf(userNet1))
 
             //synthesize params
             const synthParams = {
@@ -141,21 +122,20 @@ contract('CurveProxy', () => {
             }
 
             const metaExchangeParams = {
-                add: deployInfo["network2"].crosschainPool[1].address,            //add pool address
-                exchange: deployInfo["network2"].hubPool.address,                 //exchange pool address
+                add: deployInfo["network2"].crosschainPool[1].address,    //add pool address
+                exchange: deployInfo["network2"].hubPool.address,         //exchange pool address
                 remove: deployInfo["network2"].crosschainPool[0].address,         //remove pool address
                 //add liquidity params
                 expectedMinMintAmount: 0,
                 //exchange params
                 i: 1,                                             //index value for the coin to send
                 j: 0,                                             //index value of the coin to receive
-                expected_min_dy: 0,
+                expectedMinDy: 0,
                 //withdraw one coin params
                 x: 1,                                             // index value of the coin to withdraw
-                expected_min_amount: 0,
+                expectedMinAmount: 0,
                 //mint synth params
                 to: userNet1,
-                //unsynth params
                 chain2address: deployInfo["network1"].portal,
                 receiveSide: deployInfo["network1"].portal,
                 oppositeBridge: deployInfo["network1"].bridge,
@@ -174,10 +154,10 @@ contract('CurveProxy', () => {
             await tokenC1.approve(routerC.address, totalSupply, { from: userNet3, gas: 300_000 })
             const amounts = new Array(3).fill(ethers.utils.parseEther("0.0"))
             const testAmount = Math.floor((Math.random() * 100) + 1);
-            amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
+            amounts[1] = ethers.utils.parseEther(testAmount.toString() + ".0")
             const tokensToSynth = [tokenC1.address, tokenC2.address, tokenC3.address]
 
-            await routerC.metaExchangeRequest(
+            await routerC.synthBatchMetaExchangeRequest(
                 tokensToSynth,
                 amounts,
                 userNet3,
@@ -239,7 +219,7 @@ contract('CurveProxy', () => {
             amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
             const tokensToSynth = [tokenA1.address, tokenA2.address, tokenA3.address]
 
-            await routerA.metaExchangeRequest(
+            await routerA.synthBatchMetaExchangeRequest(
                 tokensToSynth,
                 amounts,
                 userNet1,
@@ -302,7 +282,7 @@ contract('CurveProxy', () => {
             amounts[0] = ethers.utils.parseEther(testAmount.toString() + ".0")
             const tokensToSynth = [tokenA1.address, tokenA2.address, tokenA3.address]
 
-            await routerA.metaExchangeRequest(
+            await routerA.synthBatchMetaExchangeRequest(
                 tokensToSynth,
                 amounts,
                 userNet1,
