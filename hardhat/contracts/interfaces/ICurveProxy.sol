@@ -21,9 +21,6 @@ interface ICurveProxy {
         uint256 expectedMinMintAmountH;
         //recipient address
         address to;
-        //emergency unsynth params
-        address initialBridge;
-        uint256 initialChainID;
     }
 
     struct MetaRedeemEUSD {
@@ -63,9 +60,15 @@ interface ICurveProxy {
         address receiveSide;
         address oppositeBridge;
         uint256 chainId;
-        //emergency unsynth params
+    }
+
+    struct EmergencyUnsynthParams {
+        address initialPortal;
         address initialBridge;
         uint256 initialChainID;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
     }
 
     function addLiquidity3PoolMintEUSD(

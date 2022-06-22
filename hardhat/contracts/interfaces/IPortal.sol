@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
+import "./ICurveProxy.sol";
+
 interface IPortal {
     struct PermitData {
         uint8 v;
@@ -59,5 +61,23 @@ interface IPortal {
         address from,
         bytes32[] calldata pubkeys,
         uint256 chainId
+    ) external;
+
+    function synthBatchMetaExchange(
+        address[3] memory _token,
+        uint256[3] memory _amount,
+        address _from,
+        SynthParams memory _synthParams,
+        ICurveProxy.MetaExchangeParams memory _metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
+    ) external;
+
+    function synthBatchAddLiquidity3PoolMintEUSD(
+        address[3] memory _token,
+        uint256[3] memory _amount,
+        address _from,
+        SynthParams memory _synthParams,
+        ICurveProxy.MetaMintEUSD memory _metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
     ) external;
 }

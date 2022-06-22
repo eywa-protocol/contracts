@@ -531,7 +531,7 @@ contract CurveProxy is Initializable, RelayRecipient {
      * @param _synthAmount amounts to synth from an external chain
      * @param _txId synth transaction IDs
      */
-    function transiSynthBatchMetaExchange(
+    function transitSynthBatchMetaExchange(
         MetaExchangeParams calldata _params,
         EmergencyUnsynthParams calldata _emergencyParams,
         address[3] calldata _synthToken,
