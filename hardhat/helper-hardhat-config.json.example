@@ -34,7 +34,11 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
-      "mumbai"
+      "mumbai",
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -98,8 +102,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "polygon": {
-    "rpcUrl": "wss://ws-nd-658-849-590.p2pify.com/96ffbe1fc42be191fb68a40a94685a39",
-    "rpcUrl2": "https://nd-658-849-590.p2pify.com/96ffbe1fc42be191fb68a40a94685a39",
+    "rpcUrl": "wss://ws-nd-838-336-517.p2pify.com/f394184ce78404168d445c12afbd3896",
+    "rpcUrl2": "https://nd-838-336-517.p2pify.com/f394184ce78404168d445c12afbd3896",
     "n": "POLYGON",
     "netwiker": "POL",
     "env_file": [
@@ -149,8 +153,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "bsc": {
-    "rpcUrl": "wss://ws.bsc.mainnet.eywa.fi",
-    "rpcUrl2": "https://bsc.mainnet.eywa.fi",
+    "rpcUrl": "wss://ws-nd-194-110-264.p2pify.com/c2d2909bf0ba698c181f2f4fb841baea",
+    "rpcUrl2": "https://nd-194-110-264.p2pify.com/c2d2909bf0ba698c181f2f4fb841baea",
     "n": "BSC",
     "netwiker": "BSC",
     "env_file": [
@@ -284,12 +288,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "avalanchetestnet",
       "bsctestnet",
-      "fantomtestnet",
-      "harmonytestnet",
       "mumbai",
-      "rinkeby"
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -386,12 +390,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "avalanchetestnet",
       "bsctestnet",
-      "arbitrumtestnet",
-      "harmonytestnet",
       "mumbai",
-      "rinkeby"
+      "avalanchetestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -609,6 +613,10 @@
     },
     "sourceForRepresentation": [
       "mumbai",
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
       "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
@@ -623,7 +631,7 @@
   },
   "avalanchetestnet": {
     "rpcUrl": "wss://ws.testnet.eywa.fi:17003/ext/bc/C/ws",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17004",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17004/ext/bc/C/rpc",
     "n": "AVALANCHETESTNET",
     "netwiker": "AVCH",
     "env_file": [
@@ -645,7 +653,7 @@
         "name": "USDT",
         "symbol": "USDT"
       }
-    ],      
+    ],
     "crosschainPool": [],
     "hubPool": {
       "address": "",
@@ -667,11 +675,11 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
-      "harmonytestnet",
-      "arbitrumtestnet",
-      "fantomtestnet",
       "mumbai",
-      "rinkeby"
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -718,11 +726,11 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
-      "harmonytestnet",
-      "arbitrumtestnet",
-      "fantomtestnet",
       "mumbai",
-      "avalanchetestnet"
+      "avalanchetestnet",
+      "fantomtestnet",
+      "arbitrumtestnet",
+      "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -842,6 +850,10 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
       "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
