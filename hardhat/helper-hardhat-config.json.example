@@ -631,7 +631,7 @@
   },
   "avalanchetestnet": {
     "rpcUrl": "wss://ws.testnet.eywa.fi:17003/ext/bc/C/ws",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17004/ext/bc/C/rpc",
+    "rpcUrl2": "https://api.avax-test.network",
     "n": "AVALANCHETESTNET",
     "netwiker": "AVCH",
     "env_file": [
