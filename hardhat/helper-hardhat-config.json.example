@@ -1,7 +1,7 @@
 {
   "harmony": {
-    "rpcUrl": "wss://ws.harmony.mainnet.eywa.fi",
-    "rpcUrl2": "https://harmony.mainnet.eywa.fi",
+    "rpcUrl": "wss://ws.s0.t.hmny.io",
+    "rpcUrl2": "https://api.s0.t.hmny.io",
     "n": "HARMONY",
     "netwiker": "HRM",
     "env_file": [
