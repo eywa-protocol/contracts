@@ -1146,5 +1146,107 @@
     "curveProxy": "0x0000000000000000000000000000000000000000",
     "router": "0x0000000000000000000000000000000000000000",
     "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+  "cronostestnet": {
+    "rpcUrl": "https://cronos-testnet-3.crypto.org:8545",
+    "rpcUrl2": "https://cronos-testnet-3.crypto.org:8545",
+    "n": "CRONOSTESTNET",
+    "netwiker": "TCRO",
+    "env_file": [
+      "networks_env/env_connect_to_cronostestnet.env",
+      "networks_env/env_test_for_cronostestnet.env"
+    ],
+    "chainId": 338,
+    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":"",
+      "treasury":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "rinkeby",
+      "mumbai",
+      "hecotestnet",
+      "avalanchetestnet",
+      "metistestnet",
+      "bsctestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+  "cronos": {
+    "rpcUrl": "https://evm.cronos.org",
+    "rpcUrl2": "https://evm.cronos.org",
+    "n": "CRONOS",
+    "netwiker": "CRO",
+    "env_file": [
+      "networks_env/env_connect_to_cronos.env",
+      "networks_env/env_test_for_cronos.env"
+    ],
+    "chainId": 25,
+    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":"",
+      "treasury":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "rinkeby",
+      "mumbai",
+      "hecotestnet",
+      "avalanchetestnet",
+      "metistestnet",
+      "bsctestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
   }
 }
