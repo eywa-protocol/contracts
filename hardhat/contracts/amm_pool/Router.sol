@@ -361,6 +361,65 @@ contract Router is EIP712, Ownable {
         IPortal(_portal).synthBatchMetaExchange(token, amount, from, synthParams, metaParams, unsynthParams);
     }
 
+    function synthBatchAddLiquidity3PoolMintEUSDRequestWithPermit(
+        address[3] memory token,
+        uint256[3] memory amount,
+        address from,
+        IPortal.SynthParams memory synthParams,
+        ICurveProxy.MetaMintEUSD memory metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory unsynthParams,
+        ISynthesis.PermitData[3] calldata permitData
+    ) external {
+        for (uint256 i = 0; i < token.length; i++) {
+            if (amount[i] > 0) {
+                IERC20WithPermit(token[i]).permit(
+                    msg.sender,
+                    address(this),
+                    permitData[i].approveMax ? uint256(2**256 - 1) : amount[i],
+                    permitData[i].deadline,
+                    permitData[i].v,
+                    permitData[i].r,
+                    permitData[i].s
+                );
+                SafeERC20.safeTransferFrom(IERC20(token[i]), msg.sender, _portal, amount[i]);
+            }
+        }
+        IPortal(_portal).synthBatchAddLiquidity3PoolMintEUSD(
+            token,
+            amount,
+            from,
+            synthParams,
+            metaParams,
+            unsynthParams
+        );
+    }
+
+    function synthBatchMetaExchangeRequestWithPermit(
+        address[3] memory token,
+        uint256[3] memory amount,
+        address from,
+        IPortal.SynthParams memory synthParams,
+        ICurveProxy.MetaExchangeParams memory metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory unsynthParams,
+        ISynthesis.PermitData[3] calldata permitData
+    ) external {
+        for (uint256 i = 0; i < token.length; i++) {
+            if (amount[i] > 0) {
+                IERC20WithPermit(token[i]).permit(
+                    msg.sender,
+                    address(this),
+                    permitData[i].approveMax ? uint256(2**256 - 1) : amount[i],
+                    permitData[i].deadline,
+                    permitData[i].v,
+                    permitData[i].r,
+                    permitData[i].s
+                );
+                SafeERC20.safeTransferFrom(IERC20(token[i]), msg.sender, _portal, amount[i]);
+            }
+        }
+        IPortal(_portal).synthBatchMetaExchange(token, amount, from, synthParams, metaParams, unsynthParams);
+    }
+
     /**
      * @dev Direct revert burnSyntheticToken() operation, can be called several times.
      * @param txID transaction ID to unburn
