@@ -33,12 +33,8 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "ethereum",
-      "bsc",
-      "polygon",
-      "fantom",
-      "avalanche",
-      "arbitrum"
+      "bsctestnet",
+      "mumbai"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -613,7 +609,7 @@
     },
     "sourceForRepresentation": [
       "mumbai",
-      "harmonytestnet"
+      "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -846,7 +842,7 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
-      "harmonytestnet"
+      "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
