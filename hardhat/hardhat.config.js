@@ -82,11 +82,11 @@ module.exports = {
       accounts: [PRIVATE_KEY_AVALANCHETESTNET]
     },
     ethereum: {
-      url: networkConfig.ethereum.rpcUrl.replace('ws','http').replace('ws/',''),
+      url: networkConfig.ethereum.rpcUrl2,
       accounts: [PRIVATE_KEY_ETHEREUM]
     },
     rinkeby: {
-      url: networkConfig.rinkeby.rpcUrl.replace('ws','http').replace('ws/',''),
+      url: networkConfig.rinkeby.rpcUrl2,
       accounts: [PRIVATE_KEY_RINKEBY]
     },
     bsctestnet: {
