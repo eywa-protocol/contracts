@@ -635,7 +635,7 @@
   },
   "avalanchetestnet": {
     "rpcUrl": "wss://ws.testnet.eywa.fi:17003/ext/bc/C/ws",
-    "rpcUrl2": "https://api.avax-test.network",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17004/ext/bc/C/rpc",
     "n": "AVALANCHETESTNET",
     "netwiker": "AVCH",
     "env_file": [
@@ -697,8 +697,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "rinkeby": {
-    "rpcUrl": "wss://ws.testnet.eywa.fi:17009",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17010",
+    "rpcUrl": "wss://ws-nd-466-934-107.p2pify.com/57c2043d910001c22c3f692f4251a151",
+    "rpcUrl2": "https://nd-466-934-107.p2pify.com/57c2043d910001c22c3f692f4251a151",
     "n": "RINKEBY",
     "netwiker": "ETH",
     "env_file": [
