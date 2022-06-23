@@ -330,7 +330,7 @@
   },
   "harmonytestnet": {
     "rpcUrl": "wss://ws.testnet.eywa.fi:17011",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17012",
+    "rpcUrl2": "https://api.s0.ps.hmny.io",
     "n": "HARMONYTESTNET",
     "netwiker": "HRM",
     "env_file": [
