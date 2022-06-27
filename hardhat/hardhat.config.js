@@ -28,6 +28,9 @@ const PRIVATE_KEY_ARBITRUMTESTNET   = process.env.PRIVATE_KEY_ARBITRUMTESTNET   
 const PRIVATE_KEY_ARBITRUM   = process.env.PRIVATE_KEY_ARBITRUM   || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_CRONOSTESTNET   = process.env.PRIVATE_KEY_CRONOSTESTNET   || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_CRONOS   = process.env.PRIVATE_KEY_CRONOS   || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_AURORATESTNET   = process.env.PRIVATE_KEY_AURORATESTNET   || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_AURORA  = process.env.PRIVATE_KEY_AURORA   || "0x0000000000000000000000000000000000000000";
+
 
 task("balanceDeployer", "Print info about balance deployer", async () => {
   const [deployer] = await ethers.getSigners();
@@ -116,6 +119,14 @@ module.exports = {
     cronostestnet:{
       url: networkConfig.cronostestnet.rpcUrl2,
       accounts: [PRIVATE_KEY_CRONOSTESTNET]
+    },
+    aurora:{
+      url: networkConfig.aurora.rpcUrl2,
+      accounts: [PRIVATE_KEY_AURORA]
+    },
+    auroratestnet:{
+      url: networkConfig.auroratestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_AURORATESTNET]
     },
     mumbai:{
         url: networkConfig.mumbai.rpcUrl2,
