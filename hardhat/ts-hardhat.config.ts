@@ -23,7 +23,8 @@ export default {
           runs: 200
         }
       }
-    }, {
+    },
+    {
       version: "0.7.6",
       settings: {
         optimizer: {
@@ -31,8 +32,18 @@ export default {
           runs: 200
         }
       }
-    }, {
+    },
+    {
       version: "0.8.2",
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200
+        }
+      }
+    },
+    {
+      version: "0.4.2",
       settings: {
         optimizer: {
           enabled: true,
