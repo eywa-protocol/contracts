@@ -28,8 +28,13 @@ contract('Router', () => {
             PortalB = artifacts.require('Portal')
             PortalC = artifacts.require('Portal')
 
-            factoryProvider = checkoutProvider({ 'typenet': 'devstand', 'net1': 'network1', 'net2': 'network2', 'net3': 'network3' })
-
+            prov = process.env.SET_TEST_ENVIROMENT === 'testnet' ? { 'typenet': 'teststand', 'net1': 'mumbai', 'net2': 'harmonytestnet', 'net3': 'bsctestnet' } : { 'typenet': 'devstand', 'net1': 'network1', 'net2': 'network2', 'net3': 'network3' }
+            factoryProvider = checkoutProvider(prov)
+            gasAmount = process.env.SET_TEST_ENVIROMENT === 'testnet' ? 300_000 : 1000_000
+            waitDuration = process.env.SET_TEST_ENVIROMENT === 'testnet' ? 65000 : 15000
+            net1 = prov['net1']
+            net2 = prov['net2']
+            net3 = prov['net3']
             totalSupply = ethers.constants.MaxUint256
 
             RouterA.setProvider(factoryProvider.web3Net1)
@@ -58,10 +63,9 @@ contract('Router', () => {
 
             tokenA1 = await ERC20A.at(deployInfo['network1'].localToken[0].address)
             tokenB1 = await ERC20B.at(deployInfo['network2'].localToken[0].address)
-            tokenC1 = await ERC20C.at(deployInfo['network3'].localToken[0].address)
+            tokenC1 = await ERC20C.at(tokenC1.address)
 
-            const testAmount = Math.floor((Math.random() * 100) + 1);
-            amount = ethers.utils.parseEther(testAmount + ".0")
+            amount = ethers.utils.parseEther("0." + Math.floor(Math.random() * 100))
 
             await tokenA1.mint(userNet1, amount, { from: userNet1, gas: 300_000 })
             await tokenB1.mint(userNet2, amount, { from: userNet2, gas: 300_000 })
@@ -78,11 +82,31 @@ contract('Router', () => {
             await routerA.setTrustedWorker(userNet1, { from: userNet1, gas: 300_000 })
             await routerB.setTrustedWorker(userNet2, { from: userNet2, gas: 300_000 })
             await routerC.setTrustedWorker(userNet3, { from: userNet3, gas: 300_000 })
+
+            if (process.env.SET_TEST_ENVIROMENT === 'testnet') {
+                signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_MUMBAI)
+                signerUserNet2 = new ethers.Wallet(process.env.PRIVATE_KEY_HARMONYTESTNET)
+                signerUserNet3 = new ethers.Wallet(process.env.PRIVATE_KEY_BSCTESTNET)
+            } else {
+                signerUserNet1 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK1)
+                signerUserNet2 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK2)
+                signerUserNet3 = new ethers.Wallet(process.env.PRIVATE_KEY_NETWORK3)
+            }
+
+            if (process.env.SET_TEST_ENVIROMENT === 'testnet') {
+                tokenA1 = await ERC20A.at(deployInfo[net1].token[1].address)
+                tokenB1 = await ERC20B.at(deployInfo[net2].token[1].address)
+                tokenC1 = await ERC20C.at(deployInfo[net3].token[1].address)
+            } else {
+                tokenA1 = await ERC20A.at(deployInfo[net1].localToken[0].address)
+                tokenB1 = await ERC20B.at(deployInfo[net2].localToken[0].address)
+                tokenC1 = await ERC20C.at(deployInfo[net3].localToken[0].address)
+            }
         })
 
         it("Synth Transfer (pay native): network1 -> network3", async function () {
-            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(deployInfo["network1"].localToken[0].address))
-            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(deployInfo["network1"].localToken[0].address))
+            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(tokenA1.address))
+            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(tokenA1.address))
             this.synthTokenC1 = await ERC20C.at(synthAddressC1)
             this.synthTokenB1 = await ERC20B.at(synthAddressB1)
             synthBalance = await this.synthTokenC1.balanceOf(userNet3)
@@ -155,8 +179,8 @@ contract('Router', () => {
         })
 
         it("Synth Transfer (pay native): network3 -> network1", async function () {
-            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(deployInfo["network3"].localToken[0].address))
-            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(deployInfo["network3"].localToken[0].address))
+            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(tokenC1.address))
+            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(tokenC1.address))
             this.synthTokenA1 = await ERC20A.at(synthAddressA1)
             this.synthTokenB1 = await ERC20B.at(synthAddressB1)
             synthBalance = await this.synthTokenA1.balanceOf(userNet1)
@@ -166,7 +190,7 @@ contract('Router', () => {
 
             //C->B
             await routerC.tokenSynthesizeRequest(
-                deployInfo['network3'].localToken[0].address,
+                tokenC1.address,
                 amount,
                 userNet2,
                 {
@@ -228,8 +252,8 @@ contract('Router', () => {
         })
 
         it("Synth Transfer (pay native): network3 -> network2", async function () {
-            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(deployInfo["network3"].localToken[0].address))
-            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(deployInfo["network3"].localToken[0].address))
+            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(tokenC1.address))
+            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(tokenC1.address))
             this.synthTokenA1 = await ERC20A.at(synthAddressA1)
             this.synthTokenB1 = await ERC20B.at(synthAddressB1)
             synthBalance = await this.synthTokenB1.balanceOf(userNet2)
@@ -239,7 +263,7 @@ contract('Router', () => {
 
             //C->A
             await routerC.tokenSynthesizeRequest(
-                deployInfo['network3'].localToken[0].address,
+                tokenC1.address,
                 amount,
                 userNet1,
                 {
@@ -302,8 +326,8 @@ contract('Router', () => {
 
         it("Synth Transfer (pay native): network1 -> network2", async function () {
 
-            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(deployInfo["network1"].localToken[0].address))
-            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(deployInfo["network1"].localToken[0].address))
+            const synthAddressB1 = await synthesisB.getRepresentation(addressToBytes32(tokenA1.address))
+            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(tokenA1.address))
             this.synthTokenB1 = await ERC20B.at(synthAddressB1)
             this.synthTokenC1 = await ERC20C.at(synthAddressC1)
             synthBalance = await this.synthTokenB1.balanceOf(userNet2)
@@ -375,8 +399,8 @@ contract('Router', () => {
         })
 
         it("Synth Transfer (pay native): network2 -> network1", async function () {
-            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(deployInfo["network2"].localToken[0].address))
-            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(deployInfo["network2"].localToken[0].address))
+            const synthAddressA1 = await synthesisA.getRepresentation(addressToBytes32(tokenB1.address))
+            const synthAddressC1 = await synthesisC.getRepresentation(addressToBytes32(tokenB1.address))
             this.synthTokenA1 = await ERC20A.at(synthAddressA1)
             this.synthTokenC1 = await ERC20C.at(synthAddressC1)
             synthBalance = await this.synthTokenA1.balanceOf(userNet1)
