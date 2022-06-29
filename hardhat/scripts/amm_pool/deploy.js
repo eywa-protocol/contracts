@@ -7,6 +7,29 @@ async function main() {
 
     const [deployer] = await ethers.getSigners();
     console.log("Owner:", deployer.address);
+    const UniswapV2Factory = await hre.ethers.getContractFactory("UniswapV2Factory");
+    const uniswapV2Factory = await UniswapV2Factory.deploy(deployer.address);
+    
+
+    await uniswapV2Factory.deployed();
+    networkConfig[network.name].uniswapV2Factory = uniswapV2Factory.address
+    console.log("UniswapV2Factory deployed to:", uniswapV2Factory.address);
+
+    const WETH = await hre.ethers.getContractFactory("WETH9");
+    const weth = await WETH.deploy();
+    await weth.deployed();
+    networkConfig[network.name].weth = weth.address
+    // const weth = await WETH.attach('');
+
+    console.log("WETH deployed to:", weth.address);
+
+    const UniswapV2Router02 = await hre.ethers.getContractFactory("UniswapV2Router02");
+    const uniswapV2Router02 = await UniswapV2Router02.deploy(uniswapV2Factory.address, weth.address);
+
+    await uniswapV2Router02.deployed();
+    networkConfig[network.name].uniswapV2Router02 = uniswapV2Router02.address
+    console.log("UniswapV2Router02 deployed to:", uniswapV2Router02.address);
+
 
     const _Portal = await ethers.getContractFactory("Portal")
     //const portal  = await _Portal.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
@@ -39,7 +62,8 @@ async function main() {
         networkConfig[network.name].portal,
         networkConfig[network.name].synthesis,
         networkConfig[network.name].bridge,
-    ], { initializer: 'initialize' });
+        uniswapV2Router02.address,
+    ], { initializer: 'initialize'});
     await curveProxy.deployed();
     console.log(`CurveProxy address: ${curveProxy.address}`);
     // initial Curve proxy setup
