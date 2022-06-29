@@ -606,6 +606,14 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     /**
+     * @dev Get real token address
+     * @param _stoken synthetic token address
+     */
+    function getRealTokenAddress(address _stoken) external view returns (bytes32) {
+        return representationReal[_stoken];
+    }
+
+    /**
      * @dev Get token representation list
      */
     function getListRepresentation() external view returns (bytes32[] memory, address[] memory) {

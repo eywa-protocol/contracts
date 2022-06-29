@@ -26,6 +26,11 @@ const PRIVATE_KEY_FANTOMTESTNET   = process.env.PRIVATE_KEY_FANTOMTESTNET   || "
 const PRIVATE_KEY_FANTOM   = process.env.PRIVATE_KEY_FANTOM   || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_ARBITRUMTESTNET   = process.env.PRIVATE_KEY_ARBITRUMTESTNET   || "0x0000000000000000000000000000000000000000";
 const PRIVATE_KEY_ARBITRUM   = process.env.PRIVATE_KEY_ARBITRUM   || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_CRONOSTESTNET   = process.env.PRIVATE_KEY_CRONOSTESTNET   || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_CRONOS   = process.env.PRIVATE_KEY_CRONOS   || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_AURORATESTNET   = process.env.PRIVATE_KEY_AURORATESTNET   || "0x0000000000000000000000000000000000000000";
+const PRIVATE_KEY_AURORA  = process.env.PRIVATE_KEY_AURORA   || "0x0000000000000000000000000000000000000000";
+
 
 task("balanceDeployer", "Print info about balance deployer", async () => {
   const [deployer] = await ethers.getSigners();
@@ -80,11 +85,11 @@ module.exports = {
       accounts: [PRIVATE_KEY_AVALANCHETESTNET]
     },
     ethereum: {
-      url: networkConfig.ethereum.rpcUrl.replace('ws','http').replace('ws/',''),
+      url: networkConfig.ethereum.rpcUrl2,
       accounts: [PRIVATE_KEY_ETHEREUM]
     },
     rinkeby: {
-      url: networkConfig.rinkeby.rpcUrl.replace('ws','http').replace('ws/',''),
+      url: networkConfig.rinkeby.rpcUrl2,
       accounts: [PRIVATE_KEY_RINKEBY]
     },
     bsctestnet: {
@@ -106,6 +111,22 @@ module.exports = {
     arbitrumtestnet:{
       url: networkConfig.arbitrumtestnet.rpcUrl2,
       accounts: [PRIVATE_KEY_ARBITRUMTESTNET]
+    },
+    cronos:{
+      url: networkConfig.cronos.rpcUrl2,
+      accounts: [PRIVATE_KEY_CRONOS]
+    },
+    cronostestnet:{
+      url: networkConfig.cronostestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_CRONOSTESTNET]
+    },
+    aurora:{
+      url: networkConfig.aurora.rpcUrl2,
+      accounts: [PRIVATE_KEY_AURORA]
+    },
+    auroratestnet:{
+      url: networkConfig.auroratestnet.rpcUrl2,
+      accounts: [PRIVATE_KEY_AURORATESTNET]
     },
     mumbai:{
         url: networkConfig.mumbai.rpcUrl2,

@@ -1,7 +1,7 @@
 {
   "harmony": {
-    "rpcUrl": "wss://ws.harmony.mainnet.eywa.fi",
-    "rpcUrl2": "https://harmony.mainnet.eywa.fi",
+    "rpcUrl": "wss://ws.s0.t.hmny.io",
+    "rpcUrl2": "https://api.s0.t.hmny.io",
     "n": "HARMONY",
     "netwiker": "HRM",
     "env_file": [
@@ -33,12 +33,13 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "ethereum",
-      "bsc",
-      "polygon",
-      "fantom",
-      "avalanche",
-      "arbitrum"
+      "bsctestnet",
+      "mumbai",
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -102,8 +103,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "polygon": {
-    "rpcUrl": "wss://ws-nd-658-849-590.p2pify.com/96ffbe1fc42be191fb68a40a94685a39",
-    "rpcUrl2": "https://nd-658-849-590.p2pify.com/96ffbe1fc42be191fb68a40a94685a39",
+    "rpcUrl": "wss://ws-nd-838-336-517.p2pify.com/f394184ce78404168d445c12afbd3896",
+    "rpcUrl2": "https://nd-838-336-517.p2pify.com/f394184ce78404168d445c12afbd3896",
     "n": "POLYGON",
     "netwiker": "POL",
     "env_file": [
@@ -153,8 +154,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "bsc": {
-    "rpcUrl": "wss://ws.bsc.mainnet.eywa.fi",
-    "rpcUrl2": "https://bsc.mainnet.eywa.fi",
+    "rpcUrl": "wss://ws-nd-194-110-264.p2pify.com/c2d2909bf0ba698c181f2f4fb841baea",
+    "rpcUrl2": "https://nd-194-110-264.p2pify.com/c2d2909bf0ba698c181f2f4fb841baea",
     "n": "BSC",
     "netwiker": "BSC",
     "env_file": [
@@ -288,12 +289,13 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "avalanchetestnet",
       "bsctestnet",
-      "fantomtestnet",
-      "harmonytestnet",
       "mumbai",
-      "rinkeby"
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "cronostestnet",
+      "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -390,12 +392,13 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "avalanchetestnet",
       "bsctestnet",
-      "arbitrumtestnet",
-      "harmonytestnet",
       "mumbai",
-      "rinkeby"
+      "avalanchetestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet",
+      "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -408,15 +411,15 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "harmonytestnet": {
-    "rpcUrl": "wss://ws.testnet.eywa.fi:17011",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17014",
+    "rpcUrl": "wss://ws.s0.ps.hmny.io",
+    "rpcUrl2": "https://api.s0.ps.hmny.io/",
     "n": "HARMONYTESTNET",
     "netwiker": "HRM",
     "env_file": [
       "networks_env/env_connect_to_harmonytestnet.env",
       "networks_env/env_test_for_harmonytestnet.env"
     ],
-    "chainId": 1666700000,
+    "chainId": 1666900000,
     "relayHub":  "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
@@ -613,7 +616,12 @@
     },
     "sourceForRepresentation": [
       "mumbai",
-      "harmonytestnet"
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet",
+      "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -627,7 +635,7 @@
   },
   "avalanchetestnet": {
     "rpcUrl": "wss://ws.testnet.eywa.fi:17003/ext/bc/C/ws",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17004",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17004/ext/bc/C/rpc",
     "n": "AVALANCHETESTNET",
     "netwiker": "AVCH",
     "env_file": [
@@ -649,7 +657,7 @@
         "name": "USDT",
         "symbol": "USDT"
       }
-    ],      
+    ],
     "crosschainPool": [],
     "hubPool": {
       "address": "",
@@ -671,11 +679,12 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
-      "harmonytestnet",
-      "arbitrumtestnet",
-      "fantomtestnet",
       "mumbai",
-      "rinkeby"
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet",
+      "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -722,11 +731,12 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
-      "harmonytestnet",
-      "arbitrumtestnet",
-      "fantomtestnet",
       "mumbai",
-      "avalanchetestnet"
+      "avalanchetestnet",
+      "fantomtestnet",
+      "arbitrumtestnet",
+      "cronostestnet",
+      "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -846,7 +856,12 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
-      "harmonytestnet"
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet",
+      "harmony"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -1140,6 +1155,211 @@
           "network1",
           "network2",
           "network3"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+  "cronostestnet": {
+    "rpcUrl": "https://cronos-testnet-3.crypto.org:8545",
+    "rpcUrl2": "https://cronos-testnet-3.crypto.org:8545",
+    "n": "CRONOSTESTNET",
+    "netwiker": "TCRO",
+    "env_file": [
+      "networks_env/env_connect_to_cronostestnet.env",
+      "networks_env/env_test_for_cronostestnet.env"
+    ],
+    "chainId": 338,
+    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":"",
+      "treasury":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "mumbai",
+      "bsctestnet",
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "harmony"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+  "cronos": {
+    "rpcUrl": "https://evm.cronos.org",
+    "rpcUrl2": "https://evm.cronos.org",
+    "n": "CRONOS",
+    "netwiker": "CRO",
+    "env_file": [
+      "networks_env/env_connect_to_cronos.env",
+      "networks_env/env_test_for_cronos.env"
+    ],
+    "chainId": 25,
+    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":"",
+      "treasury":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "rinkeby",
+      "mumbai",
+      "hecotestnet",
+      "avalanchetestnet",
+      "metistestnet",
+      "bsctestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+  "aurora": {
+    "rpcUrl": "https://mainnet.aurora.dev",
+    "rpcUrl2": "https://mainnet.aurora.dev",
+    "n": "AURORA",
+    "netwiker": "ETH",
+    "env_file": [
+      "networks_env/env_connect_to_aurora.env",
+      "networks_env/env_test_for_aurora.env"
+    ],
+    "chainId": 1313161554,
+    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":"",
+      "treasury":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "rinkeby",
+      "mumbai",
+      "hecotestnet",
+      "avalanchetestnet",
+      "metistestnet",
+      "bsctestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+  "auroratestnet": {
+    "rpcUrl": "https://testnet.aurora.dev/",
+    "rpcUrl2": "https://testnet.aurora.dev/",
+    "n": "AURORATESTNET",
+    "netwiker": "ETH",
+    "env_file": [
+      "networks_env/env_connect_to_auroratestnet.env",
+      "networks_env/env_test_for_auroratestnet.env"
+    ],
+    "chainId": 1313161555,
+    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa":"",
+      "votingEscrow":"",
+      "gaugeController":"",
+      "minter":"",
+      "treasury":""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "rinkeby",
+      "mumbai",
+      "hecotestnet",
+      "avalanchetestnet",
+      "metistestnet",
+      "bsctestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
