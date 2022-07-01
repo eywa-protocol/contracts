@@ -256,8 +256,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "arbitrumtestnet": {
-    "rpcUrl": "https://rinkeby.arbitrum.io/rpc",
-    "rpcUrl2": "https://rinkeby.arbitrum.io/rpc",
+    "rpcUrl": "wss://ws.testnet.eywa.fi:17015",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17016",
     "n": "ARBITRUMTESTNET",
     "netwiker": "AETH",
     "env_file": [
@@ -295,7 +295,7 @@
       "fantomtestnet",
       "rinkeby",
       "cronostestnet",
-      "harmony"
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -359,8 +359,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
    "fantomtestnet": {
-    "rpcUrl": "https://rpc.testnet.fantom.network/",
-    "rpcUrl2": "https://rpc.testnet.fantom.network/",
+    "rpcUrl": "https://rpc.testnet.fantom.network",
+    "rpcUrl2": "https://rpc.testnet.fantom.network",
     "n": "FANTOMTESTNET",
     "netwiker": "FTM",
     "env_file": [
@@ -398,7 +398,7 @@
       "rinkeby",
       "arbitrumtestnet",
       "cronostestnet",
-      "harmony"
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -502,12 +502,15 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "rinkeby",
+      "bsctestnet",
       "mumbai",
-      "hecotestnet",
       "avalanchetestnet",
-      "metistestnet",
-      "bsctestnet"
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet"
+
+
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -621,7 +624,7 @@
       "rinkeby",
       "arbitrumtestnet",
       "cronostestnet",
-      "harmony"
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -684,7 +687,7 @@
       "rinkeby",
       "arbitrumtestnet",
       "cronostestnet",
-      "harmony"
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -736,7 +739,7 @@
       "fantomtestnet",
       "arbitrumtestnet",
       "cronostestnet",
-      "harmony"
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -861,7 +864,7 @@
       "rinkeby",
       "arbitrumtestnet",
       "cronostestnet",
-      "harmony"
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -1206,7 +1209,7 @@
       "fantomtestnet",
       "rinkeby",
       "arbitrumtestnet",
-      "harmony"
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
