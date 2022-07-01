@@ -21,6 +21,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     mapping(bytes32 => SynthesizeState) public synthesizeStates;
     address public bridge;
     address public proxy;
+    address public proxyV2;
     string public versionRecipient;
     uint256 public thisChainId;
 
@@ -88,7 +89,7 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
     }
 
     modifier onlyTrusted() {
-        require(bridge == msg.sender || proxy == msg.sender, "Synthesis: only trusted contract");
+        require(bridge == msg.sender || proxy == msg.sender || proxyV2 == msg.sender, "Synthesis: only trusted contract");
         _;
     }
 
@@ -631,6 +632,14 @@ contract Synthesis is RelayRecipient, SolanaSerialize, Typecast {
      */
     function setCurveProxy(address _proxy) external onlyOwner {
         proxy = _proxy;
+    }
+
+    /**
+     * @dev Set new CurveProxyV2 address
+     * @param _proxyV2 new contract address
+     */
+    function setCurveProxyV2(address _proxyV2) external onlyOwner {
+        proxyV2 = _proxyV2;
     }
 
     /**

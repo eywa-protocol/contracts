@@ -39,6 +39,13 @@ interface ICurveProxy {
         address to;
     }
 
+    struct SwapExactTokensParams {
+        uint amountOutMin;
+        address[] path;
+        address to;
+        uint deadline;
+    }
+
     struct MetaExchangeParams {
         //pool address
         address add;
@@ -91,5 +98,14 @@ interface ICurveProxy {
         address receiveSide,
         address oppositeBridge,
         uint256 chainId
+    ) external;
+
+    function transitSynthBatchAddLiquidity3PoolMintEUSDSwap(
+        MetaMintEUSD calldata _params,
+        EmergencyUnsynthParams calldata _emergencyParams,
+        address[3] calldata _synthToken,
+        uint256[3] calldata _synthAmount,
+        bytes32[3] calldata _txId,
+        SwapExactTokensParams calldata _swapParams
     ) external;
 }

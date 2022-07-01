@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity =0.5.16;
+import "hardhat/console.sol";
 
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
@@ -474,6 +475,7 @@ contract UniswapV2Factory is IUniswapV2Factory {
         getPair[token1][token0] = pair; // populate mapping in the reverse direction
         allPairs.push(pair);
         emit PairCreated(token0, token1, pair, allPairs.length);
+        console.log(pair);
     }
 
     function setFeeTo(address _feeTo) external {

@@ -1,5 +1,5 @@
 pragma solidity =0.6.6;
-
+import "hardhat/console.sol";
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
@@ -288,6 +288,7 @@ library UniswapV2Library {
     // fetches and sorts the reserves for a pair
     function getReserves(address factory, address tokenA, address tokenB) internal view returns (uint reserveA, uint reserveB) {
         (address token0,) = sortTokens(tokenA, tokenB);
+        console.log(pairFor(factory, tokenA, tokenB));
         (uint reserve0, uint reserve1,) = IUniswapV2Pair(pairFor(factory, tokenA, tokenB)).getReserves();
         (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
     }
@@ -423,10 +424,10 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         uint deadline
     ) external virtual override ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
         (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
-        address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
-        TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
-        TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
-        liquidity = IUniswapV2Pair(pair).mint(to);
+        // address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
+        // TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
+        // TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
+        // liquidity = IUniswapV2Pair(pair).mint(to);
     }
     function addLiquidityETH(
         address token,

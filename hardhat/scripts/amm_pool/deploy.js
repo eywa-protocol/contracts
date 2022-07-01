@@ -62,7 +62,6 @@ async function main() {
         networkConfig[network.name].portal,
         networkConfig[network.name].synthesis,
         networkConfig[network.name].bridge,
-        uniswapV2Router02.address,
     ], { initializer: 'initialize'});
     await curveProxy.deployed();
     console.log(`CurveProxy address: ${curveProxy.address}`);
@@ -70,16 +69,30 @@ async function main() {
     const setCurve = await synthesis.setCurveProxy(curveProxy.address);
     await setCurve.wait();
 
-
+    // deploy Curve Proxy V2
+    const CurveProxyV2 = await ethers.getContractFactory('CurveProxyV2');
+    const curveProxyV2 = await upgrades.deployProxy(CurveProxyV2, [
+        networkConfig[network.name].forwarder,
+        networkConfig[network.name].portal,
+        networkConfig[network.name].synthesis,
+        networkConfig[network.name].bridge,
+        uniswapV2Router02.address,
+    ], { initializer: 'initialize'});
+    await curveProxyV2.deployed();
+    console.log(`CurveProxyV2 address: ${curveProxyV2.address}`);
+    // initial Curve proxy V2 setup
+    const setCurveV2 = await synthesis.setCurveProxyV2(curveProxyV2.address);
+    await setCurveV2.wait();
 
     //Deploy Router
     const _Router = await ethers.getContractFactory("Router");
-    const router = await _Router.deploy(portal.address, synthesis.address, curveProxy.address, networkConfig[network.name].chainId);
+    const router = await _Router.deploy(portal.address, synthesis.address, curveProxy.address, curveProxyV2.address, networkConfig[network.name].chainId);
     await router.deployed();
     console.log(`Router address: ${router.address}`);
 
     
     networkConfig[network.name].curveProxy = curveProxy.address;
+    networkConfig[network.name].curveProxyV2 = curveProxyV2.address;
     networkConfig[network.name].router = router.address;
 
     fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
