@@ -1,4 +1,5 @@
 pragma solidity =0.6.6;
+import "hardhat/console.sol";
 
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
@@ -281,13 +282,14 @@ library UniswapV2Library {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(token0, token1)),
-                '0xeedaddec724a209dcd26cbd89d40f3ee5be9a232f6fb78e2b0841dc76d318673' // init code hash
+                '0xfa96bd108d9b631584c6fedbbb27c86e24ed4e4b0ea17b8321d59f238fef9b7b' // init code hash
             ))));
     }
 
     // fetches and sorts the reserves for a pair
     function getReserves(address factory, address tokenA, address tokenB) internal view returns (uint reserveA, uint reserveB) {
         (address token0,) = sortTokens(tokenA, tokenB);
+        console.logAddress(pairFor(factory, tokenA, tokenB));
         (uint reserve0, uint reserve1,) = IUniswapV2Pair(pairFor(factory, tokenA, tokenB)).getReserves();
         (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
     }
@@ -397,20 +399,20 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             IUniswapV2Factory(factory).createPair(tokenA, tokenB);
         }
         (uint reserveA, uint reserveB) = UniswapV2Library.getReserves(factory, tokenA, tokenB);
-        if (reserveA == 0 && reserveB == 0) {
-            (amountA, amountB) = (amountADesired, amountBDesired);
-        } else {
-            uint amountBOptimal = UniswapV2Library.quote(amountADesired, reserveA, reserveB);
-            if (amountBOptimal <= amountBDesired) {
-                require(amountBOptimal >= amountBMin, 'UniswapV2Router: INSUFFICIENT_B_AMOUNT');
-                (amountA, amountB) = (amountADesired, amountBOptimal);
-            } else {
-                uint amountAOptimal = UniswapV2Library.quote(amountBDesired, reserveB, reserveA);
-                assert(amountAOptimal <= amountADesired);
-                require(amountAOptimal >= amountAMin, 'UniswapV2Router: INSUFFICIENT_A_AMOUNT');
-                (amountA, amountB) = (amountAOptimal, amountBDesired);
-            }
-        }
+        // if (reserveA == 0 && reserveB == 0) {
+        //     (amountA, amountB) = (amountADesired, amountBDesired);
+        // } else {
+        //     uint amountBOptimal = UniswapV2Library.quote(amountADesired, reserveA, reserveB);
+        //     if (amountBOptimal <= amountBDesired) {
+        //         require(amountBOptimal >= amountBMin, 'UniswapV2Router: INSUFFICIENT_B_AMOUNT');
+        //         (amountA, amountB) = (amountADesired, amountBOptimal);
+        //     } else {
+        //         uint amountAOptimal = UniswapV2Library.quote(amountBDesired, reserveB, reserveA);
+        //         assert(amountAOptimal <= amountADesired);
+        //         require(amountAOptimal >= amountAMin, 'UniswapV2Router: INSUFFICIENT_A_AMOUNT');
+        //         (amountA, amountB) = (amountAOptimal, amountBDesired);
+        //     }
+        // }
     }
     function addLiquidity(
         address tokenA,
@@ -423,10 +425,10 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         uint deadline
     ) external virtual override ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
         (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
-        address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
-        TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
-        TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
-        liquidity = IUniswapV2Pair(pair).mint(to);
+        // address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
+        // TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
+        // TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
+        // liquidity = IUniswapV2Pair(pair).mint(to);
     }
     function addLiquidityETH(
         address token,

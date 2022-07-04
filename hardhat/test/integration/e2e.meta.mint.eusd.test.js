@@ -72,8 +72,8 @@ contract('CurveProxy', () => {
             console.log(await factoryB.INIT_CODE_PAIR_HASH())
             await factoryB.createPair(deployInfo["network1"].token[1].address,deployInfo["network1"].token[0].address,{ from: userNet2, gas: 1000_000 })
 
-            EUSD.approve(uniswapB.address,ethers.constants.MaxUint256,{ from: userNet2, gas: 1000_000 })
-            EYWA.approve(uniswapB.address,ethers.constants.MaxUint256,{ from: userNet2, gas: 1000_000 })
+            await EUSD.approve(uniswapB.address,ethers.constants.MaxUint256,{ from: userNet2, gas: 1000_000 })
+            await EYWA.approve(uniswapB.address,ethers.constants.MaxUint256,{ from: userNet2, gas: 1000_000 })
 
             await uniswapB.addLiquidity(
                 deployInfo["network2"].hubPool.lp,
