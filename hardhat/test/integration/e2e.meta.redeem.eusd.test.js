@@ -84,20 +84,11 @@ contract('CurveProxy', () => {
                 to: userNet1
             }
 
-            //unused in this case
-            const permitParams = {
-                v: 0,
-                r: ethers.constants.HashZero,
-                s: ethers.constants.HashZero,
-                deadline: 0,
-                approveMax: false
-            }
 
             await this.EUSD.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
             await this.routerB.redeemEusdRequest(
                 redeemEUSDParams,
-                permitParams,
                 this.EUSD.address,
                 unsynthParams.receiveSide,
                 unsynthParams.oppositeBridge,
@@ -141,20 +132,10 @@ contract('CurveProxy', () => {
                 to: userNet3
             }
 
-            //unused in this case
-            const permitParams = {
-                v: 0,
-                r: ethers.constants.HashZero,
-                s: ethers.constants.HashZero,
-                deadline: 0,
-                approveMax: false
-            }
-
             await this.EUSD.approve(this.routerB.address, totalSupply, { from: userNet2, gas: 300_000 });
 
             await this.routerB.redeemEusdRequest(
                 redeemEUSDParams,
-                permitParams,
                 this.EUSD.address,
                 unsynthParams.receiveSide,
                 unsynthParams.oppositeBridge,
@@ -184,15 +165,6 @@ contract('CurveProxy', () => {
                 chainId: 0
             }
 
-            //unused in this case
-            const permitParams = {
-                v: 0,
-                r: ethers.constants.HashZero,
-                s: ethers.constants.HashZero,
-                deadline: 0,
-                approveMax: false
-            }
-
             const redeemEUSDParams = {
                 removeAtCrosschainPool: deployInfo["network2"].localPool.address,
                 x: 2,
@@ -211,7 +183,6 @@ contract('CurveProxy', () => {
 
             await this.routerB.redeemEusdRequest(
                 redeemEUSDParams,
-                permitParams,
                 this.EUSD.address,
                 unsynthParams.receiveSide,
                 unsynthParams.oppositeBridge,

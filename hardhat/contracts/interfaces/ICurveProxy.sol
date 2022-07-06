@@ -87,7 +87,6 @@ interface ICurveProxy {
 
     function redeemEUSD(
         MetaRedeemEUSD calldata params,
-        PermitData calldata permit,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId
