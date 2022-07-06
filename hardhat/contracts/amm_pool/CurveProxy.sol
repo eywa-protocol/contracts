@@ -718,34 +718,18 @@ contract CurveProxy is Initializable, RelayRecipient {
     /**
      * @dev Redeem EUSD with unsynth operation (hub chain execution only)
      * @param _params meta redeem EUSD params
-     * @param _permit permit params
      * @param _receiveSide calldata recipient address for unsynth operation
      * @param _oppositeBridge opposite bridge contract address
      * @param _chainId opposite chain ID
      */
     function redeemEUSD(
         MetaRedeemEUSD calldata _params,
-        PermitData calldata _permit,
         address _receiveSide,
         address _oppositeBridge,
         uint256 _chainId
     ) external {
         {
             address hubLpToken = lpToken[_params.removeAtHubPool];
-
-            //process permit operation if mentioned
-            if (_permit.v != 0) {
-                uint256 approveValue = _permit.approveMax ? uint256(2**256 - 1) : _params.tokenAmountH;
-                IERC20WithPermit(hubLpToken).permit(
-                    _msgSender(),
-                    address(this),
-                    approveValue,
-                    _permit.deadline,
-                    _permit.v,
-                    _permit.r,
-                    _permit.s
-                );
-            }
 
             //hub pool remove_liquidity_one_coin stage
             // IERC20Upgradeable(hubLpToken).safeTransferFrom(_msgSender(), address(this), _params.tokenAmountH);

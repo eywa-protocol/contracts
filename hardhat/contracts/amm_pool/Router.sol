@@ -488,7 +488,6 @@ contract Router is EIP712, Ownable {
     /**
      * @dev Direct local EUSD redeem request with unsynth operation (hub chain execution only).
      * @param params meta redeem EUSD params
-     * @param permit permit params
      * @param payToken pay token
      * @param receiveSide recipient address for unsynth operation
      * @param oppositeBridge opposite bridge contract address
@@ -496,14 +495,43 @@ contract Router is EIP712, Ownable {
      */
     function redeemEusdRequest(
         ICurveProxy.MetaRedeemEUSD calldata params,
-        ICurveProxy.PermitData calldata permit,
         address payToken,
         address receiveSide,
         address oppositeBridge,
         uint256 chainId
     ) external {
         SafeERC20.safeTransferFrom(IERC20(payToken), msg.sender, _curveProxy, params.tokenAmountH);
-        ICurveProxy(_curveProxy).redeemEUSD(params, permit, receiveSide, oppositeBridge, chainId);
+        ICurveProxy(_curveProxy).redeemEUSD(params, receiveSide, oppositeBridge, chainId);
+    }
+
+     /**
+     * @dev Direct local EUSD redeem request with unsynth operation (hub chain execution only) with permit.
+     * @param params meta redeem EUSD params
+     * @param permit permit params
+     * @param payToken pay token
+     * @param receiveSide recipient address for unsynth operation
+     * @param oppositeBridge opposite bridge contract address
+     * @param chainId opposite chain ID
+     */
+    function redeemEusdRequestWithPermit(
+        ICurveProxy.MetaRedeemEUSD calldata params,
+        ICurveProxy.PermitData calldata permit,
+        address payToken,
+        address receiveSide,
+        address oppositeBridge,
+        uint256 chainId
+    ) external {
+        IERC20WithPermit(payToken).permit(
+            msg.sender,
+            address(this),
+            permit.approveMax ? uint256(2**256 - 1) : params.tokenAmountH,
+            permit.deadline,
+            permit.v,
+            permit.r,
+            permit.s
+        );
+        SafeERC20.safeTransferFrom(IERC20(payToken), msg.sender, _curveProxy, params.tokenAmountH);
+        ICurveProxy(_curveProxy).redeemEUSD(params, receiveSide, oppositeBridge, chainId);
     }
 
     //==============================SYNTHESIS==============================
