@@ -20,7 +20,8 @@ interface IVestingPolicy {
      */
     function permittedForClaim(address) external view returns (uint256);
 
-    /**
+
+     /**
      * @dev Decrease permitted amount of tokens to claim
      * for this address.
      *
@@ -33,43 +34,48 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     using Counters for Counters.Counter;
 
     // Relative timestamp to use transfer/transferFrom without permission
-    uint256 public permissionlessTimeStamp;
+    uint256 public permissionlessTimeStamp; 
 
-    // Absolute timestamp of vesting period start
+    // Absolute timestamp of vesting period start 
     uint256 public started;
 
     // Token which is vested on this contract
     IERC20 public immutable eywaToken;
 
-    struct cliffData {
-        // Relative timestamp first cliff duration
-        uint256 cliffDuration1;
+    struct cliffData{
+        // Relative timestamp first cliff duration    
+        uint256 cliffDuration1; 
+
         // Claimable number of tokens after first cliff period
-        uint256 cliffAmount1;
-        // Relative timestamp second cliff duration
-        uint256 cliffDuration2;
+        uint256 cliffAmount1; 
+
+        // Relative timestamp second cliff duration    
+        uint256 cliffDuration2; 
+
         // Claimable number of tokens after second cliff period
-        uint256 cliffAmount2;
-        // Relative timestamp third cliff duration
-        uint256 cliffDuration3;
+        uint256 cliffAmount2; 
+
+        // Relative timestamp third cliff duration    
+        uint256 cliffDuration3; 
+
         // Claimable number of tokens after third cliff period
-        uint256 cliffAmount3;
+        uint256 cliffAmount3; 
     }
 
     cliffData public cliffs;
 
     // Duration of one linear or discrete step
-    uint256 public stepDuration;
+    uint256 public stepDuration; 
 
     // Number linear or discrete steps
-    uint256 public numOfSteps;
+    uint256 public numOfSteps; 
 
     // Relative timestamp to claim without permission
     uint256 claimWithAllowanceTimeStamp;
 
     // Contract which gives permission to claim before claimWithAllowanceTimeStamp
     IVestingPolicy public claimAllowanceContract;
-
+    
     /**
      * The number of claimed tokens in ``address``'s account.
      * Note: it doesn't necessary represent how much ``address`` claimed
@@ -88,7 +94,7 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     mapping(address => uint256) public unburnBalanceOf;
 
     /**
-     * The number of tokens allowed for transfer/transferFrom
+     * The number of tokens allowed for transfer/transferFrom 
      * from ``address``'s account to another ``address``'s account.
      * Note: It uses address(0) for permission for staking to staking contract
      * or to unstake from it.
@@ -100,6 +106,7 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
      */
     event ReleasedAfterClaim(address indexed from, uint256 indexed amount);
 
+
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` of the token
      * and also sets eywa token's address.
@@ -109,10 +116,10 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev Initializes main parameters for vesting period
+     * @dev Initializes main parameters for vesting period 
      * @param _claimAllowanceContract - address of contract which gives permission to claim before claimWithAllowanceTimeStamp
      * @param _claimWithAllowanceTimeStamp - relative timestamp to claim without permission
-     * @param _started - absolute timestamp of vesting period start
+     * @param _started - absolute timestamp of vesting period start 
      * @param _cliffs - data of three cliffs
      * @param _stepDuration - duration of one linear or discrete step
      * @param _allStepsDuration - duration of all linear or discrete steps
@@ -176,7 +183,7 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev Returns permitted by vesting policy contract amount to claim
+     * @dev Returns permitted by vesting policy contract amount to claim 
      * @param tokenOwner - token owner
      *
      */
@@ -185,7 +192,7 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev Returns permitted amount to transfer
+     * @dev Returns permitted amount to transfer 
      * @param from - sender address
      * @param to - recepient address
      *
@@ -240,12 +247,26 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         if (claimable(time) >= vEywaInitialSupply) {
             return balanceOf(tokenOwner);
         }
-        if ((claimable(time) * unburnBalanceOf[tokenOwner]) / vEywaInitialSupply >= claimed[tokenOwner]) {
-            return ((claimable(time) * unburnBalanceOf[tokenOwner]) / vEywaInitialSupply) - claimed[tokenOwner];
+        if (claimable(time) * unburnBalanceOf[tokenOwner] / vEywaInitialSupply >= claimed[tokenOwner]) {
+            return (claimable(time) * unburnBalanceOf[tokenOwner] / vEywaInitialSupply) - claimed[tokenOwner];
         } else {
             return 0;
         }
     }
+
+    /**
+     * @dev Returns number of token available to claim after first cliff for address who owns
+     * 'ownedTokens' tokens number.
+     * @param ownedTokens - number of tokens
+     *
+     */
+    function availableAfterFirstCliff(uint256 ownedTokens) public view returns (uint256) {
+        if (ownedTokens == 0) {
+            return 0;
+        }
+        return (claimable(started + cliffs.cliffDuration1) * ownedTokens / vEywaInitialSupply);
+    }
+
 
     /**
      * @dev Updates claimed and unburnBalanceOf mappings for math calculation next available amount of tokens
@@ -260,7 +281,7 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         address recipient,
         uint256 amount
     ) private {
-        uint256 claimedNumberTransfer = (claimed[sender] * amount) / unburnBalanceOf[sender];
+        uint256 claimedNumberTransfer = claimed[sender] * amount / unburnBalanceOf[sender];
         uint256 remainderIncrease;
         if ((claimed[sender] * amount) % unburnBalanceOf[sender] > 0) {
             remainderIncrease = 1;
@@ -285,23 +306,19 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         uint256 cliffSum;
         if (time < started + cliffs.cliffDuration1) {
             return 0;
-        }
-        if (time >= started + cliffs.cliffDuration1) {
+        } 
+        if (time >= started + cliffs.cliffDuration1){
             cliffSum = cliffSum + cliffs.cliffAmount1;
-            if (time >= started + cliffs.cliffDuration1 + cliffs.cliffDuration2) {
+            if (time >= started + cliffs.cliffDuration1 + cliffs.cliffDuration2){
                 cliffSum = cliffSum + cliffs.cliffAmount2;
-                if (time >= started + cliffs.cliffDuration1 + cliffs.cliffDuration2 + cliffs.cliffDuration3) {
+                if (time >= started + cliffs.cliffDuration1 + cliffs.cliffDuration2 + cliffs.cliffDuration3){
                     cliffSum = cliffSum + cliffs.cliffAmount3;
-                    uint256 passedSinceCliff = time -
-                        (started + cliffs.cliffDuration1 + cliffs.cliffDuration2 + cliffs.cliffDuration3);
+                    uint256 passedSinceCliff = time - (started + cliffs.cliffDuration1 + cliffs.cliffDuration2 + cliffs.cliffDuration3);
                     uint256 stepsPassed = Math.min(numOfSteps, passedSinceCliff / stepDuration);
                     if (stepsPassed >= numOfSteps) {
                         return vEywaInitialSupply;
                     }
-                    return
-                        cliffSum +
-                        (((vEywaInitialSupply - cliffs.cliffAmount1 - cliffs.cliffAmount2 - cliffs.cliffAmount3) *
-                            stepsPassed) / numOfSteps);
+                    return cliffSum + ((vEywaInitialSupply - cliffs.cliffAmount1 - cliffs.cliffAmount2 - cliffs.cliffAmount3) * stepsPassed / numOfSteps);
                 }
             }
         }
@@ -339,13 +356,10 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         require(started <= block.timestamp, "It is not started time yet");
         bool result;
         if (block.timestamp < started + permissionlessTimeStamp) {
-            uint256 maxStakinPermission = Math.max(
-                transferPermission[msg.sender][address(0)],
-                transferPermission[address(0)][recipient]
-            );
+            uint256 maxStakinPermission = Math.max(transferPermission[msg.sender][address(0)], transferPermission[address(0)][recipient]);
             uint256 permissionAmount = Math.max(transferPermission[msg.sender][recipient], maxStakinPermission);
             require(amount <= permissionAmount, "This early transfer doesn't have permission");
-            if (transferPermission[msg.sender][recipient] > maxStakinPermission) {
+            if (transferPermission[msg.sender][recipient] > maxStakinPermission){
                 transferPermission[msg.sender][recipient] = transferPermission[msg.sender][recipient] - amount;
             }
             updateUnburnBalanceAndClaimed(msg.sender, recipient, amount);
@@ -366,13 +380,10 @@ contract EywaVesting is ERC20, ReentrancyGuard, Ownable {
         require(started <= block.timestamp, "It is not started time yet");
         bool result;
         if (block.timestamp < started + permissionlessTimeStamp) {
-            uint256 maxStakinPermission = Math.max(
-                transferPermission[sender][address(0)],
-                transferPermission[address(0)][recipient]
-            );
+            uint256 maxStakinPermission = Math.max(transferPermission[sender][address(0)], transferPermission[address(0)][recipient]);
             uint256 permissionAmount = Math.max(transferPermission[sender][recipient], maxStakinPermission);
             require(amount <= permissionAmount, "This early transfer doesn't have permission");
-            if (transferPermission[sender][recipient] > maxStakinPermission) {
+            if (transferPermission[sender][recipient] > maxStakinPermission){
                 transferPermission[sender][recipient] = transferPermission[sender][recipient] - amount;
             }
             updateUnburnBalanceAndClaimed(sender, recipient, amount);
