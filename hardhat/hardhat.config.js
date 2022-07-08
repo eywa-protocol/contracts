@@ -136,8 +136,8 @@ module.exports = {
       accounts: [process.env.PRIVATE_KEY_NETWORK3]
     },
     ganache: {
-      url: networkConfig.ganache.rpcUrl,
-      accounts: [PRIVATE_KEY_GANACHE]
+      url: "http://127.0.0.1:9495",
+      accounts: ["0xabf89f3edf4168c9b0821e56943fde2ceacb4c5cadcbd80987b8f95fc8062fa6"]
     },
     hecotestnet:{
       url: networkConfig.hecotestnet.rpcUrl.split('ws').join('http'),
