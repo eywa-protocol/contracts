@@ -15,6 +15,7 @@ contract Router is EIP712, Ownable {
     using Counters for Counters.Counter;
 
     address _curveProxy;
+    address _curveProxyV2;
     address _portal;
     address _synthesis;
 
@@ -42,14 +43,17 @@ contract Router is EIP712, Ownable {
         address portal,
         address synthesis,
         address curveProxy,
+        address curveProxyV2,
         uint256 chainID
     ) EIP712("EYWA", "1", chainID) {
         require(portal != address(0), "Router: portal zero address");
         require(synthesis != address(0), "Router: synthesis zero address");
         require(curveProxy != address(0), "Router: curveProxy zero address");
+        require(curveProxyV2 != address(0), "Router: curveProxyV2 zero address");
         _portal = portal;
         _synthesis = synthesis;
         _curveProxy = curveProxy;
+        _curveProxyV2 = curveProxyV2;
     }
 
     function setTrustedWorker(address worker) public onlyOwner {
@@ -344,6 +348,29 @@ contract Router is EIP712, Ownable {
             unsynthParams
         );
     }
+
+    // function synthBatchAddLiquidity3PoolMintEUSDSwapRequest(
+    //     address[3] memory token,
+    //     uint256[3] memory amount,
+    //     address from,
+    //     IPortal.SynthParams memory synthParams,
+    //     ICurveProxy.MetaMintEUSD memory metaParams,
+    //     ICurveProxy.EmergencyUnsynthParams memory unsynthParams
+    // ) external {
+    //     for (uint256 i = 0; i < token.length; i++) {
+    //         if (amount[i] > 0) {
+    //             SafeERC20.safeTransferFrom(IERC20(token[i]), msg.sender, _portal, amount[i]);
+    //         }
+    //     }
+    //     IPortal(_portal).synthBatchAddLiquidity3PoolMintEUSDSwap(
+    //         token,
+    //         amount,
+    //         from,
+    //         synthParams,
+    //         metaParams,
+    //         unsynthParams
+    //     );
+    // }
 
     function synthBatchMetaExchangeRequest(
         address[3] memory token,

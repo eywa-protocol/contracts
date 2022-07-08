@@ -1,6 +1,9 @@
 pragma solidity =0.6.6;
 import "hardhat/console.sol";
+<<<<<<< HEAD
 
+=======
+>>>>>>> fe7ee18ebac16835d313549727ff9c860324aa62
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
