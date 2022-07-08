@@ -15,7 +15,7 @@ async function main() {
     // let chainId = networkConfig[network.name].chainId
     // let eywa = networkConfig[network.name].eywa
 
-    const EYWA = await ethers.getContractFactory("SyntERC20");
+    // const EYWA = await ethers.getContractFactory("SyntERC20");
     // const eywaToken = await EYWA.attach("0xF0AA41A080109BBAF5cB7Dc3434FB20b2Cf2D014");
 
     // const Synthesis = await ethers.getContractFactory("Synthesis");
@@ -84,11 +84,19 @@ async function main() {
 
     console.log("UniswapV2Router02 deployed to:", uniswapV2Router02.address);
 
-    const EUSD = await EYWA.attach(networkConfig["network2"].hubPool.lp)
-    const EYWAt = await EYWA.attach(networkConfig["network2"].token[0].address)
+    const eusd = await hre.ethers.getContractFactory("ERC20Mock");
+    const EUSD = await eusd.deploy("EUSD","EUSD");
+    await EUSD.deployed();
+    console.log("EUSD deployed to:", EUSD.address);
+    const eywa = await hre.ethers.getContractFactory("ERC20Mock");
+    const EYWA = await eywa.deploy("EYWA","EYWA");
+    await EYWA.deployed();
+    console.log("EYWA deployed to:", EYWA.address);
 
-    await EUSD.approve(uniswapV2Router02.address,ethers.constants.MaxUint256)
-    await EYWAt.approve(uniswapV2Router02.address,ethers.constants.MaxUint256)
+    await EYWA.
+
+    await EUSD.approve(uniswapV2Router02.address,ethers.constants.MaxUint256,{gasLimit: 1000000, gasPrice: 4000000000})
+    await EYWAt.approve(uniswapV2Router02.address,ethers.constants.MaxUint256,{gasLimit: 1000000, gasPrice: 4000000000})
 
     await uniswapV2Router02.addLiquidity(
         networkConfig["network2"].hubPool.lp,
@@ -99,7 +107,7 @@ async function main() {
         1,
         deployer.address,
         ethers.constants.MaxInt256,
-        {gasLimit: 1000000}
+        {gasLimit: 1000000, gasPrice: 4000000000}
     )
 }
 
