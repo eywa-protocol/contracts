@@ -24,7 +24,7 @@ abstract contract BridgeCore {
         uint256 chainId
     );
 
-    event ReceiveRequest(bytes32 reqId, address receiveSide, bytes32 bridgeFrom);
+    event ReceiveRequest(bytes32 requestId, address receiveSide, bytes32 bridgeFrom);
 
     /**
      * @dev Mandatory for all participants who wants to use their own contracts.
