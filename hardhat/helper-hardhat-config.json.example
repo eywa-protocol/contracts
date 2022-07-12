@@ -455,8 +455,7 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "bsctestnet",
-      "mumbai"
+      auroratestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -1357,12 +1356,7 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "rinkeby",
-      "mumbai",
-      "hecotestnet",
-      "avalanchetestnet",
-      "metistestnet",
-      "bsctestnet"
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
