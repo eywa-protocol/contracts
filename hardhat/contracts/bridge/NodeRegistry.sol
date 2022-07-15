@@ -164,7 +164,7 @@ contract NodeRegistry is Bridge {
             indexes[i] = i;
         }
 
-        uint256 rand = uint256(vrf());
+        uint256 rand = uint256(blockhash(block.number - 1)); // TODO unsafe
         uint256 len = nodes.length();
         if (len > SnapshotMaxSize) len = SnapshotMaxSize;
         for (uint256 i = 0; i < len; i++) {
@@ -189,17 +189,5 @@ contract NodeRegistry is Bridge {
 
     function setRelayerPoolFactory(address _poolFactory) public onlyOwner {
         poolFactory = _poolFactory;
-    }
-
-    function vrf() public view returns (bytes32 rand) {
-        uint[1] memory bn;
-        bn[0] = block.number;
-        assembly {
-            let memPtr := mload(0x40)
-            if iszero(staticcall(not(0), 0xff, bn, 0x20, memPtr, 0x20)) {
-                invalid()
-            }
-            rand := mload(memPtr)
-        }
     }
 }
