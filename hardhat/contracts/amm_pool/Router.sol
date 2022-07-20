@@ -345,6 +345,44 @@ contract Router is EIP712, Ownable {
         );
     }
 
+    function synthBatchAddLiquidity3PoolMintEUSDRequestSwap(
+        address from,
+        IPortal.SynthParams memory synthParams,
+        ICurveProxy.MetaMintEUSDWithSwap memory metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory unsynthParams
+    ) external {
+        for (uint256 i = 0; i < metaParams.synthToken.length; i++) {
+            if (metaParams.synthAmount[i] > 0) {
+                SafeERC20.safeTransferFrom(IERC20(metaParams.synthToken[i]), msg.sender, _portal, metaParams.synthAmount[i]);
+            }
+        }
+        IPortal(_portal).synthBatchAddLiquidity3PoolMintEUSDSwap(
+            from,
+            synthParams,
+            metaParams,
+            unsynthParams
+        );
+    }
+
+    function synthBatchAddLiquidity3PoolMintEUSDRequestAddLiquidity(
+        address from,
+        IPortal.SynthParams memory synthParams,
+        ICurveProxy.MetaMintEUSDWithSwap memory metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory unsynthParams
+    ) external {
+        for (uint256 i = 0; i < metaParams.synthToken.length; i++) {
+            if (metaParams.synthAmount[i] > 0) {
+                SafeERC20.safeTransferFrom(IERC20(metaParams.synthToken[i]), msg.sender, _portal, metaParams.synthAmount[i]);
+            }
+        }
+        IPortal(_portal).synthBatchAddLiquidity3PoolMintEUSDAddLiquidity(
+            from,
+            synthParams,
+            metaParams,
+            unsynthParams
+        );
+    }
+
     function synthBatchMetaExchangeRequest(
         address[3] memory token,
         uint256[3] memory amount,

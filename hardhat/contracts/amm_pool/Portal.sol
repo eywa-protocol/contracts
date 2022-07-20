@@ -545,6 +545,114 @@ contract Portal is RelayRecipient, SolanaSerialize, Typecast {
         );
     }
 
+    function synthBatchAddLiquidity3PoolMintEUSDSwap(
+        address _from,
+        SynthParams memory _synthParams,
+        ICurveProxy.MetaMintEUSDWithSwap memory _metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
+    ) external {
+        bytes32[3] memory txId;
+        uint256 generalNonce = IBridge(bridge).getNonce(_from);
+        bytes32 generalTxId = RequestIdLib.prepareRqId(
+            castToBytes32(_synthParams.oppositeBridge),
+            _synthParams.chainId,
+            _unsynthParams.initialChainID,
+            castToBytes32(_synthParams.receiveSide),
+            castToBytes32(_from),
+            generalNonce
+        );
+
+        //synthesize request
+        for (uint256 i = 0; i < _metaParams.synthToken.length; i++) {
+            if (_metaParams.synthAmount[i] > 0) {
+                require(tokenDecimalsData[castToBytes32(_metaParams.synthToken[i])].isApproved, "Portal: token must be verified");
+                registerNewBalance(_metaParams.synthToken[i], _metaParams.synthAmount[i]);
+                txId[i] = keccak256(abi.encodePacked(generalTxId, i));
+                TxState storage txState = requests[txId[i]];
+                txState.from = castToBytes32(_from);
+                txState.to = castToBytes32(_metaParams.to);
+                txState.rtoken = castToBytes32(_metaParams.synthToken[i]);
+                txState.amount = _metaParams.synthAmount[i];
+                txState.state = RequestState.Sent;
+
+                emit SynthesizeRequest(txId[i], _from, _metaParams.to, _metaParams.synthAmount[i], _metaParams.synthToken[i]);
+                // break;
+            }
+        }
+
+        // encode call
+        bytes memory out = abi.encodeWithSelector(
+            bytes4(keccak256(bytes("transitSynthBatchAddLiquidity3PoolMintEUSDSwap((address,uint256,uint256,address,uint256,address,address[3],uint256[3]),(address,address,uint256,uint8,bytes32,bytes32),bytes32[3])"))),
+            _metaParams,
+            _unsynthParams,
+            txId
+        );
+
+        IBridge(bridge).transmitRequestV2(
+            out,
+            _synthParams.receiveSide,
+            _synthParams.oppositeBridge,
+            _synthParams.chainId,
+            generalTxId,
+            _from,
+            generalNonce
+        );
+    }
+
+    function synthBatchAddLiquidity3PoolMintEUSDAddLiquidity(
+        address _from,
+        SynthParams memory _synthParams,
+        ICurveProxy.MetaMintEUSDWithSwap memory _metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
+    ) external {
+        bytes32[3] memory txId;
+        uint256 generalNonce = IBridge(bridge).getNonce(_from);
+        bytes32 generalTxId = RequestIdLib.prepareRqId(
+            castToBytes32(_synthParams.oppositeBridge),
+            _synthParams.chainId,
+            _unsynthParams.initialChainID,
+            castToBytes32(_synthParams.receiveSide),
+            castToBytes32(_from),
+            generalNonce
+        );
+
+        //synthesize request
+        for (uint256 i = 0; i < _metaParams.synthToken.length; i++) {
+            if (_metaParams.synthAmount[i] > 0) {
+                require(tokenDecimalsData[castToBytes32(_metaParams.synthToken[i])].isApproved, "Portal: token must be verified");
+                registerNewBalance(_metaParams.synthToken[i], _metaParams.synthAmount[i]);
+                txId[i] = keccak256(abi.encodePacked(generalTxId, i));
+                TxState storage txState = requests[txId[i]];
+                txState.from = castToBytes32(_from);
+                txState.to = castToBytes32(_metaParams.to);
+                txState.rtoken = castToBytes32(_metaParams.synthToken[i]);
+                txState.amount = _metaParams.synthAmount[i];
+                txState.state = RequestState.Sent;
+
+                emit SynthesizeRequest(txId[i], _from, _metaParams.to, _metaParams.synthAmount[i], _metaParams.synthToken[i]);
+                // break;
+            }
+        }
+
+        // encode call
+        bytes memory out = abi.encodeWithSelector(
+            bytes4(keccak256(bytes("transitSynthBatchAddLiquidity3PoolMintEUSDAddLiquidity((address,uint256,uint256,address,uint256,address,address[3],uint256[3]),(address,address,uint256,uint8,bytes32,bytes32),bytes32[3])"))),
+            _metaParams,
+            _unsynthParams,
+            txId
+        );
+
+        IBridge(bridge).transmitRequestV2(
+            out,
+            _synthParams.receiveSide,
+            _synthParams.oppositeBridge,
+            _synthParams.chainId,
+            generalTxId,
+            _from,
+            generalNonce
+        );
+    }
+
     function synthBatchMetaExchange(
         address[3] memory _token,
         uint256[3] memory _amount,
