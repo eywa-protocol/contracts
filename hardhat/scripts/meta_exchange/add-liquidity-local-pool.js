@@ -19,7 +19,7 @@ async function main() {
   const totalSupply = ethers.utils.parseEther("100000000000.0");
 
 
-  if (network.name == "network2" || network.name == "mumbai") {
+  if (network.name == "network2" || network.name == "harmonytestnet") {
     for (let i = 0; i < deployInfo[network.name].localToken.length; i++) {
       let locTk = await ERC20.attach(deployInfo[network.name].localToken[i].address);
       let tx = await locTk.mint(owner.address, totalSupply);

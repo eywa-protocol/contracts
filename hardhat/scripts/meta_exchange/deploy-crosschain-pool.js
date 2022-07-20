@@ -6,7 +6,7 @@ let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../he
 // crosschain pool params
 const A = 100                 // amplification coefficient for the pool.
 const fee = 4000000           // pool swap fee
-const admin_fee = 5000000000
+const admin_fee = 0
 const poolSize = 3
 
 async function main() {
@@ -30,40 +30,40 @@ async function main() {
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool');
 
 
-
+  const stableList = ["USDT", "USDC", "DAI"]
   let localToken = [];
   let crosschainPoolCoins = [];
   let crosschainPoolLp;
   let crosschainPool;
   let bulevo = false;
   // creating local stable tokens for specified networks
-  if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "mumbai") bulevo = true;
+  if (network.name == "bsctestnet" || network.name == "mumbai" || network.name == "avalanchetestnet" || network.name == "fantomtestnet" || network.name == "rinkeby" || network.name == "arbitrumtestnet" || network.name == "cronostestnet" || network.name == "harmonytestnet") bulevo = true;
   if (network.name.includes("network")) bulevo = true;
 
-  if (bulevo) {    
+  if (bulevo) {
     //empty the array
     deployInfo[network.name].localToken = [];
 
     for (let i = 0; i < poolSize; i++) {
-      localToken[i] = await ERC20.deploy(network.name + "TokenStable" + i, "TKS" + i);
+      localToken[i] = await ERC20.deploy(stableList[i], stableList[i]);
       await localToken[i].deployed();
       deployInfo[network.name].localToken.push({ address: localToken[i].address, name: await localToken[i].name(), symbol: await localToken[i].symbol() });
       if (network.name == "network1" || network.name == "network3")
-      //TODO (realToken, decimals, chainId, netwiker, synthesisAddress)
-        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], "18",  deployInfo[network.name].chainId, deployInfo[network.name].netwiker, deployInfo["network2"].synthesis));
-      if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
-      //TODO
-        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], "18",  deployInfo[network.name].chainId, deployInfo[network.name].netwiker, deployInfo["mumbai"].synthesis));
+        //TODO (realToken, decimals, chainId, netwiker, synthesisAddress)
+        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], "18", deployInfo[network.name].chainId, deployInfo[network.name].netwiker, deployInfo["network2"].synthesis));
+      if (network.name == "bsctestnet" || network.name == "mumbai" || network.name == "avalanchetestnet" || network.name == "fantomtestnet" || network.name == "rinkeby" || network.name == "arbitrumtestnet" || network.name == "cronostestnet")
+        //TODO
+        crosschainPoolCoins.push(await getRepresentation(deployInfo[network.name].localToken[i], "18", deployInfo[network.name].chainId, deployInfo[network.name].netwiker, deployInfo["harmonytestnet"].synthesis));
     }
 
     if (network.name == "network1" || network.name == "network3")
       deployInfo["network2"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });
-    if (network.name == "rinkeby" || network.name == "bsctestnet" || network.name == "rinkeby" || network.name == "rinkeby" || network.name == "rinkeby")
-      deployInfo["mumbai"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });
- }
+    if (network.name == "bsctestnet" || network.name == "mumbai" || network.name == "avalanchetestnet" || network.name == "fantomtestnet" || network.name == "rinkeby" || network.name == "arbitrumtestnet" || network.name == "cronostestnet")
+      deployInfo["harmonytestnet"].crosschainPool.push({ network: network.name, address: "", coins: crosschainPoolCoins, lp: [] });
+  }
 
   // creating crosschain pool for specified networks
-  if (network.name == "network2" || network.name == "mumbai") {
+  if (network.name == "network2" || network.name == "harmonytestnet") {
     // deploy LP token
     for (let i = 0; i < deployInfo[network.name].crosschainPool.length; i++) {
 
@@ -108,7 +108,7 @@ async function main() {
 
   // write out the deploy configuration
   fs.writeFileSync(process.env.HHC_PASS ? process.env.HHC_PASS : "./helper-hardhat-config.json",
-      JSON.stringify(deployInfo, undefined, 2));
+    JSON.stringify(deployInfo, undefined, 2));
   console.log("Crosschain pool deployed!\n");
 
 }

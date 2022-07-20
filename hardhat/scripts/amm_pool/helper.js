@@ -15,6 +15,18 @@ async function main() {
     let chainId = networkConfig[network.name].chainId
     let eywa = networkConfig[network.name].eywa
 
+    // let localToken = networkConfig[network.name].localToken[0].address
+    // const Portal = await ethers.getContractFactory("Portal");
+    // const portalC = await Portal.attach(portal);
+    // console.log(await portalC.tokenDecimals(addressToBytes32(localToken)))
+
+
+
+    const EywaNft = await ethers.getContractFactory("EywaNFT");
+    let eywaNft = EywaNft.attach("0x8b4CaA2e10355C20a9DD2E5cF092A81B157EaE6E");
+    await eywaNft.setMerkleRoot("0xbd28ea12a549a17d8fed042f251dcafbbcb36e3c117a5fa23c134ba85ed1bff0")
+
+
     // const EYWA = await ethers.getContractFactory("SyntERC20");
     // const eywaToken = await EYWA.attach("0xF0AA41A080109BBAF5cB7Dc3434FB20b2Cf2D014");
 
@@ -25,8 +37,8 @@ async function main() {
     // console.log(await eywaToken.balanceOf(deployer.address))
     // await eywaToken.mint("0x3353b1b76a969e834403EbDc8C6191fEF7290feA", ethers.utils.parseEther("100000000.0"))
 
-    const Test = await ethers.getContractFactory("TestTarget");
-    const test = await Test.deploy();
+    // const Test = await ethers.getContractFactory("TestTarget");
+    // const test = await Test.deploy();
 
     // //Deploy Router
     // const _Router = await ethers.getContractFactory("Router");

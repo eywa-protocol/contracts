@@ -5,7 +5,7 @@ let deployInfo = require(process.env.HHC_PASS ? process.env.HHC_PASS : '../../he
 // local pool params
 const A = 100                 // amplification coefficient for the pool.
 const fee = 4000000           // pool swap fee
-const admin_fee = 5000000000
+const admin_fee = 0
 const poolSize = 3
 
 
@@ -27,7 +27,7 @@ async function main() {
 
     const totalSupply = ethers.utils.parseEther("100000000000.0");
 
-    if (network.name == "network2" || network.name == 'mumbai') {
+    if (network.name == "network2" || network.name == 'harmonytestnet') {
 
         // let localToken = deployInfo[network.name].localToken
         let localCoins = [];

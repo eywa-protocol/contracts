@@ -7,6 +7,7 @@ const hre = require("hardhat");
 const deployInfo = require("../../helper-hardhat-config.json");
 
 const poolSize = 3
+const stableList = ["USDT", "USDC", "DAI"]
 
 async function main() {
     const [deployer] = await ethers.getSigners();
@@ -65,7 +66,7 @@ async function main() {
         try {
             await hre.run("verify:verify", {
                 address: networkConfig[network.name].localToken[i],
-                constructorArguments: [network.name + "TokenStable" + i, "TKS" + i],
+                constructorArguments: [stableList[i], stableList[i]],
                 contract: "contracts/amm_pool/SyntERC20.sol:SyntERC20"
             });
         } catch (e) {

@@ -9,7 +9,7 @@
       "networks_env/env_test_for_harmony.env"
     ],
     "chainId": 1666600000,
-    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
     "token": [],
@@ -20,11 +20,11 @@
       "coins": []
     },
     "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
     },
     "localToken": [],
     "localPool": {
@@ -40,6 +40,57 @@
       "rinkeby",
       "arbitrumtestnet",
       "cronostestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0000000000000000000000000000000000000000",
+    "mockDexPool": "0x0000000000000000000000000000000000000000",
+    "portal": "0x0000000000000000000000000000000000000000",
+    "synthesis": "0x0000000000000000000000000000000000000000",
+    "curveProxy": "0x0000000000000000000000000000000000000000",
+    "router": "0x0000000000000000000000000000000000000000",
+    "frontHelper": "0x0000000000000000000000000000000000000000"
+  },
+  "aurora": {
+    "rpcUrl": "https://mainnet.aurora.dev",
+    "rpcUrl2": "https://mainnet.aurora.dev",
+    "n": "AURORA",
+    "netwiker": "ETH",
+    "env_file": [
+      "networks_env/env_connect_to_aurora.env",
+      "networks_env/env_test_for_aurora.env"
+    ],
+    "chainId": 1313161554,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "rinkeby",
+      "mumbai",
+      "hecotestnet",
+      "avalanchetestnet",
+      "metistestnet",
+      "bsctestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -123,11 +174,11 @@
       "coins": []
     },
     "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
     },
     "localToken": [],
     "localPool": {
@@ -163,7 +214,7 @@
       "networks_env/env_test_for_bsc.env"
     ],
     "chainId": 56,
-    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
     "token": [],
@@ -174,11 +225,11 @@
       "coins": []
     },
     "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
     },
     "localToken": [],
     "localPool": {
@@ -204,7 +255,7 @@
     "router": "0x0000000000000000000000000000000000000000",
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
-   "arbitrum": {
+  "arbitrum": {
     "rpcUrl": "https://arb1.arbitrum.io/rpc",
     "rpcUrl2": "https://arb1.arbitrum.io/rpc",
     "n": "ARBITRUM",
@@ -214,7 +265,7 @@
       "networks_env/env_test_for_arbitrum.env"
     ],
     "chainId": 42161,
-    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
     "token": [],
@@ -225,11 +276,11 @@
       "coins": []
     },
     "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
     },
     "localToken": [],
     "localPool": {
@@ -255,59 +306,7 @@
     "router": "0x0000000000000000000000000000000000000000",
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
-  "arbitrumtestnet": {
-    "rpcUrl": "wss://ws.testnet.eywa.fi:17015",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17016",
-    "n": "ARBITRUMTESTNET",
-    "netwiker": "AETH",
-    "env_file": [
-      "networks_env/env_connect_to_arbitrumtestnet.env",
-      "networks_env/env_test_for_arbitrumtestnet.env"
-    ],
-    "chainId": 421611,
-    "relayHub":  "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
-    "amm_pool": "0x0000000000000000000000000000000000000000",
-    "token": [],
-    "crosschainPool": [],
-    "hubPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
-    },
-    "localToken": [],
-    "localPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "sourceForRepresentation": [
-      "bsctestnet",
-      "mumbai",
-      "avalanchetestnet",
-      "fantomtestnet",
-      "rinkeby",
-      "cronostestnet",
-      "harmonytestnet"
-    ],
-    "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
-  },
-   "fantom": {
+  "fantom": {
     "rpcUrl": "https://rpc.ftm.tools/",
     "rpcUrl2": "https://rpc.ftm.tools/",
     "n": "FANTOM",
@@ -317,7 +316,7 @@
       "networks_env/env_test_for_fantom..env"
     ],
     "chainId": 250,
-    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
     "token": [],
@@ -328,11 +327,11 @@
       "coins": []
     },
     "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
     },
     "localToken": [],
     "localPool": {
@@ -358,9 +357,226 @@
     "router": "0x0000000000000000000000000000000000000000",
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
-   "fantomtestnet": {
-    "rpcUrl": "https://rpc.testnet.fantom.network",
-    "rpcUrl2": "https://rpc.testnet.fantom.network",
+  "harmonytestnet": {
+    "rpcUrl": "wss://ws.s0.ps.hmny.io",
+    "rpcUrl2": "https://api.s0.ps.hmny.io/",
+    "n": "HARMONYTESTNET",
+    "netwiker": "HRM",
+    "env_file": [
+      "networks_env/env_connect_to_harmonytestnet.env",
+      "networks_env/env_test_for_harmonytestnet.env"
+    ],
+    "chainId": 1666900000,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0xd5fafFe2Fdd50D7305049FDA6046C5Fa35763929",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [
+      {
+        "address": "0x8234B7561b9CDB387CdebDedDbd75DC07AaeaD8F",
+        "name": "EYWA",
+        "symbol": "EYWA"
+      }
+    ],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "bsctestnet",
+      "mumbai",
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0xc5902A5dA3d8bcFAe8BB46aF2ea3d81D27d5a3d7",
+    "bridge": "0xc5902A5dA3d8bcFAe8BB46aF2ea3d81D27d5a3d7",
+    "mockDexPool": "0x1B78613E2a1C85721a269C10256f7Efb453DB3c6",
+    "portal": "0x4559F52f51CbFaC7f8eeF796215d6E4652a85E4d",
+    "synthesis": "0x63525Ecc667219AF2Fcd048d6C481B7ec1a3A0A5",
+    "curveProxy": "0xf55685A618fC1a8CAfe2F28f6e41e16F4138eB54",
+    "router": "0xcE4b5366377827a2901cE5bA6E1Ae046ADD689bf",
+    "frontHelper": "0x91B1382de4A7CbBf20A8E8fE6AFec2e3f96dF64F",
+    "eywa": "0x8234B7561b9CDB387CdebDedDbd75DC07AaeaD8F",
+    "tokenPoa": "0x835f82877c9262cd31f14a42aaD69BCd5E3DeeF1",
+    "relayerPoolFactory": "0xdd2851575364864c30b45FEd212Ce1ec01e35f99"
+  },
+  "bsctestnet": {
+    "rpcUrl": " wss://ws.testnet.eywa.fi:17001",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17002",
+    "n": "BSCTESTNET",
+    "netwiker": "BSC",
+    "env_file": [
+      "networks_env/env_connect_to_bsctestnet.env",
+      "networks_env/env_test_for_bsctestnet.env"
+    ],
+    "chainId": 97,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0xd54AD34FaF9A83e71891968ee5C72781F7F54230",
+    "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "mumbai",
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet",
+      "harmonytestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0xeb991cB75A8702Aab8f6c88BfA87844a0B130A34",
+    "mockDexPool": "0xbf40b422b444870624e7609190b70de07979BF20",
+    "portal": "0x8c2e02618bC4de569327e98B5E2943Fbb8e5AcB0",
+    "synthesis": "0xec6A80626d34Aaa9E71FA01341558983C4D46125",
+    "curveProxy": "0xF4777f5697ED507470a4d9a4403eeE8536f896a4",
+    "router": "0x040887576FD5332f8c19bceF33826d8C030C6ebd",
+    "frontHelper": "0xc6818C6135E5618F4888F5e9F16a6e4850C9586d"
+  },
+  "mumbai": {
+    "rpcUrl": "wss://ws.testnet.eywa.fi:17007",
+    "rpcUrl2": " https://http.testnet.eywa.fi:17008",
+    "n": "MUMBAI",
+    "netwiker": "MUMBAI",
+    "env_file": [
+      "networks_env/env_connect_to_mumbai.env",
+      "networks_env/env_test_for_mumbai.env"
+    ],
+    "chainId": 80001,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x297B8aF1cD0BBA035bCD66560EAf877E44A40Aa2",
+    "amm_pool": "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "bsctestnet",
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet",
+      "harmonytestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x0937f269D41441C1C7Cb1f29d414b080a23F12fC",
+    "mockDexPool": "0xE1Da9DF28512ED4c2E9D79415F53273A76D05f9D",
+    "portal": "0x0292f43F188d21c08e93054C9eF7d715f9bd4aE2",
+    "synthesis": "0x20949F053E9A52DEb08B979c7aF05628fAd97Ae1",
+    "curveProxy": "0xf45c93e89557b6375Ee2dC629bB8DBF36c289835",
+    "router": "0xd51c82AC65F721C972Ec1F832A4e3Ed40A6c22b9",
+    "frontHelper": "0x38272dE87b890B4CeF2BD69c4C8444FC2791EC97"
+  },
+  "avalanchetestnet": {
+    "rpcUrl": "wss://ws.testnet.eywa.fi:17003/ext/bc/C/ws",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17004/ext/bc/C/rpc",
+    "n": "AVALANCHETESTNET",
+    "netwiker": "AVCH",
+    "env_file": [
+      "networks_env/env_connect_to_avalanchetestnet.env",
+      "networks_env/env_test_for_avalanchetestnet.env"
+    ],
+    "chainId": 43113,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x353860529b81a4c8B4D74f8E5e389C10E2cC3dE5",
+    "amm_pool": "0x2D99ABD9008Dc933ff5c0CD271B88309593aB921",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "bsctestnet",
+      "mumbai",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet",
+      "harmonytestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x7a199D9123f2f7e3EC9DcE77F82503dfd9251169",
+    "mockDexPool": "0x836726C11a0661e1079De58BafC87bCCcF9eDE5D",
+    "portal": "0x9E5706ECC4284Ea32C1FeDCF2A9b3f6Eee1914c8",
+    "synthesis": "0xEfe7c731A27F31C5FFbCD142e42196796fCcc862",
+    "curveProxy": "0x2d54Ec27A36554cfE1B221a92fDA8495e3A8f342",
+    "router": "0x6AC8b294ffa779dFd2531cdd3437390E41FA7E58",
+    "frontHelper": "0x53951d87b1e477692656Cc79B66379794DFe9006"
+  },
+  "fantomtestnet": {
+    "rpcUrl": "https://nd-443-123-922.p2pify.com/3bb85e9a23cfb08db69c2a0d17ff5289",
+    "rpcUrl2": "wss://nd-443-123-922.p2pify.com/3bb85e9a23cfb08db69c2a0d17ff5289",
     "n": "FANTOMTESTNET",
     "netwiker": "FTM",
     "env_file": [
@@ -368,6 +584,214 @@
       "networks_env/env_test_for_fantomtestnet.env"
     ],
     "chainId": 4002,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x27Cf5DAd49D848f92272c56D01dd7333adFe6D97",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "bsctestnet",
+      "mumbai",
+      "avalanchetestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet",
+      "harmonytestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x6F3bc002B6e63C4102729A70FF67f0BE1BCE91C5",
+    "mockDexPool": "0x4bc28A6d2DFCc1Db839BB8c8731CfFbEfC384A6d",
+    "portal": "0xf0EB6AA17421d3a916Ca673F2732fa0aBD4857AF",
+    "synthesis": "0x987c26E9EE52000e4dc5C83ed6994CFE1C0770e5",
+    "curveProxy": "0xD451d3Bdadda94dB0bFf91398396fBE24B586786",
+    "router": "0xBAeeeAe74639865d78e2402c5e91B9546A6e0b1e",
+    "frontHelper": "0xA770322e4cCd67AE0ACc5E6bC505B6055dd08078"
+  },
+  "rinkeby": {
+    "rpcUrl": "wss://ws.testnet.eywa.fi:17009",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17010",
+    "n": "RINKEBY",
+    "netwiker": "ETH",
+    "env_file": [
+      "networks_env/env_connect_to_rinkeby.env",
+      "networks_env/env_test_for_rinkeby.env"
+    ],
+    "chainId": 4,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x5Ed95bbdD905055CbCea254B155ABf35A66c6880",
+    "amm_pool": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "bsctestnet",
+      "mumbai",
+      "avalanchetestnet",
+      "fantomtestnet",
+      "arbitrumtestnet",
+      "cronostestnet",
+      "harmonytestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x5cD28Bf6c2eF0c4ae8A09Cf80f93BC68A224A65F",
+    "mockDexPool": "0x94040b78cA6CAc1fde8cD7d81feF806E71C90c0E",
+    "portal": "0xfE7FD25E93CcA1bbF2F6927B20587850eA11De7a",
+    "synthesis": "0x22Fdce05D70BBfb0BD2f0d095360361eC4c6Af86",
+    "curveProxy": "0x262Ce0E88b27F69327c09971AD9d6aC5E01695e6",
+    "router": "0x417482738D21c0fe1Ba5172c0A484F2E8D88Df59",
+    "frontHelper": "0x762E478d32C2d977C218150cc8A3F7439A31df00"
+  },
+  "arbitrumtestnet": {
+    "rpcUrl": "wss://ws.testnet.eywa.fi:17015",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17016",
+    "n": "ARBITRUMTESTNET",
+    "netwiker": "AETH",
+    "env_file": [
+      "networks_env/env_connect_to_arbitrumtestnet.env",
+      "networks_env/env_test_for_arbitrumtestnet.env"
+    ],
+    "chainId": 421611,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0xEf7247db485F57Ab69A3c013a1F9a57C3a4b0B16",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "bsctestnet",
+      "mumbai",
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "cronostestnet",
+      "harmonytestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0x999aC30bDa6f1d555bC649b94e06D484ee3Ed951",
+    "mockDexPool": "0x8fF260AbF19Df6b14aAD56994964bB9a3B131039",
+    "portal": "0xb774C0CdcB8c6efBe59812Ca69115922AFb19B73",
+    "synthesis": "0x7f4f50F56F4d5512eD03C0397a9A4DE2337F2651",
+    "curveProxy": "0x27Cf5DAd49D848f92272c56D01dd7333adFe6D97",
+    "router": "0x13660D8fE235AF6Fdd91469236d36263614a1763",
+    "frontHelper": "0xeB9D33EDbC73967f61C500Fb35fab5377D72437a"
+  },
+  "cronostestnet": {
+    "rpcUrl": "https://cronos-testnet-3.crypto.org:8545",
+    "rpcUrl2": "https://cronos-testnet-3.crypto.org:8545",
+    "n": "CRONOSTESTNET",
+    "netwiker": "TCRO",
+    "env_file": [
+      "networks_env/env_connect_to_cronostestnet.env",
+      "networks_env/env_test_for_cronostestnet.env"
+    ],
+    "chainId": 338,
+    "relayHub": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0xD732177d535ea6236fBb7AD248dC2B8Bd1404f76",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "token": [],
+    "crosschainPool": [],
+    "hubPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "dao": {
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
+    },
+    "localToken": [],
+    "localPool": {
+      "address": "",
+      "lp": "",
+      "coins": []
+    },
+    "sourceForRepresentation": [
+      "mumbai",
+      "bsctestnet",
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "harmonytestnet"
+    ],
+    "paymaster": "0x0000000000000000000000000000000000000000",
+    "nodeRegistry": "0x0000000000000000000000000000000000000000",
+    "bridge": "0xB49d6B186C774A5F9549225A7f4c2Da433ea4E24",
+    "mockDexPool": "0x23A7152DF281AC16A77a642Fbbe620B7D70Ec0EA",
+    "portal": "0x858441A97C1186Eb35750B39f832C95A23eC6128",
+    "synthesis": "0xBD4c128D26247402aE2BBDAe5A2f9e8f1102916d",
+    "curveProxy": "0x8929A3155D943426D81D1d117e254aFC14F2D8Da",
+    "router": "0xF6f5a0977f240418404D0b0AE335A9a12696E8bc",
+    "frontHelper": "0x15690388c187e9c63BDF5Cc6D99C0F503fe47a69"
+  },
+   "auroratestnet": {
+    "rpcUrl": "https://testnet.aurora.dev/",
+    "rpcUrl2": "https://testnet.aurora.dev/",
+    "n": "AURORATESTNET",
+    "netwiker": "ETH",
+    "env_file": [
+      "networks_env/env_connect_to_auroratestnet.env",
+      "networks_env/env_test_for_auroratestnet.env"
+    ],
+    "chainId": 1313161555,
     "relayHub":  "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
@@ -392,13 +816,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "bsctestnet",
-      "mumbai",
-      "avalanchetestnet",
       "rinkeby",
-      "arbitrumtestnet",
-      "cronostestnet",
-      "harmonytestnet"
+      "mumbai",
+      "hecotestnet",
+      "avalanchetestnet",
+      "metistestnet",
+      "bsctestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -410,27 +833,27 @@
     "router": "0x0000000000000000000000000000000000000000",
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
-  "harmonytestnet": {
-    "rpcUrl": "wss://ws.s0.ps.hmny.io",
-    "rpcUrl2": "https://api.s0.ps.hmny.io/",
-    "n": "HARMONYTESTNET",
-    "netwiker": "HRM",
+   "hecotestnet": {
+    "rpcUrl": " wss://ws.testnet.eywa.fi:17005",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17006",
+    "n": "HECOTESTNET",
+    "netwiker": "HECO",
     "env_file": [
-      "networks_env/env_connect_to_harmonytestnet.env",
-      "networks_env/env_test_for_harmonytestnet.env"
+      "networks_env/env_connect_to_hecotestnet.env",
+      "networks_env/env_test_for_hecotestnet.env"
     ],
-    "chainId": 1666900000,
-    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "chainId": 256,
+    "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
-    "amm_pool": "0x0000000000000000000000000000000000000000",
+    "amm_pool": "0x2bCeC25644e56422bEFd3feA5286344369396fF1",
     "token": [
       {
-        "address": "0xF35d39587b9364BDaBA3Fe1E3b929B7877b2986d",
+        "address": "0x330B6f89235900A328Bd31025a6aF8f4C63734d8",
         "name": "EYWA",
         "symbol": "EYWA"
       },
       {
-        "address": "0x3C6693c5634AbE31850C71c6A70A4B02EC89f58e",
+        "address": "0x8781f0Fe84cc9Aa55F3e0F622001F816ccA61Cc9",
         "name": "USDT",
         "symbol": "USDT"
       }
@@ -455,62 +878,12 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "bsctestnet",
-      "mumbai"
-    ],
-    "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
-  },
-  "coinextestnet": {
-    "rpcUrl": "wss://testnet-ws.coinex.net/",
-    "rpcUrl2": "https://testnet-rpc1.coinex.net/",
-    "n": "COINEXTESTNET",
-    "netwiker": "CEX",
-    "env_file": [
-      "networks_env/env_connect_to_coinextestnet.env",
-      "networks_env/env_test_for_coinextestnet.env"
-    ],
-    "chainId": 53,
-    "relayHub":  "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
-    "amm_pool": "0x0000000000000000000000000000000000000000",
-    "token": [],
-    "crosschainPool": [],
-    "hubPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
-    },
-    "localToken": [],
-    "localPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "sourceForRepresentation": [
+      "rinkeby",
       "bsctestnet",
       "mumbai",
       "avalanchetestnet",
-      "fantomtestnet",
-      "rinkeby",
-      "arbitrumtestnet",
-      "cronostestnet"
-
-
+      "coinextestnet",
+      "metistestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -573,145 +946,19 @@
     "router": "0x0000000000000000000000000000000000000000",
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
-  "bsctestnet": {
-    "rpcUrl": " wss://ws.testnet.eywa.fi:17001",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17002",
-    "n": "BSCTESTNET",
-    "netwiker": "BSC",
+   "coinextestnet": {
+    "rpcUrl": "wss://testnet-ws.coinex.net/",
+    "rpcUrl2": "https://testnet-rpc1.coinex.net/",
+    "n": "COINEXTESTNET",
+    "netwiker": "CEX",
     "env_file": [
-      "networks_env/env_connect_to_bsctestnet.env",
-      "networks_env/env_test_for_bsctestnet.env"
+      "networks_env/env_connect_to_coinextestnet.env",
+      "networks_env/env_test_for_coinextestnet.env"
     ],
-    "chainId": 97,
+    "chainId": 53,
     "relayHub":  "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
-    "amm_pool": "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
-    "token": [
-      {
-        "address": "0xB81547FA8E4e37A410a42acA3aE28A7dc170Bb23",
-        "name": "EYWA",
-        "symbol": "EYWA"
-      },
-      {
-        "address": "0x786Ba7a3B3229B0eD707aFf2731DFa4a4E6CB104",
-        "name": "USDT",
-        "symbol": "USDT"
-      }
-    ],
-    "crosschainPool": [],
-    "hubPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
-    },
-    "localToken": [],
-    "localPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "sourceForRepresentation": [
-      "mumbai",
-      "avalanchetestnet",
-      "fantomtestnet",
-      "rinkeby",
-      "arbitrumtestnet",
-      "cronostestnet",
-      "harmonytestnet"
-    ],
-    "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
-  },
-  "avalanchetestnet": {
-    "rpcUrl": "wss://ws.testnet.eywa.fi:17003/ext/bc/C/ws",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17004/ext/bc/C/rpc",
-    "n": "AVALANCHETESTNET",
-    "netwiker": "AVCH",
-    "env_file": [
-      "networks_env/env_connect_to_avalanchetestnet.env",
-      "networks_env/env_test_for_avalanchetestnet.env"
-    ],
-    "chainId": 43113,
-    "relayHub": "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
-    "amm_pool": "0x2D99ABD9008Dc933ff5c0CD271B88309593aB921",
-    "token": [
-      {
-        "address": "0x1e3817FD91Cc66d3137043ac45B1d3acDe288C0c",
-        "name": "EYWA",
-        "symbol": "EYWA"
-      },
-      {
-        "address": "0xd8b917cf32022e35E09Bac2c6F16a64fa7D1DEC9",
-        "name": "USDT",
-        "symbol": "USDT"
-      }
-    ],
-    "crosschainPool": [],
-    "hubPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
-    },
-    "localToken": [],
-    "localPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "sourceForRepresentation": [
-      "bsctestnet",
-      "mumbai",
-      "fantomtestnet",
-      "rinkeby",
-      "arbitrumtestnet",
-      "cronostestnet",
-      "harmonytestnet"
-    ],
-    "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
-  },
-  "rinkeby": {
-    "rpcUrl": "wss://ws.testnet.eywa.fi:17009",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17010",
-    "n": "RINKEBY",
-    "netwiker": "ETH",
-    "env_file": [
-      "networks_env/env_connect_to_rinkeby.env",
-      "networks_env/env_test_for_rinkeby.env"
-    ],
-    "chainId": 4,
-    "relayHub": "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
-    "amm_pool": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",
+    "amm_pool": "0x0000000000000000000000000000000000000000",
     "token": [],
     "crosschainPool": [],
     "hubPool": {
@@ -737,134 +984,9 @@
       "mumbai",
       "avalanchetestnet",
       "fantomtestnet",
-      "arbitrumtestnet",
-      "cronostestnet",
-      "harmonytestnet"
-    ],
-    "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
-  },
-  "hecotestnet": {
-    "rpcUrl": " wss://ws.testnet.eywa.fi:17005",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17006",
-    "n": "HECOTESTNET",
-    "netwiker": "HECO",
-    "env_file": [
-      "networks_env/env_connect_to_hecotestnet.env",
-      "networks_env/env_test_for_hecotestnet.env"
-    ],
-    "chainId": 256,
-    "relayHub": "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
-    "amm_pool": "0x2bCeC25644e56422bEFd3feA5286344369396fF1",
-    "token": [
-      {
-        "address": "0x330B6f89235900A328Bd31025a6aF8f4C63734d8",
-        "name": "EYWA",
-        "symbol": "EYWA"
-      },
-      {
-        "address": "0x8781f0Fe84cc9Aa55F3e0F622001F816ccA61Cc9",
-        "name": "USDT",
-        "symbol": "USDT"
-      }
-    ],
-    "crosschainPool": [],
-    "hubPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
-    },
-    "localToken": [],
-    "localPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "sourceForRepresentation": [
-      "rinkeby",
-      "bsctestnet",
-      "mumbai",
-      "avalanchetestnet",
-      "coinextestnet",
-      "metistestnet"
-    ],
-    "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
-  },
-  "mumbai": {
-    "rpcUrl": "wss://ws.testnet.eywa.fi:17007",
-    "rpcUrl2": " https://http.testnet.eywa.fi:17008",
-    "n": "MUMBAI",
-    "netwiker": "MUMBAI",
-    "env_file": [
-      "networks_env/env_connect_to_mumbai.env",
-      "networks_env/env_test_for_mumbai.env"
-    ],
-    "chainId": 80001,
-    "relayHub": "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
-    "amm_pool": "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506",
-    "token": [
-      {
-        "address": "0x8198a5716de98ba81b75bf6cEBFd3f27053876B9",
-        "name": "EYWA",
-        "symbol": "EYWA"
-      },
-      {
-        "address": "0x55c18d10ded7968Cd980AbfE0547B410DF284413",
-        "name": "USDT",
-        "symbol": "USDT"
-      }
-    ],
-    "crosschainPool": [],
-    "hubPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
-    },
-    "localToken": [],
-    "localPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "sourceForRepresentation": [
-      "bsctestnet",
-      "avalanchetestnet",
-      "fantomtestnet",
       "rinkeby",
       "arbitrumtestnet",
-      "cronostestnet",
-      "harmonytestnet"
+      "cronostestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -908,11 +1030,11 @@
       "coins": []
     },
     "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
     },
     "localToken": [],
     "localPool": {
@@ -920,9 +1042,7 @@
       "lp": "",
       "coins": []
     },
-    "sourceForRepresentation": [
-
-    ],
+    "sourceForRepresentation": [],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
     "bridge": "0x0000000000000000000000000000000000000000",
@@ -944,16 +1064,16 @@
     ],
     "chainId": 1111,
     "relayHub": "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x48a031c6ad7F74923Dd4450d4b70d9D21c52215b",
     "amm_pool": "0x0000000000000000000000000000000000000000",
     "token": [
       {
-        "address": "0x0000000000000000000000000000000000000000",
+        "address": "0xC5B690d37400B1Dde0DEb7502603Db6F48c63C5C",
         "name": "EYWA",
         "symbol": "EYWA"
       },
       {
-        "address": "0x0000000000000000000000000000000000000000",
+        "address": "0x369a861E613915093Ff15420Ed1D2f6599EaeB50",
         "name": "USDT",
         "symbol": "USDT"
       }
@@ -965,13 +1085,29 @@
       "coins": []
     },
     "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
     },
-    "localToken": [],
+    "localToken": [
+      {
+        "address": "0x2acAa98143b8FBa9e6528F676aC24d7785529fF5",
+        "name": "network1TokenStable0",
+        "symbol": "TKS0"
+      },
+      {
+        "address": "0x02eca05244C2454831fc8B7DeCB2f26424967F12",
+        "name": "network1TokenStable1",
+        "symbol": "TKS1"
+      },
+      {
+        "address": "0x9370eCf5Cba7f46e7e01eDd55f516Fe85b38f496",
+        "name": "network1TokenStable2",
+        "symbol": "TKS2"
+      }
+    ],
     "localPool": {
       "address": "",
       "lp": "",
@@ -984,13 +1120,13 @@
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
+    "bridge": "0x53C0A09e4954dD2D0edc6bF44F2C53B9c1fED667",
+    "mockDexPool": "0xD846DE1386bac441fdA49D05563bFD874F52CAb4",
+    "portal": "0xD110733A983A255C692c9547c66266EDE8EAb9d3",
+    "synthesis": "0x710E068DF625Dfe124dD9DdB3867061548Bf564b",
+    "curveProxy": "0x7d19533e4199F63598eC491cc5D7Db9090e0f1cC",
+    "router": "0x4BC7C18016FA3BB7EEca1346d358a4E89F97339d",
+    "frontHelper": "0x0633a3A22c1d704B4D567bBF16D1182cb3303309"
   },
   "network2": {
     "rpcUrl": "ws://172.20.128.12:8545",
@@ -1003,38 +1139,102 @@
     ],
     "chainId": 1112,
     "relayHub": "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x4Bf79f2cb58F2003615E4fD62101199EAC73DA3E",
     "amm_pool": "0x0000000000000000000000000000000000000000",
     "token": [
       {
-        "address": "0x0000000000000000000000000000000000000000",
+        "address": "0x2CF0C5E0C34F8930216ED15a0f5C622A55610e77",
         "name": "EYWA",
         "symbol": "EYWA"
       },
       {
-        "address": "0x0000000000000000000000000000000000000000",
+        "address": "0x52B8096d0618fa4Af3082FE9e3C4c70cEBC59456",
         "name": "USDT",
         "symbol": "USDT"
       }
     ],
-    "crosschainPool": [],
+    "crosschainPool": [
+      {
+        "network": "network1",
+        "address": "0xFb7B186B88B386f98E4FE70A55eB925620d116b7",
+        "coins": [
+          "0xd5b51463a5F62072b891DFc1e3D35FB4803a7A90",
+          "0xccF54Bc324d18296CE41B3f7B1B22F4dc9d02a3C",
+          "0x52B6f4d528C0A2c29BB5E1A0e963A376161E575C"
+        ],
+        "lp": [
+          {
+            "address": "0x981d9066426a1907389D2A20171b32955e6E8F96",
+            "name": "network1LpPoolCrosschain",
+            "symbol": "LPC"
+          }
+        ],
+        "gauge": "0x34f783b193d500DEaD4D442f050A9da0CC368d67"
+      },
+      {
+        "network": "network3",
+        "address": "0xad69764B8B5424d2407684Ab4B8C3dF815cB43D8",
+        "coins": [
+          "0x3f1c3d303B4c7c9F3c29805E2428c1E08363A15e",
+          "0x95964a01BFbd2AfF883E1d7D18aBf5133EDA6494",
+          "0xec5aA122B8dcecf5F61FC470292681b10d125b01"
+        ],
+        "lp": [
+          {
+            "address": "0xF08aE706a6e29Be30Ad8DCaF6192caAC0b058530",
+            "name": "network3LpPoolCrosschain",
+            "symbol": "LPC"
+          }
+        ],
+        "gauge": "0xb1111ABD8e93763f39FD3f9090b19B10ffD085fC"
+      }
+    ],
     "hubPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
+      "address": "0x8575eddEd4d4d30E987a92715Ae75AeDc12b34Cd",
+      "lp": "0xAEE7B2D31C85dcec06CbB764f7E1640913a2c41c",
+      "coins": [
+        "0x981d9066426a1907389D2A20171b32955e6E8F96",
+        "0xF08aE706a6e29Be30Ad8DCaF6192caAC0b058530",
+        "0xC6F6Ce28997DACF091Ae9dBC7B177cA16bF8290C"
+      ]
     },
     "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
+      "eywa": "0x9CD11e2130BafA63fF0Fc7F068717dEcaC6E0D17",
+      "votingEscrow": "0xda6bF8221925f1B303f3cCE0414Bda1Fb2AD3B51",
+      "gaugeController": "0x3EB6764784175F3cFefD39b729528D050F774104",
+      "minter": "0x0E0fdD3A049088008B545AB6dC95272b780Efe34",
+      "treasury": ""
     },
-    "localToken": [],
+    "localToken": [
+      {
+        "address": "0xE5b1281AA832f5A0444CDF511661a9561A91A95a",
+        "name": "network2TokenStable0",
+        "symbol": "TKS0"
+      },
+      {
+        "address": "0xFf321daEf3cfC42e4a1c677e2F92550bc7245789",
+        "name": "network2TokenStable1",
+        "symbol": "TKS1"
+      },
+      {
+        "address": "0x661937d4944A28E1cc7E741e65A9f10De19535eE",
+        "name": "network2TokenStable2",
+        "symbol": "TKS2"
+      }
+    ],
     "localPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
+      "address": "0xaF96e687934006C67675736574bc46415837073f",
+      "lp": {
+        "address": "0xC6F6Ce28997DACF091Ae9dBC7B177cA16bF8290C",
+        "name": "network2LpLocal",
+        "symbol": "LP"
+      },
+      "coins": [
+        "0xE5b1281AA832f5A0444CDF511661a9561A91A95a",
+        "0xFf321daEf3cfC42e4a1c677e2F92550bc7245789",
+        "0x661937d4944A28E1cc7E741e65A9f10De19535eE"
+      ],
+      "gauge": "0x5164D0b0639A029cb4Ef8149b361CEe6fFD53Af3"
     },
     "sourceForRepresentation": [
       "network1",
@@ -1043,13 +1243,14 @@
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
+    "bridge": "0x0c760E9A85d2E957Dd1E189516b6658CfEcD3985",
+    "mockDexPool": "0x329DCb6edc4D6b9110d366BCc4f52624F619176A",
+    "portal": "0xdd85dDc3A272000d9d0942eD6e44A2c8c487858e",
+    "synthesis": "0xf7Da00D518AE33e5086AFc023b48894c06D5454B",
+    "curveProxy": "0x9588f010BDcd4230f4Fb3fB676E582B2831774A0",
+    "router": "0x38368Be80e3Af7AfC09321470F4AE016CC867Cd4",
+    "frontHelper": "0x12Be2b0c537975795930885b571Ec1cd17E66e03",
+    "treasury": "0x50a820403b3B4f529Aa0D4b3A7f81Aa6A640b11b"
   },
   "network3": {
     "rpcUrl": "ws://172.20.128.13:9545",
@@ -1062,16 +1263,16 @@
     ],
     "chainId": 1113,
     "relayHub": "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0x1AA57a168eBa12F6D270c80F9B8cEcEeFAE41d0f",
     "amm_pool": "0x0000000000000000000000000000000000000000",
     "token": [
       {
-        "address": "0x0000000000000000000000000000000000000000",
+        "address": "0x94d99d47FACA7e9a48Efe63201D363Ed563daa4f",
         "name": "EYWA",
         "symbol": "EYWA"
       },
       {
-        "address": "0x0000000000000000000000000000000000000000",
+        "address": "0xB61ecE822aE132F4a3F8b4eD464acAe1f4202847",
         "name": "USDT",
         "symbol": "USDT"
       }
@@ -1083,13 +1284,29 @@
       "coins": []
     },
     "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
     },
-    "localToken": [],
+    "localToken": [
+      {
+        "address": "0x8CFb4d77AE348070C05f0317FEF3Cb9c558D4370",
+        "name": "network3TokenStable0",
+        "symbol": "TKS0"
+      },
+      {
+        "address": "0x20416916580A46D684A928435204ADbE4f0C0E41",
+        "name": "network3TokenStable1",
+        "symbol": "TKS1"
+      },
+      {
+        "address": "0x1B40342a9e103Be4620EDA320a6bC6b9Ac077f18",
+        "name": "network3TokenStable2",
+        "symbol": "TKS2"
+      }
+    ],
     "localPool": {
       "address": "",
       "lp": "",
@@ -1102,13 +1319,13 @@
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
+    "bridge": "0x99A0cc91fb7fbD7b5514D68E9280AFd72576A267",
+    "mockDexPool": "0x222D25c3D561FE8DaDeF22Ba9010C4454FA6e02B",
+    "portal": "0x30c487604FD3c7e8c102EF92EDD3053e24f999E1",
+    "synthesis": "0x957aB6b34f99781a70b33307613554617D984A7f",
+    "curveProxy": "0x36276ab97a7d3bf9c6dA49dEeEb71CBe3e85320E",
+    "router": "0x194004026FC2BEc5811abD21019F31F78016eA21",
+    "frontHelper": "0x054c8658Fc30f632E59F71eC7Be69e3801c2F2c9"
   },
   "harmonylocal": {
     "rpcUrl": "ws://172.20.128.14:9800",
@@ -1121,18 +1338,23 @@
     ],
     "chainId": 1666700000,
     "relayHub": "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
+    "forwarder": "0xB75DA069E82064e0c9895b11F571aD99FDFd231D",
     "amm_pool": "0x0000000000000000000000000000000000000000",
     "token": [
       {
-        "address": "0x0000000000000000000000000000000000000000",
+        "address": "0xb54f5e97972AcF96470e02BE0456c8DB2173f33a",
         "name": "EYWA",
         "symbol": "EYWA"
       },
       {
-        "address": "0x0000000000000000000000000000000000000000",
+        "address": "0x8F03b8857744D91d4d1A8b159f9E9C3fF777084e",
         "name": "USDT",
         "symbol": "USDT"
+      },
+      {
+        "address": "0xa210f356046b9497E73581F0b8B38fa4988F913B",
+        "name": "EYWA-POA",
+        "symbol": "POAT"
       }
     ],
     "crosschainPool": [],
@@ -1142,11 +1364,11 @@
       "coins": []
     },
     "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
     },
     "localToken": [],
     "localPool": {
@@ -1155,71 +1377,22 @@
       "coins": []
     },
     "sourceForRepresentation": [
-          "network1",
-          "network2",
-          "network3"
+      "network1",
+      "network2",
+      "network3"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
-  },
-  "cronostestnet": {
-    "rpcUrl": "https://cronos-testnet-3.crypto.org:8545",
-    "rpcUrl2": "https://cronos-testnet-3.crypto.org:8545",
-    "n": "CRONOSTESTNET",
-    "netwiker": "TCRO",
-    "env_file": [
-      "networks_env/env_connect_to_cronostestnet.env",
-      "networks_env/env_test_for_cronostestnet.env"
-    ],
-    "chainId": 338,
-    "relayHub":  "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
-    "amm_pool": "0x0000000000000000000000000000000000000000",
-    "token": [],
-    "crosschainPool": [],
-    "hubPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
-    },
-    "localToken": [],
-    "localPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "sourceForRepresentation": [
-      "mumbai",
-      "bsctestnet",
-      "avalanchetestnet",
-      "fantomtestnet",
-      "rinkeby",
-      "arbitrumtestnet",
-      "harmonytestnet"
-    ],
-    "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
+    "nodeRegistry": "0x9044FD36f1c6db63991300fe7aC8ffa09A4305A4",
+    "bridge": "0x9044FD36f1c6db63991300fe7aC8ffa09A4305A4",
+    "mockDexPool": "0x05AcF27495FAAf9A178e316B9Da2f330983b9B95",
+    "portal": "0xfad748a1063a40FF447B5D766331904d9bedDC26",
+    "synthesis": "0xB20CCD2a42e5486054AE3439f2bDa95DC75d9B75",
+    "curveProxy": "0x7e88a2e433222E4162d70Bfb02FB873c0c1cf508",
+    "router": "0x4c97F77fa1D2ceB60A6Ee76929439B33D34A219A",
+    "frontHelper": "0xcBAbd291E65341137b2B3b4627871B74AcED2a01",
+    "eywa": "0x8BcF541eA0d90a4001F5B3f6667c495aBcBFC9A2",
+    "tokenPoa": "0xa210f356046b9497E73581F0b8B38fa4988F913B",
+    "relayerPoolFactory": "0x647377F4142723890ee8C2f4d17A02FEc96fD0D4"
   },
   "cronos": {
     "rpcUrl": "https://evm.cronos.org",
@@ -1231,7 +1404,7 @@
       "networks_env/env_test_for_cronos.env"
     ],
     "chainId": 25,
-    "relayHub":  "0x0000000000000000000000000000000000000000",
+    "relayHub": "0x0000000000000000000000000000000000000000",
     "forwarder": "0x0000000000000000000000000000000000000000",
     "amm_pool": "0x0000000000000000000000000000000000000000",
     "token": [],
@@ -1242,113 +1415,11 @@
       "coins": []
     },
     "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
-    },
-    "localToken": [],
-    "localPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "sourceForRepresentation": [
-      "rinkeby",
-      "mumbai",
-      "hecotestnet",
-      "avalanchetestnet",
-      "metistestnet",
-      "bsctestnet"
-    ],
-    "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
-  },
-  "aurora": {
-    "rpcUrl": "https://mainnet.aurora.dev",
-    "rpcUrl2": "https://mainnet.aurora.dev",
-    "n": "AURORA",
-    "netwiker": "ETH",
-    "env_file": [
-      "networks_env/env_connect_to_aurora.env",
-      "networks_env/env_test_for_aurora.env"
-    ],
-    "chainId": 1313161554,
-    "relayHub":  "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
-    "amm_pool": "0x0000000000000000000000000000000000000000",
-    "token": [],
-    "crosschainPool": [],
-    "hubPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
-    },
-    "localToken": [],
-    "localPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "sourceForRepresentation": [
-      "rinkeby",
-      "mumbai",
-      "hecotestnet",
-      "avalanchetestnet",
-      "metistestnet",
-      "bsctestnet"
-    ],
-    "paymaster": "0x0000000000000000000000000000000000000000",
-    "nodeRegistry": "0x0000000000000000000000000000000000000000",
-    "bridge": "0x0000000000000000000000000000000000000000",
-    "mockDexPool": "0x0000000000000000000000000000000000000000",
-    "portal": "0x0000000000000000000000000000000000000000",
-    "synthesis": "0x0000000000000000000000000000000000000000",
-    "curveProxy": "0x0000000000000000000000000000000000000000",
-    "router": "0x0000000000000000000000000000000000000000",
-    "frontHelper": "0x0000000000000000000000000000000000000000"
-  },
-  "auroratestnet": {
-    "rpcUrl": "https://testnet.aurora.dev/",
-    "rpcUrl2": "https://testnet.aurora.dev/",
-    "n": "AURORATESTNET",
-    "netwiker": "ETH",
-    "env_file": [
-      "networks_env/env_connect_to_auroratestnet.env",
-      "networks_env/env_test_for_auroratestnet.env"
-    ],
-    "chainId": 1313161555,
-    "relayHub":  "0x0000000000000000000000000000000000000000",
-    "forwarder": "0x0000000000000000000000000000000000000000",
-    "amm_pool": "0x0000000000000000000000000000000000000000",
-    "token": [],
-    "crosschainPool": [],
-    "hubPool": {
-      "address": "",
-      "lp": "",
-      "coins": []
-    },
-    "dao": {
-      "eywa":"",
-      "votingEscrow":"",
-      "gaugeController":"",
-      "minter":"",
-      "treasury":""
+      "eywa": "",
+      "votingEscrow": "",
+      "gaugeController": "",
+      "minter": "",
+      "treasury": ""
     },
     "localToken": [],
     "localPool": {

@@ -14,11 +14,11 @@ async function main() {
 
   const ERC20 = await ethers.getContractFactory('ERC20Mock');
   // const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool');
-  const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool');
+  // const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool');
   // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool')
   // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool')
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool')
-
+  const StableSwap8Pool = await ethers.getContractFactory('StableSwap8Pool')
   const totalSupply = ethers.utils.parseEther("100000000000.0");
 
 
@@ -27,15 +27,15 @@ async function main() {
   let amounts = []
   let min_mint_amount = 0
 
-  if (network.name == "network2" || network.name == "mumbai") {
+  if (network.name == "network2" || network.name == "harmonytestnet") {
 
-    let hubPool = StableSwap3Pool.attach(deployInfo[network.name].hubPool.address);
+    let hubPool = StableSwap8Pool.attach(deployInfo[network.name].hubPool.address);
     switch (network.name) {
       case "network2":
-        hubPool = StableSwap3Pool.attach(deployInfo[network.name].hubPool.address);
+        hubPool = StableSwap8Pool.attach(deployInfo[network.name].hubPool.address);
         break;
-      case "mumbai":
-        hubPool = StableSwap3Pool.attach(deployInfo[network.name].hubPool.address);
+      case "harmonytestnet":
+        hubPool = StableSwap8Pool.attach(deployInfo[network.name].hubPool.address);
         break;
     }
 
