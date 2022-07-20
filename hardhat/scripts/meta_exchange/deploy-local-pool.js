@@ -22,6 +22,7 @@ async function main() {
 
     const ERC20 = await ethers.getContractFactory('SyntERC20');
     const CurveProxy = await ethers.getContractFactory('CurveProxy');
+    const CurveProxyV2 = await ethers.getContractFactory('CurveProxyV2');
     const LpToken = await ethers.getContractFactory('CurveTokenV5');
     const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool');
 
@@ -82,6 +83,10 @@ async function main() {
         let curveProxyInstance = await CurveProxy.attach(deployInfo[network.name].curveProxy);
         let txSP = await curveProxyInstance.setPool(localPool.address, localLp.address, localCoins);
         await txSP.wait();
+
+        let curveProxyV2Instance = await CurveProxyV2.attach(deployInfo[network.name].curveProxyV2);
+        let txV2SP = await curveProxyV2Instance.setPool(localPool.address, localLp.address, localCoins);
+        await txV2SP.wait();
 
         deployInfo[network.name].localPool.address = localPool.address
         deployInfo[network.name].localPool.coins = localCoins

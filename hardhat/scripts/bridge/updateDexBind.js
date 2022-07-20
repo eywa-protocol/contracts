@@ -13,6 +13,7 @@ async function main() {
   this.s = networkConfig[network.name].synthesis;
   this.p = networkConfig[network.name].portal;
   this.cp = networkConfig[network.name].curveProxy;
+  this.cpV2 = networkConfig[network.name].curveProxyV2;
   this.sourceForRepresentation = networkConfig[network.name].sourceForRepresentation;
 
   const [deployer] = await ethers.getSigners();
@@ -29,6 +30,7 @@ async function main() {
     let portal = networkConfig[netw].portal;
     let synth = networkConfig[netw].synthesis;
     let curveProxy = networkConfig[netw].curveProxy;
+    let curveProxyV2 = networkConfig[netw].curveProxyV2;
     let mockDexPool = networkConfig[netw].mockDexPool;
     let chainid = networkConfig[netw].chainId;
     try {
@@ -122,6 +124,48 @@ async function main() {
           addressToBytes32(curveProxy)
         );
         console.log(`addContractBind for Curve proxy > Curve proxy on ${network.name} with ${netw}: ${this.tx.hash}`);
+        await this.tx.wait();
+      }
+      //Second Curve Proxy 
+      if (curveProxyV2 !== nuLL && this.cpV2 !== nuLL) {
+        this.tx = await bridgeA.addContractBind(
+          addressToBytes32(this.p),
+          addressToBytes32(bridgeB),
+          addressToBytes32(curveProxyV2)
+        );
+        console.log(`addContractBind for Curve proxy V2 > Portal on ${network.name} with ${netw}: ${this.tx.hash}`);
+        await this.tx.wait();
+
+        this.tx = await bridgeA.addContractBind(
+          addressToBytes32(this.s),
+          addressToBytes32(bridgeB),
+          addressToBytes32(curveProxyV2)
+        );
+        console.log(`addContractBind for Curve proxy V2 > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
+        await this.tx.wait();
+
+        this.tx = await bridgeA.addContractBind(
+          addressToBytes32(this.cpV2),
+          addressToBytes32(bridgeB),
+          addressToBytes32(portal)
+        );
+        console.log(`addContractBind for Curve proxy V2 > Portal on ${network.name} with ${netw}: ${this.tx.hash}`);
+        await this.tx.wait();
+
+        this.tx = await bridgeA.addContractBind(
+          addressToBytes32(this.cpV2),
+          addressToBytes32(bridgeB),
+          addressToBytes32(synth)
+        );
+        console.log(`addContractBind for Curve proxy V2 > Synthesis on ${network.name} with ${netw}: ${this.tx.hash}`);
+        await this.tx.wait();
+
+        this.tx = await bridgeA.addContractBind(
+          addressToBytes32(this.cpV2),
+          addressToBytes32(bridgeB),
+          addressToBytes32(curveProxyV2)
+        );
+        console.log(`addContractBind for Curve proxy V2 > Curve proxy V2 on ${network.name} with ${netw}: ${this.tx.hash}`);
         await this.tx.wait();
       }
 

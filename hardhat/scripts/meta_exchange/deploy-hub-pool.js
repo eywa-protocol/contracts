@@ -12,6 +12,7 @@ async function main() {
   console.log(`Account balance: ${ethers.utils.formatEther(balance.toString())}`);
 
   const CurveProxy = await ethers.getContractFactory('CurveProxy');
+  const CurveProxyV2 = await ethers.getContractFactory('CurveProxyV2');
   const LpToken = await ethers.getContractFactory('CurveTokenV5');
   // const StableSwap2Pool = await ethers.getContractFactory('StableSwap2Pool');
   const StableSwap3Pool = await ethers.getContractFactory('StableSwap3Pool');
@@ -68,9 +69,9 @@ async function main() {
     }
 
     // setting the hub pool in proxy contract
-    let curveProxyInstance = await CurveProxy.attach(deployInfo[network.name].curveProxy);
-    let tx_ = await curveProxyInstance.setPool(hubPool.address, hubPoolLp.address, hubPoolCoins);
-    await tx_.wait();
+    let curveProxyV2Instance = await CurveProxyV2.attach(deployInfo[network.name].curveProxyV2);
+    let txV2_ = await curveProxyV2Instance.setPool(hubPool.address, hubPoolLp.address, hubPoolCoins);
+    await txV2_.wait();
 
     deployInfo[network.name].hubPool.address = hubPool.address;
     deployInfo[network.name].hubPool.lp = hubPoolLp.address;

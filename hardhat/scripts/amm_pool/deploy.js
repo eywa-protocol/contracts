@@ -62,6 +62,7 @@ async function main() {
         networkConfig[network.name].portal,
         networkConfig[network.name].synthesis,
         networkConfig[network.name].bridge,
+        uniswapV2Router02.address,
     ], { initializer: 'initialize'});
     await curveProxy.deployed();
     console.log(`CurveProxy address: ${curveProxy.address}`);

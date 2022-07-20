@@ -1,9 +1,5 @@
 pragma solidity =0.6.6;
-import "hardhat/console.sol";
-<<<<<<< HEAD
 
-=======
->>>>>>> fe7ee18ebac16835d313549727ff9c860324aa62
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
@@ -285,15 +281,14 @@ library UniswapV2Library {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(token0, token1)),
-                '0xfa96bd108d9b631584c6fedbbb27c86e24ed4e4b0ea17b8321d59f238fef9b7b' // init code hash
+                hex'96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // init code hash
             ))));
     }
 
     // fetches and sorts the reserves for a pair
     function getReserves(address factory, address tokenA, address tokenB) internal view returns (uint reserveA, uint reserveB) {
         (address token0,) = sortTokens(tokenA, tokenB);
-        console.logAddress(pairFor(factory, tokenA, tokenB));
-        (uint reserve0, uint reserve1,) = IUniswapV2Pair(pairFor(factory, tokenA, tokenB)).getReserves();
+        (uint reserve0, uint reserve1,) = IUniswapV2Pair(IUniswapV2Factory(factory).getPair(tokenA, tokenB)).getReserves();
         (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
     }
 
@@ -398,7 +393,9 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         uint amountBMin
     ) internal virtual returns (uint amountA, uint amountB) {
         // create the pair if it doesn't exist yet
+        //address pair = IUniswapV2Factory(factory).getPair(tokenA, tokenB);
         if (IUniswapV2Factory(factory).getPair(tokenA, tokenB) == address(0)) {
+            //pair = IUniswapV2Factory(factory).createPair(tokenA, tokenB);
             IUniswapV2Factory(factory).createPair(tokenA, tokenB);
         }
         (uint reserveA, uint reserveB) = UniswapV2Library.getReserves(factory, tokenA, tokenB);
@@ -428,10 +425,10 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         uint deadline
     ) external virtual override ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
         (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
-        // address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
-        // TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
-        // TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
-        // liquidity = IUniswapV2Pair(pair).mint(to);
+        address pair = IUniswapV2Factory(factory).getPair(tokenA, tokenB);
+        TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
+        TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
+        liquidity = IUniswapV2Pair(pair).mint(to);
     }
     function addLiquidityETH(
         address token,
@@ -574,8 +571,8 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             (address token0,) = UniswapV2Library.sortTokens(input, output);
             uint amountOut = amounts[i + 1];
             (uint amount0Out, uint amount1Out) = input == token0 ? (uint(0), amountOut) : (amountOut, uint(0));
-            address to = i < path.length - 2 ? UniswapV2Library.pairFor(factory, output, path[i + 2]) : _to;
-            IUniswapV2Pair(UniswapV2Library.pairFor(factory, input, output)).swap(
+            address to = i < path.length - 2 ? IUniswapV2Factory(factory).getPair(output, path[i + 2]) : _to;
+            IUniswapV2Pair(IUniswapV2Factory(factory).getPair(input, output)).swap(
                 amount0Out, amount1Out, to, new bytes(0)
             );
         }
@@ -589,8 +586,9 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
         amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+        address pair = IUniswapV2Factory(factory).getPair(path[0], path[1]);
         TransferHelper.safeTransferFrom(
-            path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
+            path[0], msg.sender, pair, amounts[0]
         );
         _swap(amounts, path, to);
     }

@@ -73,18 +73,22 @@ interface IPortal {
     ) external;
 
     function synthBatchAddLiquidity3PoolMintEUSD(
-        address[3] memory _token,
-        uint256[3] memory _amount,
-        address _from,
+        ICurveProxy.MetaTokenParams memory _tokenParams,
         SynthParams memory _synthParams,
         ICurveProxy.MetaMintEUSD memory _metaParams,
         ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
     ) external;
 
     function synthBatchAddLiquidity3PoolMintEUSDSwap(
-        address[3] memory _token,
-        uint256[3] memory _amount,
-        address _from,
+        ICurveProxy.MetaTokenParams memory _tokenParams,
+        SynthParams memory _synthParams,
+        ICurveProxy.MetaMintEUSD memory _metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory _unsynthParams,
+        ICurveProxy.SwapExactTokensParams memory _swapParams
+    ) external;
+
+    function synthBatchAddLiquidity3PoolMintEUSDAddLiquidity(
+        ICurveProxy.MetaTokenParams memory _tokenParams,
         SynthParams memory _synthParams,
         ICurveProxy.MetaMintEUSD memory _metaParams,
         ICurveProxy.EmergencyUnsynthParams memory _unsynthParams,
