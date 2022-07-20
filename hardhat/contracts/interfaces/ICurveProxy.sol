@@ -23,6 +23,21 @@ interface ICurveProxy {
         address to;
     }
 
+    struct MetaMintEUSDWithSwap {
+        //crosschain pool params
+        address addAtCrosschainPool;
+        uint256 expectedMinMintAmountC;
+        //incoming coin index for adding liq to hub pool
+        uint256 lpIndex;
+        //hub pool params
+        address addAtHubPool;
+        uint256 expectedMinMintAmountH;
+        //recipient address
+        address to;
+        address[3] synthToken;
+        uint256[3] synthAmount;
+    }
+
     struct MetaRedeemEUSD {
         //crosschain pool params
         address removeAtCrosschainPool;

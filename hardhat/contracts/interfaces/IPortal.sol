@@ -80,4 +80,18 @@ interface IPortal {
         ICurveProxy.MetaMintEUSD memory _metaParams,
         ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
     ) external;
+
+    function synthBatchAddLiquidity3PoolMintEUSDSwap(
+        address _from,
+        SynthParams memory _synthParams,
+        ICurveProxy.MetaMintEUSDWithSwap memory _metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
+    ) external;
+
+    function synthBatchAddLiquidity3PoolMintEUSDAddLiquidity(
+        address _from,
+        SynthParams memory _synthParams,
+        ICurveProxy.MetaMintEUSDWithSwap memory _metaParams,
+        ICurveProxy.EmergencyUnsynthParams memory _unsynthParams
+    ) external;
 }

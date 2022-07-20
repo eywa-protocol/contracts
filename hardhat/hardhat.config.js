@@ -210,7 +210,11 @@ module.exports = {
           runs: 200
         }
       }
+<<<<<<< HEAD
     },{
+=======
+    }, {
+>>>>>>> 18374e55ceb5936c06fd1bf6b1d6546223c1a813
       version: "0.6.6",
       settings: {
         optimizer: {

@@ -82,6 +82,21 @@ contract CurveProxy is Initializable, RelayRecipient {
         address to;
     }
 
+    struct MetaMintEUSDWithSwap {
+        //crosschain pool params
+        address addAtCrosschainPool;
+        uint256 expectedMinMintAmountC;
+        //incoming coin index for adding liq to hub pool
+        uint256 lpIndex;
+        //hub pool params
+        address addAtHubPool;
+        uint256 expectedMinMintAmountH;
+        //recipient address
+        address to;
+        address[3] synthToken;
+        uint256[3] synthAmount;
+    }
+
     struct MetaRedeemEUSD {
         //crosschain pool params
         address removeAtCrosschainPool;
@@ -392,6 +407,186 @@ contract CurveProxy is Initializable, RelayRecipient {
         //transfer EUSD to the recipient
         uint256 thisBalance = IERC20Upgradeable(lpToken[_params.addAtHubPool]).balanceOf(address(this));
         IERC20Upgradeable(lpToken[_params.addAtHubPool]).safeTransfer(_params.to, thisBalance);
+    }
+
+    function transitSynthBatchAddLiquidity3PoolMintEUSDSwap(
+        MetaMintEUSDWithSwap calldata _params,
+        EmergencyUnsynthParams calldata _emergencyParams,
+        bytes32[3] calldata _txId
+    ) external onlyBridge {
+        {
+            address[3] memory representation;
+
+            //synthesize stage
+            for (uint256 i = 0; i < _txId.length; i++) {
+                representation[i] = ISynthesis(synthesis).getRepresentation(bytes32(uint256(uint160(_params.synthToken[i]))));
+                if (_params.synthAmount[i] > 0) {
+                    ISynthesis(synthesis).mintSyntheticToken(_txId[i], _params.synthToken[i], _params.synthAmount[i], address(this));
+                    IERC20Upgradeable(representation[i]).approve(_params.addAtCrosschainPool, _params.synthAmount[i]);
+                }
+            }
+
+            //add liquidity crosschain stage
+            uint256 minMintAmountC = IStableSwapPool(_params.addAtCrosschainPool).calc_token_amount(_params.synthAmount, true);
+
+            //inconsistency check
+            if (_params.expectedMinMintAmountC > minMintAmountC) {
+                for (uint256 i = 0; i < representation.length; i++) {
+                    if (_params.synthAmount[i] > 0) {
+                        ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+                            _txId[i],
+                            _emergencyParams.initialPortal,
+                            _emergencyParams.initialBridge,
+                            _emergencyParams.initialChainID,
+                            _emergencyParams.v,
+                            _emergencyParams.r,
+                            _emergencyParams.s
+                        );
+                        emit InconsistencyCallback(
+                            _params.addAtCrosschainPool,
+                            representation[i],
+                            _params.to,
+                            _params.synthAmount[i]
+                        );
+                    }
+                }
+                return;
+            }
+
+            //add liquidity to the crosschain pool
+            IStableSwapPool(_params.addAtCrosschainPool).add_liquidity(_params.synthAmount, 0);
+        }
+        //HUB STAGE (3pool only)
+        IERC20Upgradeable(lpToken[_params.addAtCrosschainPool]).approve(
+            _params.addAtHubPool,
+            IERC20Upgradeable(lpToken[_params.addAtCrosschainPool]).balanceOf(address(this))
+        );
+        uint256[3] memory amountH;
+        amountH[_params.lpIndex] = IERC20Upgradeable(lpToken[_params.addAtCrosschainPool]).balanceOf(address(this));
+
+        //add liquidity hub stage
+        uint256 minMintAmountH = IStableSwapPool(_params.addAtHubPool).calc_token_amount(_params.synthAmount, true);
+        //inconsistency check hub stage
+        if (_params.expectedMinMintAmountH > minMintAmountH) {
+            //TODO: check index
+            for (uint256 i = 0; i < _txId.length; i++) {
+                if (_params.synthAmount[i] > 0) {
+                    ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+                        _txId[i],
+                        _emergencyParams.initialPortal,
+                        _emergencyParams.initialBridge,
+                        _emergencyParams.initialChainID,
+                        _emergencyParams.v,
+                        _emergencyParams.r,
+                        _emergencyParams.s
+                    );
+                }
+            }
+            emit InconsistencyCallback(
+                _params.addAtHubPool,
+                lpToken[_params.addAtHubPool],
+                _params.to,
+                amountH[_params.lpIndex]
+            );
+            return;
+        }
+
+        //add liquidity
+        IStableSwapPool(_params.addAtHubPool).add_liquidity(amountH, 0);
+
+        //transfer EUSD to the recipient
+        uint256 thisBalance = IERC20Upgradeable(lpToken[_params.addAtHubPool]).balanceOf(address(this));
+        IERC20Upgradeable(lpToken[_params.addAtHubPool]).safeTransfer(_params.to, thisBalance);
+    }
+
+    function transitSynthBatchAddLiquidity3PoolMintEUSDAddLiquidity(
+        MetaMintEUSDWithSwap calldata _params,
+        EmergencyUnsynthParams calldata _emergencyParams,
+        bytes32[3] calldata _txId
+    ) external onlyBridge {
+        {
+            address[3] memory representation;
+
+            //synthesize stage
+            for (uint256 i = 0; i < _txId.length; i++) {
+                representation[i] = ISynthesis(synthesis).getRepresentation(bytes32(uint256(uint160(_params.synthToken[i]))));
+                if (_params.synthAmount[i] > 0) {
+                    ISynthesis(synthesis).mintSyntheticToken(_txId[i], _params.synthToken[i], _params.synthAmount[i], address(this));
+                    IERC20Upgradeable(representation[i]).approve(_params.addAtCrosschainPool, _params.synthAmount[i]);
+                }
+            }
+
+            // //add liquidity crosschain stage
+            // uint256 minMintAmountC = IStableSwapPool(_params.addAtCrosschainPool).calc_token_amount(_params.synthAmount, true);
+
+            // //inconsistency check
+            // if (_params.expectedMinMintAmountC > minMintAmountC) {
+            //     for (uint256 i = 0; i < representation.length; i++) {
+            //         if (_params.synthAmount[i] > 0) {
+            //             ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+            //                 _txId[i],
+            //                 _emergencyParams.initialPortal,
+            //                 _emergencyParams.initialBridge,
+            //                 _emergencyParams.initialChainID,
+            //                 _emergencyParams.v,
+            //                 _emergencyParams.r,
+            //                 _emergencyParams.s
+            //             );
+            //             emit InconsistencyCallback(
+            //                 _params.addAtCrosschainPool,
+            //                 representation[i],
+            //                 _params.to,
+            //                 _params.synthAmount[i]
+            //             );
+            //         }
+            //     }
+            //     return;
+            // }
+
+            // //add liquidity to the crosschain pool
+            // IStableSwapPool(_params.addAtCrosschainPool).add_liquidity(_params.synthAmount, 0);
+        }
+        // //HUB STAGE (3pool only)
+        // IERC20Upgradeable(lpToken[_params.addAtCrosschainPool]).approve(
+        //     _params.addAtHubPool,
+        //     IERC20Upgradeable(lpToken[_params.addAtCrosschainPool]).balanceOf(address(this))
+        // );
+        // uint256[3] memory amountH;
+        // amountH[_params.lpIndex] = IERC20Upgradeable(lpToken[_params.addAtCrosschainPool]).balanceOf(address(this));
+
+        // //add liquidity hub stage
+        // uint256 minMintAmountH = IStableSwapPool(_params.addAtHubPool).calc_token_amount(_params.synthAmount, true);
+        // //inconsistency check hub stage
+        // if (_params.expectedMinMintAmountH > minMintAmountH) {
+        //     //TODO: check index
+        //     for (uint256 i = 0; i < _txId.length; i++) {
+        //         if (_params.synthAmount[i] > 0) {
+        //             ISynthesis(synthesis).emergencyUnsyntesizeRequest(
+        //                 _txId[i],
+        //                 _emergencyParams.initialPortal,
+        //                 _emergencyParams.initialBridge,
+        //                 _emergencyParams.initialChainID,
+        //                 _emergencyParams.v,
+        //                 _emergencyParams.r,
+        //                 _emergencyParams.s
+        //             );
+        //         }
+        //     }
+        //     emit InconsistencyCallback(
+        //         _params.addAtHubPool,
+        //         lpToken[_params.addAtHubPool],
+        //         _params.to,
+        //         amountH[_params.lpIndex]
+        //     );
+        //     return;
+        // }
+
+        // //add liquidity
+        // IStableSwapPool(_params.addAtHubPool).add_liquidity(amountH, 0);
+
+        // //transfer EUSD to the recipient
+        // uint256 thisBalance = IERC20Upgradeable(lpToken[_params.addAtHubPool]).balanceOf(address(this));
+        // IERC20Upgradeable(lpToken[_params.addAtHubPool]).safeTransfer(_params.to, thisBalance);
     }
 
     /**
