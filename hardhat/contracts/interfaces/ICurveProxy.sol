@@ -40,10 +40,10 @@ interface ICurveProxy {
     }
 
     struct SwapExactTokensParams {
-        uint amountOutMin;
+        uint256 amountOutMin;
         address path;
         address to;
-        uint deadline;
+        uint256 deadline;
     }
 
     struct MetaExchangeParams {
