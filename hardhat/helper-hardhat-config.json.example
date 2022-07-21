@@ -295,7 +295,8 @@
       "fantomtestnet",
       "rinkeby",
       "cronostestnet",
-      "harmonytestnet"
+      "harmonytestnet",
+      "auroratestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -359,8 +360,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
    "fantomtestnet": {
-    "rpcUrl": "https://rpc.testnet.fantom.network",
-    "rpcUrl2": "https://rpc.testnet.fantom.network",
+    "rpcUrl": "wss://ws.testnet.eywa.fi:17017",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17018",
     "n": "FANTOMTESTNET",
     "netwiker": "FTM",
     "env_file": [
@@ -398,7 +399,8 @@
       "rinkeby",
       "arbitrumtestnet",
       "cronostestnet",
-      "harmonytestnet"
+      "harmonytestnet",
+      "auroratestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -456,7 +458,13 @@
     },
     "sourceForRepresentation": [
       "bsctestnet",
-      "mumbai"
+      "mumbai",
+      "avalanchetestnet",
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet",
+      "auroratestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -624,7 +632,8 @@
       "rinkeby",
       "arbitrumtestnet",
       "cronostestnet",
-      "harmonytestnet"
+      "harmonytestnet",
+      "auroratestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -687,7 +696,8 @@
       "rinkeby",
       "arbitrumtestnet",
       "cronostestnet",
-      "harmonytestnet"
+      "harmonytestnet",
+      "auroratestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -739,7 +749,8 @@
       "fantomtestnet",
       "arbitrumtestnet",
       "cronostestnet",
-      "harmonytestnet"
+      "harmonytestnet",
+      "auroratestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -864,7 +875,8 @@
       "rinkeby",
       "arbitrumtestnet",
       "cronostestnet",
-      "harmonytestnet"
+      "harmonytestnet",
+      "auroratestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -1170,8 +1182,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "cronostestnet": {
-    "rpcUrl": "https://cronos-testnet-3.crypto.org:8545",
-    "rpcUrl2": "https://cronos-testnet-3.crypto.org:8545",
+    "rpcUrl": "wss://ws.testnet.eywa.fi:17019",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17020",
     "n": "CRONOSTESTNET",
     "netwiker": "TCRO",
     "env_file": [
@@ -1203,13 +1215,14 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "mumbai",
       "bsctestnet",
+      "mumbai",
       "avalanchetestnet",
       "fantomtestnet",
       "rinkeby",
       "arbitrumtestnet",
-      "harmonytestnet"
+      "harmonytestnet",
+      "auroratestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
@@ -1324,8 +1337,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "auroratestnet": {
-    "rpcUrl": "https://testnet.aurora.dev/",
-    "rpcUrl2": "https://testnet.aurora.dev/",
+    "rpcUrl": "wss://ws.testnet.eywa.fi:17021",
+    "rpcUrl2": "https://http.testnet.eywa.fi:17022",
     "n": "AURORATESTNET",
     "netwiker": "ETH",
     "env_file": [
@@ -1357,12 +1370,14 @@
       "coins": []
     },
     "sourceForRepresentation": [
-      "rinkeby",
+      "bsctestnet",
       "mumbai",
-      "hecotestnet",
       "avalanchetestnet",
-      "metistestnet",
-      "bsctestnet"
+      "fantomtestnet",
+      "rinkeby",
+      "arbitrumtestnet",
+      "cronostestnet",
+      "harmonytestnet"
     ],
     "paymaster": "0x0000000000000000000000000000000000000000",
     "nodeRegistry": "0x0000000000000000000000000000000000000000",
