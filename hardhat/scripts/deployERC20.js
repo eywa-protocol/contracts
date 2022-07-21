@@ -18,6 +18,7 @@ async function main() {
             if(tkn.address === '0x0000000000000000000000000000000000000000'){
                 let token  = await Token.deploy(tkn.name, tkn.symbol);
                 await token.deployed();
+                await token.deployTransaction.wait();
                 console.log(`Token ${tkn.name} address: ${token.address} network ${network.name}`);
                 networkConfig[network.name].token[i].address = token.address;
                 i++;

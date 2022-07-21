@@ -14,18 +14,21 @@ async function main() {
         { initializer: 'initializeFunc' }
     );
     await portal.deployed();
+    await portal.deployTransaction.wait();
     console.log("Portal address:", portal.address);
 
     const _Synthesis = await ethers.getContractFactory("Synthesis");
     //const synthesis  = await _Synthesis.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
     const synthesis = await upgrades.deployProxy(_Synthesis, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder, networkConfig[network.name].chainId], { initializer: 'initializeFunc' });
     await synthesis.deployed();
+    await synthesis.deployTransaction.wait();
     console.log("Synthesis address:", synthesis.address);
 
     //Deploy FrontHelper
     const _FrontHelper = await ethers.getContractFactory("FrontHelper");
     const frontHelper = await _FrontHelper.deploy();
     await frontHelper.deployed();
+    await frontHelper.deployTransaction.wait();
     networkConfig[network.name].frontHelper = frontHelper.address;
     console.log(`FrontHelper address: ${frontHelper.address}`);
 
@@ -41,6 +44,7 @@ async function main() {
         networkConfig[network.name].bridge,
     ], { initializer: 'initialize' });
     await curveProxy.deployed();
+    await curveProxy.deployTransaction.wait();
     console.log(`CurveProxy address: ${curveProxy.address}`);
     // initial Curve proxy setup
     const setCurve = await synthesis.setCurveProxy(curveProxy.address);
@@ -52,6 +56,7 @@ async function main() {
     const _Router = await ethers.getContractFactory("Router");
     const router = await _Router.deploy(portal.address, synthesis.address, curveProxy.address, networkConfig[network.name].chainId);
     await router.deployed();
+    await router.deployTransaction.wait();
     console.log(`Router address: ${router.address}`);
 
     

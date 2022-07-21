@@ -26,6 +26,7 @@ async function main() {
     }
 
     await EYWA.deployed();
+    await EYWA.deployTransaction.wait();
     networkConfig[network.name].eywa = EYWA.address;
     networkConfig[network.name].tokenPoa = tokenPoa.address;
     networkConfig[network.name].token[networkConfig[network.name].token.findIndex(x => x.name === 'EYWA-POA')]
@@ -38,6 +39,7 @@ async function main() {
     const _Forwarder = await ethers.getContractFactory("Forwarder");
     const forwarder = await _Forwarder.deploy();
     await forwarder.deployed();
+    await forwarder.deployTransaction.wait();
     networkConfig[network.name].forwarder = forwarder.address;
     console.log("Forwarder address:", forwarder.address);
 
@@ -45,6 +47,7 @@ async function main() {
     const _RelayerPoolFactory = await ethers.getContractFactory("RelayerPoolFactory");
     const relayerPoolFactory = await _RelayerPoolFactory.deploy();
     await relayerPoolFactory.deployed();
+    await relayerPoolFactory.deployTransaction.wait();
     networkConfig[network.name].relayerPoolFactory = relayerPoolFactory.address;
     console.log("RelayerPoolFactory address:", relayerPoolFactory.address);
 
@@ -58,6 +61,7 @@ async function main() {
         { initializer: 'initialize2' },
     );
     await bridge.deployed();
+    await bridge.deployTransaction.wait();
     await relayerPoolFactory.setNodeRegistry(bridge.address);
     networkConfig[network.name].nodeRegistry = bridge.address;
     networkConfig[network.name].bridge = bridge.address;
@@ -67,6 +71,7 @@ async function main() {
     const _MockDexPool = await ethers.getContractFactory("MockDexPool");
     const mockDexPool = await _MockDexPool.deploy(bridge.address);
     await mockDexPool.deployed();
+    await mockDexPool.deployTransaction.wait();
     networkConfig[network.name].mockDexPool = mockDexPool.address;
     console.log(`MockDexPool address: ${mockDexPool.address}`);
 
