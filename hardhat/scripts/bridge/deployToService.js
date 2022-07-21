@@ -20,12 +20,12 @@ async function main() {
         EYWA = await _ERC20Permit.deploy("EYWA-TOKEN", "EYWA", networkConfig[network.name].chainId, {nonce: await ethers.provider.getTransactionCount(deployer.address, 'pending')});
     } else {
         _TokenPOA = await ethers.getContractFactory("TokenPOA");
-        let nonce = await ethers.provider.getTransactionCount(deployer.address, 'pending');  console.log('NONCE', nonce);
+        let nonce = await ethers.provider.getTransactionCount(deployer.address, 'pending');
         tokenPoa = await _TokenPOA.deploy("EYWA-POA", "POAT", networkConfig[network.name].chainId, {nonce: nonce});
         await tokenPoa.deployed();
         await tokenPoa.deployTransaction.wait();
         _ERC20Permit = await ethers.getContractFactory("EywaToken");
-        nonce = await ethers.provider.getTransactionCount(deployer.address, 'pending');  console.log('NONCE', nonce);
+        nonce = await ethers.provider.getTransactionCount(deployer.address, 'pending');
         EYWA = await _ERC20Permit.deploy(deployer.address, networkConfig[network.name].chainId, {nonce: nonce});
     }
 
@@ -41,7 +41,7 @@ async function main() {
 
     // Deploy Forwarder
     const _Forwarder = await ethers.getContractFactory("Forwarder");
-    let nonce = await ethers.provider.getTransactionCount(deployer.address, 'pending');  console.log('NONCE', nonce);
+    let nonce = await ethers.provider.getTransactionCount(deployer.address, 'pending');
     const forwarder = await _Forwarder.deploy({nonce: nonce});
     await forwarder.deployed();
     await forwarder.deployTransaction.wait();
@@ -60,7 +60,7 @@ async function main() {
     const _NodeRegistry = await ethers.getContractFactory("NodeRegistry");
 
     // const bridge = await _NodeRegistry.deploy({gasLimit: 5_000_000});
-    nonce = await ethers.provider.getTransactionCount(deployer.address, 'pending');  console.log('NONCE', nonce);
+    nonce = await ethers.provider.getTransactionCount(deployer.address, 'pending');
     const bridge = await upgrades.deployProxy(
         _NodeRegistry,
         [tokenPoa.address, forwarder.address, relayerPoolFactory.address],
@@ -76,7 +76,7 @@ async function main() {
 
     // Deploy MockDexPool
     const _MockDexPool = await ethers.getContractFactory("MockDexPool");
-    nonce = await ethers.provider.getTransactionCount(deployer.address, 'pending');  console.log('NONCE', nonce);
+    nonce = await ethers.provider.getTransactionCount(deployer.address, 'pending');
     const mockDexPool = await _MockDexPool.deploy(bridge.address, {nonce: nonce });
     await mockDexPool.deployed();
     await mockDexPool.deployTransaction.wait();
