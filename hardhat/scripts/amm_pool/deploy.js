@@ -11,7 +11,8 @@ async function main() {
     const _Portal = await ethers.getContractFactory("Portal")
     //const portal  = await _Portal.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
     const portal = await upgrades.deployProxy(_Portal, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder, networkConfig[network.name].chainId],
-        { initializer: 'initializeFunc' }
+        { initializer: 'initializeFunc' },
+        {nonce: await ethers.provider.getTransactionCount(deployer.address, 'pending')}
     );
     await portal.deployed();
     await portal.deployTransaction.wait();
@@ -19,14 +20,14 @@ async function main() {
 
     const _Synthesis = await ethers.getContractFactory("Synthesis");
     //const synthesis  = await _Synthesis.deploy(networkConfig[network.name].bridge, networkConfig[network.name].forwarder);
-    const synthesis = await upgrades.deployProxy(_Synthesis, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder, networkConfig[network.name].chainId], { initializer: 'initializeFunc' });
+    const synthesis = await upgrades.deployProxy(_Synthesis, [networkConfig[network.name].bridge, networkConfig[network.name].forwarder, networkConfig[network.name].chainId], { initializer: 'initializeFunc' }, {nonce: await ethers.provider.getTransactionCount(deployer.address, 'pending')});
     await synthesis.deployed();
     await synthesis.deployTransaction.wait();
     console.log("Synthesis address:", synthesis.address);
 
     //Deploy FrontHelper
     const _FrontHelper = await ethers.getContractFactory("FrontHelper");
-    const frontHelper = await _FrontHelper.deploy();
+    const frontHelper = await _FrontHelper.deploy({nonce: await ethers.provider.getTransactionCount(deployer.address, 'pending')});
     await frontHelper.deployed();
     await frontHelper.deployTransaction.wait();
     networkConfig[network.name].frontHelper = frontHelper.address;
@@ -42,7 +43,7 @@ async function main() {
         networkConfig[network.name].portal,
         networkConfig[network.name].synthesis,
         networkConfig[network.name].bridge,
-    ], { initializer: 'initialize' });
+    ], { initializer: 'initialize' }, {nonce: await ethers.provider.getTransactionCount(deployer.address, 'pending')});
     await curveProxy.deployed();
     await curveProxy.deployTransaction.wait();
     console.log(`CurveProxy address: ${curveProxy.address}`);
@@ -54,7 +55,7 @@ async function main() {
 
     //Deploy Router
     const _Router = await ethers.getContractFactory("Router");
-    const router = await _Router.deploy(portal.address, synthesis.address, curveProxy.address, networkConfig[network.name].chainId);
+    const router = await _Router.deploy(portal.address, synthesis.address, curveProxy.address, networkConfig[network.name].chainId, {nonce: await ethers.provider.getTransactionCount(deployer.address, 'pending')});
     await router.deployed();
     await router.deployTransaction.wait();
     console.log(`Router address: ${router.address}`);
