@@ -1337,8 +1337,8 @@
     "frontHelper": "0x0000000000000000000000000000000000000000"
   },
   "auroratestnet": {
-    "rpcUrl": "wss://ws.testnet.eywa.fi:17021",
-    "rpcUrl2": "https://http.testnet.eywa.fi:17022",
+   "rpcUrl": "https://testnet.aurora.dev",
+    "rpcUrl2": "https://testnet.aurora.dev",
     "n": "AURORATESTNET",
     "netwiker": "ETH",
     "env_file": [
