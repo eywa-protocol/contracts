@@ -22,6 +22,8 @@ async function main() {
         _TokenPOA = await ethers.getContractFactory("TokenPOA");
         let nonce = await ethers.provider.getTransactionCount(deployer.address, 'pending');  console.log('NONCE', nonce);
         tokenPoa = await _TokenPOA.deploy("EYWA-POA", "POAT", networkConfig[network.name].chainId, {nonce: nonce});
+        await tokenPoa.deployed();
+        await tokenPoa.deployTransaction.wait();
         _ERC20Permit = await ethers.getContractFactory("EywaToken");
         nonce = await ethers.provider.getTransactionCount(deployer.address, 'pending');  console.log('NONCE', nonce);
         EYWA = await _ERC20Permit.deploy(deployer.address, networkConfig[network.name].chainId, {nonce: nonce});
