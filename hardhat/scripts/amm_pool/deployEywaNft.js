@@ -13,7 +13,8 @@ async function main() {
 
     const EywaNFT = await ethers.getContractFactory("EywaNFT")
     const eywaNft = await EywaNFT.deploy("EYWA-NFT", "EYWA-NFT", allocation, totalScore);
-
+    await eywaNft.setMerkleRoot("0xbd28ea12a549a17d8fed042f251dcafbbcb36e3c117a5fa23c134ba85ed1bff0")
+    
     networkConfig[network.name].eywaNft = eywaNft.address;
     console.log("NFT address:", eywaNft.address)
 

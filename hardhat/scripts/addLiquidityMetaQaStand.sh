@@ -1,6 +1,6 @@
 #! /bin/bash
 
-nets="arbitrumtestnet cronostestnet bsctestnet mumbai avalanchetestnet fantomtestnet rinkeby harmonytestnet"
+nets="arbitrumtestnet bsctestnet mumbai avalanchetestnet fantomtestnet rinkeby harmonytestnet"
 
 for net in ${nets//\,/ }
   do

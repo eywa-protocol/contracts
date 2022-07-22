@@ -22,9 +22,9 @@ async function main() {
 
 
 
-    const EywaNft = await ethers.getContractFactory("EywaNFT");
-    let eywaNft = EywaNft.attach("0x8b4CaA2e10355C20a9DD2E5cF092A81B157EaE6E");
-    await eywaNft.setMerkleRoot("0xbd28ea12a549a17d8fed042f251dcafbbcb36e3c117a5fa23c134ba85ed1bff0")
+    // const EywaNft = await ethers.getContractFactory("EywaNFT");
+    // let eywaNft = EywaNft.attach("0x8b4CaA2e10355C20a9DD2E5cF092A81B157EaE6E");
+    // await eywaNft.setMerkleRoot("0xbd28ea12a549a17d8fed042f251dcafbbcb36e3c117a5fa23c134ba85ed1bff0")
 
 
     // const EYWA = await ethers.getContractFactory("SyntERC20");

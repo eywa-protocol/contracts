@@ -18,7 +18,8 @@ async function main() {
   // const StableSwap4Pool = await ethers.getContractFactory('StableSwap4Pool');
   // const StableSwap5Pool = await ethers.getContractFactory('StableSwap5Pool');
   // const StableSwap6Pool = await ethers.getContractFactory('StableSwap6Pool');
-  const StableSwap8Pool = await ethers.getContractFactory('StableSwap8Pool');
+  const StableSwap7Pool = await ethers.getContractFactory('StableSwap7Pool');
+  // const StableSwap8Pool = await ethers.getContractFactory('StableSwap8Pool');
 
   // hub pool params
   const A = 100    ;     // amplification coefficient for the pool.
@@ -61,7 +62,7 @@ async function main() {
     }
 
     if (network.name == "harmonytestnet") {
-      hubPool = await StableSwap8Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee);
+      hubPool = await StableSwap7Pool.deploy(deployer.address, hubPoolCoins, hubPoolLp.address, A, fee, admin_fee);
       await hubPool.deployed();
       await hubPool.deployTransaction.wait();
       let tx_ = await hubPoolLp.set_minter(hubPool.address);

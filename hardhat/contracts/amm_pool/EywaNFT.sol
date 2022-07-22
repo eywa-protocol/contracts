@@ -25,28 +25,28 @@ contract EywaNFT is ERC721Enumerable, Ownable, ERC721Burnable {
     uint256 private TIER_ONE_MIN_SCORE = 110;
     uint256 private TIER_ONE_MAX_SCORE = 2000;
     uint256[25082] private tierOneArray;
-    uint256 private tierOneIndex;
+    uint256 public tierOneIndex;
 
     uint256 private TIER_TWO_START = 25083;
     uint256 private TIER_TWO_SUPPLY = 23866;
     uint256 private TIER_TWO_MAX_SCORE = 3000;
     uint256[23866] private tierTwoArray;
-    uint256 private tierTwoIndex;
+    uint256 public tierTwoIndex;
 
     uint256 private TIER_THREE_START = 48950;
     uint256 private TIER_THREE_SUPPLY = 3678;
     uint256 private TIER_THREE_MAX_SCORE = 5000;
     uint256[3678] private tierThreeArray;
-    uint256 private tierThreeIndex;
+    uint256 public tierThreeIndex;
 
     uint256 private TIER_FOUR_START = 52629;
     uint256 private TIER_FOUR_SUPPLY = 401;
     uint256 private TIER_FOUR_MAX_SCORE = 100000;
     uint256[401] private tierFourArray;
-    uint256 private tierFourIndex;
+    uint256 public tierFourIndex;
 
     uint256 private TEAM_START = 55000;
-    uint256 private teamIndex = 0;
+    uint256 public teamIndex = 0;
 
     bool public claimingActive;
     bool public vestingActive;
